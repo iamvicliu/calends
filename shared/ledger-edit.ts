@@ -1,4 +1,5 @@
 import { validatePeopleAvatars } from './avatar.ts';
+import { CURRENCY_CODE, newShapeError } from './billing.ts';
 // Ledger references and non-secret settings. Pure functions; no storage or platform APIs.
 import { categoryList, cleanCategories, renameInSubs, type Category } from './categories.ts';
 import { mergePeople, refsFor, syncPerson } from './people.ts';
@@ -75,6 +76,10 @@ export const referenceSummary = (subs: Subscription[]) => subs.map((s) => ({ id:
 export function requireMigration(references: unknown[], into: string | undefined): void {
   if (references.length && !into) throw new Error(t('mcp.error.references', { references: JSON.stringify(references) }));
 }
+/** 一笔扣款引用到的支付方式：单独记的与拆分来源 */
+const payMethodIds = (x: Payment) => [x.methodId, ...(x.funding ?? []).map((f) => f?.methodId)].filter((m): m is string => !!m);
+const usesMethod = (x: Payment, id: string) => payMethodIds(x).includes(id);
+
 export function methodReferences(st: AppState, id: string) {
   return [
     ...st.subscriptions.flatMap((s) => [
@@ -84,9 +89,7 @@ export function methodReferences(st: AppState, id: string) {
         .map((p) => ({ subscription: s.id, name: s.name, kind: 'phase', start: p.start, payments: p.payments?.length ?? 0 })),
       // 单笔扣款单独记的支付方式也算引用：删卡时一起迁移，不留下指向已删卡的记录
       ...[s, ...(s.phases ?? [])].flatMap((p) =>
-        (p.payments ?? [])
-          .filter((x) => x.methodId === id || x.funding?.some((f) => f.methodId === id))
-          .map((x) => ({ subscription: s.id, name: s.name, kind: 'payment', date: x.date })),
+        (p.payments ?? []).filter((x) => usesMethod(x, id)).map((x) => ({ subscription: s.id, name: s.name, kind: 'payment', date: x.date })),
       ),
     ]),
     ...(st.settings.defaultMethodId === id ? [{ kind: 'default_method' }] : []),
@@ -102,7 +105,7 @@ export function deleteMethodData(st: AppState, id: string, into?: string | null)
   if (into === id || (into && !st.methods.some((m) => m.id === into))) throw new Error(t('mcp.error.invalidTarget'));
   if (into !== null) requireMigration(references, into);
   const target = into ?? undefined;
-  const uses = (pays?: Payment[]) => pays?.some((x) => x.methodId === id || x.funding?.some((f) => f.methodId === id));
+  const uses = (pays?: Payment[]) => pays?.some((x) => usesMethod(x, id));
   // 拆分付款里的来源一起迁移；迁到同一笔里已有的来源时合并成一份
   const moveFunding = (parts: NonNullable<Payment['funding']>, to: string) => {
     const merged = new Map<string, number>();
@@ -201,7 +204,7 @@ export function personEdit(st: AppState, person: Person, deleting: boolean, into
   return { people, subscriptions: syncPerson(st.subscriptions, person), references };
 }
 export function validateCurrency(st: Pick<AppState, 'fx'>, code: string): void {
-  if (!/^[A-Z]{3}$/.test(code) || !(st.fx.rates[code] > 0)) throw new Error(t('mcp.error.unsupportedCurrency', { code }));
+  if (!CURRENCY_CODE.test(code) || !(st.fx.rates[code] > 0)) throw new Error(t('mcp.error.unsupportedCurrency', { code }));
 }
 export function validateMethod(st: Pick<AppState, 'fx'>, m: PaymentMethod): void {
   if (!m.name?.trim()) throw new Error(t('mcp.error.invalidInput', { field: 'name' }));
@@ -267,10 +270,7 @@ export function methodIdsOf(s: Subscription | undefined): string[] {
   const ids = new Set<string>();
   for (const p of s ? [s, ...(s.phases ?? [])] : []) {
     if (p.methodId) ids.add(p.methodId);
-    for (const pay of p.payments ?? []) {
-      if (pay.methodId) ids.add(pay.methodId);
-      for (const f of pay.funding ?? []) if (f?.methodId) ids.add(f.methodId);
-    }
+    for (const pay of p.payments ?? []) for (const m of payMethodIds(pay)) ids.add(m);
   }
   return [...ids];
 }
@@ -278,9 +278,11 @@ const currenciesOf = (s: Subscription | undefined) => (s ? [s.currency, ...(s.ph
 /**
  * 整条订阅写入的引用校验（网页 PUT /api/subscriptions、MCP save_subscription 与其余订阅写工具共用）：
  * 新写入的支付方式必须存在，新写入的币种必须有汇率。previous 里本来就有的值放行（删卡遗留、汇率表变化），
- * 这样未改动的历史记录仍能保存，只拒绝本次新引入的非法值。
+ * 这样未改动的历史记录仍能保存，只拒绝本次新引入的非法值。字段格式（各阶段的日期、价格、币种、周期等）同样按此放行旧值，见 newShapeError。
  */
 export function subRefsError(st: Pick<AppState, 'fx' | 'methods'>, previous: Subscription | undefined, next: Subscription): string | undefined {
+  const shape = newShapeError(previous, next);
+  if (shape) return shape;
   const knownMethods = new Set(methodIdsOf(previous));
   for (const id of methodIdsOf(next))
     if (!knownMethods.has(id) && !st.methods.some((m) => m.id === id))

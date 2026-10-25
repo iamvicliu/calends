@@ -254,6 +254,7 @@
     "dateUnknown": "日期不详",
     "terminate": "被停用"
   },
+  "interrupted": "回复中途中断，没有完整收到。",
   "saveUnknown": "未能确认是否保存成功。请先核对账本，不要重复提交。",
   "savedUnverified": "已保存，但回读未能核对结果。请先检查账本再继续。",
   "savedRefreshFailed": "修改已保存，但页面刷新失败。请刷新后再确认其他草稿。",

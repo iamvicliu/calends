@@ -1,7 +1,7 @@
 // 多语言：前端、Worker、邮件、MCP 共用一套。
 // - 文案放在 shared/locales/<语言>/<命名空间>.json，键名形如 editor.save；zh-CN 与 en 是源语言，其余由它们翻译而来。
 // - t('ns.key', { name }) 取文案，{name} 为占位符；值写成 { "one": …, "other": … } 时按 count 选复数形式。
-// - 当前语言是模块级状态：浏览器里全局只有一种；Worker 每个请求开始时按请求头或设置切换（单用户，不会互相串）。
+// - 当前语言：浏览器里全局只有一种；Worker 每个请求、定时任务各有一份（setLocaleScope），按请求头或设置切换，并发请求互不串用。
 
 export const LOCALES = [
   { code: 'en', name: 'English', flag: 'us' },
@@ -72,25 +72,43 @@ export function flatten(ns: string, tree: MessageTree, out: Messages = {}): Mess
   return out;
 }
 
-let current: Locale = DEFAULT_LOCALE;
-/** 按回退顺序排好的文案表 */
-let tables: Messages[] = [];
-let plural = new Intl.PluralRules(current);
+/** 一种语言的运行状态：语言代码、按回退顺序排好的文案表、复数规则 */
+export interface LocaleState {
+  locale: Locale;
+  tables: Messages[];
+  plural: Intl.PluralRules;
+}
+
+/** 浏览器里全局只有一份；Worker 没有请求作用域时（如测试直接调用）也用它 */
+const globalState: LocaleState = { locale: DEFAULT_LOCALE, tables: [], plural: new Intl.PluralRules(DEFAULT_LOCALE) };
+/** Worker 按请求 / 定时任务各自持有一份（见 worker/i18n.ts），避免并发请求互相切换语言 */
+let scoped: () => LocaleState | undefined = () => undefined;
+const active = (): LocaleState => scoped() ?? globalState;
+
+/** 安装按作用域取语言状态的函数；返回 undefined 时回到全局状态 */
+export function setLocaleScope(get: () => LocaleState | undefined): void {
+  scoped = get;
+}
+
+/** 新的语言状态（默认英文、无文案），供作用域使用 */
+export const freshLocaleState = (): LocaleState => ({ locale: DEFAULT_LOCALE, tables: [], plural: new Intl.PluralRules(DEFAULT_LOCALE) });
 
 /** 切换语言；messages 是按回退顺序排列的各语言文案（第一个是目标语言） */
 export function setLocale(locale: Locale, messages: Messages[]): void {
-  current = locale;
-  tables = messages;
-  plural = new Intl.PluralRules(locale);
+  const st = active();
+  st.locale = locale;
+  st.tables = messages;
+  st.plural = new Intl.PluralRules(locale);
 }
 
-export const locale = (): Locale => current;
+export const locale = (): Locale => active().locale;
 
 export type Params = Record<string, string | number | undefined | null>;
 
 /** 取文案并填入参数；找不到时返回键名，方便发现漏翻 */
 export function t(key: string, params?: Params): string {
   let v: string | Record<string, string> | undefined;
+  const { tables, plural } = active();
   for (const tb of tables) {
     v = tb[key];
     if (v !== undefined) break;
@@ -106,4 +124,4 @@ export function t(key: string, params?: Params): string {
 }
 
 /** 当前语言下的 Intl 标签；pt-BR 等直接可用 */
-export const intlLocale = (): string => current;
+export const intlLocale = (): string => active().locale;

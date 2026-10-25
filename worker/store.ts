@@ -6,7 +6,7 @@ import { linkPeople } from '../shared/people.ts';
 import { migrateReceivables } from '../shared/receivables-legacy.ts';
 import type { Prefs } from '../shared/prefs.ts';
 import type { Env } from './env.ts';
-import { keepSet, slimFxHistory } from './fx.ts';
+import { keepSet, putFxDayStmt, slimFxHistory } from './fx.ts';
 
 const revSql = "SELECT CAST(value AS INTEGER) AS rev FROM kv WHERE key = 'rev'";
 
@@ -62,17 +62,15 @@ const putPeopleStmt = (env: Env, people: Person[]): D1PreparedStatement =>
     "INSERT INTO kv (key, value, updated_at) VALUES ('people', ?1, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
   ).bind(JSON.stringify(people));
 
-/** 把名册和改动过的订阅一起写入（分批，D1 一次 batch 的语句数有限） */
+/**
+ * 把名册和改动过的订阅一起写入：一个 batch 即一个事务，不会只写进一半。
+ * D1 不限制一次 batch 的语句数（整个 batch 只算一次查询），单条语句、单行各有 100 KB / 2 MB 的上限。
+ */
 export async function writePeople(env: Env, people: Person[] | undefined, subs: Subscription[]): Promise<Revision | undefined> {
   if (people) validatePeopleAvatars(people);
-  const stmts = [...(people ? [putPeopleStmt(env, people)] : []), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))];
-  let revision: Revision | undefined;
-  for (let i = 0; i < stmts.length; i += 50) {
-    const next = await mutate(env, stmts.slice(i, i + 50));
-    // Only acknowledge a contiguous series; interleaved remote writes require a reload.
-    revision = { from: revision && revision.rev === next.from ? revision.from : next.from, rev: next.rev };
-  }
-  return revision;
+  const now = new Date().toISOString();
+  const stmts = [...(people ? [putPeopleStmt(env, people)] : []), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, stamp(s, now)))];
+  return stmts.length ? mutate(env, stmts) : undefined;
 }
 
 /**
@@ -138,6 +136,15 @@ export async function loadState(env: Env, migratePeople = true): Promise<AppStat
 
 type Table = 'subscriptions' | 'methods';
 
+/**
+ * 订阅的 updatedAt 只在这里写：网页、MCP、助手、名册同步、分类改名等所有经存储层的写入都记下当时时间。
+ * 导入与备份恢复（replaceAll / restoreLedger）原样保留记录里的值。原地写入，调用方返回的对象也带上它。
+ */
+function stamp(s: Subscription, now: string): Subscription {
+  s.updatedAt = now;
+  return s;
+}
+
 function upsertStmt(env: Env, table: Table, id: string, data: unknown): D1PreparedStatement {
   return env.DB.prepare(
     `INSERT INTO ${table} (id, data, updated_at) VALUES (?1, ?2, datetime('now')) ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
@@ -145,6 +152,7 @@ function upsertStmt(env: Env, table: Table, id: string, data: unknown): D1Prepar
 }
 
 export async function upsert(env: Env, table: Table, id: string, data: unknown): Promise<Revision> {
+  if (table === 'subscriptions') stamp(data as Subscription, new Date().toISOString());
   return mutate(env, [upsertStmt(env, table, id, data)]);
 }
 
@@ -162,15 +170,50 @@ export async function replaceAll(env: Env, subs: Subscription[], methods: Paymen
   return mutate(env, stmts);
 }
 
+/** 支付方式原样读取（不排序）；网页、导入写入前的校验用 */
+export async function loadMethods(env: Env): Promise<PaymentMethod[]> {
+  return (await env.DB.prepare('SELECT data FROM methods').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as PaymentMethod);
+}
+
+/** 订阅（续费规则按旧数据兼容转换，与 loadState 同一口径） */
 export async function loadSubs(env: Env): Promise<Subscription[]> {
   return (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) =>
     migrateRenewalRules(JSON.parse(r.data) as Subscription),
   );
 }
 
+/**
+ * 备份恢复：订阅、支付方式整体替换，名册、设置、当前汇率替换，历史汇率按日期合并——全部在同一个事务里。
+ * 任何一条失败（如备份里的历史汇率缺字段）都整体回滚，原账本保持不变。
+ */
+export async function restoreLedger(
+  env: Env,
+  b: {
+    subscriptions: Subscription[];
+    methods: PaymentMethod[];
+    people: Person[];
+    settings?: Settings;
+    fx?: FxTable;
+    fxDaily: Array<{ date: string; rates: Record<string, number>; source: string }>;
+  },
+): Promise<Revision> {
+  validatePeopleAvatars(b.people);
+  return mutate(env, [
+    env.DB.prepare('DELETE FROM subscriptions'),
+    env.DB.prepare('DELETE FROM methods'),
+    ...b.methods.map((m) => upsertStmt(env, 'methods', m.id, m)),
+    ...b.subscriptions.map((s) => upsertStmt(env, 'subscriptions', s.id, s)),
+    putKvStmt(env, 'people', b.people),
+    ...(b.settings ? [putKvStmt(env, 'settings', b.settings)] : []),
+    ...(b.fx ? [putKvStmt(env, 'fx', b.fx)] : []),
+    ...b.fxDaily.map((d) => putFxDayStmt(env, d.date, d.rates, d.source)),
+  ]);
+}
+
 /** 设置和改动的订阅在同一个 batch 里写入（D1 batch 是一个事务）：分类改名时不会只改了一半 */
 export async function saveSettingsWithSubs(env: Env, settings: Settings, subs: Subscription[]): Promise<Revision> {
-  return mutate(env, [putKvStmt(env, 'settings', settings), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, s))]);
+  const now = new Date().toISOString();
+  return mutate(env, [putKvStmt(env, 'settings', settings), ...subs.map((s) => upsertStmt(env, 'subscriptions', s.id, stamp(s, now)))]);
 }
 
 /** Atomic multi-entity tool write: never leave a migration or settings/prefs edit half-applied. */
@@ -180,8 +223,9 @@ export async function saveLedgerEdit(
   deletedMethods: string[] = [],
   deletedSubscriptions: string[] = [],
 ): Promise<Revision> {
+  const now = new Date().toISOString();
   const stmts = [
-    ...(patch.subscriptions ?? []).map((s) => upsertStmt(env, 'subscriptions', s.id, s)),
+    ...(patch.subscriptions ?? []).map((s) => upsertStmt(env, 'subscriptions', s.id, stamp(s, now))),
     ...(patch.methods ?? []).map((m) => upsertStmt(env, 'methods', m.id, m)),
     ...deletedMethods.map((id) => env.DB.prepare('DELETE FROM methods WHERE id = ?1').bind(id)),
     ...deletedSubscriptions.map((id) => env.DB.prepare('DELETE FROM subscriptions WHERE id = ?1').bind(id)),

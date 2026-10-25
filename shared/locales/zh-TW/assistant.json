@@ -258,6 +258,7 @@
     "dateUnknown": "日期不詳",
     "terminate": "被停用"
   },
+  "interrupted": "回覆中途中斷，沒有完整收到。",
   "saveUnknown": "無法確認是否儲存成功。請先核對帳本，勿重複提交。",
   "savedUnverified": "已儲存，但回讀未能核對結果。請先檢查帳本再繼續。",
   "savedRefreshFailed": "變更已儲存，但頁面重新整理失敗。請重新整理後再確認其他草稿。",

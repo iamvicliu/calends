@@ -258,6 +258,7 @@
     "dateUnknown": "Không rõ ngày",
     "terminate": "Bị nhà cung cấp dừng"
   },
+  "interrupted": "Câu trả lời bị ngắt giữa chừng.",
   "saveUnknown": "Không thể xác nhận thay đổi đã được lưu. Hãy kiểm tra sổ trước khi thử lại.",
   "savedUnverified": "Đã lưu nhưng chưa thể xác minh kết quả. Hãy kiểm tra sổ trước khi tiếp tục.",
   "savedRefreshFailed": "Thay đổi đã được lưu nhưng không thể làm mới trang. Hãy tải lại trước khi xác nhận bản nháp khác.",

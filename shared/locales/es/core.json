@@ -44,6 +44,7 @@
   "subError": {
     "name": "El nombre es obligatorio",
     "price": "Precio no válido",
+    "paymentCurrency": "La moneda del pago debe coincidir con la del plan",
     "start": "Fecha de inicio no válida",
     "cycle": "Ciclo de facturación no válido",
     "refundAmount": "Introduce un importe positivo y una moneda válida",
@@ -229,5 +230,6 @@
     "badDate": "{field} original «{value}» no reconocido; no se importó",
     "nextDue": "fecha del próximo pago",
     "end": "fecha de fin"
-  }
+  },
+  "fxIncomplete": "Algunos importes no se pueden convertir porque faltan tipos de cambio, así que el resultado está incompleto."
 }

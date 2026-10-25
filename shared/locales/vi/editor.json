@@ -233,7 +233,8 @@
     "sources": "Nguồn thanh toán",
     "addSource": "Thêm nguồn",
     "splitOk": "Tổng {amount}, khớp số tiền",
-    "splitLeft": "Còn lại chưa chia: {amount}"
+    "splitLeft": "Còn lại chưa chia: {amount}",
+    "confirmDelete": "Xóa bản ghi ngày {date}?"
   },
   "timeline": {
     "home": "Về hôm nay (hoặc nhấn đúp vào dòng thời gian)"

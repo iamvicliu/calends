@@ -6,8 +6,7 @@ import { DEFAULT_SETTINGS, type FxTable, type PaymentMethod, type Person, type S
 import type { Env } from './env.ts';
 import { migrateRenewalRules } from '../shared/billing.ts';
 import { t } from '../shared/i18n.ts';
-import { putFxDayStmt } from './fx.ts';
-import { getFx, getPeople, getSettings, putKv, replaceAll } from './store.ts';
+import { getFx, getPeople, getSettings, restoreLedger } from './store.ts';
 
 const BACKUP_FORMAT = 'calends-backup';
 /** 改名前的备份格式名，照样能导入 */
@@ -68,18 +67,17 @@ export function parseBackup(raw: unknown): Backup {
   };
 }
 
-/** 整体替换为备份里的内容；历史汇率按日期合并（同一天以备份为准） */
+/** 整体替换为备份里的内容；历史汇率按日期合并（同一天以备份为准）。一个事务：失败时原账本不变 */
 export async function restoreAll(env: Env, b: Backup): Promise<{ subscriptions: number; methods: number; people: number; fxDays: number }> {
-  validatePeopleAvatars(b.people);
-  await replaceAll(env, b.subscriptions, b.methods, 'replace');
-  // 名册整体替换；没有名册的旧备份清空后，下次读取时按成员、代付的称呼重新建档
-  await putKv(env, 'people', b.people);
-  // 设置整体替换（备份里没有的项回到默认值），不和当前设置混在一起
-  if (b.settings && Object.keys(b.settings).length) await putKv(env, 'settings', { ...DEFAULT_SETTINGS, ...b.settings });
-  if (b.fx?.rates) await putKv(env, 'fx', b.fx);
-  // D1 一次 batch 的语句数有限，分批写
-  for (let i = 0; i < b.fxDaily.length; i += 50) {
-    await env.DB.batch(b.fxDaily.slice(i, i + 50).map((d) => putFxDayStmt(env, d.date, d.rates, d.source)));
-  }
+  await restoreLedger(env, {
+    subscriptions: b.subscriptions,
+    methods: b.methods,
+    // 名册整体替换；没有名册的旧备份清空后，下次读取时按成员、代付的称呼重新建档
+    people: b.people,
+    // 设置整体替换（备份里没有的项回到默认值），不和当前设置混在一起
+    settings: b.settings && Object.keys(b.settings).length ? { ...DEFAULT_SETTINGS, ...b.settings } : undefined,
+    fx: b.fx?.rates ? b.fx : undefined,
+    fxDaily: b.fxDaily,
+  });
   return { subscriptions: b.subscriptions.length, methods: b.methods.length, people: b.people.length, fxDays: b.fxDaily.length };
 }

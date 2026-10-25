@@ -184,6 +184,7 @@
       "date": "日期",
       "amount": "金额",
       "base": "折合 {ccy}"
-    }
+    },
+    "confirmDelete": "删除 {date} 的这笔转让收付？"
   }
 }

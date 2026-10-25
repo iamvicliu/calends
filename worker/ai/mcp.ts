@@ -20,11 +20,17 @@ export interface McpToken {
 }
 
 const KEY = 'mcpTokens';
+/** 最后使用时间单独存一个键（{令牌 id: ISO 时间}）：令牌列表只由管理接口写，鉴权时不读改写整张列表 */
+const USE_KEY = 'mcpTokenUse';
 const PROTOCOL = '2025-06-18';
 const SUPPORTED = ['2025-06-18', '2025-03-26', '2024-11-05'];
 
+const storedTokens = async (env: Env) => (await getKv<McpToken[]>(env, KEY)) ?? [];
+
+/** 令牌列表（含最后使用时间）；旧版写在列表里的 lastUsedAt 作为回退 */
 export async function listTokens(env: Env): Promise<McpToken[]> {
-  return (await getKv<McpToken[]>(env, KEY)) ?? [];
+  const used = (await getKv<Record<string, string>>(env, USE_KEY)) ?? {};
+  return (await storedTokens(env)).map((x) => (used[x.id] ? { ...x, lastUsedAt: used[x.id] } : x));
 }
 
 /** 新建令牌：明文只在这一次返回 */
@@ -38,7 +44,7 @@ export async function createToken(env: Env, name: string, scope: 'read' | 'write
     scope,
     createdAt: new Date().toISOString(),
   };
-  await putKv(env, KEY, [...(await listTokens(env)), item]);
+  await putKv(env, KEY, [...(await storedTokens(env)), item]);
   return { token, item };
 }
 
@@ -46,9 +52,15 @@ export async function revokeToken(env: Env, id: string): Promise<void> {
   await putKv(
     env,
     KEY,
-    (await listTokens(env)).filter((x) => x.id !== id),
+    (await storedTokens(env)).filter((x) => x.id !== id),
   );
 }
+
+/** 记下最后使用时间：单条语句只改这一个令牌的条目，不会覆盖同时发生的新建、吊销 */
+const touchStmt = (env: Env, id: string, at: string) =>
+  env.DB.prepare(
+    "INSERT INTO kv (key, value, updated_at) VALUES (?1, json_object(?2, ?3), datetime('now')) ON CONFLICT(key) DO UPDATE SET value = json_set(kv.value, '$.' || json_quote(?2), ?3), updated_at = excluded.updated_at",
+  ).bind(USE_KEY, id, at);
 
 /** 校验请求里的令牌；通过时顺手记下最后使用时间（同一小时内不重复写） */
 async function authenticate(req: Request, env: Env): Promise<McpToken | undefined> {
@@ -58,13 +70,12 @@ async function authenticate(req: Request, env: Env): Promise<McpToken | undefine
     ?.trim();
   if (!raw) return undefined;
   const hash = await sha256(raw);
-  const tokens = await listTokens(env);
-  const tk = tokens.find((x) => x.hash === hash);
+  const tk = (await listTokens(env)).find((x) => x.hash === hash);
   if (!tk) return undefined;
   const now = new Date().toISOString();
   if (!tk.lastUsedAt || now.slice(0, 13) !== tk.lastUsedAt.slice(0, 13)) {
+    await touchStmt(env, tk.id, now).run();
     tk.lastUsedAt = now;
-    await putKv(env, KEY, tokens);
   }
   return tk;
 }
@@ -138,7 +149,12 @@ export async function mcp(req: Request, env: Env): Promise<Response> {
     return Response.json(fail(null, -32700, t('mcp.error.parse')), { status: 400, headers: cors });
   }
   const list = Array.isArray(body) ? body : [body];
-  const out = (await Promise.all(list.map((m) => handle(m, env, token)))).filter((x) => x !== undefined);
+  // 批量请求逐条执行：后面的写入要看到前面的结果，两个写入也不会同时读同一份旧账本
+  const out: unknown[] = [];
+  for (const m of list) {
+    const r = await handle(m, env, token);
+    if (r !== undefined) out.push(r);
+  }
   if (!out.length) return new Response(null, { status: 202, headers: cors });
   return Response.json(Array.isArray(body) ? out : out[0], { headers: { ...cors, 'cache-control': 'no-store' } });
 }

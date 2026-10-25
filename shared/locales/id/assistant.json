@@ -258,6 +258,7 @@
     "dateUnknown": "Tanggal tidak diketahui",
     "terminate": "Dihentikan penyedia"
   },
+  "interrupted": "Balasan terputus sebelum selesai.",
   "saveUnknown": "Tidak dapat memastikan apakah perubahan tersimpan. Periksa buku sebelum mencoba lagi.",
   "savedUnverified": "Tersimpan, tetapi hasilnya tidak dapat diverifikasi. Periksa buku sebelum melanjutkan.",
   "savedRefreshFailed": "Perubahan tersimpan, tetapi halaman gagal dimuat ulang. Muat ulang sebelum mengonfirmasi draf lain.",

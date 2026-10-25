@@ -2,17 +2,16 @@ import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
 import { type CSSProperties, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge, chargeMethodId } from '../../../shared/billing.ts';
+import { addDays, addMonths, cycleLabel, diffDays, perLabel, runwayFor, totals, type Charge, chargeMethodId } from '../../../shared/billing.ts';
 import { moneyTick, flow, cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
-import { chargeValue } from '../../../shared/fx.ts';
+import { chargeBaseOrNaN, chargeValue } from '../../../shared/fx.ts';
 import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosses } from '../../../shared/metrics.ts';
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
 import { MetricCards, Metric, IconButton, Amount, CardTitle, CatIcon, TipTable, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
-import { allCharges, catColor, sumBase } from '../derive.ts';
-import { perLabel } from './Report.tsx';
+import { allCharges, catColor, sortValue, sumBaseOrNaN, firstStart } from '../derive.ts';
 import { go } from '../router.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 
@@ -47,12 +46,8 @@ export function Overview({ state, today, onOpen, onAdd }: { state: AppState; tod
 function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const past30 = useMemo(() => {
-    let past30 = 0;
-    for (const c of allCharges(state, addDays(today, -29), today, today)) {
-      const v = chargeValue(state, c);
-      past30 += v;
-    }
-    return past30;
+    // 缺汇率的一笔让合计为 NaN（显示「—」），不当作 0
+    return sumBaseOrNaN(state, allCharges(state, addDays(today, -29), today, today));
   }, [state, today]);
   // 时间线按需加载：拖到哪段算哪段
   const load = useCallback(
@@ -84,7 +79,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
           </span>
         </div>
       </div>
-      <Timeline load={load} today={today} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
+      <Timeline load={load} today={today} start={firstStart(state, today)} />
     </section>
   );
 }
@@ -95,7 +90,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
   const [scale, setScale] = useState<Scale>('month');
   const [hidden, setHidden] = useState<string[]>([]);
   const [selKey, setSelKey] = useState<string | undefined>();
-  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const first = firstStart(state, today);
 
   const ranges = useMemo(() => {
     const out: Array<{ key: string; label: string; from: string; to: string }> = [];
@@ -129,21 +124,26 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
   );
 
   const curKey = scale === 'month' ? today.slice(0, 7) : today.slice(0, 4);
+  // 柱高用缺汇率按 0 的值（图表几何必须是有限数）；提示框里显示的金额用缺汇率为 NaN 的值，显示「—」
+  const exact = new Map<string, Map<string, number>>();
   const buckets: Bucket[] = data.map(({ r, cs }) => {
     const parts = new Map<string, number>();
+    const shown = new Map<string, number>();
     for (const c of cs) {
       const k = c.projected && r.key === curKey ? PROJ : c.sub.category;
       parts.set(k, (parts.get(k) ?? 0) + chargeValue(state, c));
+      shown.set(k, (shown.get(k) ?? 0) + chargeBaseOrNaN(state, c));
     }
+    exact.set(r.key, shown);
     const arr = [...parts.entries()].map(([k, v]) => ({ k, v })).sort((a, b) => (a.k === PROJ ? 1 : b.k === PROJ ? -1 : b.v - a.v));
     return { key: r.key, label: r.label, parts: arr, total: arr.reduce((a, p) => a + p.v, 0), future: r.key > curKey, current: r.key === curKey };
   });
 
   const sel = selKey && buckets.some((b) => b.key === selKey) ? selKey : curKey;
   const selData = data.find((d) => d.r.key === sel);
-  const selTotal = selData ? sumBase(state, selData.cs) : 0;
+  const selTotal = selData ? sumBaseOrNaN(state, selData.cs) : 0;
   const selPaid = selData
-    ? sumBase(
+    ? sumBaseOrNaN(
         state,
         selData.cs.filter((c) => !c.projected),
       )
@@ -151,18 +151,18 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
   const bySub = new Map<string, { sub: Subscription; v: number; n: number; proj: boolean }>();
   for (const c of selData?.cs ?? []) {
     const e = bySub.get(c.sub.id) ?? { sub: c.sub, v: 0, n: 0, proj: true };
-    e.v += chargeValue(state, c);
+    e.v += chargeBaseOrNaN(state, c);
     e.n++;
     e.proj = e.proj && c.projected;
     bySub.set(c.sub.id, e);
   }
-  const items = [...bySub.values()].sort((a, b) => b.v - a.v);
+  const items = [...bySub.values()].sort((a, b) => sortValue(b.v) - sortValue(a.v));
 
   // 图例：所选区间（全部柱子）里各分类的合计
   const catTotals = new Map<string, number>();
   for (const { cs } of allRanges(state, ranges, today))
-    for (const c of cs) catTotals.set(c.sub.category, (catTotals.get(c.sub.category) ?? 0) + chargeValue(state, c));
-  const cats = [...catTotals.entries()].sort((a, b) => b[1] - a[1]);
+    for (const c of cs) catTotals.set(c.sub.category, (catTotals.get(c.sub.category) ?? 0) + chargeBaseOrNaN(state, c));
+  const cats = [...catTotals.entries()].sort((a, b) => sortValue(b[1]) - sortValue(a[1]));
   const selLabel = scale === 'month' ? monthLabel(sel) : t('overview.spending.year', { year: sel });
   const isFuture = sel > curKey;
 
@@ -200,11 +200,11 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
         fmt={(v) => moneyTick(v, base)}
         tip={(b) => (
           <TipTable
-            head={[b.label, flow(-b.total, base, { compact: true })]}
+            head={[b.label, flow(-b.parts.reduce((a, p) => a + (exact.get(b.key)?.get(p.k) ?? NaN), 0), base, { compact: true })]}
             rows={b.parts
               .filter((p) => p.k !== PROJ)
               .slice(0, 5)
-              .map((p) => ({ key: p.k, label: p.k, value: flow(-p.v, base, { compact: true }) }))}
+              .map((p) => ({ key: p.k, label: p.k, value: flow(-(exact.get(b.key)?.get(p.k) ?? p.v), base, { compact: true }) }))}
           />
         )}
       />
@@ -271,7 +271,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
   const pair = useMoneyPair(state);
   const base = state.settings.baseCurrency;
   const cs = allCharges(state, addDays(today, 1), addDays(today, 30), today).filter((c) => c.amount > 0 && c.kind !== 'refund' && c.kind !== 'failed');
-  const total = sumBase(state, cs);
+  const total = sumBaseOrNaN(state, cs);
   const groups: Array<['thisWeek' | 'later', Charge[]]> = [
     ['thisWeek', cs.filter((c) => diffDays(today, c.date) <= 6)],
     ['later', cs.filter((c) => diffDays(today, c.date) > 6)],
@@ -294,7 +294,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
               {list.slice(0, g === 'thisWeek' ? 10 : 6).map((c, i) => {
                 const d = diffDays(today, c.date);
                 const m = state.methods.find((x) => x.id === chargeMethodId(c));
-                const amt = pair(-c.amount, c.currency, { value: -chargeValue(state, c) });
+                const amt = pair(-c.amount, c.currency, { value: -chargeBaseOrNaN(state, c) });
                 return (
                   <button key={c.sub.id + c.date + i} className="due-row" onClick={() => onOpen(c.sub)}>
                     <SubIcon sub={c.sub} size={36} />
@@ -347,11 +347,13 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
                     {copyParts(
                       t('overview.wallet.balance', {
                         amount: money(r.current, m.currency, { compact: true }),
-                        status: r.shortfall
-                          ? r.coveredCharges
-                            ? t('overview.wallet.covered', { count: r.coveredCharges, date: cnDate(r.shortfall.date) })
-                            : t('overview.wallet.mustTopUp', { date: cnDate(r.shortfall.date) })
-                          : t('overview.wallet.enough'),
+                        status: !Number.isFinite(r.monthlyDrain)
+                          ? '—'
+                          : r.shortfall
+                            ? r.coveredCharges
+                              ? t('overview.wallet.covered', { count: r.coveredCharges, date: cnDate(r.shortfall.date) })
+                              : t('overview.wallet.mustTopUp', { date: cnDate(r.shortfall.date) })
+                            : t('overview.wallet.enough'),
                       }),
                     )}
                   </small>
@@ -432,7 +434,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
   const tot = totals(state, today);
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);
   const delta = mrrChangeSinceLastMonth(state, today);
-  const ytd = useMemo(() => sumBase(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
+  const ytd = useMemo(() => sumBaseOrNaN(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
   const loss = useMemo(() => (state.readonly ? 0 : stopLosses(state, today, { from: `${today.slice(0, 4)}-01-01`, to: today }).total), [state, today]);
   const live = useMemo(
     () =>

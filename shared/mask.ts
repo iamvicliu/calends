@@ -1,6 +1,6 @@
 // 公开页脱敏：服务端只下发这里处理过的数据，浏览器拿不到原始信息
-import { DEFAULT_SETTINGS, type AppState, type Payment, type PaymentMethod, type Subscription } from './types.ts';
-import { migrateRenewalRules } from './billing.ts';
+import { DEFAULT_SETTINGS, type AppState, type Payment, type PaymentMethod, type Phase, type Stop, type Subscription } from './types.ts';
+import { fnv1a, migrateRenewalRules } from './billing.ts';
 import { t } from './i18n.ts';
 import { categoryList, isDomainCategory, presetOf, type Category } from './categories.ts';
 
@@ -34,11 +34,7 @@ function publicMethod(m: PaymentMethod): PaymentMethod {
 }
 
 /** FNV-1a 短哈希：公开数据里不暴露可能含域名的 id */
-function shortHash(text: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
-  return (h >>> 0).toString(36);
-}
+const shortHash = (text: string) => fnv1a(text).toString(36);
 
 /** 只保留网址的协议与域名；写得不像网址的不下发（避免整个公开页报错） */
 function originOf(url?: string): string | undefined {
@@ -50,9 +46,44 @@ function originOf(url?: string): string | undefined {
   }
 }
 
-/** 公开页的一笔扣款：去掉备注；拆分付款只留来源 id 与金额（与 methodId 同口径，来源本身由 publicMethod 脱敏） */
-function publicPayment({ note: _n, funding, ...pay }: Payment): Payment {
-  return funding?.length ? { ...pay, funding: funding.map(({ methodId, amount }) => ({ methodId, amount })) } : pay;
+/** 公开页的一笔扣款（白名单）：不带备注；拆分付款只留来源 id 与金额（与 methodId 同口径，来源本身由 publicMethod 脱敏） */
+function publicPayment(pay: Payment): Payment {
+  return {
+    date: pay.date,
+    amount: pay.amount,
+    currency: pay.currency,
+    kind: pay.kind,
+    settled: pay.settled && { amount: pay.settled.amount, currency: pay.settled.currency },
+    methodId: pay.methodId,
+    ...(pay.funding?.length ? { funding: pay.funding.map(({ methodId, amount }) => ({ methodId, amount })) } : {}),
+  };
+}
+
+const publicStop = (stop: Stop | undefined) => stop && { kind: stop.kind, date: stop.date, paidThrough: stop.paidThrough };
+
+/** 公开页的一个阶段（白名单）：计费需要的字段，不带备注与停用原因；以后新增的阶段字段不会被顺带公开 */
+function publicPhase(p: Phase): Phase {
+  return {
+    start: p.start,
+    billingStart: p.billingStart,
+    end: p.end,
+    stop: publicStop(p.stop),
+    price: p.price,
+    currency: p.currency,
+    cycle: p.cycle,
+    methodId: p.methodId,
+    region: p.region,
+    priceHistory: p.priceHistory,
+    intro: p.intro,
+    bonus: p.bonus,
+    payments: p.payments?.filter((pay) => pay.kind !== 'refund').map(publicPayment),
+    nextDue: p.nextDue,
+    planned: p.planned,
+    chargeLeadDays: p.chargeLeadDays,
+    cancelLeadDays: p.cancelLeadDays,
+    renewalHistory: p.renewalHistory,
+    renewalOffsetDays: p.renewalOffsetDays,
+  };
 }
 
 function publicSub(s: Subscription, cats: Category[]): Subscription {
@@ -81,7 +112,7 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
 
     end: s.end,
     status: s.status,
-    stop: s.stop && { kind: s.stop.kind, date: s.stop.date, paidThrough: s.stop.paidThrough },
+    stop: publicStop(s.stop),
     trialEnd: s.trialEnd,
     pausedAt: s.pausedAt,
     methodId: s.methodId,
@@ -90,11 +121,7 @@ function publicSub(s: Subscription, cats: Category[]): Subscription {
     bonus: s.bonus,
     priceHistory: s.priceHistory,
     // 计费需要的结构原样保留：阶段、实际扣款、下次扣款日（不含敏感信息）
-    phases: s.phases?.map(({ note: _n, stop, ...p }) => ({
-      ...p,
-      stop: stop && { kind: stop.kind, date: stop.date, paidThrough: stop.paidThrough },
-      payments: p.payments?.filter((pay) => pay.kind !== 'refund').map(publicPayment),
-    })),
+    phases: s.phases?.map(publicPhase),
     payments: s.payments?.filter((pay) => pay.kind !== 'refund').map(publicPayment),
     nextDue: s.nextDue,
     share: s.share && {

@@ -260,6 +260,7 @@
     "dateUnknown": "Tarih bilinmiyor",
     "terminate": "Sağlayıcı sonlandırdı"
   },
+  "interrupted": "Yanıt tamamlanmadan kesildi.",
   "saveUnknown": "Kaydedilip kaydedilmediği doğrulanamadı. Yeniden denemeden önce defteri kontrol edin.",
   "savedUnverified": "Kaydedildi ancak sonuç doğrulanamadı. Devam etmeden önce defteri kontrol edin.",
   "savedRefreshFailed": "Değişiklik kaydedildi ancak sayfa yenilenemedi. Diğer taslakları onaylamadan önce sayfayı yenileyin.",

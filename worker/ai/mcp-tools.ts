@@ -1,6 +1,5 @@
 import { personSummary } from '../../shared/avatar.ts';
-import { parseAppStorePlans } from '../../shared/appstore-plans.ts';
-import { reconcileRenewalRules, preserveRenewalHistory, renewalDates, chargeMethodId, chargeSources } from '../../shared/billing.ts';
+import { preserveRenewalHistory, renewalDates, chargeMethodId, chargeSources } from '../../shared/billing.ts';
 // MCP 工具：查询订阅、扣款、统计，以及新增 / 维护订阅。全部复用 shared/ 里的计费与统计逻辑，和后台界面算出来的数一致。
 import {
   activePhases,
@@ -34,7 +33,7 @@ import {
   type Charge,
   validDay,
 } from '../../shared/billing.ts';
-import { chargeFxMissing, chargeValue, toBaseAt } from '../../shared/fx.ts';
+import { chargeBaseOrNaN, toBaseOrNaN } from '../../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, stopLosses, topUpPlan, yearReview } from '../../shared/metrics.ts';
 import {
   editPhase,
@@ -54,7 +53,6 @@ import {
   toEditForm,
   stopSubscription,
   reactivate,
-  statusChangeError,
   cancelAtEnd,
   stopUndated,
   movePhaseStart,
@@ -75,7 +73,7 @@ import {
 import { normName, peopleLedger, personLink, type PersonLedger } from '../../shared/people.ts';
 import type { AppState, Payment, PaymentMethod, Person, Receipt, ShareMember, Subscription } from '../../shared/types.ts';
 import type { Env } from '../env.ts';
-import { loadState, saveLedgerEdit, upsert } from '../store.ts';
+import { loadState, saveLedgerEdit } from '../store.ts';
 import {
   applyCarRule,
   suggestedLeaveRefund,
@@ -92,63 +90,15 @@ import {
 } from '../../shared/carpool.ts';
 import { t } from '../../shared/i18n.ts';
 import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
+import { searchAppStore } from '../appstore.ts';
 import { filteredSubs, LIST_FILTER, monthReportOut, scopeReportOut } from './report-tools.ts';
-import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
-import { subError } from '../../shared/billing.ts';
+import { drySchema, objectSchema as obj, validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { prepareSubWrite } from '../../shared/sub-write.ts';
 import { SUBSCRIPTION_SCHEMA } from '../../shared/subscription-schema.ts';
-import { validateCurrency, categoryEdit, deleteSubscriptionSettings, subRefsError } from '../../shared/ledger-edit.ts';
+import { validateCurrency, categoryEdit, deleteSubscriptionSettings } from '../../shared/ledger-edit.ts';
 import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
 import { CATEGORY_ALIASES } from '../../shared/locales/categories.gen.ts';
 import { cleanTransfers, netCost, transferRows, transferredStop, transferSign, transfersOf, transferValue } from '../../shared/transfers.ts';
-
-/** App Store 搜索（也接受 App Store 链接，按 id 精确查找）；后台的名称联想和 AI 共用 */
-const storeCountry = (country: string) =>
-  country
-    .toLowerCase()
-    .replace(/[^a-z]/g, '')
-    .slice(0, 2) || 'us';
-
-export async function searchAppStore(query: string, country = 'us') {
-  const term = query.trim().slice(0, 80);
-  const cc = storeCountry(country);
-  if (!term) return [];
-  const id = term.match(/id(\d{6,})/)?.[1];
-  const api = id
-    ? `https://itunes.apple.com/lookup?id=${id}&country=${cc}`
-    : `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=software&limit=8&country=${cc}`;
-  const res = await fetch(api, { cf: { cacheTtl: 86400 } });
-  const body = (await res.json().catch(() => ({}))) as { results?: Array<Record<string, unknown>> };
-  return (body.results ?? []).map((r) => ({
-    id: String(r.trackId),
-    name: r.trackName as string,
-    icon: r.artworkUrl100 as string,
-    url: r.trackViewUrl as string,
-    seller: r.sellerName as string,
-    genre: r.primaryGenreName as string,
-  }));
-}
-
-/**
- * App 的内购套餐：iTunes 接口不给内购，只能读商店详情页；币种取同一地区 lookup 的结果。
- * 页面改版、地区没有这个 App 或读不到币种时返回空列表，前端照常手填。
- */
-export async function appStorePlans(id: string, country = 'us') {
-  const appId = /^\d{6,12}$/.test(id) ? id : '';
-  const cc = storeCountry(country);
-  if (!appId) return { currency: undefined, plans: [] };
-  const [page, lookup] = await Promise.all([
-    fetch(`https://apps.apple.com/${cc}/app/id${appId}`, { cf: { cacheTtl: 86400 }, headers: { 'user-agent': 'Mozilla/5.0 (Macintosh)' } })
-      .then((r) => (r.ok ? r.text() : ''))
-      .catch(() => ''),
-    fetch(`https://itunes.apple.com/lookup?id=${appId}&country=${cc}`, { cf: { cacheTtl: 86400 } })
-      .then((r) => r.json() as Promise<{ results?: Array<{ currency?: string }> }>)
-      .catch(() => ({ results: [] as Array<{ currency?: string }> })),
-  ]);
-  const currency = lookup.results?.[0]?.currency;
-  if (!currency || !/^[A-Z]{3}$/.test(currency)) return { currency: undefined, plans: [] };
-  return { currency, plans: parseAppStorePlans(page).slice(0, 20) };
-}
 
 export interface ToolCtx {
   env: Env;
@@ -182,12 +132,34 @@ export async function state(ctx: ToolCtx): Promise<{ st: AppState; today: string
   return { st, today: todayIn(st.settings.timezone) };
 }
 
-/** 金额：原币 + 折算成目标币种（默认本位币） */
+/** 金额：原币 + 折算成目标币种（默认本位币）；缺汇率时 converted 为 null，不当成 0 */
 export function money(st: AppState, amount: number, currency: string, date?: string, to = st.settings.baseCurrency) {
-  const conv = !Number.isFinite(amount) ? NaN : currency === to ? amount : toBaseAt(st, amount, currency, date, to);
-  return { amount: round(amount), currency, converted: round(conv), convertedCurrency: to };
+  const conv = !Number.isFinite(amount) ? NaN : currency === to ? amount : toBaseOrNaN(st, amount, currency, date, to);
+  return { amount: fin(amount), currency, converted: fin(conv), convertedCurrency: to };
 }
 export const round = (n: number) => Math.round(n * 100) / 100;
+/** 输出用的金额：算不出（缺汇率等）时为 null，与 report-tools 一致 */
+export const fin = (n: number): number | null => (Number.isFinite(n) ? round(n) : null);
+
+/**
+ * 缺汇率的收集：每个算不出的值记下它的原币种，输出 incomplete / fx_missing（与月报、选区报告同一口径）。
+ * 没有币种可记（如共享层整体返回 NaN）时只标 incomplete。
+ */
+function fxGaps() {
+  const missing = new Set<string>();
+  let gap = false;
+  return {
+    /** 记录 v；不是有限数时标记缺汇率，原样返回 v */
+    note(v: number | null | undefined, ccy?: string) {
+      if (v == null || !Number.isFinite(v)) {
+        gap = true;
+        if (ccy) missing.add(ccy);
+      }
+      return v;
+    },
+    out: () => ({ incomplete: gap, fx_missing: [...missing].sort() }),
+  };
+}
 
 /** 工具的显示名（随语言变化，所以不写在 TOOLS 里） */
 export const toolTitle = (name: string) => t(`mcp.tool.${name}`);
@@ -195,8 +167,7 @@ export const toolTitle = (name: string) => t(`mcp.tool.${name}`);
 /** 候选列表：「名称（id）、名称（id）」 */
 const candidates = (xs: Array<{ name: string; id: string }>) => xs.map((x) => t('mcp.item', { name: x.name, id: x.id })).join(t('mcp.sep'));
 
-/** Connection metadata is private, credential-free and reflects the actual caller's permissions. */
-/** 连接信息只用到设置：握手时不必读整份账本 */
+/** 连接信息：私有、不含凭据，反映调用方实际权限；只用到设置，握手时不必读整份账本 */
 export function connectionInfo(ctx: ToolCtx, settings: AppState['settings'], today: string) {
   const scope = ctx.access?.scope ?? 'read';
   let site: string | null = null;
@@ -222,8 +193,11 @@ export function connectionInfo(ctx: ToolCtx, settings: AppState['settings'], tod
 const subCandidates = (st: AppState, xs: Subscription[]) =>
   candidates(xs.map((s) => ({ id: s.id, name: [s.name, s.account, s.region, st.methods.find((m) => m.id === s.methodId)?.name].filter(Boolean).join(' · ') })));
 
-/** 按 id 或名称找订阅；名称模糊匹配到多个时报错并列出候选，让 AI 选 */
-export function findSub(st: AppState, ref: unknown): Subscription {
+/**
+ * 按 id 或名称找订阅；名称模糊匹配到多个时报错并列出候选，让 AI 选。
+ * exact：删除、移除这类破坏性操作只认 id 或完整名称（不分大小写），子串唯一命中也不算。
+ */
+export function findSub(st: AppState, ref: unknown, opts: { exact?: boolean } = {}): Subscription {
   const q = String(ref ?? '').trim();
   if (!q) throw new Error(t('mcp.error.needSub'));
   const byId = st.subscriptions.find((s) => s.id === q);
@@ -232,9 +206,30 @@ export function findSub(st: AppState, ref: unknown): Subscription {
   const exact = st.subscriptions.filter((s) => s.name.toLowerCase() === k);
   if (exact.length === 1) return exact[0];
   const fuzzy = exact.length ? exact : st.subscriptions.filter((s) => s.name.toLowerCase().includes(k));
+  if (opts.exact && !exact.length) {
+    if (fuzzy.length) throw new Error(t('mcp.error.subNotExact', { q, list: subCandidates(st, fuzzy) }));
+    throw new Error(t('mcp.error.subNotFound', { q }));
+  }
   if (fuzzy.length === 1) return fuzzy[0];
   if (!fuzzy.length) throw new Error(t('mcp.error.subNotFound', { q }));
   throw new Error(t('mcp.error.subAmbiguous', { q, count: fuzzy.length, list: subCandidates(st, fuzzy) }));
+}
+
+/**
+ * 合租成员：id，或称呼（不分大小写）完全相同的唯一一位；fuzzy 时再接受唯一的子串命中。
+ * 重名、找不到都报错并列出候选，不会默默挑第一个。
+ */
+export function findMember(s: Subscription, ref: unknown, opts: { fuzzy?: boolean } = {}): ShareMember {
+  const members = s.share?.members ?? [];
+  const raw = String(ref ?? '').trim();
+  const byId = members.find((m) => m.id === raw);
+  if (byId) return byId;
+  const q = raw.toLowerCase();
+  const exact = q ? members.filter((m) => m.name.toLowerCase() === q) : [];
+  const hits = exact.length || !opts.fuzzy ? exact : q ? members.filter((m) => m.name.toLowerCase().includes(q)) : [];
+  if (hits.length === 1) return hits[0];
+  if (hits.length) throw new Error(t('mcp.error.memberAmbiguous', { q: raw, list: candidates(hits) }));
+  throw new Error(t('mcp.error.noMember', { list: candidates(members) }));
 }
 
 /** 按 id 或称呼找人；称呼模糊匹配到多个时报错并列出候选 */
@@ -262,7 +257,7 @@ const contactLine = (p: Pick<Person, 'contactVia' | 'contact'>) => {
 
 /** 一个人的应收：在哪些合租 / 代付里、欠多少、收回多少 */
 function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
-  const conv = (v: number) => round(toBaseAt(st, v, st.settings.baseCurrency, undefined, out));
+  const conv = (v: number) => fin(toBaseOrNaN(st, v, st.settings.baseCurrency, undefined, out));
   return {
     person_id: l.person.id || null,
     name: l.person.name,
@@ -309,7 +304,7 @@ function periodsOut(periods: LedgerPeriod[]) {
 /** 收款摘要：日期是最早没结清的一期（可能已逾期），金额由 shared 计算。 */
 function collectionSummary(st: AppState, s: Subscription, m: ShareMember, due: MemberDue | undefined, today: string) {
   const rule = s.share?.role === 'owner' ? carRule(st, s, today) : undefined;
-  const currency = st.settings.collectCurrency ?? st.settings.baseCurrency;
+  const currency = collectCcy(st);
   const first = memberCollection(s, m, m.joined ?? s.share?.since ?? s.start, currency);
   const next = memberCollection(s, m, memberUnpaidFrom(s, m), currency);
   return {
@@ -422,13 +417,14 @@ function row(st: AppState, s: Subscription, today: string, out?: string) {
 /** 一笔扣款：原币 + 折算；scope=mine 时 my_amount 只算我承担的部分 */
 function chargeRow(st: AppState, c: Charge, out?: string) {
   const sub = st.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
-  const v = chargeValue(st, c, out ?? st.settings.baseCurrency);
+  const v = chargeBaseOrNaN(st, c, out ?? st.settings.baseCurrency);
   return {
     date: c.date,
     subscription_id: c.sub.id,
     name: sub.name,
-    amount: { amount: round(c.amount), currency: c.currency, converted: round(v), convertedCurrency: out ?? st.settings.baseCurrency },
-    my_amount: round(v * myShareFactor(c.sub, c.date)),
+    amount: { amount: round(c.amount), currency: c.currency, converted: fin(v), convertedCurrency: out ?? st.settings.baseCurrency },
+    my_amount: fin(v * myShareFactor(c.sub, c.date)),
+    ...(Number.isFinite(v) ? {} : { fx_missing: true }),
     projected: c.projected,
     kind: c.kind ?? 'charge',
     method: st.methods.find((m) => m.id === chargeMethodId(c))?.name ?? null,
@@ -475,6 +471,12 @@ function groupOf(by: string, c: Charge, sub: Subscription, m: PaymentMethod | un
   }
 }
 
+/** 合租收款币种：设置里的收款币种，没设时用本位币 */
+const collectCcy = (st: AppState) => st.settings.collectCurrency ?? st.settings.baseCurrency;
+
+/** 当前汇率表里没有（或不为正）的币种 */
+const missingRates = (st: AppState, ccys: string[]) => [...new Set(ccys.filter((c) => c !== 'USD' && !(st.fx.rates[c] > 0)))].sort();
+
 const outCcy = (st: AppState, a: Record<string, unknown>) => {
   const c = a.currency_out ? String(a.currency_out).toUpperCase() : undefined;
   if (c && !st.fx.rates[c]) throw new Error(t('mcp.error.unsupportedCurrency', { code: c }));
@@ -483,6 +485,11 @@ const outCcy = (st: AppState, a: Record<string, unknown>) => {
 
 const DATE = { format: 'date', type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'YYYY-MM-DD' };
 const SUBREF = { type: 'string', description: 'Subscription id, or its name (fuzzy match; ambiguous names return candidates).' };
+/** 破坏性操作的订阅引用：只认 id 或完整名称 */
+const SUBREF_EXACT = {
+  type: 'string',
+  description: 'Subscription id, or its exact full name (case-insensitive). Partial names are rejected with candidates for this destructive action.',
+};
 const CURRENCY_OUT = { type: 'string', description: 'Convert amounts into this currency (ISO code). Defaults to the ledger base currency.' };
 const PERIOD = { type: 'string', enum: PERIODS, description: 'Time window. custom requires from/to.' };
 const CYCLE = {
@@ -499,14 +506,12 @@ const SHIFT_BILLING = {
   description:
     'Only with a start change. Default false keeps the original billing anchor, like the web editor: later charge dates stay the same and cycles added before it follow the original day. true moves the anchor with the start, shifting every estimated future charge.',
 };
-const DRY = { type: 'boolean', default: false, description: 'Preview the result without saving.' };
 const CATEGORY = { type: 'string', description: 'Existing category code or name from list_categories; localized names are case-insensitive.' };
 const CATEGORY_CREATE = {
   create_category: { type: 'boolean', default: false, description: 'If category is unknown, explicitly create it. Ambiguous references always fail.' },
   category_icon: { type: ['string', 'null'], description: 'New category only: Lucide icon name or emoji; same validation as save_category set.icon.' },
   category_color: { type: ['string', 'null'], description: 'New category only: palette code or #rrggbb; same validation as save_category set.color.' },
 };
-const obj = (properties: Record<string, unknown>, required: string[] = []) => ({ type: 'object', properties, required, additionalProperties: false });
 const FUNDING = {
   type: ['array', 'null'],
   description:
@@ -514,13 +519,13 @@ const FUNDING = {
   items: obj({ method: { type: 'string', description: 'Payment method id or name.' }, amount: { type: 'number', minimum: 0 } }, ['method', 'amount']),
 };
 
-/** 写入：dry_run 只返回预览；否则保存并返回最新一行 + 接下来几笔扣款 */
 /** 模型偶尔把名称里的 & 等写成 HTML 实体（AT&amp;T），存之前还原 */
 export const decodeEntities = (s: string) =>
   s.replace(/&(amp|lt|gt|quot|#39|apos);/g, (_, e: string) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", apos: "'" })[e]!);
 
 type CategoryCreation = { category: Category; categories: Category[] };
 
+/** 写入：校验后交给 persist；dry_run 只返回预览，否则保存并返回最新一行 + 接下来几笔扣款 */
 export async function commit(
   ctx: ToolCtx,
   st: AppState,
@@ -531,37 +536,22 @@ export async function commit(
   categoryCreation?: CategoryCreation,
   personCreation?: Person,
 ) {
-  after = reconcileRenewalRules(
-    st.subscriptions.find((s) => s.id === after.id),
-    after,
-    today,
-  );
+  // 续费规则历史、清退出日连带清退款、完整校验、引用校验与状态迁移都交给与网页整条保存同一个 prepareSubWrite
   after = resyncShares(
     st,
     st.subscriptions.find((s) => s.id === after.id),
     after,
   );
   for (const member of after.share?.members ?? []) if (!Number.isFinite(member.share)) throw new Error(t('mcp.error.notNumber', { what: 'member.share' }));
-  for (const v of phaseSubs(after)) {
-    const error = subError(v);
-    if (error) throw new Error(error);
-  }
   // 与网页整条保存同一套引用校验：新写入的支付方式要存在、币种要可用；记录里原有的值放行
-  const refs = subRefsError(
-    st,
-    st.subscriptions.find((x) => x.id === after.id),
-    after,
-  );
-  if (refs) throw new Error(refs);
-  const invalid = subError(after);
-  if (invalid) throw new Error(invalid);
-  const errs = statusChangeError(
+  const prepared = prepareSubWrite(
     st.subscriptions.find((x) => x.id === after.id),
     after,
     today,
+    st,
   );
-  if (errs) throw new Error(errs);
-  return persist(ctx, st, today, after, dry, changed, categoryCreation, undefined, personCreation);
+  if (prepared.error !== undefined) throw new Error(prepared.error);
+  return persist(ctx, st, today, prepared.sub, dry, changed, categoryCreation, undefined, personCreation);
 }
 
 /** 已校验的订阅：生成预览；dry_run 只叠进草稿层，否则保存 */
@@ -599,22 +589,46 @@ async function persist(
       .map((c) => ({ date: c.date, amount: round(c.amount), currency: c.currency })),
     ...extra,
   };
-  const people = personCreation ? [...(st.people ?? []), personCreation] : undefined;
+  // 新建的分类、人与订阅同一个事务写入
+  return writeLedger(
+    ctx,
+    st,
+    {
+      subscriptions: [after],
+      ...(categoryCreation ? { settings: { ...st.settings, categories: categoryCreation.categories } } : {}),
+      ...(personCreation ? { people: [...(st.people ?? []), personCreation] } : {}),
+    },
+    preview,
+    dry,
+  );
+}
+
+/** 一次写入涉及的实体：订阅、支付方式、设置、名册、界面配置，以及要删除的支付方式与订阅 */
+export interface LedgerWrite extends Pick<Partial<AppState>, 'subscriptions' | 'methods' | 'settings' | 'people' | 'prefs'> {
+  deletedMethods?: string[];
+  deletedSubscriptions?: string[];
+}
+
+/**
+ * 所有写工具唯一的写入出口。dry_run 时只叠进草稿层（订阅进 overlay，删除记为 null；其余进 draftState），
+ * 同一轮后面的工具能看到；否则在一个事务里写入（saveLedgerEdit）。preview 原样带回。
+ */
+export async function writeLedger(ctx: ToolCtx, st: AppState, w: LedgerWrite, preview: object, dry: unknown) {
+  const { subscriptions, methods, deletedMethods = [], deletedSubscriptions = [], ...rest } = w;
   if (dry) {
-    if (categoryCreation) ctx.draftState = { ...ctx.draftState, settings: { ...st.settings, categories: categoryCreation.categories } };
-    if (people) ctx.draftState = { ...ctx.draftState, people };
-    ctx.overlay?.set(after.id, after);
+    ctx.draftState = {
+      ...ctx.draftState,
+      ...rest,
+      ...(methods || deletedMethods.length
+        ? { methods: [...st.methods.filter((m) => !deletedMethods.includes(m.id) && !methods?.some((n) => n.id === m.id)), ...(methods ?? [])] }
+        : {}),
+    };
+    for (const s of subscriptions ?? []) ctx.overlay?.set(s.id, s);
+    for (const id of deletedSubscriptions) ctx.overlay?.set(id, null);
     return { dry_run: true, ...preview };
   }
-  const saved = { ...after, updatedAt: new Date().toISOString() };
-  // 新建的分类、人与订阅同一个事务写入
-  if (categoryCreation || people)
-    await saveLedgerEdit(ctx.env, {
-      subscriptions: [saved],
-      ...(categoryCreation ? { settings: { ...st.settings, categories: categoryCreation.categories } } : {}),
-      ...(people ? { people } : {}),
-    });
-  else await upsert(ctx.env, 'subscriptions', saved.id, saved);
+  // 存储层会给订阅记 updatedAt：写副本，预览里的对象保持原样
+  await saveLedgerEdit(ctx.env, { ...rest, subscriptions: subscriptions?.map((s) => ({ ...s })), methods }, deletedMethods, deletedSubscriptions);
   return { ok: true, ...preview };
 }
 
@@ -629,6 +643,34 @@ const date = (v: unknown, what: string, fallback?: string) => {
   if (!d || !validDay(d)) throw new Error(t('mcp.error.notDate', { what }));
   return d;
 };
+/** 订阅里记下的全部付款：顶层与各阶段 */
+const allPayments = (s: Subscription): Payment[] => [...(s.payments ?? []), ...(s.phases ?? []).flatMap((p) => p.payments ?? [])];
+
+/** 停用退款参数；date 省略时用 fallback（编辑停用时省略即保留原日期） */
+function refundInput(raw: unknown, fallback?: string) {
+  const r = raw as { amount: unknown; date?: unknown; currency?: unknown; settled?: { amount: unknown; currency: unknown } };
+  return {
+    amount: num(r.amount, 'refund.amount'),
+    date: r.date == null ? fallback : date(r.date, 'refund.date'),
+    currency: str(r.currency)?.toUpperCase(),
+    settled: r.settled ? { amount: num(r.settled.amount, 'refund.settled.amount'), currency: String(r.settled.currency).toUpperCase() } : undefined,
+  };
+}
+
+/** 新建时的同名去重：同名同开始日视为可能重复，除非双方都写了账号且不同 */
+function assertNotDuplicate(st: AppState, name: string, start: string, account: string | undefined) {
+  const dup = st.subscriptions.some(
+    (s) =>
+      s.name.toLowerCase() === name.toLowerCase() &&
+      s.start === start &&
+      !(account && s.account?.trim() && account.toLowerCase() !== s.account.trim().toLowerCase()),
+  );
+  if (dup) throw new Error(t('mcp.error.duplicateSub', { name }));
+}
+
+/** 没指定分类时的默认分类：现有的「工具」预设；被删掉时报错，让调用方指定 */
+const defaultCategory = (st: AppState) => categoryRef(st, presetCategory(categoryList(st.settings, st.subscriptions), 'tools'))!;
+
 export const methodRef = (st: AppState, v: unknown) => {
   const q = str(v);
   if (!q) return undefined;
@@ -707,15 +749,19 @@ function fieldChanges(before: unknown, after: unknown, path = ''): Array<{ path:
   return keys.flatMap((k) => fieldChanges(b[k], n[k], Array.isArray(after) ? `${path}[${k}]` : path ? `${path}.${k}` : k));
 }
 
+/** 一笔扣款折算时用的原币种：已发生且记了卡上实扣的按实扣币种 */
+const chargeCcy = (c: Charge) => (c.settled && !c.projected ? c.settled.currency : c.currency);
+
 /** 预览里的计算结果：状态、下次 / 上次扣款、截至今天的累计支出（本位币）与笔数 */
 function computedOf(st: AppState, s: Subscription, today: string) {
   const all = chargesBetween(s, '1970-01-01', today, today).filter((c) => !c.projected);
-  const spent = all.reduce((sum, c) => sum + chargeValue(st, c), 0);
+  const gaps = fxGaps();
+  const spent = all.reduce((sum, c) => sum + (gaps.note(chargeBaseOrNaN(st, c), chargeCcy(c)) as number), 0);
   return {
     status: effectiveStatus(s, today),
     next_charge: nextCharge(s, today) ?? null,
     last_charge: lastCharge(s, today) ?? null,
-    spent_total: { amount: Number.isFinite(spent) ? round(spent) : null, currency: st.settings.baseCurrency, charges: all.length },
+    spent_total: { amount: fin(spent), currency: st.settings.baseCurrency, charges: all.length, ...gaps.out() },
     stop: stopSummary(currentPhase(s, today), today) ?? null,
   };
 }
@@ -733,15 +779,18 @@ const CATALOGUE: Tool[] = [
       const { st, today } = await state(ctx);
       const out = outCcy(st, a) ?? st.settings.baseCurrency;
       const t = totals(st, today);
-      const conv = (v: number) => round(toBaseAt(st, v, st.settings.baseCurrency, undefined, out));
+      const gaps = fxGaps();
+      const conv = (v: number) => fin(gaps.note(toBaseOrNaN(st, v, st.settings.baseCurrency, undefined, out)) as number);
+      const mrr = conv(t.mrr);
+      const figures = { mrr, yearly: conv(t.mrr * 12), gross_mrr: conv(t.grossMrr), share_recovered_mrr: conv(t.recoverMrr) };
       return {
         today,
         base_currency: st.settings.baseCurrency,
         currency_out: out,
-        mrr: conv(t.mrr),
-        yearly: conv(t.mrr * 12),
-        gross_mrr: conv(t.grossMrr),
-        share_recovered_mrr: conv(t.recoverMrr),
+        ...figures,
+        // 缺汇率时总数为 null：列出没有当前汇率的币种（包括换算目标）
+        incomplete: gaps.out().incomplete,
+        fx_missing: gaps.out().incomplete ? missingRates(st, [out, ...st.subscriptions.flatMap((s) => phaseSubs(s).map((v) => v.currency))]) : [],
         active_count: t.activeCount,
         subscription_count: st.subscriptions.length,
         methods: st.methods.map((m) => ({ id: m.id, name: m.name, kind: m.kind, currency: m.currency, region: m.region ?? null, balance: m.balance ?? null })),
@@ -826,7 +875,7 @@ const CATALOGUE: Tool[] = [
       const sort = str(a.sort) ?? 'next_charge';
       rows.sort((x, y) =>
         sort === 'monthly_cost'
-          ? y.monthly.converted - x.monthly.converted
+          ? (y.monthly.converted ?? -Infinity) - (x.monthly.converted ?? -Infinity) || 0
           : sort === 'name'
             ? x.name.localeCompare(y.name)
             : sort === 'start'
@@ -834,7 +883,9 @@ const CATALOGUE: Tool[] = [
               : (x.next_charge ?? '9').localeCompare(y.next_charge ?? '9'),
       );
       rows = rows.slice(0, Number(a.limit ?? 100));
-      return { count: rows.length, items: rows };
+      const gaps = fxGaps();
+      for (const r of rows) for (const m of [r.price, r.monthly]) gaps.note(m.converted, m.currency);
+      return { count: rows.length, ...gaps.out(), items: rows };
     },
   },
   {
@@ -850,11 +901,12 @@ const CATALOGUE: Tool[] = [
       const out = outCcy(st, a);
       const s = findSub(st, a.subscription);
       const all = chargesBetween(s, s.start, today, today);
-      const spent = all.reduce((t, c) => t + chargeValue(st, c, out ?? st.settings.baseCurrency), 0);
+      const gaps = fxGaps();
+      const spent = all.reduce((t, c) => t + (gaps.note(chargeBaseOrNaN(st, c, out ?? st.settings.baseCurrency), chargeCcy(c)) as number), 0);
       const from = addMonths(today, -Number(a.months_back ?? 12));
       const to = addMonths(today, Number(a.months_forward ?? 6));
       const px = s.proxy;
-      const collect = st.settings.collectCurrency ?? st.settings.baseCurrency;
+      const collect = collectCcy(st);
       return {
         ...row(st, s, today, out),
         record: s, // Complete editable history, stable receipt indices and original currencies.
@@ -865,7 +917,8 @@ const CATALOGUE: Tool[] = [
         bonus: s.bonus ?? null,
         expires: renewalDates(s, today).serviceExpires ?? null,
         spent_total: {
-          amount: round(spent),
+          amount: fin(spent),
+          ...gaps.out(),
           currency: out ?? st.settings.baseCurrency,
           charges: all.length,
           from: s.estimateFrom ?? s.start,
@@ -878,7 +931,7 @@ const CATALOGUE: Tool[] = [
           index: (s.transfers ?? []).filter((x) => x.date === tr.date).indexOf(tr),
           amount: tr.amount,
           currency: tr.currency,
-          base_amount: round(transferValue(st, tr, out ?? st.settings.baseCurrency)),
+          base_amount: fin(transferValue(st, tr, out ?? st.settings.baseCurrency)),
           note: tr.note ?? null,
         })),
         // 生命周期净成本 = 服务付款 + 转入 − 转出；持有期从最早转入（早于开始时）到最后一次转出
@@ -886,15 +939,15 @@ const CATALOGUE: Tool[] = [
           const c = netCost(st, s, today, out ?? st.settings.baseCurrency);
           return {
             currency: c.currency,
-            service: round(c.service),
-            bought: round(c.bought),
-            sold: round(c.sold),
-            net: round(c.net),
+            service: fin(c.service),
+            bought: fin(c.bought),
+            sold: fin(c.sold),
+            net: fin(c.net),
             holding_from: c.from,
             holding_until: c.until,
             holding_days: c.days,
-            per_month: round(c.perMonth),
-            per_day: round(c.perDay),
+            per_month: fin(c.perMonth),
+            per_day: fin(c.perDay),
             complete: !c.incomplete && !s.estimateFrom,
           };
         })(),
@@ -932,7 +985,7 @@ const CATALOGUE: Tool[] = [
                 leave_refund: m.leaveRefund ?? null,
                 exempt: !!m.exempt,
               })),
-              dues: memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st)
+              dues: memberDues(s, today, collectCcy(st), st)
                 .filter((d) => d.periodsOwed > 0)
                 .map((d) => ({ member: d.member.name, periods_owed: d.periodsOwed, owed: money(st, d.owed, d.currency, undefined, out) })),
             }
@@ -971,12 +1024,25 @@ const CATALOGUE: Tool[] = [
       const sub = a.subscription ? findSub(st, a.subscription) : undefined;
       const method = a.method ? methodRef(st, a.method) : undefined;
       const scope = str(a.scope) ?? 'mine';
-      const items = (sub ? chargesBetween(sub, from, to, today) : chargesIn(st, from, to, today, scope))
+      const charges = (sub ? chargesBetween(sub, from, to, today) : chargesIn(st, from, to, today, scope))
         .filter((c) => !method || chargeMethodId(c) === method)
-        .filter((c) => a.include_projected !== false || !c.projected)
-        .map((c) => chargeRow(st, c, out));
-      const sum = (k: 'converted' | 'my') => round(items.reduce((t, i) => t + (k === 'my' ? i.my_amount : i.amount.converted), 0));
-      return { from, to, today, currency: out ?? st.settings.baseCurrency, count: items.length, total: sum('converted'), my_total: sum('my'), items };
+        .filter((c) => a.include_projected !== false || !c.projected);
+      const items = charges.map((c) => chargeRow(st, c, out));
+      // 有一笔折算不了，合计就是 null 并标出缺哪些币种，不把它当 0 加进去
+      const sum = (k: 'converted' | 'my') => fin(items.reduce((t, i) => t + ((k === 'my' ? i.my_amount : i.amount.converted) ?? NaN), 0));
+      const missing = [...new Set(charges.filter((c) => !Number.isFinite(chargeBaseOrNaN(st, c, out ?? st.settings.baseCurrency))).map(chargeCcy))].sort();
+      return {
+        from,
+        to,
+        today,
+        currency: out ?? st.settings.baseCurrency,
+        count: items.length,
+        total: sum('converted'),
+        my_total: sum('my'),
+        incomplete: missing.length > 0,
+        fx_missing: missing,
+        items,
+      };
     },
   },
   {
@@ -1019,9 +1085,9 @@ const CATALOGUE: Tool[] = [
         if (a.include_projected === false && c.projected) continue;
         if (ids && !ids.has(c.sub.id)) continue;
         const sub = st.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
-        // 缺汇率时 chargeValue 给 0：标为不完整而不是算进 0
-        const v = chargeFxMissing(st, c, out) ? NaN : chargeValue(st, c, out) * (scope === 'mine' ? myShareFactor(c.sub, c.date) : 1);
-        const ccy = c.settled && !c.projected ? c.settled.currency : c.currency;
+        // 缺汇率为 NaN：标为不完整而不是算进 0
+        const v = chargeBaseOrNaN(st, c, out) * (scope === 'mine' ? myShareFactor(c.sub, c.date) : 1);
+        const ccy = chargeCcy(c);
         // 按支付方式分组时，拆分付款按份额分到各来源
         for (const x of by === 'method' ? chargeSources(c) : [{ methodId: chargeMethodId(c), share: 1 }]) {
           const m = st.methods.find((y) => y.id === x.methodId);
@@ -1085,7 +1151,7 @@ const CATALOGUE: Tool[] = [
       return {
         currency: st.settings.baseCurrency,
         ...roundAll({ ...mv, items: undefined }),
-        items: mv.items.map((i) => ({ name: i.sub.name, kind: i.kind, delta: round(i.delta) })),
+        items: mv.items.map((i) => ({ name: i.sub.name, kind: i.kind, delta: fin(i.delta) })),
       };
     },
   },
@@ -1109,7 +1175,7 @@ const CATALOGUE: Tool[] = [
             kind: m.kind,
             currency: m.currency,
             region: m.region ?? null,
-            balance: r ? round(r.current) : (m.balance ?? null),
+            balance: r ? fin(r.current) : (m.balance ?? null),
             balance_as_of: m.balanceAsOf ?? null,
             subscriptions: st.subscriptions
               .filter(
@@ -1120,13 +1186,15 @@ const CATALOGUE: Tool[] = [
               .map((s) => s.name),
             runway: r
               ? {
-                  monthly_drain: round(r.monthlyDrain),
+                  monthly_drain: fin(r.monthlyDrain),
+                  // 余额估算或月耗用到了折算不了的扣款：数字为 null，不当成 0
+                  incomplete: !Number.isFinite(r.current) || !Number.isFinite(r.monthlyDrain) || ('incomplete' in r && !!r.incomplete),
                   covered_charges: r.coveredCharges,
                   runs_out_on: r.runsOutOn ?? null,
-                  shortfall: r.shortfall ? { date: r.shortfall.date, name: r.shortfall.sub.name, amount: round(r.shortfall.amount) } : null,
+                  shortfall: r.shortfall ? { date: r.shortfall.date, name: r.shortfall.sub.name, amount: fin(r.shortfall.amount) } : null,
                 }
               : null,
-            topup: p && p.need > 0 ? { need: round(p.need), min_need: round(p.minNeed), deadline: p.deadline ?? null } : null,
+            topup: p && (p.need > 0 || !Number.isFinite(p.need)) ? { need: fin(p.need), min_need: fin(p.minNeed), deadline: p.deadline ?? null } : null,
           };
         }),
       };
@@ -1147,7 +1215,8 @@ const CATALOGUE: Tool[] = [
       const q = normName(str(a.query));
       const list = peopleLedger(st, today).filter((l) => (!q || normName(l.person.name).includes(q)) && (!a.owing_only || l.periodsOwed > 0));
       const rows = list.map((l) => personRow(st, l, out, today));
-      return { currency: out, count: rows.length, total_owed: round(rows.reduce((x, r) => x + r.owed, 0)), people: rows };
+      const total = rows.reduce((x, r) => x + (r.owed ?? NaN), 0);
+      return { currency: out, count: rows.length, total_owed: fin(total), incomplete: !Number.isFinite(total), people: rows };
     },
   },
   {
@@ -1163,7 +1232,7 @@ const CATALOGUE: Tool[] = [
         kind === 'proxy'
           ? []
           : st.subscriptions.flatMap((s) =>
-              memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st)
+              memberDues(s, today, collectCcy(st), st)
                 .filter((d) => d.periodsOwed > 0)
                 .map((d) => ({
                   subscription_id: s.id,
@@ -1193,15 +1262,18 @@ const CATALOGUE: Tool[] = [
                     charged: money(st, p.due, p.currency, p.from, out),
                   })),
               );
-      const total = share.reduce((t, x) => t + x.owed.converted, 0) + proxy.reduce((t, x) => t + x.charged.converted, 0);
+      const gaps = fxGaps();
+      const total =
+        share.reduce((t, x) => t + (gaps.note(x.owed.converted, x.owed.currency) ?? NaN), 0) +
+        proxy.reduce((t, x) => t + (gaps.note(x.charged.converted, x.charged.currency) ?? NaN), 0);
       // 按人汇总：只列现在欠钱的人，金额与下面的明细同源（memberDues / 代付逐期对账）
       const by_person = peopleLedger(st, today)
         .map((l) => ({ ...l, items: l.items.filter((i) => i.periodsOwed > 0 && (kind === 'all' || i.kind === kind)) }))
         .filter((l) => l.items.length)
         .map((l) => ({ ...l, owed: l.items.reduce((a, i) => a + i.owed, 0), periodsOwed: l.items.reduce((a, i) => a + i.periodsOwed, 0) }))
         .map((l) => personRow(st, l, out, today))
-        .sort((a, b) => b.owed - a.owed);
-      return { currency: out, total_outstanding: round(total), by_person, share, proxy };
+        .sort((a, b) => (b.owed ?? Infinity) - (a.owed ?? Infinity) || 0);
+      return { currency: out, total_outstanding: fin(total), ...gaps.out(), by_person, share, proxy };
     },
   },
   {
@@ -1233,13 +1305,13 @@ const CATALOGUE: Tool[] = [
           year: r.year,
           stop_loss: Number.isFinite(r.stopLoss) ? round(r.stopLoss) : null,
           stop_loss_incomplete: !Number.isFinite(r.stopLoss),
-          total: round(r.total),
+          total: fin(r.total),
           charges: r.charges,
-          per_day: round(r.perDay),
+          per_day: fin(r.perDay),
           currencies: r.currencies,
-          top: r.items.slice(0, 10).map((x) => ({ name: x.sub.name, total: round(x.sum) })),
+          top: r.items.slice(0, 10).map((x) => ({ name: x.sub.name, total: fin(x.sum) })),
           longest: r.longest ? { name: r.longest.sub.name, days: r.longest.days } : null,
-          busiest_month: r.busiestMonth ? { month: r.busiestMonth.month, total: round(r.busiestMonth.sum) } : null,
+          busiest_month: r.busiestMonth ? { month: r.busiestMonth.month, total: fin(r.busiestMonth.sum) } : null,
           new: r.newSubs.map((s) => s.name),
           ended: r.ended.map((s) => s.name),
         };
@@ -1248,11 +1320,11 @@ const CATALOGUE: Tool[] = [
         const p = prepaidValue(st, today);
         return {
           currency: base,
-          total: round(p.total),
+          total: fin(p.total),
           unused_total: Number.isFinite(p.unusedTotal) ? round(p.unusedTotal) : null,
           unused_incomplete: p.unusedIncomplete,
           unused_items: p.unusedItems.map((i) => ({ name: i.sub.name, value: Number.isFinite(i.value) ? round(i.value) : null, until: i.until })),
-          items: p.items.map((i) => ({ name: i.sub.name, value: round(i.value), until: i.until })),
+          items: p.items.map((i) => ({ name: i.sub.name, value: fin(i.value), until: i.until })),
         };
       }
       if (sec === 'stop_losses') {
@@ -1289,8 +1361,9 @@ const CATALOGUE: Tool[] = [
       const c = cancelSavings(st, today);
       return {
         currency: base,
-        total: round(c.total),
-        items: c.items.map((i) => ({ name: i.sub.name, saved: round(i.saved), since: i.since, monthly: round(i.monthly) })),
+        total: fin(c.total),
+        incomplete: !Number.isFinite(c.total),
+        items: c.items.map((i) => ({ name: i.sub.name, saved: fin(i.saved), since: i.since, monthly: fin(i.monthly) })),
       };
     },
   },
@@ -1305,12 +1378,11 @@ const CATALOGUE: Tool[] = [
       const items = events(st, today)
         .filter((e) => (!a.since || e.date >= String(a.since)) && (!a.until || e.date <= String(a.until)) && (!sub || e.sub.id === sub.id))
         .slice(0, Number(a.limit ?? 50))
-        .map((e) => ({ date: e.date, subscription_id: e.sub.id, name: e.sub.name, kind: e.kind, monthly_delta: round(e.delta), note: e.note ?? null }));
+        .map((e) => ({ date: e.date, subscription_id: e.sub.id, name: e.sub.name, kind: e.kind, monthly_delta: fin(e.delta), note: e.note ?? null }));
       return { currency: st.settings.baseCurrency, count: items.length, items };
     },
   },
 
-  // ---------- 写入 ----------
   {
     name: 'search_app_store',
     description:
@@ -1322,6 +1394,8 @@ const CATALOGUE: Tool[] = [
       return { results: await searchAppStore(String(a.query ?? ''), str(a.country) ?? 'us') };
     },
   },
+
+  // ---------- 写入 ----------
   {
     name: 'create_subscription',
     description:
@@ -1385,7 +1459,7 @@ const CATALOGUE: Tool[] = [
         },
         force: { type: 'boolean', default: false },
         id: { type: 'string', description: 'Internal: keep this id (used when confirming an earlier draft).' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['name', 'price', 'currency', 'cycle'],
     ),
@@ -1419,20 +1493,8 @@ const CATALOGUE: Tool[] = [
         .sort((x, y) => x.date.localeCompare(y.date));
       if (!st.fx.rates[currency]) throw new Error(t('mcp.error.unsupportedCurrency', { code: currency }));
       const account = str(a.account)?.trim();
-      if (
-        !a.force &&
-        st.subscriptions.some(
-          (s) =>
-            s.name.toLowerCase() === name.toLowerCase() &&
-            s.start === start &&
-            !(account && s.account?.trim() && account.toLowerCase() !== s.account.trim().toLowerCase()),
-        )
-      )
-        throw new Error(t('mcp.error.duplicateSub', { name }));
-      const category =
-        a.category === undefined
-          ? { name: categoryRef(st, presetCategory(categoryList(st.settings, st.subscriptions), 'tools'))! }
-          : subscriptionCategory(st, a.category, a);
+      if (!a.force) assertNotDuplicate(st, name, start, account);
+      const category = a.category === undefined ? { name: defaultCategory(st) } : subscriptionCategory(st, a.category, a);
       const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number };
       let sub: Subscription = {
         // 确认草稿时沿用草稿里生成的 id，后续基于它的草稿（合租、成员）才能对上
@@ -1482,7 +1544,7 @@ const CATALOGUE: Tool[] = [
         subscription: SUBSCRIPTION_SCHEMA,
         force: { type: 'boolean', default: false },
         ...CATEGORY_CREATE,
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription'],
     ),
@@ -1494,22 +1556,13 @@ const CATALOGUE: Tool[] = [
       const start = String(raw.start ?? '');
       if (!['active', 'trial', 'paused', 'cancelled', 'terminated'].includes(String(raw.status)))
         throw new Error(t('mcp.error.invalidInput', { field: 'subscription.status' }));
-      if (!previous && !a.force) {
-        const account = str(raw.account)?.trim();
-        const dup = st.subscriptions.some(
-          (s) =>
-            s.name.toLowerCase() === name.toLowerCase() &&
-            s.start === start &&
-            !(account && s.account?.trim() && account.toLowerCase() !== s.account.trim().toLowerCase()),
-        );
-        if (dup) throw new Error(t('mcp.error.duplicateSub', { name }));
-      }
+      if (!previous && !a.force) assertNotDuplicate(st, name, start, str(raw.account)?.trim());
       // 原分类不变时照旧（包括历史名称）；改了或新建时按分类规则解析
       const category =
         raw.category == null
           ? previous
             ? { name: previous.category }
-            : { name: categoryRef(st, presetCategory(categoryList(st.settings, st.subscriptions), 'tools'))! }
+            : { name: defaultCategory(st) }
           : previous && raw.category === previous.category
             ? { name: previous.category }
             : subscriptionCategory(st, raw.category, a);
@@ -1572,7 +1625,7 @@ const CATALOGUE: Tool[] = [
         }),
         ...CATEGORY_CREATE,
         shift_billing: SHIFT_BILLING,
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'set'],
     ),
@@ -1640,7 +1693,7 @@ const CATALOGUE: Tool[] = [
         original_from: { ...DATE, description: 'Original effective date; required for edit/remove.' },
         amount: { type: 'number', minimum: 0 },
         from: { ...DATE, description: 'Effective date; defaults to today for add, original_from for edit.' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription'],
     ),
@@ -1663,7 +1716,7 @@ const CATALOGUE: Tool[] = [
     name: 'change_plan',
     destructive: true,
     description:
-      'Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. set.start moves the phase start like the web editor: recorded payments, stops and the billing anchor stay, so future charge dates are unchanged (preview next_charges); shift_billing=true moves the anchor too. action=remove deletes that phase and its payments, requires at least two phases. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
+      'Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. set.start moves the phase start like the web editor: recorded payments, stops and the billing anchor stay, so future charge dates are unchanged (preview next_charges); shift_billing=true moves the anchor too. action=remove deletes that phase and its payments, requires at least two phases; remove and drop accept only the subscription id or exact full name. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
     write: true,
     inputSchema: obj(
       {
@@ -1713,15 +1766,15 @@ const CATALOGUE: Tool[] = [
         },
         earlier_until: { ...DATE, description: 'action=earlier only: the earlier phase ended on this date (a gap before the next one).' },
         shift_billing: SHIFT_BILLING,
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'action', 'at'],
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
-      const at = date(a.at, 'at');
       const act = String(a.action);
+      const s = findSub(st, a.subscription, { exact: act === 'remove' || act === 'drop' });
+      const at = date(a.at, 'at');
       if (act === 'edit' || act === 'remove') {
         const phases = s.phases?.length ? s.phases : [{ ...s, phases: undefined }];
         const index = phases.findIndex((p) => p.start === at);
@@ -1813,7 +1866,7 @@ const CATALOGUE: Tool[] = [
           description:
             'Correct an already stopped subscription with action=cancel|terminate: change the stop date (at; omitted keeps it), non-renewal vs immediate cancel, reason or refund. Provider termination cannot become cancel.',
         },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'action'],
     ),
@@ -1826,26 +1879,13 @@ const CATALOGUE: Tool[] = [
       if (a.edit === true) {
         if (!stopping) throw new Error(t('mcp.error.invalidStop'));
         if (a.at === null) throw new Error(t('mcp.error.editStopDate'));
-        const r = a.refund as { amount: unknown; date?: unknown; currency?: unknown; settled?: { amount: unknown; currency: unknown } } | null | undefined;
         const next = editStop(
           s,
           {
             mode: act === 'terminate' ? 'terminate' : a.immediate === true ? 'cancel' : 'nonrenew',
             date: a.at === undefined ? undefined : date(a.at, 'at'),
             reason: 'reason' in a ? (str(a.reason) ?? null) : undefined,
-            refund:
-              r === null
-                ? null
-                : r
-                  ? {
-                      amount: num(r.amount, 'refund.amount'),
-                      date: r.date == null ? undefined : date(r.date, 'refund.date'),
-                      currency: str(r.currency)?.toUpperCase(),
-                      settled: r.settled
-                        ? { amount: num(r.settled.amount, 'refund.settled.amount'), currency: String(r.settled.currency).toUpperCase() }
-                        : undefined,
-                    }
-                  : undefined,
+            refund: a.refund === null ? null : a.refund ? refundInput(a.refund) : undefined,
           },
           today,
         );
@@ -1853,7 +1893,7 @@ const CATALOGUE: Tool[] = [
       }
       // 停用不默认今天：已经开始或付过钱的订阅，今天未必是真实的停用日，需显式给出（或 null 表示日期未知）
       if (stopping && a.at === undefined) {
-        const paid = [...(s.payments ?? []), ...(s.phases ?? []).flatMap((p) => p.payments ?? [])].some((p) => p.date < today);
+        const paid = allPayments(s).some((p) => p.date < today);
         if (paid || s.start < today) throw new Error(t('mcp.error.stopDateRequired'));
       }
       if (stopping && a.at === null) {
@@ -1864,22 +1904,7 @@ const CATALOGUE: Tool[] = [
       let next: Subscription;
       if (act === 'reactivate') next = reactivate(s, today);
       else if (act === 'terminate' || (act === 'cancel' && a.immediate === true)) {
-        const r = a.refund as { amount: unknown; date?: unknown; currency?: unknown; settled?: { amount: unknown; currency: unknown } } | undefined;
-        next = stopSubscription(
-          s,
-          today,
-          act === 'terminate' ? 'terminate' : 'cancel',
-          at,
-          str(a.reason),
-          r
-            ? {
-                amount: num(r.amount, 'refund.amount'),
-                date: date(r.date, 'refund.date', at),
-                currency: str(r.currency)?.toUpperCase(),
-                settled: r.settled ? { amount: num(r.settled.amount, 'refund.settled.amount'), currency: String(r.settled.currency).toUpperCase() } : undefined,
-              }
-            : undefined,
-        );
+        next = stopSubscription(s, today, act === 'terminate' ? 'terminate' : 'cancel', at, str(a.reason), a.refund ? refundInput(a.refund, at) : undefined);
       } else {
         if (['ended', 'terminated'].includes(effectiveStatus(s, today)) || s.stop) throw new Error(t('mcp.error.subscriptionEnded'));
         if (act === 'trial')
@@ -1901,7 +1926,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'record_payment',
     description:
-      'Record or replace an actual charge (replace={date,index}, same-day zero-based index; phase selects overlapping history), refund (positive amount — stored negative; total refunds cannot exceed the current period paid amount), adjustment or failed charge for a subscription, in the subscription’s currency. Optional currency must equal the selected phase currency for refunds. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). method = payment method (id or name) used for this one charge when it differs from the phase’s method; null clears it; omitted keeps a replaced charge’s own method. funding = one order paid from several sources (amounts in the subscription currency summing to amount, e.g. 178.80 = PayPal 168.05 + Balance 10.75); wallet balances are reduced by each part. funding and method are exclusive; null clears a split; omitted keeps a replaced charge’s split. Rejects same-day same-amount duplicates unless allow_duplicate.',
+      'Record or replace an actual charge (replace={date,index}, same-day zero-based index; phase selects overlapping history), refund (positive amount — stored negative; total refunds cannot exceed the current period paid amount), adjustment or failed charge for a subscription, in the subscription’s currency. Optional currency must equal the selected phase currency for every kind (charge, refund, adjust, failed); a different card currency belongs in settled. settled = what the card was actually charged in another currency (e.g. TRY subscription billed in USD). method = payment method (id or name) used for this one charge when it differs from the phase’s method; null clears it; omitted keeps a replaced charge’s own method. funding = one order paid from several sources (amounts in the subscription currency summing to amount, e.g. 178.80 = PayPal 168.05 + Balance 10.75); wallet balances are reduced by each part. funding and method are exclusive; null clears a split; omitted keeps a replaced charge’s split. Rejects same-day same-amount duplicates unless allow_duplicate.',
     write: true,
     inputSchema: obj(
       {
@@ -1911,7 +1936,7 @@ const CATALOGUE: Tool[] = [
         amount: { type: 'number', minimum: 0 },
         currency: {
           type: 'string',
-          description: 'Refund currency must equal the subscription / selected phase currency. Use settled for a different card currency.',
+          description: 'Must equal the subscription / selected phase currency for every kind; usually omit. Use settled for a different card currency.',
         },
         kind: { type: 'string', enum: ['charge', 'refund', 'adjust', 'failed'], default: 'charge' },
         settled: obj({ amount: { type: 'number' }, currency: { type: 'string' } }, ['amount', 'currency']),
@@ -1924,7 +1949,7 @@ const CATALOGUE: Tool[] = [
           description:
             'Start date of the phase this payment belongs to; only needed when two phases overlap on that date (defaults to the latest-started one).',
         },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'amount'],
     ),
@@ -1936,9 +1961,7 @@ const CATALOGUE: Tool[] = [
       const sign = kind === 'refund' ? -1 : 1;
       const amount = sign * Math.abs(num(a.amount, 'amount'));
       const existing = chargesBetween(s, d, d, today).filter((c) => !c.projected && Math.abs(c.amount - amount) < 0.005);
-      const isRecorded = [...(s.payments ?? []), ...(s.phases ?? []).flatMap((p) => p.payments ?? [])].some(
-        (p) => p.date === d && Math.abs(p.amount - amount) < 0.005,
-      );
+      const isRecorded = allPayments(s).some((p) => p.date === d && Math.abs(p.amount - amount) < 0.005);
       if (isRecorded && existing.length && !a.allow_duplicate && !a.replace) throw new Error(t('mcp.error.duplicatePayment', { date: d, amount }));
       const st2 = a.settled as { amount: unknown; currency: unknown } | undefined;
       if (a.funding != null && a.method != null) throw new Error(t('core.subError.funding'));
@@ -1972,17 +1995,17 @@ const CATALOGUE: Tool[] = [
     destructive: true,
     inputSchema: obj(
       {
-        subscription: SUBREF,
+        subscription: SUBREF_EXACT,
         date: DATE,
         index: { type: 'integer', default: 0 },
         phase: { ...DATE, description: 'Start date of the phase holding the payment, when two phases overlap.' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'date'],
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: true });
       return commit(
         ctx,
         st,
@@ -2008,7 +2031,7 @@ const CATALOGUE: Tool[] = [
         note: { type: 'string' },
         replace: obj({ date: DATE, index: { type: 'integer', minimum: 0 } }, ['date', 'index']),
         delete: obj({ date: DATE, index: { type: 'integer', minimum: 0 } }, ['date', 'index']),
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription'],
     ),
@@ -2060,7 +2083,7 @@ const CATALOGUE: Tool[] = [
           .map((s) => {
             const sh = s.share!;
             const live = sh.members.filter((m) => memberAboard(m, today));
-            const dues = new Map(memberDues(s, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).map((d) => [d.member.id, d]));
+            const dues = new Map(memberDues(s, today, collectCcy(st), st).map((d) => [d.member.id, d]));
             const book = carLedger(st, s, today);
             return {
               id: s.id,
@@ -2074,17 +2097,20 @@ const CATALOGUE: Tool[] = [
               collect_from: collectionAnchor(s),
               rule: sh.role === 'owner' ? ruleOut(st, s, today) : null,
               // 方向写清楚：i_pay = 我自己净掏的钱，i_earn = 收的比付的多（赚了）；两者至多一个大于 0
+              // 缺汇率时对应数字为 null，incomplete 标出这一组不完整
               year: {
-                cost: round(book.yearCost),
-                expected_income: round(book.yearIncome),
-                i_pay: round(Math.max(0, book.yearNet)),
-                i_earn: round(Math.max(0, -book.yearNet)),
+                cost: fin(book.yearCost),
+                expected_income: fin(book.yearIncome),
+                i_pay: fin(Math.max(0, book.yearNet)),
+                i_earn: fin(Math.max(0, -book.yearNet)),
+                incomplete: ![book.yearCost, book.yearIncome, book.yearNet].every(Number.isFinite),
               },
               to_date: {
-                paid: round(book.paid),
-                received: round(book.received),
-                i_pay: round(Math.max(0, book.net)),
-                i_earn: round(Math.max(0, -book.net)),
+                paid: fin(book.paid),
+                received: fin(book.received),
+                i_pay: fin(Math.max(0, book.net)),
+                i_earn: fin(Math.max(0, -book.net)),
+                incomplete: ![book.paid, book.received, book.net].every(Number.isFinite),
               },
               members: sh.members.map((m) => {
                 const fee = memberFee(st, s, m, today);
@@ -2114,10 +2140,10 @@ const CATALOGUE: Tool[] = [
     description: 'Delete a subscription and its whole history. Irreversible: always preview with dry_run first; the user confirms.',
     write: true,
     destructive: true,
-    inputSchema: obj({ subscription: SUBREF, dry_run: DRY }, ['subscription']),
+    inputSchema: obj({ subscription: SUBREF_EXACT, dry_run: drySchema }, ['subscription']),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: true });
       const preview = {
         before: s,
         after: null,
@@ -2131,20 +2157,14 @@ const CATALOGUE: Tool[] = [
           default_public_hidden: st.settings.publicHidden?.includes(s.id) ?? false,
         },
       };
-      if (a.dry_run) {
-        ctx.overlay?.set(s.id, null);
-        ctx.draftState = { ...ctx.draftState, settings: deleteSubscriptionSettings(st.settings, s.id) };
-        return { dry_run: true, ...preview };
-      }
-      await saveLedgerEdit(ctx.env, { settings: deleteSubscriptionSettings(st.settings, s.id) }, [], [s.id]);
-      return { ok: true, ...preview };
+      return writeLedger(ctx, st, { settings: deleteSubscriptionSettings(st.settings, s.id), deletedSubscriptions: [s.id] }, preview, a.dry_run);
     },
   },
   {
     name: 'set_share',
     destructive: true,
     description:
-      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Only the joining period aligns to the anchor; later collections start after individual paid-through. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing. rule sets the owner plan collection rule {fee, fee_currency, bill_every}: members following the rule get the new fee from rule_from (default today) as a dated fee change, keeping receipts and earlier periods; custom-fee, exempt and departed members are untouched. The first time a rule is saved, members whose fee differs are marked custom. Returns the effective rule. Describe the returned fee, cycle, date and affected members; do not infer annual income or savings from this result.',
+      'Turn a subscription into a shared plan or change its sharing: role owner (I pay the full price and collect from members) or member (I joined someone else’s plan; price is my part), seats = total seats including me, owner_name for member role, since = date the carpool started. collect_from optionally overrides the shared collection anchor; otherwise since, earliest recorded coverage start (or a period inferred from paid-until when coverage starts are absent), then subscription start is inferred. Returns the effective collect_from in both previews and saves. Only the joining period aligns to the anchor; later collections start after individual paid-through. Null clears since/collect_from/owner_name so defaults can be inferred again. role none stops sharing (subscription must then be its id or exact full name). rule sets the owner plan collection rule {fee, fee_currency, bill_every}: members following the rule get the new fee from rule_from (default today) as a dated fee change, keeping receipts and earlier periods; custom-fee, exempt and departed members are untouched. The first time a rule is saved, members whose fee differs are marked custom. Returns the effective rule. Describe the returned fee, cycle, date and affected members; do not infer annual income or savings from this result.',
     write: true,
     inputSchema: obj(
       {
@@ -2170,13 +2190,13 @@ const CATALOGUE: Tool[] = [
           additionalProperties: false,
         },
         rule_from: { ...DATE, description: 'Effective date for the rule change; defaults to today. Whole periods starting on/after it use the new fee.' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription', 'role'],
     ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: a.role === 'none' });
       if (a.role === 'none') return commit(ctx, st, today, { ...s, share: undefined }, a.dry_run, ['share_removed']);
       const role = a.role === 'member' ? 'member' : 'owner';
       const cur = s.share;
@@ -2265,7 +2285,7 @@ const CATALOGUE: Tool[] = [
         contact: { type: 'string' },
         account: { type: 'string', description: 'This person’s account on this shared plan (arbitrary text: email, phone number, username or ID).' },
         note: { type: 'string' },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       ['subscription'],
     ),
@@ -2273,13 +2293,11 @@ const CATALOGUE: Tool[] = [
       const { st, today } = await state(ctx);
       const s = findSub(st, a.subscription);
       if (!s.share || s.share.role !== 'owner') throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
-      const q = str(a.member)?.toLowerCase();
-      const old = q ? s.share.members.find((m) => m.id === q || m.name.toLowerCase() === q) : undefined;
-      if (q && !old) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
+      const old = str(a.member) ? findMember(s, a.member) : undefined;
       const live = s.share.members.filter((m) => memberAboard(m, today));
       if (!old && live.length + 1 >= s.share.seats) throw new Error(t('mcp.error.shareFull', { name: s.name, seats: s.share.seats }));
       const feeArgs = a.follow_rule === true ? {} : a;
-      const ccy = (str(feeArgs.fee_currency) ?? old?.feeCurrency ?? st.settings.collectCurrency ?? st.settings.baseCurrency).toUpperCase();
+      const ccy = (str(feeArgs.fee_currency) ?? old?.feeCurrency ?? collectCcy(st)).toUpperCase();
       validateCurrency(st, ccy);
       // 新成员没给收费标准时按车的收款规则
       const rule = carRule(st, s, today);
@@ -2379,7 +2397,7 @@ const CATALOGUE: Tool[] = [
       // 期初已付至：这天及之前的期算开始记账前就收清了
       if ('paid_until' in a) {
         const until = a.paid_until == null ? undefined : date(a.paid_until, 'paid_until');
-        m = { ...m, ...setOpening(m, memberPeriods(s, m, until ?? today, st.settings.collectCurrency ?? st.settings.baseCurrency), until) };
+        m = { ...m, ...setOpening(m, memberPeriods(s, m, until ?? today, collectCcy(st)), until) };
       }
       // 与网页成员表单同一套建档规则：没关联到人的按称呼（+ 联系方式）认已有的人，认不到就新建；person=null 明确不关联
       const link = !m.personId && a.person !== null ? personLink(st.people ?? [], { name: m.name, contactVia: m.contactVia, contact: m.contact }) : undefined;
@@ -2400,7 +2418,7 @@ const CATALOGUE: Tool[] = [
             st,
             after,
             m,
-            memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
+            memberDues(after, today, collectCcy(st), st).find((d) => d.member.id === m.id),
             today,
           ),
         },
@@ -2412,14 +2430,15 @@ const CATALOGUE: Tool[] = [
     description: 'Remove a member from a shared plan entirely (their payment history goes too). To keep history, use save_share_member with left instead.',
     write: true,
     destructive: true,
-    inputSchema: obj({ subscription: SUBREF, member: { type: 'string' }, dry_run: DRY }, ['subscription', 'member']),
+    inputSchema: obj(
+      { subscription: SUBREF_EXACT, member: { type: 'string', description: 'Member id or exact name (case-insensitive).' }, dry_run: drySchema },
+      ['subscription', 'member'],
+    ),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
-      const s = findSub(st, a.subscription);
+      const s = findSub(st, a.subscription, { exact: true });
       if (!s.share) throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
-      const q = String(a.member).trim().toLowerCase();
-      const m = s.share.members.find((x) => x.id === q || x.name.toLowerCase() === q);
-      if (!m) throw new Error(t('mcp.error.noMember', { list: candidates(s.share.members) }));
+      const m = findMember(s, a.member);
       return commit(
         ctx,
         st,
@@ -2434,7 +2453,7 @@ const CATALOGUE: Tool[] = [
     name: 'record_receivable',
     destructive: true,
     description:
-      'Receivables are kept per period: each shared-plan member period (identified by its start date) and each proxy charge (identified by its charge date) is paid, waived, free, due or upcoming; periods need not be settled in order. Read periods, statuses, receipt_id and waiver_id with get_subscription. action=record (default) records money received: periods = the period keys it covers (may skip earlier unpaid ones, may be future = prepayment), or count = the N earliest unsettled periods (default 1). amount defaults to the total due of those periods (converted to currency at the receipt date); an explicit amount is the actual receipt and is split across the periods in proportion to their dues. action=waive marks periods as not owed (no money). action=update replaces receipt/waiver id with the given fields (periods/amount/currency/date/note; omitted fields keep their values). action=delete removes receipt/waiver id; its periods become unsettled again. action=charged (proxy only) sets the actual card charge of one charge date: charged_amount and charged_currency; null charged_amount clears the override. A period can be covered by only one record. Pass person (name or id) instead of subscription/member/kind: their only open item is picked (pass subscription when they owe on several).',
+      'Receivables are kept per period: each shared-plan member period (identified by its start date) and each proxy charge (identified by its charge date) is paid, waived, free, due or upcoming; periods need not be settled in order. Read periods, statuses, receipt_id and waiver_id with get_subscription. action=record (default) records money received: periods = the period keys it covers (may skip earlier unpaid ones, may be future = prepayment), or count = the N earliest unsettled periods (default 1). amount defaults to the total due of those periods (converted to currency at the receipt date); an explicit amount is the actual receipt and is split across the periods in proportion to their dues. action=waive marks periods as not owed (no money). action=update replaces receipt/waiver id with the given fields (periods/amount/currency/date/note; omitted fields keep their values). action=delete removes receipt/waiver id; its periods become unsettled again (subscription and member must be ids or exact names). action=charged (proxy only) sets the actual card charge of one charge date: charged_amount and charged_currency; null charged_amount clears the override. A period can be covered by only one record. Pass person (name or id) instead of subscription/member/kind: their only open item is picked (pass subscription when they owe on several).',
     write: true,
     inputSchema: obj(
       {
@@ -2459,7 +2478,7 @@ const CATALOGUE: Tool[] = [
         charge: { ...DATE, description: 'charged: which proxy charge date.' },
         charged_amount: { type: ['number', 'null'], minimum: 0 },
         charged_currency: { type: ['string', 'null'] },
-        dry_run: DRY,
+        dry_run: drySchema,
       },
       [],
     ),
@@ -2467,10 +2486,10 @@ const CATALOGUE: Tool[] = [
       const { st, today } = await state(ctx);
       if (a.person != null && String(a.person).trim()) a = { ...a, ...personTarget(st, a, today) };
       if (!a.subscription) throw new Error(t('mcp.error.needSubOrPerson'));
-      const s = findSub(st, a.subscription);
+      const action = String(a.action ?? 'record');
+      const s = findSub(st, a.subscription, { exact: action === 'delete' });
       const kind = a.kind ?? (a.member ? 'share' : s.proxy ? 'proxy' : a.kind);
       if (kind !== 'share' && kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
-      const action = String(a.action ?? 'record');
       if (action === 'charged') {
         if (kind !== 'proxy') throw new Error(t('mcp.error.needKind'));
         const currency = str(a.charged_currency)?.toUpperCase();
@@ -2490,17 +2509,7 @@ const CATALOGUE: Tool[] = [
       let target: ReceivableTarget = { kind: 'proxy' };
       if (kind === 'share') {
         if (!s.share || s.share.role !== 'owner') throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
-        const q = String(a.member ?? '')
-          .trim()
-          .toLowerCase();
-        const ms = s.share.members.filter((m) => m.id === q || m.name.toLowerCase() === q || (q && m.name.toLowerCase().includes(q)));
-        if (ms.length !== 1)
-          throw new Error(
-            ms.length
-              ? t('mcp.error.memberAmbiguous', { q: String(a.member), list: candidates(ms) })
-              : t('mcp.error.noMember', { list: candidates(s.share.members) }),
-          );
-        target = { kind: 'share', member: ms[0] };
+        target = { kind: 'share', member: findMember(s, a.member, { fuzzy: action !== 'delete' }) };
       }
       const ledger = receivableOf(st, s, target, today);
       const existing = a.id ? [...(ledger.record.receipts ?? []), ...(ledger.record.waivers ?? [])].find((x) => x.id === a.id) : undefined;
@@ -2546,7 +2555,7 @@ const CATALOGUE: Tool[] = [
                   st,
                   after,
                   m,
-                  memberDues(after, today, st.settings.collectCurrency ?? st.settings.baseCurrency, st).find((d) => d.member.id === m.id),
+                  memberDues(after, today, collectCcy(st), st).find((d) => d.member.id === m.id),
                   today,
                 ),
               },

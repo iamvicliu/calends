@@ -4,6 +4,7 @@
   "invalidItem": "{name}: {error}",
   "notPublic": "Este registro no es público",
   "idMismatch": "El ID no coincide",
+  "invalidJson": "El cuerpo de la solicitud no es JSON válido.",
   "invalidMethod": "Método de pago no válido",
   "invalidBackup": "Archivo de copia de seguridad no válido",
   "refreshFailed": "No se pudo actualizar",

@@ -214,6 +214,7 @@
       "date": "Fecha",
       "amount": "Importe",
       "base": "En {ccy}"
-    }
+    },
+    "confirmDelete": "¿Eliminar la transferencia del {date}?"
   }
 }

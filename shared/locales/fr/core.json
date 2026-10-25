@@ -44,6 +44,7 @@
   "subError": {
     "name": "Le nom est obligatoire",
     "price": "Prix non valide",
+    "paymentCurrency": "La devise du paiement doit correspondre à celle de la formule",
     "start": "Date de début non valide",
     "cycle": "Cycle de facturation non valide",
     "refundAmount": "Saisissez un montant positif et une devise valide",
@@ -229,5 +230,6 @@
     "badDate": "{field} d’origine « {value} » non reconnu, non importé",
     "nextDue": "date du prochain paiement",
     "end": "date de fin"
-  }
+  },
+  "fxIncomplete": "Certains montants ne peuvent pas être convertis faute de taux de change ; ce résultat est incomplet."
 }

@@ -1,3 +1,4 @@
+import { collectCurrencyOf } from '../../../shared/billing.ts';
 import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
@@ -8,8 +9,8 @@ import type { ImportSource } from '../../../shared/import-ledger.ts';
 import { readImportFile } from '../import-file.ts';
 import { ImportSheet } from './ImportSheet.tsx';
 import { avatarOf, type AppState, type Subscription } from '../../../shared/types.ts';
-import { IconButton, Cell, Group, CardTitle, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
-import { api, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
+import { IconButton, Cell, Group, CardTitle, Icon, LoadFailed, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { adoptRestored, api, copyText, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
 import { SecurityGroup } from './Security.tsx';
@@ -76,7 +77,7 @@ export function IcsSheet({ state, onClose }: { state: AppState; onClose: () => v
           <>
             <div className="codebox">{url}</div>
             <div className="sheet-actions">
-              <button className="btn" onClick={() => navigator.clipboard.writeText(url).then(() => toast(t('app.ics.copied')))}>
+              <button className="btn" onClick={() => void copyText(url, t('app.ics.copied'))}>
                 {t('app.ics.copy')}
               </button>
               <button className="btn ghost" onClick={() => run(rotateIcs, t('app.ics.resetDone'))}>
@@ -164,15 +165,25 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const [importing, setImporting] = useState<ImportSource | null>(null);
   const [reading, setReading] = useState(false);
 
+  // 读取失败要显示出来：不能把失败当成「今天没有提醒」「汇率覆盖未知」
+  const [failed, setFailed] = useState({ preview: false, fx: false });
   const loadPreview = () =>
-    api<Preview>('/api/notify/preview')
-      .then(setPreview)
-      .catch(() => {});
+    api<Preview>('/api/notify/preview').then(
+      (v) => {
+        setPreview(v);
+        setFailed((f) => ({ ...f, preview: false }));
+      },
+      () => setFailed((f) => ({ ...f, preview: true })),
+    );
   const [fxs, setFxs] = useState<{ needed: number; covered: number; sources: Record<string, number>; first?: string } | null>(null);
   const loadFx = () =>
-    api<typeof fxs>('/api/fx/status')
-      .then(setFxs)
-      .catch(() => {});
+    api<typeof fxs>('/api/fx/status').then(
+      (v) => {
+        setFxs(v);
+        setFailed((f) => ({ ...f, fx: false }));
+      },
+      () => setFailed((f) => ({ ...f, fx: true })),
+    );
   useEffect(() => {
     loadPreview();
     loadFx();
@@ -196,10 +207,10 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
       setReading(true);
       try {
         const source = await readImportFile(file, state.methods, today);
-        if (!source.rows.length) toast(t('settings.toast.csvEmpty'), true);
+        if (!source.rows.length) toast(t('settings.toast.csvEmpty'), 'error');
         else setImporting(source);
       } catch (e) {
-        toast(e instanceof Error ? e.message : t('core.import.invalid'), true);
+        toast(e instanceof Error ? e.message : t('core.import.invalid'), 'error');
       } finally {
         setReading(false);
       }
@@ -214,7 +225,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
       if (!Array.isArray(j.subscriptions)) throw new Error();
       setRestoring({ raw: j, subs: j.subscriptions.length, methods: j.methods?.length ?? 0, exportedAt: j.exportedAt, version: j.version ?? 1 });
     } catch {
-      toast(t('settings.toast.badBackup'), true);
+      toast(t('settings.toast.badBackup'), 'error');
     }
   };
 
@@ -425,7 +436,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
 
         <ChannelsGroup state={state} />
 
-        <ReminderPreview preview={preview} timezone={s.timezone} />
+        {failed.preview && !preview ? (
+          <Group>
+            <LoadFailed onRetry={() => void loadPreview()} />
+          </Group>
+        ) : (
+          <ReminderPreview preview={preview} timezone={s.timezone} />
+        )}
 
         <Group title={t('settings.books.title')}>
           <Cell label={t('settings.books.defaultMethod')}>
@@ -448,7 +465,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           )}
           <Cell label={t('settings.books.collectCurrency')}>
             <CurrencySelect
-              value={s.collectCurrency ?? s.baseCurrency}
+              value={collectCurrencyOf(s)}
               onChange={(c) => run(() => saveSettings({ collectCurrency: c }))}
               ariaLabel={t('settings.books.collectCurrency')}
             />
@@ -465,9 +482,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           >
             1 USD = {state.fx.rates.CNY?.toFixed(2)} CNY
           </Cell>
-          <Cell label={t('settings.fx.history')} sub={fxs?.first ? t('settings.fx.earliest', { date: fxs.first }) : undefined}>
-            {fxs ? t('settings.fx.coverage', { covered: fxs.covered, count: fxs.needed }) : '…'}
-          </Cell>
+          {failed.fx && !fxs ? (
+            <LoadFailed onRetry={() => void loadFx()} />
+          ) : (
+            <Cell label={t('settings.fx.history')} sub={fxs?.first ? t('settings.fx.earliest', { date: fxs.first }) : undefined}>
+              {fxs ? t('settings.fx.coverage', { covered: fxs.covered, count: fxs.needed }) : '…'}
+            </Cell>
+          )}
           {fxs && fxs.covered < fxs.needed && (
             <Cell
               label={<span style={{ color: 'var(--accent)' }}>{t('settings.fx.fill')}</span>}
@@ -571,8 +592,8 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
                       method: 'POST',
                       body: JSON.stringify(restoring.raw),
                     });
+                    adoptRestored(r.state);
                     setRestoring(null);
-                    location.reload();
                     return r;
                   }, t('settings.restore.done'))
                 }

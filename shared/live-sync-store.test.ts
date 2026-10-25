@@ -275,3 +275,69 @@ test('改界面偏好只换偏好，不换账本对象，依赖账本的派生�
   assert.ok(c.requests.includes('prefs'), '偏好照常同步到服务端');
   await c.store.logout();
 });
+
+test('成功响应却不是 JSON 时报错，不当作空结果；读不到账本时不进入空账本', async (t) => {
+  const c = await client(t, true, false);
+  // 坏缓存：不是账本形状，丢弃而不是显示成空账本
+  c.values.set('ledger:state:v1:/ledger', JSON.stringify({ hello: 1 }));
+  c.delayState(async () => new Response('<!doctype html><title>proxy</title>', { status: 200, headers: { 'content-type': 'text/html' } }));
+  await c.store.boot();
+  assert.equal(c.store.useStore().phase, 'offline');
+  assert.equal(c.store.useStore().state, undefined);
+  assert.equal(c.values.has('ledger:state:v1:/ledger'), false);
+  // 200 但正文是 JSON 却不是账本（例如 {}）同样不能进入空账本
+  c.delayState(async () => Response.json({}));
+  await c.store.boot();
+  assert.equal(c.store.useStore().state, undefined);
+  // 空正文（204）仍然算成功
+  c.delayWrite(async () => new Response(null, { status: 204 }));
+  await c.store.boot();
+  assert.equal(c.store.useStore().phase, 'ready');
+  await assert.doesNotReject(() => c.store.api('/api/prefs', { method: 'PATCH', body: '{}' }));
+  c.delayWrite(async () => new Response('<html>', { status: 200 }));
+  await assert.rejects(() => c.store.api('/api/prefs', { method: 'PATCH', body: '{}' }));
+  await c.store.logout();
+});
+
+test('一笔写入失败回滚后，强制拉取服务端快照，不丢掉期间另一笔已成功的写入', async (t) => {
+  const c = await client(t);
+  let fail!: (response: Response) => void;
+  c.delayWrite(() => new Promise((resolve) => (fail = resolve)));
+  const first = c.store.saveMethod({ id: 'a', name: 'Fails', currency: 'USD', kind: 'bank' });
+  await settle();
+  await c.store.saveMethod({ id: 'b', name: 'Succeeds', currency: 'USD', kind: 'bank' });
+  fail(Response.json({ error: 'boom' }, { status: 500 }));
+  await assert.rejects(first);
+  await c.tick(1000);
+  await c.tick(1000);
+  assert.deepEqual(
+    c.store.getState().methods.map((m: { id: string }) => m.id),
+    ['b'],
+  );
+  await c.store.logout();
+});
+
+test('mergeEdits：表单打开期间那一项在别处被删，不把它写回来', async () => {
+  const { mergeEdits } = await import('../app/src/store.ts');
+  const a = { id: 'x', name: 'A' };
+  assert.throws(() => mergeEdits(a, { ...a, name: 'B' }, undefined));
+  assert.deepEqual(mergeEdits(a, { ...a, name: 'B' }, { id: 'x', name: 'A', extra: 1 } as typeof a), { id: 'x', name: 'B', extra: 1 });
+});
+
+test('登录失效与退出登录统一清掉本机私有数据：账本缓存、助手会话、编辑草稿', async (t) => {
+  const c = await client(t);
+  const keys = ['ledger:state:v1:/ledger', 'calends.assistant:/ledger', 'ledger:draft:new:/ledger', 'ledger:draft:abc:/ledger'];
+  const others = ['ledger:draft:new', 'ledger:locale:/ledger', 'ledger:theme:/ledger'];
+  for (const k of [...keys, ...others]) c.values.set(k, '{}');
+  // 让假 localStorage 支持遍历
+  Object.assign(globalThis.localStorage, {
+    get length() {
+      return c.values.size;
+    },
+    key: (i: number) => [...c.values.keys()][i] ?? null,
+  });
+  c.expire();
+  await assert.rejects(() => c.store.saveMethod({ id: 'm', name: 'Local card', currency: 'USD', kind: 'bank' }));
+  for (const k of keys) assert.equal(c.values.has(k), false, k);
+  for (const k of others) assert.equal(c.values.has(k), true, k);
+});

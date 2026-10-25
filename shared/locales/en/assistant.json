@@ -263,6 +263,7 @@
     "dateUnknown": "Date unknown",
     "terminate": "Terminated"
   },
+  "interrupted": "The reply was cut off before it finished.",
   "saveUnknown": "Could not confirm whether this change was saved. Check the ledger before trying again.",
   "savedUnverified": "Saved, but the result could not be verified. Check the ledger before continuing.",
   "savedRefreshFailed": "The change was saved, but the page could not refresh. Refresh before confirming more drafts.",

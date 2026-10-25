@@ -198,6 +198,7 @@
       "date": "日付",
       "amount": "金額",
       "base": "{ccy} 換算"
-    }
+    },
+    "confirmDelete": "{date} の譲渡記録を削除しますか？"
   }
 }

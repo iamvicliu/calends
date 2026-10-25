@@ -4,6 +4,7 @@
   "invalidItem": "{name}: {error}",
   "notPublic": "Bu defter herkese açık değil",
   "idMismatch": "ID uyuşmuyor",
+  "invalidJson": "İstek gövdesi geçerli bir JSON değil.",
   "invalidMethod": "Geçersiz ödeme yöntemi",
   "invalidBackup": "Geçersiz yedek dosyası",
   "refreshFailed": "Yenilenemedi",

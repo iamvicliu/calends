@@ -26,6 +26,7 @@
     "needSub": "subscription is required (subscription id or name)",
     "subNotFound": "No subscription matches “{q}”. Try searching with list_subscriptions first.",
     "subAmbiguous": "“{q}” matches {count} subscriptions. Specify one by id: {list}",
+    "subNotExact": "“{q}” is not a subscription id or exact full name; this action deletes data, so partial names are not accepted. Candidates: {list}",
     "customRange": "period=custom requires from and to (YYYY-MM-DD)",
     "unknownPeriod": "Unknown period: {period}",
     "unsupportedCurrency": "Unsupported currency: {code}",

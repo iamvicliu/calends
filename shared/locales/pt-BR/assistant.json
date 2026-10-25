@@ -263,6 +263,7 @@
     "dateUnknown": "Data desconhecida",
     "terminate": "Encerrada pelo provedor"
   },
+  "interrupted": "A resposta foi interrompida antes de terminar.",
   "saveUnknown": "Não foi possível confirmar o salvamento. Confira o registro antes de tentar novamente.",
   "savedUnverified": "Salvo, mas não foi possível verificar o resultado. Confira o registro antes de continuar.",
   "savedRefreshFailed": "A alteração foi salva, mas a página não pôde ser atualizada. Atualize-a antes de confirmar outros rascunhos.",

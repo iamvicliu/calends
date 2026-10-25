@@ -4,6 +4,9 @@ import { IMPORT_LIMIT, readImportTables, type ImportSource } from './import-ledg
 import { t } from './i18n.ts';
 
 export { IMPORT_LIMIT };
+
+/** 备份本身的问题（格式不对、太大、还有未合并的写入）：消息已本地化，调用方原样显示；其他异常统一当作格式不对 */
+export class ImportError extends Error {}
 const MAX_ROWS = 5000;
 interface DatabaseReader {
   exec(sql: string): Array<{ columns: string[]; values: unknown[][] }>;
@@ -44,7 +47,7 @@ const columns: Record<string, string[]> = {
 
 /** Never extract files to disk, execute source migrations, or read credential columns. */
 export function readImportBackup(bytes: Uint8Array, open: (bytes: Uint8Array) => DatabaseReader): ImportSource {
-  if (bytes.length > IMPORT_LIMIT) throw new Error(t('core.import.tooLarge'));
+  if (bytes.length > IMPORT_LIMIT) throw new ImportError(t('core.import.tooLarge'));
   let database = bytes;
   let files: Record<string, Uint8Array> = {};
   if (bytes[0] === 0x50 && bytes[1] === 0x4b) {
@@ -54,19 +57,19 @@ export function readImportBackup(bytes: Uint8Array, open: (bytes: Uint8Array) =>
         const db = /(^|\/)wallos\.db(?:-wal)?$/.test(file.name);
         const wanted = db || /(^|\/)logos\/[^/]+\.(png|jpe?g|webp)$/i.test(file.name);
         if (!wanted) return false;
-        if (file.name.startsWith('/') || file.name.split('/').includes('..')) throw new Error(t('core.import.invalid'));
+        if (file.name.startsWith('/') || file.name.split('/').includes('..')) throw new ImportError(t('core.import.invalid'));
         total += file.originalSize;
-        if (file.originalSize > IMPORT_LIMIT || total > IMPORT_LIMIT) throw new Error(t('core.import.tooLarge'));
+        if (file.originalSize > IMPORT_LIMIT || total > IMPORT_LIMIT) throw new ImportError(t('core.import.tooLarge'));
         // 超过上限的 logo 不解压
         return db || file.originalSize <= ICON_DATA_LIMIT;
       },
     });
     const names = Object.keys(files).filter((name) => /(^|\/)wallos\.db$/.test(name));
-    if (names.length !== 1) throw new Error(t('core.import.invalid'));
-    if (Object.entries(files).some(([name, content]) => name.endsWith('wallos.db-wal') && content.length > 0)) throw new Error(t('core.import.pending'));
+    if (names.length !== 1) throw new ImportError(t('core.import.invalid'));
+    if (Object.entries(files).some(([name, content]) => name.endsWith('wallos.db-wal') && content.length > 0)) throw new ImportError(t('core.import.pending'));
     database = files[names[0]];
   }
-  if (new TextDecoder().decode(database.subarray(0, 16)) !== 'SQLite format 3\0') throw new Error(t('core.import.invalid'));
+  if (new TextDecoder().decode(database.subarray(0, 16)) !== 'SQLite format 3\0') throw new ImportError(t('core.import.invalid'));
   const db = open(database);
   try {
     db.exec('PRAGMA query_only = ON');
@@ -77,9 +80,9 @@ export function readImportBackup(bytes: Uint8Array, open: (bytes: Uint8Array) =>
       const info = db.exec(`PRAGMA table_info("${table}")`)[0];
       const available = new Set(info?.values.map((r) => String(r[1])) ?? []);
       const select = allow.filter((column) => available.has(column));
-      if (!select.length) throw new Error(t('core.import.invalid'));
+      if (!select.length) throw new ImportError(t('core.import.invalid'));
       const result = db.exec(`SELECT ${select.map((c) => `"${c}"`).join(',')} FROM "${table}" LIMIT ${MAX_ROWS + 1}`)[0];
-      if ((result?.values.length ?? 0) > MAX_ROWS) throw new Error(t('core.import.tooLarge'));
+      if ((result?.values.length ?? 0) > MAX_ROWS) throw new ImportError(t('core.import.tooLarge'));
       tables[table] = result?.values.map((row) => Object.fromEntries(result.columns.map((c, i) => [c, row[i]]))) ?? [];
     }
     const source = readImportTables(tables);

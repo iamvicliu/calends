@@ -18,7 +18,7 @@ import {
   totals,
   chargeMethodId,
 } from '../shared/billing.ts';
-import { toBaseAt } from '../shared/fx.ts';
+import { toBaseOrNaN } from '../shared/fx.ts';
 import { billLabel, cnDate, money, monthLabel, relDays } from '../shared/format.ts';
 import { t } from '../shared/i18n.ts';
 import { channelsOf, type AppState, type Subscription } from '../shared/types.ts';
@@ -172,7 +172,8 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
       if (!(d === 7 || d === 3 || d === 0 || d === -7 || d === -14 || (d < 0 && -d % 30 === 0))) continue;
       const every = memberBillMonths(s, m, due);
       const period = memberCollection(s, m, due, collect);
-      const fee = money(toBaseAt(state, period.amount, period.currency, undefined, collect), collect);
+      // 缺汇率时显示「—」，不显示成 0
+      const fee = money(toBaseOrNaN(state, period.amount, period.currency, undefined, collect), collect);
       const who = (m.contactVia && m.contact ? `${m.contactVia} ${m.contact}` : (m.contact ?? m.tg)) ?? '';
       carpool.push({
         title: `${m.name} · ${s.name}`,
@@ -200,7 +201,7 @@ export function buildDaily(state: AppState, today: string): Digest | undefined {
         title: `${name} · ${s.name}`,
         sub: `${t('notify.proxy.sub', { status: d === 0 ? t('notify.proxy.chargedToday') : t('notify.proxy.chargedAgo', { date: cnDate(c.from), count: d }) })}${contact}`,
         amount: money(charged, ccy),
-        amountSub: `≈ ${money(toBaseAt(state, charged, ccy, c.from, collect), collect)}`,
+        amountSub: `≈ ${money(toBaseOrNaN(state, charged, ccy, c.from, collect), collect)}`,
         tone: d > 0 ? 'warn' : undefined,
         icon: iconOf(s),
       });
@@ -267,7 +268,8 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
     .filter((s) => !s.proxy)
     .flatMap((s) => chargesBetween(s, today, end, today).filter((c) => c.date < end))
     .sort((a, b) => a.date.localeCompare(b.date));
-  const sum = charges.reduce((acc, c) => acc + (convert(c.amount, c.currency, base, state.fx) || 0), 0);
+  // 有一笔折算不了，本月合计就显示「—」，不把它当 0 少算
+  const sum = charges.reduce((acc, c) => acc + convert(c.amount, c.currency, base, state.fx), 0);
   const tot = totals(state, today);
   const [y, m] = today.split('-').map(Number);
   const ym = today.slice(0, 7);
@@ -313,6 +315,9 @@ export function buildMonthly(state: AppState, today: string): Digest | undefined
   };
 }
 
+/** 发送占位的租约：超过这么久仍是 sending，视为上次发送中途崩溃 */
+export const SEND_LEASE_MS = 10 * 60_000;
+
 /**
  * 把一份提醒发到所有开着的渠道（或只发 only 指定的那一个）。
  * 任一渠道成功即完成，不重复补发；全部失败持久化原提醒，在之后的整点最多补发 3 次。
@@ -328,13 +333,14 @@ export async function sendDigest(
   const now = opts.now ?? Date.now();
   if (!opts.force) {
     // 原子占位：新提醒或到期的失败重试只有一个任务能取得发送权。
+    // 占位带租约（retry_at = 现在 + SEND_LEASE_MS）：发送中途崩溃留下的 sending 过了租约可再被取走，不会永远卡住。
     const claim = await env.DB.prepare(
-      `INSERT INTO notify_log (dedupe_key, kind, subject, status, digest, attempts)
-       VALUES (?1, ?2, ?3, 'sending', ?4, 1)
-       ON CONFLICT(dedupe_key) DO UPDATE SET status = 'sending', attempts = notify_log.attempts + 1, retry_at = NULL
-       WHERE notify_log.status = 'failed' AND notify_log.attempts < 4 AND notify_log.retry_at <= ?5`,
+      `INSERT INTO notify_log (dedupe_key, kind, subject, status, digest, attempts, retry_at)
+       VALUES (?1, ?2, ?3, 'sending', ?4, 1, ?6)
+       ON CONFLICT(dedupe_key) DO UPDATE SET status = 'sending', attempts = notify_log.attempts + 1, retry_at = ?6
+       WHERE notify_log.status IN ('failed', 'sending') AND notify_log.attempts < 4 AND notify_log.retry_at <= ?5`,
     )
-      .bind(d.key, d.kind, d.subject, JSON.stringify(d), now)
+      .bind(d.key, d.kind, d.subject, JSON.stringify(d), now, now + SEND_LEASE_MS)
       .run();
     if (!claim.meta.changes) return { sent: false, reason: t('notify.send.alreadySent') };
   }
@@ -384,7 +390,8 @@ function localHour(tz: string, now = Date.now()): number {
 export async function runScheduled(env: Env, state: AppState, now = Date.now()): Promise<string[]> {
   const log: string[] = [];
   // 重试使用原提醒快照，跨日后也保留原日期与去重键。
-  const pending = await env.DB.prepare("SELECT digest FROM notify_log WHERE status = 'failed' AND attempts < 4 AND retry_at <= ?1")
+  // 含租约已过的 sending（上次发送中途崩溃）；旧版留下的 sending 没有 retry_at，不会被取到
+  const pending = await env.DB.prepare("SELECT digest FROM notify_log WHERE status IN ('failed', 'sending') AND attempts < 4 AND retry_at <= ?1")
     .bind(now)
     .all<{ digest: string }>();
   for (const row of pending.results) {

@@ -15,6 +15,7 @@ import {
 import type { Env } from './env.ts';
 import { t } from '../shared/i18n.ts';
 import { getKv, getSettings, putKv } from './store.ts';
+import { readJson } from './http.ts';
 
 const COOKIE = 'sid';
 const SESSION_DAYS = 180;
@@ -52,7 +53,7 @@ async function pbkdf2(password: string, salt: string, iterations: number): Promi
 }
 
 /** 定长比较，避免按字节泄露 */
-function constantEqual(a: string, b: string): boolean {
+export function constantEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
@@ -150,9 +151,22 @@ async function startSession(req: Request, env: Env, method: 'password' | 'passke
   );
 }
 
-/** 按 IP 限速：15 分钟内失败 6 次就先锁住 */
+/** 取不到访客 IP 时每次失败的等待：不锁定，只放慢尝试 */
+const NO_IP_DELAY_MS = 750;
+
+/**
+ * 按 IP 限速：15 分钟内失败 6 次就先锁住。
+ * Cloudflare 总带 cf-connecting-ip，Docker 由前置转发按真实连接写入；只有直接跑 wrangler dev 等情况取不到。
+ * 取不到时所有人会落进同一个桶，锁定会让任何人都能把站长锁在门外，所以不锁，只在每次失败后等一会儿（PBKDF2 本身也有开销）。
+ */
 async function throttle(req: Request, env: Env) {
-  const ip = clientIp(req, env) || 'unknown';
+  const ip = clientIp(req, env);
+  if (!ip)
+    return {
+      blocked: false,
+      fail: () => new Promise((r) => setTimeout(r, NO_IP_DELAY_MS)),
+      clear: async () => undefined,
+    };
   const now = Date.now();
   const rec = await env.DB.prepare('SELECT fails, window_start FROM login_attempts WHERE ip = ?1').bind(ip).first<{ fails: number; window_start: number }>();
   const fresh = !rec || now - rec.window_start >= WINDOW_MS;
@@ -315,12 +329,11 @@ async function saveChallenge(env: Env, kind: string, challenge: string): Promise
   return id;
 }
 
-/** 取出并作废一次性挑战 */
-async function takeChallenge(env: Env, id: string, kind: string): Promise<string | undefined> {
-  const row = await env.DB.prepare('SELECT challenge, kind, expires_at FROM auth_challenges WHERE id = ?1')
+/** 取出并作废一次性挑战：单条 DELETE … RETURNING，两个并发请求只有一个能拿到它 */
+export async function takeChallenge(env: Env, id: string, kind: string): Promise<string | undefined> {
+  const row = await env.DB.prepare('DELETE FROM auth_challenges WHERE id = ?1 RETURNING challenge, kind, expires_at')
     .bind(id)
     .first<{ challenge: string; kind: string; expires_at: number }>();
-  await env.DB.prepare('DELETE FROM auth_challenges WHERE id = ?1').bind(id).run();
   return row && row.kind === kind && row.expires_at > Date.now() ? row.challenge : undefined;
 }
 
@@ -371,7 +384,7 @@ export async function passkeyRegisterOptions(req: Request, env: Env): Promise<Re
 
 /** 第二步：校验浏览器返回的凭据并保存 */
 export async function passkeyRegisterVerify(req: Request, env: Env): Promise<Response> {
-  const body = (await req.json()) as { challengeId: string; response: RegistrationResponseJSON; name?: string };
+  const body = (await readJson(req)) as { challengeId: string; response: RegistrationResponseJSON; name?: string };
   const expected = await takeChallenge(env, body.challengeId, 'register');
   if (!expected) return err(t('server.auth.expired'));
   const { rpID, origin } = rp(req, env);
@@ -406,7 +419,7 @@ export async function passkeyLoginOptions(req: Request, env: Env): Promise<Respo
 export async function passkeyLoginVerify(req: Request, env: Env): Promise<Response> {
   const th = await throttle(req, env);
   if (th.blocked) return err(t('server.auth.tooMany'), 429);
-  const body = (await req.json()) as { challengeId: string; response: AuthenticationResponseJSON };
+  const body = (await readJson(req)) as { challengeId: string; response: AuthenticationResponseJSON };
   const expected = await takeChallenge(env, body.challengeId, 'login');
   if (!expected) return Response.json({ error: t('server.auth.expired'), code: 'PASSKEY_CHALLENGE_EXPIRED' }, { status: 400 });
   const row = await env.DB.prepare('SELECT * FROM passkeys WHERE id = ?1').bind(body.response.id).first<PasskeyRow>();

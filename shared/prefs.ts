@@ -25,7 +25,6 @@ export const PREF_KEYS = [
   'car-dir',
   'proxy-filter',
   'cal-mode',
-  'cal-report-open',
   'cal-report-mode',
   'car-view',
   'proxy-view',

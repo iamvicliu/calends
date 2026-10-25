@@ -16,17 +16,17 @@ import {
   collectionAnchor,
   diffDays,
   LIFETIME_BILL_MONTHS,
+  collectCurrencyOf,
 } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, CarRule, Person, Receipt, ShareMember, Subscription } from '../../../shared/types.ts';
 import { isSettled, paidThrough, putRecord, removeRecord, resolveKey, setOpening, type Receivable } from '../../../shared/receivables.ts';
 import { isReceipt, PeriodStrip, ReceivableSheet, recordPeriods } from './Receivable.tsx';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle } from '../components/ui.tsx';
+import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle, useSubmit } from '../components/ui.tsx';
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonProfileSheet } from './People.tsx';
 import {
-  carLedger,
   periodsTotal,
   carRule,
   followCarRule,
@@ -40,18 +40,9 @@ import {
   memberFlowValue,
 } from '../../../shared/carpool.ts';
 
-export { carLedger, memberFee };
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { t, type Params } from '../../../shared/i18n.ts';
-
-// 渠道值存进数据里（微信、邮箱等保持中文代码），显示时再翻译
-const CONTACT_VIA = ['Telegram', '微信', 'WhatsApp', '邮箱', '手机', 'X', 'Discord', '其他'];
-const VIA_KEY: Record<string, string> = { 微信: 'wechat', 邮箱: 'email', 手机: 'phone', 其他: 'other' };
-/** 渠道的显示名：Telegram 等专名原样，微信、邮箱等按当前语言 */
-export const viaLabel = (via: string): string => (VIA_KEY[via] ? t(`family.contact.via.${VIA_KEY[via]}`) : via);
-const CONTACT_HINT: Record<string, string> = { Telegram: '@username', WhatsApp: '+63 …', 邮箱: 'name@example.com', 手机: '+86 …', X: '@handle' };
-const contactHint = (via: string): string | undefined =>
-  via === '微信' ? t('family.contact.hint.wechat') : via === 'Discord' ? t('family.contact.hint.discord') : CONTACT_HINT[via];
+import { ContactField, contactText } from '../components/Contact.tsx';
 
 /** 按收费周期选文案：常用周期各有一条，买断只收一次（once），其余走 custom（带 count） */
 export const perBill = (key: string, months = 1, params: Params = {}): string =>
@@ -84,72 +75,6 @@ export function FeeRuleFields({ value, onChange }: { value: CarRule; onChange: (
       </Cell>
     </>
   );
-}
-
-/** 用户名前面带 @ 的渠道：输入框里固定显示 @，存的时候去掉 */
-const AT_VIA = new Set(['Telegram', 'X']);
-const bare = (id: string) => id.replace(/^@+/, '');
-
-/** 成员联系方式的一行文字：「Telegram @abc」 */
-/** 只要联系方式本身（如 @name、手机号），不带「Telegram」「微信」等渠道名；列表里用 */
-export function contactValue(m: Pick<ShareMember, 'contactVia' | 'contact' | 'tg'>): string {
-  const via = m.contactVia ?? (m.tg ? 'Telegram' : '');
-  const id = m.contact ?? m.tg;
-  if (!id) return '';
-  return AT_VIA.has(via) ? `@${bare(id)}` : id;
-}
-
-export function contactText(m: Pick<ShareMember, 'contactVia' | 'contact' | 'tg'>): string {
-  const via = m.contactVia ?? (m.tg ? 'Telegram' : '');
-  const id = m.contact ?? m.tg;
-  if (!id) return '';
-  const shown = AT_VIA.has(via) ? `@${bare(id)}` : id;
-  return via && via !== '其他' ? `${viaLabel(via)} ${shown}` : shown;
-}
-
-/** 联系方式输入：渠道选择 + 账号；Telegram、X 固定显示 @，能直接打开的渠道后面带一个跳转按钮 */
-export function ContactField({ via, value, onVia, onChange }: { via: string; value?: string; onVia: (v: string) => void; onChange: (id: string) => void }) {
-  const at = AT_VIA.has(via);
-  const url = contactUrl(via, value);
-  return (
-    <span className="contact-field">
-      <Picker value={via} onChange={onVia} options={CONTACT_VIA.map((c) => ({ value: c, label: viaLabel(c) }))} ariaLabel={t('family.contact.viaAria')} />
-      {at && <span className="contact-at">@</span>}
-      <input
-        value={at ? bare(value ?? '') : (value ?? '')}
-        autoCapitalize="off"
-        inputMode={via === '邮箱' ? 'email' : via === '手机' ? 'tel' : 'text'}
-        placeholder={at ? bare(contactHint(via) ?? '') : (contactHint(via) ?? t('family.contact.hint.generic'))}
-        onChange={(e) => {
-          const v = (e.target as HTMLInputElement).value.trim();
-          onChange(at ? bare(v) : v);
-        }}
-      />
-      {url && (
-        <a
-          className="icon-btn contact-go"
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={t('family.contact.open', { via: viaLabel(via) })}
-          title={t('family.contact.open', { via: viaLabel(via) })}
-        >
-          <Icon name="link" />
-        </a>
-      )}
-    </span>
-  );
-}
-
-/** 能直接打开的联系链接：Telegram → t.me，X → x.com，WhatsApp → wa.me，邮箱、手机走系统 */
-export function contactUrl(via: string, id?: string): string | undefined {
-  if (!id) return undefined;
-  if (via === 'Telegram') return `https://t.me/${bare(id)}`;
-  if (via === 'X') return `https://x.com/${bare(id)}`;
-  if (via === 'WhatsApp') return `https://wa.me/${id.replace(/\D/g, '')}`;
-  if (via === '邮箱') return `mailto:${id}`;
-  if (via === '手机') return `tel:${id.replace(/[^\d+]/g, '')}`;
-  return undefined;
 }
 
 /**
@@ -308,7 +233,7 @@ async function saveReceivable(s: Subscription, memberId: string, r: Receivable) 
 
 /** 成员的各期：算到十年后，可以提前收 */
 const memberLedgerAhead = (state: AppState, s: Subscription, m: ShareMember, today: string) =>
-  memberLedger(s, m, today, state.settings.collectCurrency ?? state.settings.baseCurrency, addMonths(today, 120));
+  memberLedger(s, m, today, collectCurrencyOf(state.settings), addMonths(today, 120));
 
 /**
  * 收款表单（全站唯一）：上面是这辆车和收费标准（只读），下面勾选这笔钱抵扣哪几期、实际收了多少。
@@ -335,7 +260,7 @@ function ReceiptForm({
 }) {
   const today = todayIn(state.settings.timezone);
   const cur = memberFee(state, s, m, today);
-  const collectCcy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collectCcy = collectCurrencyOf(state.settings);
   const edit = [...(m.receipts ?? []), ...(m.waivers ?? [])].find((x) => x.id === editId);
   const name = m.name || t('family.member.defaultName');
   return (
@@ -401,7 +326,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
   const isNew = !member;
   const once = s.cycle.unit === 'lifetime';
   // 收款默认币种：设置里的「合租收款币种」，缺省同本位币
-  const collectCcy = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collectCcy = collectCurrencyOf(state.settings);
   const [f, setF] = useState<ShareMember>(() => {
     // 早期单独记的 Telegram 并入通用的联系方式
     const init =
@@ -513,9 +438,11 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
       t('family.member.copied', { count: targets.length }),
     );
   };
-  const removeRecordById = (id: string) =>
+  const removeRecordById = async (id: string, date: string) =>
+    (await ask(t('receivable.confirmDelete', { date: cnDateFull(date) }))) &&
     run(() => saveReceivable(s, f.id, id === 'opening' ? setOpening(member!, [], undefined) : removeRecord(member!, id)), t('receivable.toastRemoved'));
 
+  const [busy, submit] = useSubmit();
   const save = () =>
     run(
       async () => {
@@ -566,16 +493,19 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
             <button
               className="btn plain"
               style={{ color: 'var(--red)' }}
+              disabled={busy}
               onClick={async () =>
                 (await ask(t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') }))) &&
-                run(async () => {
-                  const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
-                  await saveSub({
-                    ...current,
-                    share: { ...current.share!, collectFrom: collectionAnchor(current), members: current.share!.members.filter((x) => x.id !== f.id) },
-                  });
-                  onClose();
-                }, t('family.member.deleted'))
+                submit(() =>
+                  run(async () => {
+                    const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
+                    await saveSub({
+                      ...current,
+                      share: { ...current.share!, collectFrom: collectionAnchor(current), members: current.share!.members.filter((x) => x.id !== f.id) },
+                    });
+                    onClose();
+                  }, t('family.member.deleted')),
+                )
               }
             >
               {t('family.member.delete')}
@@ -585,7 +515,11 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
           <button className="btn" onClick={onClose}>
             {t('family.member.cancel')}
           </button>
-          <button className="btn primary" disabled={!f.name.trim() || refundInvalid(s, next) || (isNew && firstPay && payInvalid)} onClick={save}>
+          <button
+            className="btn primary"
+            disabled={busy || !f.name.trim() || refundInvalid(s, next) || (isNew && firstPay && payInvalid)}
+            onClick={() => void submit(save)}
+          >
             {isNew ? t('family.member.add') : t('family.member.save')}
           </button>
         </>
@@ -596,7 +530,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
         <Group
           title={t('family.member.group')}
           action={
-            linked && !state.readonly ? (
+            linked ? (
               <button type="button" className="btn plain" onClick={() => setProfile(true)}>
                 {t('people.field.editProfile')}
               </button>
@@ -885,7 +819,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
                           <Icon name="copy" />
                         </IconButton>
                       )}
-                      <IconButton aria-label={t('family.member.removePayAria')} onClick={() => removeRecordById(r.id)}>
+                      <IconButton aria-label={t('family.member.removePayAria')} onClick={() => removeRecordById(r.id, r.date)}>
                         <Icon name="x" />
                       </IconButton>
                     </span>
@@ -964,7 +898,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
 
 /** 成员一行的收款状态：逾期几天 / 待收 / 已结清，合租表格和收费弹窗共用 */
 export function memberStatus(state: AppState, s: Subscription, m: ShareMember, today: string) {
-  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collect = collectCurrencyOf(state.settings);
   const d = memberDues(s, today, collect, state).find((x) => x.member.id === m.id);
   const next = memberCollection(s, m, memberUnpaidFrom(s, m), collect);
   const owe = !!d && d.periodsOwed > 0;

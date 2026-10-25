@@ -1,6 +1,6 @@
 import { PersonAvatar, personFor } from './PersonAvatar.tsx';
 import type { CSSProperties } from 'react';
-import { memberAboard, memberDues } from '../../../shared/billing.ts';
+import { memberAboard, memberDues, collectCurrencyOf } from '../../../shared/billing.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { t } from '../../../shared/i18n.ts';
 import { base } from '../base.ts';
@@ -25,7 +25,7 @@ export function ShareAvatars({
   onMember?: (member: ShareMember) => void;
 }) {
   const members = sub.share!.members.filter((m) => memberAboard(m, today));
-  const dues = memberDues(sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state);
+  const dues = memberDues(sub, today, collectCurrencyOf(state.settings), state);
   const limit = Math.max(2, max);
   const shown = members.slice(0, members.length + 1 > limit ? limit - 2 : limit - 1);
   const extra = members.length - shown.length;

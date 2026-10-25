@@ -1,6 +1,6 @@
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { DetailHead, DetailSheet, Panel } from '../components/DetailKit.tsx';
-import { ChargeMethods, chargeMethodIds, YearLedger, YearMethods } from '../components/YearLedger.tsx';
+import { ChargeMethods, chargeMethodIds, currencyTotals, YearLedger, YearMethods } from '../components/YearLedger.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
@@ -17,6 +17,8 @@ import {
   memberBillMonths,
   memberCollection,
   memberUnpaidFrom,
+  isStopped,
+  collectCurrencyOf,
 } from '../../../shared/billing.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import { useRef, useState } from 'react';
@@ -26,12 +28,22 @@ import { createPortal } from 'react-dom';
 import { flow, billLabel, cnDate, cnDateAuto, cnDateFull, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
-import { chargeValue, convertOn } from '../../../shared/fx.ts';
+import { chargeBaseOrNaN, convertOn } from '../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
 import { base } from '../base.ts';
 import { LtHead, nextSort, perMonths, PlanPrice, usePhone } from '../components/LtHead.tsx';
-import { carLedger, FeeRuleFields, MemberSheet, memberFee, memberSegments, memberStatus, perBill } from './Members.tsx';
-import { applyCarRule, carRule, carYear, followsCar, memberCashFlows, memberFlowValue, nextCollectionDay } from '../../../shared/carpool.ts';
+import { FeeRuleFields, MemberSheet, memberSegments, memberStatus, perBill } from './Members.tsx';
+import {
+  applyCarRule,
+  carLedger,
+  carRule,
+  carYear,
+  followsCar,
+  memberCashFlows,
+  memberFee,
+  memberFlowValue,
+  nextCollectionDay,
+} from '../../../shared/carpool.ts';
 import type { CarRule } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import {
@@ -50,9 +62,10 @@ import {
   SubIcon,
   tipProps,
   Toolbar,
+  useSubmit,
   useWidth,
 } from '../components/ui.tsx';
-import { toBase } from '../derive.ts';
+import { sortValue, toBase } from '../derive.ts';
 import { run, saveSub, usePref } from '../store.ts';
 import { FamilyTabs } from './People.tsx';
 import { carpoolRoster, carpoolTimeline } from '../../../shared/carpool-timeline.ts';
@@ -91,8 +104,8 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const base = state.settings.baseCurrency;
   const [colsRef, colsWidth] = useWidth();
   const colCount = Math.max(1, Math.min(4, Math.floor((colsWidth + 16) / 356)));
-  // 买断的车没有到期，一直算进行中
-  const live = (s: Subscription) => ['active', 'ending', 'trial', 'paused', 'lifetime'].includes(effectiveStatus(s, today));
+  // 没有停止的车都算进行中：包括买断（没有到期）和还没开始的
+  const live = (s: Subscription) => !isStopped(effectiveStatus(s, today));
   const owned = state.subscriptions.filter((s) => s.share?.role === 'owner' && live(s));
   const joined = state.subscriptions.filter((s) => s.share?.role === 'member' && live(s));
   // 卡片按状态筛选；顶部的统计始终按进行中的合租算
@@ -100,7 +113,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const [filter, setFilter] = usePref<CarFilter>('car-filter', 'live', (v): v is CarFilter => (CAR_FILTERS as readonly string[]).includes(v));
   const ended = state.subscriptions.filter((s) => s.share?.role === 'owner' && !live(s));
   const all = [...owned, ...ended];
-  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collect = collectCurrencyOf(state.settings);
   // 每辆车的成员待收、账、下次扣款只算一次：筛选、排序、统计、卡片与表格共用
   const duesBy = new Map(all.map((s) => [s.id, memberDues(s, today, collect, state)]));
   const duesOf = (s: Subscription) => duesBy.get(s.id) ?? memberDues(s, today, collect, state);
@@ -128,14 +141,9 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const view = phone ? 'grid' : savedView;
   const nextBy = new Map(all.map((s) => [s.id, nextCharge(s, addDays(today, 1)) ?? '9999-12-31']));
   const nextOf = (s: Subscription) => nextBy.get(s.id)!;
-  const owedBy = new Map(
-    all.map((s) => [
-      s.id,
-      duesOf(s)
-        .filter((d) => d.periodsOwed > 0)
-        .reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : 0), 0),
-    ]),
-  );
+  // 待收合计（本位币）：算不出（缺汇率或缺金额）的一笔让合计为 NaN，只写「待收」，不写成少收的金额。每辆车与顶部合计同一算法
+  const owedTotal = (dues: ReturnType<typeof duesOf>) => dues.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
+  const owedBy = new Map(all.map((s) => [s.id, owedTotal(duesOf(s).filter((d) => d.periodsOwed > 0))]));
   const owedOf = (s: Subscription) => owedBy.get(s.id)!;
   // 当年盈亏：今年成本（已扣 + 预计）对比成员今年的收入（已收 + 今年还该收）
   const years = new Map(all.map((s) => [s.id, carYear(state, s, today)]));
@@ -150,7 +158,11 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
     profit: (s) => -books.get(s.id)!.net,
   };
   const asc = (a: Subscription, b: Subscription) =>
-    sort === 'name' ? a.name.localeCompare(b.name, locale()) : sort === 'next' ? nextOf(a).localeCompare(nextOf(b)) : value[sort](a) - value[sort](b);
+    sort === 'name'
+      ? a.name.localeCompare(b.name, locale())
+      : sort === 'next'
+        ? nextOf(a).localeCompare(nextOf(b))
+        : sortValue(value[sort](a)) - sortValue(value[sort](b));
   const shown = [...groups[filter]].sort(
     (a, b) => Number(!live(a)) - Number(!live(b)) || (dir === 'asc' ? asc(a, b) : asc(b, a)) || nextOf(a).localeCompare(nextOf(b)),
   );
@@ -160,8 +172,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const openSeats = owned.reduce((a, s) => a + carpoolRoster(s, today).vacancies, 0);
   const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
   const owedAll = all.flatMap(duesOf).filter((d) => d.periodsOwed > 0);
-  const owedSum = owedAll.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
-  const ro = !!state.readonly;
+  const owedSum = owedTotal(owedAll);
   const [convert, setConvert] = useState<Subscription | null>(null);
   const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; editId?: string } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
@@ -187,7 +198,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           onChange={setFilter}
           options={CAR_FILTERS.map((f) => [f, `${t(`family.pool.filter.${f}`)} ${groups[f].length}`] as [CarFilter, string])}
         />
-        {!ro && <FamilyTabs tab="plans" />}
+        <FamilyTabs tab="plans" />
         {/* 卡片 / 列表切换固定在右上角最后一个；排序只在列表表头切换，对卡片同样生效 */}
         {!phone && (
           <Seg
@@ -302,7 +313,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                         )}
                       </div>
                       <div className="seats-row">
-                        <ShareAvatars sub={s} state={state} today={today} onMember={ro ? undefined : (m) => setMember({ s, m })} />
+                        <ShareAvatars sub={s} state={state} today={today} onMember={(m) => setMember({ s, m })} />
                         <button className={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
                           {(() => {
                             const n = dues.filter((d) => d.periodsOwed > 0).length;
@@ -320,12 +331,12 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                       <CarFacts book={books.get(s.id)!} base={base} />
                       {expanded.has(s.id) && (
                         <>
-                          {!ro && free > 0 && live(s) && (
+                          {free > 0 && live(s) && (
                             <button className="btn tinted" style={{ alignSelf: 'flex-start' }} onClick={() => setMember({ s })}>
                               <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
                             </button>
                           )}
-                          <MemberRows state={state} s={s} today={today} ro={ro} onMember={(m, c) => setMember({ s, m, collect: c })} />
+                          <MemberRows state={state} s={s} today={today} onMember={(m, c) => setMember({ s, m, collect: c })} />
                         </>
                       )}
                     </div>
@@ -356,7 +367,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
           </Group>
         )}
 
-        {candidates.length > 0 && !ro && (
+        {candidates.length > 0 && (
           <Group title={t('family.pool.maybeGroup')}>
             {candidates.map((s) => (
               <div key={s.id} className="cell">
@@ -382,7 +393,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             state={state}
             s={sheetSub}
             today={today}
-            ro={ro}
+
             book={books.get(sheetSub.id) ?? carLedger(state, sheetSub, today)}
             onClose={() => setSheet(null)}
             onOpenSub={() => {
@@ -549,7 +560,6 @@ function MemberRows({
   state,
   s,
   today,
-  ro,
   onMember,
   only,
   timeline,
@@ -560,7 +570,6 @@ function MemberRows({
   state: AppState;
   s: Subscription;
   today: string;
-  ro: boolean;
   onMember: (m: ShareMember, collect?: boolean) => void;
   /** 只列一部分成员（合租弹窗里按收费周期分组时用） */
   only?: (m: ShareMember) => boolean;
@@ -570,10 +579,10 @@ function MemberRows({
   masked?: boolean;
   win?: ReturnType<typeof carpoolTimeline>;
 }) {
-  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter(
+  const dues = memberDues(s, today, collectCurrencyOf(state.settings), state).filter(
     (d) => (includeLeft || !d.member.left || d.member.left > today) && (!only || only(d.member)),
   );
-  const collect = state.settings.collectCurrency ?? state.settings.baseCurrency;
+  const collect = collectCurrencyOf(state.settings);
   return (
     <div>
       {dues.map((d) => {
@@ -582,16 +591,16 @@ function MemberRows({
           <div
             key={d.member.id}
             className={`member ${d.member.left && d.member.left <= today ? 'departed' : ''}`}
-            role={ro ? undefined : 'button'}
-            tabIndex={ro ? undefined : 0}
+            role="button"
+            tabIndex={0}
             onClick={(e) => {
-              if (!ro && !(e.target as HTMLElement).closest('button')) {
+              if (!(e.target as HTMLElement).closest('button')) {
                 e.stopPropagation();
                 onMember(d.member);
               }
             }}
             onKeyDown={(e) => {
-              if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+              if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
                 e.preventDefault();
                 e.stopPropagation();
                 onMember(d.member);
@@ -599,7 +608,7 @@ function MemberRows({
             }}
           >
             {/* 一行称呼，一行动态日期：欠款写「应收 某日」，已结清写「下次应收 某日」；账号、周期在合租详情表格里看 */}
-            <button className="member-info" aria-label={masked ? t('family.sheet.hiddenMember') : undefined} disabled={ro} onClick={() => onMember(d.member)}>
+            <button className="member-info" aria-label={masked ? t('family.sheet.hiddenMember') : undefined} onClick={() => onMember(d.member)}>
               <div className="icon-text" style={{ fontWeight: 600, fontSize: 'var(--fs-2)' }}>
                 <MemberAvatar state={state} m={d.member} size={28} masked={masked} />
                 <span className={`text-ellipsis member-label ${masked ? 'car-private' : ''}`} aria-hidden={masked || undefined}>
@@ -726,7 +735,6 @@ function MemberTable({
   state,
   s,
   today,
-  ro,
   onMember,
   win,
   expanded,
@@ -736,7 +744,6 @@ function MemberTable({
   state: AppState;
   s: Subscription;
   today: string;
-  ro: boolean;
   onMember: (m?: ShareMember, collect?: boolean) => void;
   win: ReturnType<typeof carpoolTimeline>;
   expanded: boolean;
@@ -771,7 +778,7 @@ function MemberTable({
           ...(expanded ? roster.departed : []),
           ...Array.from({ length: roster.vacancies }, () => null),
         ].map((m, index) => {
-          if (!m) return <Vacancy key={`vacancy-${index}`} ro={ro} onAdd={() => onMember()} table />;
+          if (!m) return <Vacancy key={`vacancy-${index}`} onAdd={() => onMember()} table />;
           const st = memberStatus(state, s, m, today);
           const rate = memberFee(state, s, m, today);
           const left = !!m.left && m.left <= today;
@@ -780,12 +787,11 @@ function MemberTable({
               role="row"
               key={m.id}
               className="car-member-row"
-              data-readonly={ro || undefined}
-              tabIndex={ro ? undefined : 0}
+              tabIndex={0}
               aria-label={masked ? t('family.sheet.hiddenMember') : m.name || t('family.pool.unnamed')}
-              onClick={() => !ro && onMember(m)}
+              onClick={() => onMember(m)}
               onKeyDown={(e) => {
-                if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
                   e.preventDefault();
                   onMember(m);
                 }
@@ -889,7 +895,7 @@ function OwnerTimeline({ state, s, today, win }: { state: AppState; s: Subscript
               style={{ left: `${pct(from, win)}%`, width: `${Math.max(0.6, pct(addDays(until, 1), win) - pct(from, win))}%` }}
               {...tipProps(() => (
                 <>
-                  <b>{g.kind === 'owner' ? flow(-chargeValue(state, g.c), state.settings.baseCurrency) : t('family.timeline.future')}</b>
+                  <b>{g.kind === 'owner' ? flow(-chargeBaseOrNaN(state, g.c), state.settings.baseCurrency) : t('family.timeline.future')}</b>
                   <div>
                     {cnDateFull(g.from)} – {cnDateFull(g.until)}
                   </div>
@@ -942,16 +948,15 @@ function OwnerSeat({
   );
 }
 
-function Vacancy({ ro, onAdd, table = false }: { ro: boolean; onAdd: () => void; table?: boolean }) {
+function Vacancy({ onAdd, table = false }: { onAdd: () => void; table?: boolean }) {
   const props = {
     className: `car-vacancy ${table ? 'car-member-row' : 'member'}`,
-    role: table ? 'row' : ro ? undefined : 'button',
-    'data-readonly': ro || undefined,
-    tabIndex: ro ? undefined : 0,
-    'aria-label': t(ro ? 'family.sheet.vacancy' : 'family.sheet.addMember'),
-    onClick: () => !ro && onAdd(),
+    role: table ? 'row' : 'button',
+    tabIndex: 0,
+    'aria-label': t('family.sheet.addMember'),
+    onClick: () => onAdd(),
     onKeyDown: (e: React.KeyboardEvent) => {
-      if (!ro && e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+      if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
         onAdd();
       }
@@ -993,7 +998,6 @@ export function CarMembers({
   state,
   s,
   today,
-  ro,
   onMember,
   masked = false,
   billEvery,
@@ -1001,7 +1005,6 @@ export function CarMembers({
   state: AppState;
   s: Subscription;
   today: string;
-  ro: boolean;
   onMember: (m?: ShareMember, collect?: boolean) => void;
   masked?: boolean;
   billEvery: number;
@@ -1021,7 +1024,7 @@ export function CarMembers({
         state={state}
         s={s}
         today={today}
-        ro={ro}
+
         onMember={onMember}
         win={win}
         masked={masked}
@@ -1038,13 +1041,13 @@ export function CarMembers({
               <div className="car-group-head">
                 {label} <span className="copy-gap" aria-hidden="true" /> {t('family.sheet.people', { count: n })}
               </div>
-              <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => groupOf(m) === key} masked={masked} timeline win={win} />
+              <MemberRows state={state} s={s} today={today} onMember={onMember} only={(m) => groupOf(m) === key} masked={masked} timeline win={win} />
             </div>
           ))}
         {roster.active.some((m) => m.exempt) && (
           <div className="car-sheet-members">
             <div className="car-group-head">{t('family.pool.exempt')}</div>
-            <MemberRows state={state} s={s} today={today} ro={ro} onMember={onMember} only={(m) => !!m.exempt} masked={masked} timeline win={win} />
+            <MemberRows state={state} s={s} today={today} onMember={onMember} only={(m) => !!m.exempt} masked={masked} timeline win={win} />
           </div>
         )}
         {departedOpen && (
@@ -1053,7 +1056,7 @@ export function CarMembers({
               state={state}
               s={s}
               today={today}
-              ro={ro}
+
               onMember={onMember}
               only={(m) => !!m.left && m.left <= today}
               includeLeft
@@ -1064,7 +1067,7 @@ export function CarMembers({
           </div>
         )}
         {Array.from({ length: free }, (_, i) => (
-          <Vacancy key={i} ro={ro} onAdd={() => onMember()} />
+          <Vacancy key={i} onAdd={() => onMember()} />
         ))}
         {roster.departed.length > 0 && (
           <DepartedToggle count={roster.departed.length} expanded={departedOpen} onToggle={() => setDepartedOpen(!departedOpen)} />
@@ -1082,7 +1085,6 @@ export function CarSheet({
   state,
   s,
   today,
-  ro,
   book,
   onClose,
   onOpenSub,
@@ -1092,7 +1094,6 @@ export function CarSheet({
   state: AppState;
   s: Subscription;
   today: string;
-  ro: boolean;
   book: ReturnType<typeof carLedger>;
   onClose: () => void;
   onOpenSub: () => void;
@@ -1105,10 +1106,10 @@ export function CarSheet({
   const base = state.settings.baseCurrency;
   const sh = s.share!;
   const st = effectiveStatus(s, today);
-  const stopped = ['ended', 'terminated'].includes(st);
+  const stopped = isStopped(st);
   const next = nextCharge(s, addDays(today, 1));
   const roster = carpoolRoster(s, today);
-  const dues = memberDues(s, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state).filter((d) => d.periodsOwed > 0);
+  const dues = memberDues(s, today, collectCurrencyOf(state.settings), state).filter((d) => d.periodsOwed > 0);
   const owe = dues.length;
   const oweSum = dues.reduce((a, d) => a + convertOn(d.owed, d.currency, base, today, undefined, state.fx), 0);
   const hasPending = oweSum > 0 || !Number.isFinite(oweSum);
@@ -1122,7 +1123,8 @@ export function CarSheet({
   const [tab, setTab] = useState<'in' | 'out'>('in');
   const outs = chargesBetween(s, book.since ?? s.start, today, today)
     .filter((c) => c.kind !== 'failed')
-    .map((c) => ({ c, base: chargeValue(state, c) }))
+    // 缺汇率的一笔为 NaN：行与年小计显示「—」
+    .map((c) => ({ c, base: chargeBaseOrNaN(state, c) }))
     .reverse();
   return (
     <DetailSheet label={t('family.sheet.title')} onClose={onClose}>
@@ -1150,9 +1152,9 @@ export function CarSheet({
           actions={
             <span className="dt-header-tools" data-snapshot-hide>
               {!stopped && (
-                <button className="btn car-rule-btn" disabled={ro} onClick={() => setEditingRule(true)} title={t('family.rule.title')}>
+                <button className="btn car-rule-btn" onClick={() => setEditingRule(true)} title={t('family.rule.title')}>
                   {perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
-                  {!ro && <Icon name="right" size={14} />}
+                  <Icon name="right" size={14} />
                 </button>
               )}
               <IconButton
@@ -1197,7 +1199,7 @@ export function CarSheet({
           {/* 与订阅详情一样：成员表、收付款表各在一张卡片里，标题在卡片内 */}
           {/* 成员卡片不加标题：表头第一列已经是「成员」 */}
           <Panel className="dt-share car-members-panel">
-            <CarMembers state={state} s={s} today={today} ro={ro} onMember={onMember} masked={masked} billEvery={rule.billEvery} />
+            <CarMembers state={state} s={s} today={today} onMember={onMember} masked={masked} billEvery={rule.billEvery} />
           </Panel>
 
           {/* 收进来的和我付出去的切换着看；表格与订阅详情的扣款记录同一套（YearLedger） */}
@@ -1232,9 +1234,11 @@ export function CarSheet({
                       return {
                         second: <YearMethods ids={chargeMethodIds(ys.map((r) => r.c))} state={state} />,
                         orig: copyParts(
-                          [...ys.reduce((m, { c }) => m.set(c.currency, (m.get(c.currency) ?? 0) + c.amount), new Map<string, number>())]
-                            .map(([ccy, sum]) => flow(-sum, ccy))
-                            .join('\n'),
+                          currencyTotals(
+                            ys,
+                            (r) => r.c,
+                            (sum, ccy) => flow(-sum, ccy),
+                          ),
                         ),
                         base: Number.isFinite(total) ? flow(-total, base) : '—',
                       };
@@ -1286,11 +1290,7 @@ export function CarSheet({
                         </span>
                       );
                     })(),
-                    orig: copyParts(
-                      [...ys.reduce((m, { p }) => m.set(p.currency, (m.get(p.currency) ?? 0) + p.amount), new Map<string, number>())]
-                        .map(([ccy, sum]) => flow(sum, ccy))
-                        .join('\n'),
-                    ),
+                    orig: copyParts(currencyTotals(ys, (r) => r.p, flow)),
                     base: flow(
                       ys.reduce((a, r) => a + r.base, 0),
                       base,
@@ -1317,7 +1317,7 @@ export function CarSheet({
                   })}
                   rowKey={({ m, p }, i) => `${m.id}-${p.date}-${i}`}
                   rowTitle={({ p }) => (masked ? undefined : p.note)}
-                  onRow={ro ? undefined : ({ m, p }) => (onPayment && p.kind === 'receipt' ? onPayment(m, p.id) : onMember(m))}
+                  onRow={({ m, p }) => (onPayment && p.kind === 'receipt' ? onPayment(m, p.id) : onMember(m))}
                 />
               ) : (
                 <div className="car-empty">
@@ -1336,9 +1336,7 @@ export function CarSheet({
 
 /** 常见家庭方案的席位数（含自己） */
 function defaultSeats(name: string): number {
-  if (/1password/i.test(name)) return 5;
-  if (/spotify|youtube|apple one|icloud|netflix/i.test(name)) return 6;
-  return 6;
+  return /1password/i.test(name) ? 5 : 6;
 }
 
 /** 一步转为合租：选身份与席位，保存后在上面补成员 */
@@ -1350,6 +1348,7 @@ function ConvertSheet({ state, s, today, onClose }: { state: AppState; s: Subscr
   // 我发起时一起定收费标准：默认按价格和席位推算，改了就用改的（之后在合租详情的收费规则里也是这一份）
   const [rule, setRule] = useState<CarRule | null>(null);
   const shown = rule ?? carRule(state, { ...s, share: { role: 'owner', seats, members: [] } }, today);
+  const [busy, submit] = useSubmit();
   return (
     <Sheet
       narrow
@@ -1363,19 +1362,22 @@ function ConvertSheet({ state, s, today, onClose }: { state: AppState; s: Subscr
           </button>
           <button
             className="btn primary"
+            disabled={busy}
             onClick={() =>
-              run(
-                async () => {
-                  await saveSub({
-                    ...s,
-                    share:
-                      role === 'owner'
-                        ? { role, seats, members: [], since: today, rule: shown }
-                        : { role, seats, members: [], ownerName: ownerName.trim() || undefined, since: today },
-                  });
-                  onClose();
-                },
-                role === 'owner' ? t('family.convert.toastOwner') : t('family.convert.toastMember'),
+              submit(() =>
+                run(
+                  async () => {
+                    await saveSub({
+                      ...s,
+                      share:
+                        role === 'owner'
+                          ? { role, seats, members: [], since: today, rule: shown }
+                          : { role, seats, members: [], ownerName: ownerName.trim() || undefined, since: today },
+                    });
+                    onClose();
+                  },
+                  role === 'owner' ? t('family.convert.toastOwner') : t('family.convert.toastMember'),
+                ),
               )
             }
           >
@@ -1451,6 +1453,7 @@ function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppState; s: 
   // 下期收款日：新标准从这天起执行，也是全车往后的收款节奏；默认按现在的节奏算出的下一次
   const [next, setNext] = useState(nextCollectionDay(s, rule.billEvery, today));
   const followers = (s.share?.members ?? []).filter((m) => followsCar(state, s, m, today) && (!m.left || m.left > today)).length;
+  const [busy, submit] = useSubmit();
   const save = () =>
     run(async () => {
       const applied = applyCarRule(state, s, draft, next, today);
@@ -1468,7 +1471,7 @@ function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppState; s: 
           <button className="btn" onClick={onClose}>
             {t('family.member.cancel')}
           </button>
-          <button className="btn primary" disabled={!(draft.fee >= 0)} onClick={() => void save()}>
+          <button className="btn primary" disabled={busy || !(draft.fee >= 0)} onClick={() => void submit(save)}>
             {t('family.member.save')}
           </button>
         </>

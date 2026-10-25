@@ -3,7 +3,7 @@ import { prepareImport, type ImportFixes, type ImportSource } from '../../../sha
 import type { AppState, Cycle } from '../../../shared/types.ts';
 import { t } from '../../../shared/i18n.ts';
 import { cycleLabel } from '../../../shared/billing.ts';
-import { ask, Cell, Group, Sheet, Toggle } from '../components/ui.tsx';
+import { ask, Cell, Group, NumInput, Sheet, Toggle } from '../components/ui.tsx';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { importData, run } from '../store.ts';
 
@@ -87,13 +87,15 @@ export function ImportSheet({ source, state, today, onClose }: { source: ImportS
               {!excluded.includes(row.key) && (
                 <>
                   <Cell label={t('editor.field.amount')}>
-                    <input
+                    {/* 按币种限制小数位（日元等不收小数）；保留原来的数字输入框样式 */}
+                    <NumInput
                       type="number"
                       min="0"
                       step="any"
+                      ccy={fix.currency ?? row.currency}
                       aria-label={`${t('editor.field.amount')} ${row.name}`}
-                      value={Number.isFinite(fix.price ?? row.price) ? (fix.price ?? row.price) : ''}
-                      onChange={(e) => edit(row.key, { price: e.target.value === '' ? NaN : Number(e.target.value) })}
+                      value={Number.isFinite(fix.price ?? row.price) ? (fix.price ?? row.price) : undefined}
+                      onValue={(n) => edit(row.key, { price: n ?? NaN })}
                     />
                   </Cell>
                   <Cell label={t('editor.field.currency')}>

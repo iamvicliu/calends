@@ -1,6 +1,6 @@
 import { transferredStop } from '../../../shared/transfers.ts';
 import { stopDescription } from '../components/StopPanel.tsx';
-import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   addDays,
   addMonths,
@@ -17,7 +17,7 @@ import { flow, cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import { GANTT_STEP, ganttLabelBounds, ganttTicks, ganttWindow, isGanttZoom, snapGanttPan, stepGanttPan, type GanttZoom } from '../../../shared/gantt.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { IconButton, FlagImg, Icon, Seg, SubIcon, useWidth } from '../components/ui.tsx';
+import { IconButton, FlagImg, Icon, Seg, SubIcon, useMedia, useWidth } from '../components/ui.tsx';
 import { perLabel } from './Overview.tsx';
 import { usePref } from '../store.ts';
 
@@ -75,16 +75,6 @@ function amountWidth(text: string): number {
 }
 const NARROW = '(max-width: 700px)';
 const PORTRAIT = '(max-width: 700px) and (orientation: portrait)';
-function subscribeNarrow(cb: () => void) {
-  const mq = matchMedia(NARROW);
-  mq.addEventListener('change', cb);
-  return () => mq.removeEventListener('change', cb);
-}
-function subscribePortrait(cb: () => void) {
-  const mq = matchMedia(PORTRAIT);
-  mq.addEventListener('change', cb);
-  return () => mq.removeEventListener('change', cb);
-}
 
 export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription[]; state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   // 缩放与着色方式存在服务端，多台设备一致
@@ -104,16 +94,8 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   };
   const [colorBy, setColorBy] = usePref<ColorBy>('gantt-color', 'method', isColorBy);
   // 名称列宽度可拖动调整；手机与桌面各记一份，桌面上调宽的值不会挤占手机上的时间轴
-  const narrow = useSyncExternalStore(
-    subscribeNarrow,
-    () => matchMedia(NARROW).matches,
-    () => false,
-  );
-  const portrait = useSyncExternalStore(
-    subscribePortrait,
-    () => matchMedia(PORTRAIT).matches,
-    () => false,
-  );
+  const narrow = useMedia(NARROW);
+  const portrait = useMedia(PORTRAIT);
   const gtEl = useRef<HTMLDivElement>(null);
   const [measured, setMeasured] = useState<{ textWidth: number; containerWidth: number; paddingLeft: number; paddingRight: number; gap: number } | null>(null);
   const bounds = ganttLabelBounds(measured?.textWidth ?? 144, measured?.containerWidth ?? 0, {

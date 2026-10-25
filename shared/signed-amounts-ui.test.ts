@@ -8,7 +8,7 @@ import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { currencyDecimals, moneyDecimals, flow, flowSign, setSignedAmounts, symbol, relDays, money, cnDateAuto, cnDateFull } from './format.ts';
 import { intlLocale, locale, setLocale } from './i18n.ts';
-import { chargeValue } from './fx.ts';
+import { chargeBaseOrNaN, chargeValue } from './fx.ts';
 import { FALLBACK_FX, addMonths, phaseSubs, diffDays } from './billing.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 import * as billing from './billing.ts';
@@ -37,6 +37,16 @@ afterEach(() => {
   setSignedAmounts(true);
   setLocale('en', []);
 });
+
+// YearLedger.tsx 的 currencyTotals（带样式导入，不能直接加载）：同一实现
+const currencyTotals = (rows: any[], amountOf: (r: any) => { currency: string; amount: number }, fmt: (sum: number, ccy: string) => string) => {
+  const m = new Map<string, number>();
+  for (const r of rows) {
+    const { currency, amount } = amountOf(r);
+    m.set(currency, (m.get(currency) ?? 0) + amount);
+  }
+  return [...m].map(([c, n]) => fmt(n, c)).join('\n');
+};
 
 test('Amount renders directed flows, zero, unavailable values and neutral prices/balances with both settings', () => {
   const file = '../app/src/components/ui.tsx';
@@ -146,16 +156,19 @@ test('Root applies loaded/changed signed settings before rendering and changes t
     preferredLocale: () => 'en',
     setSignedAmounts,
     App: 'App',
+    ErrorBoundary: 'ErrorBoundary',
   });
-  const first = Root();
+  // 根节点外面包着错误兜底，App 是它唯一的子节点
+  const app = () => Root().props.children;
+  const first = app();
   assert.equal(flow(-10, 'USD'), '−$10.00');
   state = { settings: { ...DEFAULT_SETTINGS, signedAmounts: false } };
-  const disabled = Root();
+  const disabled = app();
   assert.notEqual(disabled.key, first.key);
   assert.equal(flow(-10, 'USD'), '$10.00');
   assert.equal(flow(10, 'USD'), '$10.00');
   state = { settings: { ...DEFAULT_SETTINGS, signedAmounts: true } };
-  assert.equal(Root().key, first.key);
+  assert.equal(app().key, first.key);
   assert.equal(flow(10, 'USD'), '+$10.00');
 });
 
@@ -173,6 +186,7 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
     }),
     phaseSubs,
     chargeValue,
+    chargeBaseOrNaN,
     diffDays,
     relDays,
     flow,
@@ -183,6 +197,7 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
     cnDateFull,
     chargeMethodId: billing.chargeMethodId,
     YearMethods: () => null,
+    currencyTotals,
     ChargeMethods: () => null,
     chargeMethodIds: () => [],
     copyParts: (v: unknown) => v,
@@ -238,6 +253,7 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
     YearLedger: yearLedger({ useState: hook, t: (key: string, args?: { count?: number; year?: string }) => `${key}:${args?.count ?? args?.year ?? ''}` }),
     phaseSubs,
     chargeValue,
+    chargeBaseOrNaN,
     addMonths,
     flow,
     t: (key: string, args?: { count?: number; year?: string }) => `${key}:${args?.count ?? args?.year ?? ''}`,
@@ -247,6 +263,7 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
     cnDateFull,
     chargeMethodId: billing.chargeMethodId,
     YearMethods: () => null,
+    currencyTotals,
     ChargeMethods: () => React.createElement('i', { 'data-pay': '' }),
     chargeMethodIds: () => [],
     copyParts: (v: unknown) => v,
@@ -349,7 +366,7 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
 });
 
 test('shared-plan avatars retain owner images, initials, dues colors and overflow in both sizes', async () => {
-  const { memberAboard, memberDues } = await import('./billing.ts');
+  const { collectCurrencyOf, memberAboard, memberDues } = await import('./billing.ts');
   const file = '../app/src/components/ShareAvatars.tsx';
   const source = read(file).split('export function ShareAvatars(')[1];
   const PersonAvatar = load(
@@ -362,6 +379,7 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
     React,
     memberAboard,
     memberDues,
+    collectCurrencyOf,
     PersonAvatar,
     personFor: (state: AppState, id: string, name: string) => state.people?.find((p) => p.id === id) ?? { id, name },
     base: (path: string) => path,
@@ -449,6 +467,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     relDays,
     flow,
     chargeValue,
+    chargeBaseOrNaN,
     t: (key: string) => key,
     useState: (initial: unknown) => [typeof initial === 'function' ? initial() : initial, empty],
     useRef: () => ({ current: null }),
@@ -499,6 +518,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     Seg: empty,
     copyParts: (v: unknown) => v,
     YearMethods: empty,
+    currencyTotals,
     ChargeMethods: empty,
     chargeMethodIds: () => [],
     YearLedger: yearLedger({ useState: React.useState, t: deps.t }),

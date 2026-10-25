@@ -44,6 +44,7 @@
   "subError": {
     "name": "Name is required",
     "price": "Invalid price",
+    "paymentCurrency": "Payment currency must match the plan currency",
     "start": "Invalid start date",
     "cycle": "Invalid billing cycle",
     "refundAmount": "Enter a positive refund amount and a valid currency",
@@ -229,5 +230,6 @@
     "badDate": "Original {field} \"{value}\" was not recognized and was not imported",
     "nextDue": "next payment date",
     "end": "end date"
-  }
+  },
+  "fxIncomplete": "Some amounts can’t be converted because exchange rates are missing, so this is incomplete."
 }

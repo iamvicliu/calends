@@ -89,6 +89,14 @@ function compile(names, extra = {}) {
     Seg: noop,
     YearLedger: noop,
     YearMethods: noop,
+    currencyTotals: (rows, amountOf, fmt) => {
+      const m = new Map();
+      for (const r of rows) {
+        const { currency, amount } = amountOf(r);
+        m.set(currency, (m.get(currency) ?? 0) + amount);
+      }
+      return [...m].map(([c, n]) => fmt(n, c)).join('\n');
+    },
     PayBadge: noop,
     useTimelinePan: noop,
     tipProps: () => ({}),
@@ -103,17 +111,14 @@ function compile(names, extra = {}) {
   return new Function(...Object.keys(dependencies), `${compiled.code}; return {${names.join(',')}};`)(...Object.values(dependencies));
 }
 
-test('空位整行支持点击与键盘；只读空位不会打开编辑器', () => {
+test('空位整行支持点击与键盘', () => {
   const { Vacancy } = compile(['Vacancy']);
   let opened = 0;
   for (const table of [false, true]) {
-    const editable = Vacancy({ ro: false, table, onAdd: () => opened++ });
+    const editable = Vacancy({ table, onAdd: () => opened++ });
     editable.props.onClick();
     editable.props.onKeyDown({ key: 'Enter', target: null, currentTarget: null, preventDefault() {} });
-    const readonly = Vacancy({ ro: true, table, onAdd: () => opened++ });
-    readonly.props.onClick();
-    readonly.props.onKeyDown({ key: ' ', target: null, currentTarget: null, preventDefault() {} });
-    assert.equal(readonly.props.tabIndex, undefined);
+    assert.equal(editable.props.tabIndex, 0);
     assert.match(renderToStaticMarkup(editable), /Currently vacant/);
   }
   assert.equal(opened, 4);

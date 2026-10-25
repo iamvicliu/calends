@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { activePhases, chargesBetween, currentPhase, cycleLabel, phaseSubs } from '../../../shared/billing.ts';
-import { money } from '../../../shared/format.ts';
+import { cnDateFull, currencyDecimals, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { deletePayment, savePayment, setPhaseMethod } from '../../../shared/phases.ts';
 import type { Payment, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { MoneyInput, Cell, Group, Icon, IconButton, Seg, Sheet } from '../components/ui.tsx';
+import { ask, MoneyInput, Cell, Group, Icon, IconButton, Seg, Sheet, useSubmit } from '../components/ui.tsx';
 import { getState, run, saveSub } from '../store.ts';
 
 type Kind = 'charge' | NonNullable<Payment['kind']>;
@@ -51,13 +51,17 @@ export function PaymentSheet({
     edit?.pay.funding?.length ? edit.pay.funding.map((f) => ({ methodId: f.methodId, amount: String(Math.abs(f.amount)) })) : null,
   );
   const splitSum = (split ?? []).reduce((a, x) => a + (Number(x.amount) || 0), 0);
-  const left = Math.round((Number(amount) - splitSum) * 100) / 100;
+  // 差额按这一段币种的小数位取整（日元等没有小数）
+  const unit = 10 ** currencyDecimals(ccy);
+  const left = Math.round((Number(amount) - splitSum) * unit) / unit;
+  const amountValid = amount.trim() !== '' && Number(amount) >= 0;
   const blanks = (split ?? []).filter((x) => x.amount === '').length;
   const setPart = (i: number, patch: Partial<{ methodId?: string; amount: string }>) => setSplit((xs) => xs!.map((x, k) => (k === i ? { ...x, ...patch } : x)));
 
+  const [busy, submit] = useSubmit();
   const save = () => {
     const n = Number(amount);
-    if (!(n >= 0) || amount === '') return;
+    if (!amountValid) return;
     const pay: Payment = {
       date,
       amount: sign * n,
@@ -72,21 +76,26 @@ export function PaymentSheet({
         ?.filter((x) => x.methodId || x.amount !== '')
         .map((x) => ({ methodId: x.methodId ?? '', amount: sign * (x.amount === '' && blanks === 1 ? left : Number(x.amount)) })),
     };
-    run(
-      async () => {
-        let next = savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }, pick);
-        if (!split && changed && scope === 'phase') next = setPhaseMethod(next, phase.start, method);
-        await saveSub(next);
-        onClose();
-      },
-      t(edit ? 'editor.payment.toast.edited' : 'editor.payment.toast.added'),
+    return submit(() =>
+      run(
+        async () => {
+          let next = savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }, pick);
+          if (!split && changed && scope === 'phase') next = setPhaseMethod(next, phase.start, method);
+          await saveSub(next);
+          onClose();
+        },
+        t(edit ? 'editor.payment.toast.edited' : 'editor.payment.toast.added'),
+      ),
     );
   };
-  const remove = () =>
-    run(async () => {
-      await saveSub(deletePayment(sub, today, edit!.pay.date, edit!.index, edit!.phase));
-      onClose();
-    }, t('editor.payment.toast.deleted'));
+  const remove = async () =>
+    (await ask(t('editor.payment.confirmDelete', { date: cnDateFull(edit!.pay.date) }))) &&
+    submit(() =>
+      run(async () => {
+        await saveSub(deletePayment(sub, today, edit!.pay.date, edit!.index, edit!.phase));
+        onClose();
+      }, t('editor.payment.toast.deleted')),
+    );
 
   return (
     <Sheet
@@ -96,14 +105,14 @@ export function PaymentSheet({
       foot={
         <>
           {edit && (
-            <button className="btn danger" style={{ marginRight: 'auto' }} onClick={remove}>
+            <button className="btn danger" style={{ marginRight: 'auto' }} disabled={busy} onClick={remove}>
               {t('common.delete')}
             </button>
           )}
           <button className="btn" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button className="btn primary" onClick={save}>
+          <button className="btn primary" disabled={busy || !amountValid} onClick={save}>
             {t('common.save')}
           </button>
         </>
@@ -162,7 +171,7 @@ export function PaymentSheet({
           }
           foot={
             split
-              ? Math.abs(left) < 0.005 || (blanks === 1 && left > 0)
+              ? Math.abs(left) < 0.5 / unit || (blanks === 1 && left > 0)
                 ? t('editor.payment.splitOk', { amount: money(Number(amount) || 0, ccy) })
                 : t('editor.payment.splitLeft', { amount: money(left, ccy) })
               : undefined

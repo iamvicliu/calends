@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "Bitte melde dich zuerst an",
     "requestFailed": "Anfrage fehlgeschlagen ({status})",
-    "wholeCurrency": "Beträge in {currency} müssen ganze Zahlen sein"
+    "wholeCurrency": "Beträge in {currency} müssen ganze Zahlen sein",
+    "deletedElsewhere": "Dieser Eintrag wurde an anderer Stelle gelöscht; deine Änderungen wurden nicht gespeichert."
   },
   "theme": {
     "light": "Hell",
@@ -23,5 +24,7 @@
   },
   "working": "Wird ausgeführt…",
   "undo": "Rückgängig",
-  "restored": "Wiederhergestellt"
+  "restored": "Wiederhergestellt",
+  "loadFailed": "Konnte nicht geladen werden",
+  "retry": "Erneut versuchen"
 }

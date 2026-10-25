@@ -1,6 +1,6 @@
 // Transient stop fields owned by the editor or the standalone stop dialog.
 import { nonrenewalDate, billingPeriod, currentPhase, effectiveStatus, stopSummary, subError } from './billing.ts';
-import { cancelAtEnd, reactivate, statusChangeError, stopSubscription } from './phases.ts';
+import { cancelAtEnd, reactivate, reopenStopped, statusChangeError, stopSubscription } from './phases.ts';
 import { t } from './i18n.ts';
 import type { Subscription } from './types.ts';
 
@@ -29,6 +29,7 @@ export function stopForm(sub: Subscription, today: string): StopForm {
     refundDate: payment?.date,
     reason: sub.stop?.reason ?? '',
     settled: payment?.settled ? String(-payment.settled.amount) : '',
+    // 没记过卡上实退时的默认币种写死为 USD（不随卡或本位币）；改默认会改变表单初始显示，留待决定
     settledCurrency: payment?.settled?.currency ?? 'USD',
   };
 }
@@ -51,16 +52,7 @@ export function applyStopForm(sub: Subscription, form: StopForm, today: string):
   let open = sub;
   if (sub.stop || sub.end || sub.status === 'cancelled' || sub.status === 'terminated') {
     // Reopen only this local calculation; the resulting record must still pass the provider-termination constraint.
-    open = terminated
-      ? {
-          ...sub,
-          status: 'active',
-          pausedAt: undefined,
-          end: undefined,
-          stop: undefined,
-          phases: sub.phases?.map((p, i, all) => (i === all.length - 1 ? { ...p, end: undefined, stop: undefined } : p)),
-        }
-      : reactivate(sub, today);
+    open = terminated ? reopenStopped(sub) : reactivate(sub, today);
   }
   if (form.mode === 'nonrenew') return cancelAtEnd(open, form.date, today);
   const { summary } = stopPreview(sub, form, today);

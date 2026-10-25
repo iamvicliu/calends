@@ -56,5 +56,6 @@
     "due": "Unbezahlt",
     "upcoming": "Noch nicht fällig",
     "this": "Diese Zahlung"
-  }
+  },
+  "confirmDelete": "Eintrag vom {date} löschen?"
 }

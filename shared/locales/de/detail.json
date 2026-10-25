@@ -214,6 +214,7 @@
       "date": "Datum",
       "amount": "Betrag",
       "base": "In {ccy}"
-    }
+    },
+    "confirmDelete": "Übertragung vom {date} löschen?"
   }
 }

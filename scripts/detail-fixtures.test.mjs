@@ -144,8 +144,8 @@ for (const today of ['2026-10-24', '2028-02-29', '2027-03-31', '2026-01-31', '20
     const seats = (n) => sub(n).share.members.filter((m) => memberAboard(m, today)).length + 1;
     assert.equal(seats(5), 3);
     assert.equal(sub(5).share.seats, 4);
-    assert.ok(memberDues(sub(5), today)[0].dueFor < today);
-    assert.ok(paidThrough(memberLedger(sub(5), sub(5).share.members[1], today).periods) > today);
+    assert.ok(memberDues(sub(5), today, sub(5).currency)[0].dueFor < today);
+    assert.ok(paidThrough(memberLedger(sub(5), sub(5).share.members[1], today, sub(5).currency).periods) > today);
     assert.equal(sub(6).share.role, 'member');
     for (const [n, status] of [
       [7, 'trial'],

@@ -81,5 +81,7 @@
     "months": "Bulan sebelumnya / berikutnya (tahun dalam tampilan tahunan)",
     "today": "Ke hari ini",
     "hint": "Pintasan global satu tombol dijeda saat mengetik atau lapisan terbuka. Tutup pemilih sebelum mengirim. Di area teks, Enter membuat baris baru."
-  }
+  },
+  "crashed": "Terjadi kesalahan di halaman ini. Muat ulang untuk melanjutkan.",
+  "reload": "Muat ulang"
 }

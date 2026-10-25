@@ -4,6 +4,7 @@
   "invalidItem": "{name}: {error}",
   "notPublic": "Dieses Konto ist nicht öffentlich",
   "idMismatch": "ID stimmt nicht überein",
+  "invalidJson": "Der Anfrageinhalt ist kein gültiges JSON.",
   "invalidMethod": "Ungültige Zahlungsmethode",
   "invalidBackup": "Ungültige Backup-Datei",
   "refreshFailed": "Aktualisierung fehlgeschlagen",

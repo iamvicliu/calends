@@ -4,7 +4,18 @@ import { base } from '../base.ts';
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, rectSortingStrategy, SortableContext, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
 import { useRef, useState } from 'react';
-import { activePhases, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyMine, runwayFor, uid, type Runway } from '../../../shared/billing.ts';
+import {
+  activePhases,
+  currentPhase,
+  cycleLabel,
+  diffDays,
+  effectiveStatus,
+  monthlyMine,
+  runwayFor,
+  uid,
+  type Runway,
+  isStopped,
+} from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../../shared/types.ts';
@@ -78,7 +89,10 @@ function RunwayCard({ r, today, state, flat, detailsOnly }: { r: Runway; today: 
         <span>{t('wallet.runway.scale.y1')}</span>
       </div>
       <div className="rw-note">
-        {r.monthlyDrain <= 0 ? (
+        {/* 缺汇率时月消耗、余额推演算不出：说明不完整，不说「够用」 */}
+        {!Number.isFinite(r.monthlyDrain) || !Number.isFinite(r.topUp12m) ? (
+          t('core.fxIncomplete')
+        ) : r.monthlyDrain <= 0 ? (
           t('wallet.runway.noSubs')
         ) : r.shortfall && r.coveredCharges === 0 ? (
           <>
@@ -122,6 +136,7 @@ function projFoot(r: Runway, m: PaymentMethod): string | undefined {
 /** 卡面右下角的小字：设了余额的说还够扣几期，没设的显示卡号尾号 */
 function cardHint(m: PaymentMethod, r: Runway | undefined): string {
   if (r) {
+    if (!Number.isFinite(r.monthlyDrain) || !Number.isFinite(r.topUp12m)) return '—';
     if (r.monthlyDrain <= 0) return t('wallet.card.noCharges');
     if (!r.shortfall) return t('wallet.card.enough');
     return r.coveredCharges ? t('wallet.card.periodsLeft', { count: r.coveredCharges }) : t('wallet.card.low');
@@ -241,11 +256,14 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
         </DndContext>
 
         {/* 只列有关联计费订阅的余额；空着的账户（比如还没用上的美国区）不占位置 */}
-        {state.methods.some((m) => (runwayFor(m, state, today)?.monthlyDrain ?? 0) > 0) && (
+        {state.methods.some((m) => {
+          const drain = runwayFor(m, state, today)?.monthlyDrain ?? 0;
+          return drain > 0 || !Number.isFinite(drain);
+        }) && (
           <Group title={t('wallet.runwayGroup')}>
             {state.methods
               .map((m) => runwayFor(m, state, today))
-              .filter((r): r is NonNullable<typeof r> => r != null && r.monthlyDrain > 0)
+              .filter((r): r is NonNullable<typeof r> => r != null && (r.monthlyDrain > 0 || !Number.isFinite(r.monthlyDrain)))
               .map((r) => (
                 <div key={r.method.id} className="cell" style={{ display: 'block', padding: '14px 16px' }}>
                   <RunwayCard r={r} today={today} state={state} flat detailsOnly />
@@ -327,7 +345,7 @@ function MethodSheet({
 }) {
   const r = runwayFor(m, state, today);
   // 关联订阅：还在用的（含买断）在前，已退订、被停用的排到后面；同组内保持原有顺序
-  const stopped = (s: Subscription) => ['ended', 'terminated'].includes(effectiveStatus(s, today));
+  const stopped = (s: Subscription) => isStopped(effectiveStatus(s, today));
   const subs = state.subscriptions.filter((s) => s.methodId === m.id).sort((a, b) => Number(stopped(a)) - Number(stopped(b)));
   const ro = !!state.readonly;
   return (
@@ -631,7 +649,8 @@ function MethodDeleteSheet({ m, state, onClose, onDeleted }: { m: PaymentMethod;
 function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState; onClose: () => void }) {
   const [f, setF] = useState<PaymentMethod>(m);
   const [deleting, setDeleting] = useState(false);
-  const isNew = !state.methods.some((x) => x.id === m.id);
+  // 打开时决定：编辑期间这张卡在别处被删，保存时报错而不是当新卡建回来
+  const [isNew] = useState(() => !state.methods.some((x) => x.id === m.id));
   const up = (p: Partial<PaymentMethod>) => setF({ ...f, ...p });
   const balanceKind = BALANCE_KINDS.includes(f.kind);
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;

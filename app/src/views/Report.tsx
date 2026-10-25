@@ -24,18 +24,8 @@ import {
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
 import { MetricCards, Metric, IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
-import { allCharges, catColor, KIND_BG, paletteColor, sumBase, toBase } from '../derive.ts';
+import { allCharges, catColor, KIND_BG, paletteColor, sumBaseOrNaN, toBase, firstStart } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
-
-export function perLabel(s: Subscription): string {
-  const { unit, every } = s.cycle;
-  if (unit === 'lifetime') return t('report.per.lifetime');
-  if (every === 1) return t(`report.per.${unit}`);
-  if (unit === 'month' && every === 3) return t('report.per.quarter');
-  if (unit === 'month' && every === 6) return t('report.per.halfYear');
-  if (unit === 'year' && every === 2) return t('report.per.twoYears');
-  return t(`report.per.n.${unit}`, { count: every });
-}
 
 const mLabel = (m: string) => (m.endsWith('-01') ? t('report.axis.year', { yy: m.slice(2, 4), year: m.slice(0, 4) }) : monthLabel(m, { year: false }));
 const perMonth = (amount: string) => t('report.perMonth', { amount });
@@ -84,7 +74,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const [range, setRange] = useState<'12' | '36' | 'all'>('36');
   const [hist, setHist] = useState(true);
-  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const first = firstStart(state, today);
   const allMonths = monthsSince(first, today);
   const months = range === 'all' ? Math.ceil(allMonths) : Number(range);
   const series = useMemo(() => mrrSeries(state, today, months, hist), [state, today, months, hist]);
@@ -194,7 +184,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
             aria-label={t('report.wf.next')}
             disabled={offset >= 0}
 
-            onClick={() => setOffset(Math.min(0, offset + 1))}
+            onClick={() => setOffset(offset + 1)}
           >
             <Icon name="right" />
           </IconButton>
@@ -304,7 +294,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const rows = useMemo(() => cashVsAccrual(state, today, 23, 12), [state, today]);
   const pv = useMemo(() => prepaidValue(state, today), [state, today]);
-  const next90 = sumBase(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
+  const next90 = sumBaseOrNaN(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
   const peak = rows.filter((r) => r.projected).sort((a, b) => b.cash - a.cash)[0];
   return (
     <div className="card copy-card" data-copy-card>
@@ -666,6 +656,9 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
                   <div className="topup-why soft">{t('report.topup.anyAmount')}</div>
                 )}
               </>
+            ) : !Number.isFinite(p.need) ? (
+              // 缺汇率算不出要充多少：不能说「够用」
+              <div className="topup-why soft">{t('core.fxIncomplete')}</div>
             ) : (
               <div className="green" style={{ fontSize: 'var(--fs-2)', marginTop: 6 }}>
                 {t(`report.topup.enough${months}`)}

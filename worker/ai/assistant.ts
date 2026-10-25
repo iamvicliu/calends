@@ -21,7 +21,8 @@ import {
 import { locale, t } from '../../shared/i18n.ts';
 import { remainingFailures, writeMismatches, type AssistantOutcome, type ToolFailure, type WriteVerification } from '../../shared/assistant-result.ts';
 import type { Env } from '../env.ts';
-import { decodeEntities, searchAppStore, state, TOOLS, type Tool, type ToolCtx } from './mcp-tools.ts';
+import { decodeEntities, state, TOOLS, type Tool, type ToolCtx } from './mcp-tools.ts';
+import { searchAppStore } from '../appstore.ts';
 import { getKv, loadState, putKv } from '../store.ts';
 
 const KEY = 'assistant';
@@ -110,6 +111,23 @@ async function systemPrompt(env: Env): Promise<string> {
 }
 
 type Emit = (event: Record<string, unknown>) => void;
+
+/** 交给模型的工具结果上限（字符） */
+const TOOL_RESULT_MAX = 24000;
+
+/**
+ * 工具结果太长时截断，避免撑爆上下文。截断后仍是合法 JSON：原文的前一部分放进 partial 字符串，
+ * 并注明已截断、原长度，模型不会把半截对象当成完整结果。
+ */
+export function toolContent(content: string, max = TOOL_RESULT_MAX): string {
+  if (content.length <= max) return content;
+  return JSON.stringify({
+    truncated: true,
+    original_chars: content.length,
+    note: 'Result too long and truncated; partial holds the beginning of the JSON text. Narrow the query (filters, a single subscription, a shorter period) for complete data.',
+    partial: content.slice(0, max),
+  });
+}
 
 const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 
@@ -273,8 +291,7 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
               ...(deletedNow ? { hint: 'Subscriptions you drafted for deletion in this turn are already hidden; that is expected. Do not retry.' } : {}),
             });
           }
-          // 工具结果太长时截断，避免撑爆上下文
-          added.push({ role: 'tool', tool_call_id: call.id, content: content.length > 24000 ? `${content.slice(0, 24000)}…` : content });
+          added.push({ role: 'tool', tool_call_id: call.id, content: toolContent(content) });
         }
       }
       if (exhausted) {
@@ -372,7 +389,8 @@ function confirmationArgs(name: string, args: Record<string, unknown>, preview: 
 
 // ---------- 聊天记录：存在服务端，多台设备共用；「新对话」只是开新的一段，清空要在设置里明确操作 ----------
 
-const CHAT_MAX = 1_500_000;
+/** 一段对话存成一行：按 UTF-8 字节计，与名册同为 1.8 MB，留在 D1 单行 2 MB 的上限以内 */
+const CHAT_MAX_BYTES = 1_800_000;
 
 /** 全部对话，按开始时间从早到晚 */
 export async function listChats(env: Env): Promise<unknown[]> {
@@ -387,7 +405,7 @@ export async function saveChat(env: Env, id: string, body: unknown): Promise<voi
   const b = body as { createdAt?: unknown; turns?: unknown; history?: unknown } | null;
   if (!b || !Array.isArray(b.turns) || !Array.isArray(b.history)) throw new Error('invalid chat');
   const data = JSON.stringify({ createdAt: typeof b.createdAt === 'string' ? b.createdAt : new Date().toISOString(), turns: b.turns, history: b.history });
-  if (data.length > CHAT_MAX) throw new Error('chat too large');
+  if (new TextEncoder().encode(data).length > CHAT_MAX_BYTES) throw new Error('chat too large');
   await env.DB.prepare(
     `INSERT INTO chats (id, data, updated_at) VALUES (?1, ?2, datetime('now')) ON CONFLICT(id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`,
   )

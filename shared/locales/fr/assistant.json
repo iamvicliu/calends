@@ -263,6 +263,7 @@
     "dateUnknown": "Date inconnue",
     "terminate": "Résilié par le fournisseur"
   },
+  "interrupted": "La réponse a été interrompue avant la fin.",
   "saveUnknown": "Impossible de confirmer l’enregistrement. Vérifiez le registre avant de réessayer.",
   "savedUnverified": "Enregistré, mais le résultat n’a pas pu être vérifié. Vérifiez le registre avant de continuer.",
   "savedRefreshFailed": "La modification est enregistrée, mais la page n’a pas pu être actualisée. Actualisez-la avant de confirmer d’autres brouillons.",

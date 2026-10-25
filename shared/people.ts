@@ -2,7 +2,7 @@ import { memberCashFlows, memberFlowValue } from './carpool.ts';
 // 人：合租成员与代付对象的统一名册。
 // 成员、代付上存 personId 指向名册；原来的称呼、联系方式保留为镜像副本，老数据和只认副本的地方（提醒邮件、导出）照常工作。
 // 应收按人汇总时，直接复用合租（memberDues）与代付（proxyRows）各自的算法，只是换个维度加起来。
-import { effectiveStatus, memberDues, memberAboard, memberLedger } from './billing.ts';
+import { collectCurrencyOf, effectiveStatus, fnv1a, isStopped, memberDues, memberAboard, memberLedger } from './billing.ts';
 import { toBaseAt } from './fx.ts';
 import { proxyRows, proxyTotals } from './proxy.ts';
 import { paidThrough } from './receivables.ts';
@@ -26,12 +26,8 @@ export function normContact(via?: string, contact?: string, tg?: string): string
 export const personKey = (name: string | undefined, via?: string, contact?: string, tg?: string): string =>
   `${normName(name)}|${normContact(via, contact, tg)}`;
 
-/** FNV-1a 短哈希：自动建档的人用它当 id，同样的数据算出同样的 id，并发迁移也不会重复建档 */
-function hash(text: string): number {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 0x01000193);
-  return h >>> 0;
-}
+/** 自动建档的人用 FNV-1a 短哈希当 id，同样的数据算出同样的 id，并发迁移也不会重复建档 */
+const hash = fnv1a;
 
 export const colorFor = (seed: string): PersonColor => PERSON_COLORS[hash(seed) % PERSON_COLORS.length];
 
@@ -255,7 +251,7 @@ function shareItem(state: AppState, s: Subscription, m: ShareMember, today: stri
     periodsOwed: d && !m.exempt ? d.periodsOwed : 0,
     received: flows.reduce((a, p) => a + memberFlowValue(state, p), 0),
     lastPaid: flows.filter((p) => p.kind === 'receipt').reduce<string | undefined>((a, p) => (!a || p.date > a ? p.date : a), undefined),
-    paidUntil: paidThrough(memberLedger(s, m, today).periods),
+    paidUntil: paidThrough(memberLedger(s, m, today, collectCurrencyOf(state.settings)).periods),
     active: !!d && memberAboard(m, today) && ['active', 'ending', 'trial'].includes(effectiveStatus(s, today)),
   };
 }
@@ -272,7 +268,7 @@ function proxyItem(state: AppState, s: Subscription, today: string): PersonItem 
     periodsOwed: open.length,
     received: done.reduce((a, r) => a + r.receivedBase!, 0),
     lastPaid: proxyTotals(rows).lastIn,
-    active: !['ended', 'terminated'].includes(effectiveStatus(s, today)),
+    active: !isStopped(effectiveStatus(s, today)),
   };
 }
 
@@ -291,8 +287,7 @@ export function peopleLedger(state: AppState, today: string): PersonLedger[] {
     if (!person.id && !normName(person.name)) continue;
     const key = person.id || `~${personKey(person.name, person.contactVia, person.contact)}`;
     if (!book.has(key)) book.set(key, { person, items: [], owed: 0, periodsOwed: 0, received: 0 });
-    if (r.kind === 'member' && !dues.has(r.sub.id))
-      dues.set(r.sub.id, memberDues(r.sub, today, state.settings.collectCurrency ?? state.settings.baseCurrency, state));
+    if (r.kind === 'member' && !dues.has(r.sub.id)) dues.set(r.sub.id, memberDues(r.sub, today, collectCurrencyOf(state.settings), state));
     const item = r.kind === 'member' ? shareItem(state, r.sub, r.member, today, dues.get(r.sub.id)!) : proxyItem(state, r.sub, today);
     const l = book.get(key)!;
     l.items.push(item);

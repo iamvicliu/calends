@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "Entre primeiro",
     "requestFailed": "Falha na solicitação ({status})",
-    "wholeCurrency": "Os valores em {currency} devem ser inteiros"
+    "wholeCurrency": "Os valores em {currency} devem ser inteiros",
+    "deletedElsewhere": "Este item foi excluído em outro lugar, então suas alterações não foram salvas."
   },
   "theme": {
     "light": "Claro",
@@ -23,5 +24,7 @@
   },
   "working": "Processando…",
   "undo": "Desfazer",
-  "restored": "Restaurado"
+  "restored": "Restaurado",
+  "loadFailed": "Não foi possível carregar",
+  "retry": "Tentar novamente"
 }

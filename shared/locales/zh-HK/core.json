@@ -29,6 +29,7 @@
   "subError": {
     "name": "名稱不能為空",
     "price": "價格無效",
+    "paymentCurrency": "扣款貨幣必須與所屬方案的貨幣一致",
     "start": "開始日期無效",
     "cycle": "週期無效",
     "refundAmount": "退款金額須為正數，貨幣須有效",
@@ -198,5 +199,6 @@
     "badDate": "原{field}「{value}」格式無法辨識，未匯入",
     "nextDue": "下次扣款日",
     "end": "結束日"
-  }
+  },
+  "fxIncomplete": "部分金額缺少匯率無法換算，這裡的結果不完整。"
 }

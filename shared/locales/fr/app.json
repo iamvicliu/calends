@@ -82,5 +82,7 @@
     "months": "Mois précédent / suivant (année en vue annuelle)",
     "today": "Aller à aujourd’hui",
     "hint": "Les raccourcis globaux à une touche sont désactivées pendant la saisie ou lorsqu’une fenêtre est ouverte. Fermez les sélecteurs avant l’envoi. Dans une zone de texte, Entrée ajoute une ligne."
-  }
+  },
+  "crashed": "Une erreur s’est produite sur cette page. Rechargez pour continuer.",
+  "reload": "Recharger"
 }

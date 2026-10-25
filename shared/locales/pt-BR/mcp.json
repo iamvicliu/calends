@@ -26,6 +26,7 @@
     "needSub": "subscription é obrigatório (id ou nome da assinatura)",
     "subNotFound": "Nenhuma assinatura corresponde a “{q}”. Tente buscar primeiro com list_subscriptions.",
     "subAmbiguous": "“{q}” corresponde a {count} assinaturas. Indique uma pelo id: {list}",
+    "subNotExact": "“{q}” não é um id nem o nome completo de uma assinatura; esta ação apaga dados, por isso nomes parciais não são aceitos. Candidatas: {list}",
     "customRange": "period=custom exige from e to (AAAA-MM-DD)",
     "unknownPeriod": "Período desconhecido: {period}",
     "unsupportedCurrency": "Moeda não suportada: {code}",

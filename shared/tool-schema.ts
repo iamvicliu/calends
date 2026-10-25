@@ -8,10 +8,13 @@ export type Schema = {
   required?: string[];
   additionalProperties?: boolean;
   items?: Schema;
-  enum?: unknown[];
+  enum?: readonly unknown[];
   minimum?: number;
   maximum?: number;
   format?: string;
+  pattern?: string;
+  minItems?: number;
+  maxItems?: number;
   [key: string]: unknown;
 };
 export const objectSchema = (properties: Record<string, Schema>, required: string[] = []): Schema => ({
@@ -22,7 +25,11 @@ export const objectSchema = (properties: Record<string, Schema>, required: strin
 });
 export const textSchema: Schema = { type: 'string' };
 export const daySchema: Schema = { type: 'string', format: 'date' };
-export const nullable = (s: Schema): Schema => ({ ...s, type: [String(s.type), 'null'] });
+/** 允许 null：type 已是数组时合并，不会变成 "string,null" 这种无效类型 */
+export const nullable = (s: Schema): Schema => {
+  const types = s.type === undefined ? [] : Array.isArray(s.type) ? s.type : [s.type];
+  return { ...s, type: [...new Set([...types, 'null'])] };
+};
 export const drySchema: Schema = { type: 'boolean', description: 'Preview before/after and references without saving.' };
 
 export function validateToolInput(schema: Schema, value: unknown, path = 'arguments'): void {
@@ -54,6 +61,12 @@ export function validateToolInput(schema: Schema, value: unknown, path = 'argume
   )
     fail();
   if (schema.format === 'date' && (typeof value !== 'string' || !validDay(value))) fail();
+  if (typeof value === 'string' && schema.pattern !== undefined && !new RegExp(schema.pattern, 'u').test(value)) fail();
+  if (
+    Array.isArray(value) &&
+    ((schema.minItems !== undefined && value.length < schema.minItems) || (schema.maxItems !== undefined && value.length > schema.maxItems))
+  )
+    fail();
   if (Array.isArray(value) && schema.items) value.forEach((v, i) => validateToolInput(schema.items!, v, `${path}[${i}]`));
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const record = value as Record<string, unknown>;

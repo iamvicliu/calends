@@ -3,7 +3,14 @@ import { test } from 'node:test';
 import { fetchPublic, isPublicHttpsUrl } from '../worker/url-guard.ts';
 
 test('图片中转只允许公网 https 地址：回环、私网、链路本地、云元数据和各种 IP 写法都拦住', () => {
-  for (const ok of ['https://example.com/a.png', 'https://8.8.8.8/x.png', 'https://[2606:4700::1111]/x.png', 'https://172.32.0.1/x.png'])
+  for (const ok of [
+    'https://example.com/a.png',
+    'https://8.8.8.8/x.png',
+    'https://[2606:4700::1111]/x.png',
+    'https://172.32.0.1/x.png',
+    'https://[64:ff9b::808:808]/x.png',
+    'https://[2002:808:808::1]/x.png',
+  ])
     assert.equal(isPublicHttpsUrl(ok), true, ok);
   for (const bad of [
     'http://example.com/a.png',
@@ -29,6 +36,16 @@ test('图片中转只允许公网 https 地址：回环、私网、链路本地�
     'https://[fe80::1]/a.png',
     'https://[::ffff:127.0.0.1]/a.png',
     'https://[::ffff:a9fe:a9fe]/a.png',
+    'https://[::127.0.0.1]/a.png',
+    'https://[::7f00:1]/a.png',
+    'https://[::a9fe:a9fe]/a.png',
+    'https://[64:ff9b::7f00:1]/a.png',
+    'https://[64:ff9b::10.0.0.1]/a.png',
+    'https://[64:ff9b:1::c0a8:101]/a.png',
+    'https://[2002:7f00:1::]/a.png',
+    'https://[2002:a9fe:a9fe::1]/a.png',
+    'https://[ff02::1]/a.png',
+    'https://[0:0:0:0:0:0:0:1]/a.png',
   ])
     assert.equal(isPublicHttpsUrl(bad), false, bad);
 });

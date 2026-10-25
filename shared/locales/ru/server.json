@@ -4,6 +4,7 @@
   "invalidItem": "{name}: {error}",
   "notPublic": "Этот учёт не публичный",
   "idMismatch": "ID не совпадает",
+  "invalidJson": "Тело запроса не является корректным JSON.",
   "invalidMethod": "Неверный способ оплаты",
   "invalidBackup": "Неверный файл резервной копии",
   "refreshFailed": "Не удалось обновить",

@@ -26,6 +26,7 @@
     "needSub": "subscription ist erforderlich (Abo-ID oder Name)",
     "subNotFound": "Kein Abo passt zu „{q}“. Suche zuerst mit list_subscriptions.",
     "subAmbiguous": "„{q}“ passt zu {count} Abos. Gib eines per ID an: {list}",
+    "subNotExact": "„{q}“ ist keine Abo-ID und kein vollständiger Name; diese Aktion löscht Daten, Teilnamen werden nicht akzeptiert. Kandidaten: {list}",
     "customRange": "period=custom erfordert from und to (JJJJ-MM-TT)",
     "unknownPeriod": "Unbekannter Zeitraum: {period}",
     "unsupportedCurrency": "Nicht unterstützte Währung: {code}",

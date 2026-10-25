@@ -3,9 +3,20 @@ import { copyParts } from '../components/copy.tsx';
 import { StopBadge, StopText, stopDescription, stopLabel } from '../components/StopPanel.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
-import { activePhases, addDays, currentPhase, diffDays, effectiveStatus, monthlyMine, nextCharge, priceAt, upcomingPhase } from '../../../shared/billing.ts';
+import {
+  activePhases,
+  addDays,
+  currentPhase,
+  diffDays,
+  effectiveStatus,
+  monthlyMine,
+  nextCharge,
+  priceAt,
+  upcomingPhase,
+  isStopped,
+} from '../../../shared/billing.ts';
 import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
-import { toBaseAt } from '../../../shared/fx.ts';
+import { toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import {
   IconButton,
@@ -118,7 +129,7 @@ export function List({
             : undefined,
       }; // 外币或不是按月付的，都折成每月多少
     }
-    return { value: toBaseAt(state, price, s.currency, undefined, money2), ccy: money2, sub: t('list.originalPrice', { amount: money(price, s.currency) }) };
+    return { value: toBaseOrNaN(state, price, s.currency, undefined, money2), ccy: money2, sub: t('list.originalPrice', { amount: money(price, s.currency) }) };
   };
   const base = state.settings.baseCurrency;
 
@@ -166,12 +177,14 @@ export function List({
     const price = n && !(cur.end && n >= cur.end) ? priceAt(cur, n) : cur.price;
     return toBase(state, price, cur.currency);
   };
+  // 排序时缺汇率（NaN）按 0 比较，与显示无关，保持原有顺序
+  const n0 = (v: number) => (Number.isFinite(v) ? v : 0);
   // 先按升序比较，再按方向翻转；没有下次扣款的始终排在最后
   const asc = (a: Subscription, b: Subscription) => {
     if (sort === 'name') return a.name.localeCompare(b.name, locale());
     // 分类按设置里的顺序，同类里最贵的在前
-    if (sort === 'category') return catRank(a) - catRank(b) || mo(b) - mo(a) || a.name.localeCompare(b.name, locale());
-    if (sort === 'cost') return mo(a) - mo(b) || toBase(state, a.price, a.currency) - toBase(state, b.price, b.currency);
+    if (sort === 'category') return catRank(a) - catRank(b) || n0(mo(b)) - n0(mo(a)) || a.name.localeCompare(b.name, locale());
+    if (sort === 'cost') return n0(mo(a)) - n0(mo(b)) || n0(toBase(state, a.price, a.currency)) - n0(toBase(state, b.price, b.currency));
     // 支付方式按设置里的顺序，未指定的排最后
     if (sort === 'method') {
       const rank = (s: Subscription) => {
@@ -181,7 +194,7 @@ export function List({
       return rank(a) - rank(b) || a.name.localeCompare(b.name, locale());
     }
     // 金额按列里显示的那个数（当前阶段、下次扣款日的价格）折算成本位币，跨币种才比得准
-    if (sort === 'amount') return amountOf(a) - amountOf(b);
+    if (sort === 'amount') return n0(amountOf(a)) - n0(amountOf(b));
     if (sort === 'start') return a.start.localeCompare(b.start);
     return (nextCharge(a, addDays(today, 1)) ?? '').localeCompare(nextCharge(b, addDays(today, 1)) ?? '');
   };
@@ -193,7 +206,7 @@ export function List({
     }
     return dir === 'asc' ? asc(a, b) : asc(b, a);
   });
-  const sum = rows.reduce((a, s) => a + (['ended', 'terminated'].includes(effectiveStatus(s, today)) ? 0 : mo(s)), 0);
+  const sum = rows.reduce((a, s) => a + (isStopped(effectiveStatus(s, today)) ? 0 : mo(s)), 0);
   const saved = new Map(cancelSavings(state, today).items.map((x) => [x.sub.id, x.saved]));
   // 只按筛选范围识别报告，排序、视图及时间轴窗口不影响报告。
   const reportKey = JSON.stringify([category ?? null, filter, cat, pay, words.join(' ')]);
@@ -320,6 +333,7 @@ export function List({
               const st = effectiveStatus(s, today);
               const n = nextCharge(s, addDays(today, 1));
               const d = n ? diffDays(today, n) : undefined;
+              const v = shown(s, n);
               const cur = currentPhase(s, today);
               const up = upcomingPhase(s, today);
               const m = state.methods.find((x) => x.id === cur.methodId);
@@ -346,12 +360,8 @@ export function List({
                         </span>
                       )}
                       {st === 'upcoming' && !up && <span className="badge blue">{t('list.status.upcoming')}</span>}
-                      {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
-                      {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
-                      {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
-                      {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
-                      {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
-                      <StopBadge sub={s} today={today} readonly={state.readonly} />
+                      <StatusBadges st={st} />
+                      <StopBadge sub={s} today={today} />
                       {s.share?.role === 'owner' && <span className="badge blue">{t('list.badge.share')}</span>}
                       {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
                       {s.proxy && <ProxyBadge state={state} s={s} today={today} />}
@@ -366,15 +376,15 @@ export function List({
                     <PayBadge m={m} />
                   </div>
                   <div className="sc-price">
-                    <Amount plain value={shown(s, n).value} ccy={shown(s, n).ccy} />
+                    <Amount plain value={v.value} ccy={v.ccy} />
                     <span className="sc-per">/{perLabel(cur)}</span>
                   </div>
                   <div className="sc-foot">
-                    <span>{shown(s, n).sub ?? '\u00a0'}</span>
+                    <span>{v.sub ?? '\u00a0'}</span>
                     <span className={d != null && d <= 3 ? 'soon' : ''}>
                       {st === 'lifetime' ? (
                         s.start.slice(0, 7)
-                      ) : ['ended', 'terminated'].includes(st) ? (
+                      ) : isStopped(st) ? (
                         saved.get(s.id) ? (
                           <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
                         ) : (
@@ -447,11 +457,7 @@ export function List({
                             )}
                           />
                           {st === 'upcoming' && <span className="badge blue">{t('list.status.upcoming')}</span>}
-                          {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
-                          {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
-                          {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
-                          {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
-                          {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
+                          <StatusBadges st={st} />
                           {s.share?.role === 'owner' && s.share.members.length > 0 && <span className="badge blue">{t('list.badge.share')}</span>}
                           {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
                           {s.proxy && (
@@ -503,7 +509,7 @@ export function List({
                     <span className={`lt-next ${d != null && d <= 3 ? 'soon' : ''}`}>
                       {st === 'lifetime' ? (
                         t('list.status.lifetime')
-                      ) : ['ended', 'terminated'].includes(st) ? (
+                      ) : isStopped(st) ? (
                         saved.get(s.id) ? (
                           <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
                         ) : (
@@ -735,4 +741,17 @@ function CardGlow({ sub }: { sub: Subscription }) {
       : subImage(sub);
   const tint = useIconTint(src);
   return <div className="sc-glow" style={{ '--glow': tint ?? catColor(sub.category) } as Record<string, string>} />;
+}
+
+/** 卡片与列表视图共用的状态徽章（试用、即将到期、暂停、已结束、被停用）；未开始、合租、代付的徽章两处规则不同，各自保留 */
+function StatusBadges({ st }: { st: string }) {
+  return (
+    <>
+      {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
+      {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
+      {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
+      {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
+      {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
+    </>
+  );
 }

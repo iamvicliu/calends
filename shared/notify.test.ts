@@ -58,6 +58,7 @@ function fixture() {
   const sent: Array<{ to: string; subject: string }> = [];
   let fails = true;
   let failTo = '';
+  let hang = false;
   const env = {
     DB: {
       prepare,
@@ -70,6 +71,8 @@ function fixture() {
     EMAIL: {
       async send(msg: { to: string; subject: string }) {
         sent.push(msg);
+        // 模拟发送途中 Worker 被中止：这次调用永远不会返回
+        if (hang) return new Promise(() => {});
         if (fails || msg.to === failTo) throw new Error('fixture failure');
       },
     },
@@ -83,6 +86,10 @@ function fixture() {
     },
     success() {
       fails = false;
+      hang = false;
+    },
+    hang() {
+      hang = true;
     },
     failOnly(to: string) {
       fails = false;
@@ -137,6 +144,28 @@ test('11. 重试成功即停止，任一渠道成功也不重发给成功渠道'
     await runScheduled(f.env, st, Date.parse('2026-01-02T02:00Z'));
     assert.equal(f.sent.length, 4);
     assert.equal(f.db.prepare("SELECT status FROM notify_log WHERE dedupe_key='partial'").get()!.status, 'partial 1/2');
+  } finally {
+    f.db.close();
+  }
+});
+
+test('发送途中崩溃留下的 sending 在租约过后会被重新发送，租约内不重复发送', async () => {
+  const f = fixture();
+  try {
+    const st = state();
+    const now = Date.parse('2026-01-01T09:00Z');
+    f.hang();
+    void sendDigest(f.env, st, digest, { now });
+    await new Promise((r) => setTimeout(r, 10));
+    assert.equal(f.db.prepare('SELECT status FROM notify_log').get()!.status, 'sending');
+    f.success();
+    await runScheduled(f.env, st, now + 5 * 60_000);
+    assert.equal(f.sent.length, 1);
+    await runScheduled(f.env, st, now + 11 * 60_000);
+    assert.equal(f.sent.length, 2);
+    const row = f.db.prepare('SELECT status, attempts FROM notify_log').get()!;
+    assert.equal(row.status, 'sent');
+    assert.equal(row.attempts, 2);
   } finally {
     f.db.close();
   }

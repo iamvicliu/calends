@@ -39,6 +39,7 @@
   "subError": {
     "name": "Nama wajib diisi",
     "price": "Harga tidak valid",
+    "paymentCurrency": "Mata uang pembayaran harus sama dengan mata uang paket",
     "start": "Tanggal mulai tidak valid",
     "cycle": "Siklus tagihan tidak valid",
     "refundAmount": "Masukkan jumlah positif dan mata uang yang valid",
@@ -218,5 +219,6 @@
     "badDate": "{field} asli \"{value}\" tidak dikenali, tidak diimpor",
     "nextDue": "tanggal pembayaran berikutnya",
     "end": "tanggal berakhir"
-  }
+  },
+  "fxIncomplete": "Beberapa jumlah tidak dapat dikonversi karena kurs tidak tersedia, jadi hasil ini tidak lengkap."
 }

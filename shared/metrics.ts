@@ -20,19 +20,15 @@ import {
   priceAt,
   runwayFor,
   type Charge,
+  DAYS_PER_MONTH,
 } from './billing.ts';
-import { chargeValue, convertOn, toBaseAt } from './fx.ts';
+import { chargeBaseOrNaN, chargeValue, convertOn, toBaseAt } from './fx.ts';
 import { cnDate, money } from './format.ts';
 import { intlLocale, t } from './i18n.ts';
 import type { AppState, PaymentMethod, Subscription } from './types.ts';
 import { transferRows, transferredStop } from './transfers.ts';
 
-const MONTH = 30.4375;
-
-/** 不带日期 = 当前汇率（固定汇率口径）；带日期 = 当天汇率 */
-function toBase(state: AppState, amount: number, ccy: string, date?: string): number {
-  return toBaseAt(state, amount, ccy, date);
-}
+const MONTH = DAYS_PER_MONTH;
 
 /** day 当天这个订阅贡献的月成本（本位币，我承担的部分）；不在计费状态则为 0 */
 export function contributionOn(state: AppState, s: Subscription, day: string, fxDate?: string): number {
@@ -45,7 +41,7 @@ export function contributionOn(state: AppState, s: Subscription, day: string, fx
   if (s.status === 'cancelled' && !s.end) return 0;
   if (s.status === 'paused' && (s.pausedAt ?? day) <= day) return 0;
   if (s.status === 'trial' && s.trialEnd && s.trialEnd > day) return 0;
-  return toBase(state, monthlyGross(s, day), s.currency, fxDate) * myShareFactor(s, day);
+  return toBaseAt(state, monthlyGross(s, day), s.currency, fxDate) * myShareFactor(s, day);
 }
 
 /** fxDate 缺省为当前汇率；传入则按该日汇率 */
@@ -136,7 +132,7 @@ export interface LedgerEvent {
 function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[] {
   const out: LedgerEvent[] = [];
   if (s.cycle.unit === 'lifetime') {
-    if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'buy', delta: toBase(state, s.price, s.currency) });
+    if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'buy', delta: toBaseAt(state, s.price, s.currency) });
     return out;
   }
   const after = (d: string) => contributionOn(state, s, d);
@@ -145,7 +141,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       date: s.start,
       sub: s,
       kind: 'start',
-      delta: after(s.start) || after(addDays(s.start, 1)) || toBase(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.start),
+      delta: after(s.start) || after(addDays(s.start, 1)) || toBaseAt(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.start),
     });
   const hist = (s.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
   for (let i = 1; i < hist.length; i++) {
@@ -157,7 +153,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       date: hist[i].from,
       sub: s,
       kind: 'price',
-      delta: toBase(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, hist[i].from),
+      delta: toBaseAt(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, hist[i].from),
       note: `${prev} → ${cur} ${s.currency}`,
     });
   }
@@ -166,7 +162,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       date: s.intro.until,
       sub: s,
       kind: 'intro-end',
-      delta: toBase(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until),
+      delta: toBaseAt(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until),
     });
   }
   if (s.stop && s.stop.date <= today)
@@ -410,7 +406,7 @@ export function cancelSavings(
   const items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> = [];
   for (const s of state.subscriptions) {
     if (s.proxy || s.cycle.unit === 'lifetime' || !s.end || s.end > today) continue;
-    const monthly = toBase(state, (priceAt(s, s.end) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.end);
+    const monthly = toBaseAt(state, (priceAt(s, s.end) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.end);
     const since = s.stop ? s.stop.paidThrough : s.end;
     const saved = (monthly * Math.max(0, diffDays(since, today))) / MONTH;
     if (saved > 0) items.push({ sub: s, saved, since, monthly });
@@ -561,7 +557,7 @@ export function insights(state: AppState, today: string): Insight[] {
     .filter((x) => x.n && diffDays(today, x.n) <= 60)
     .sort((a, b) => a.n!.localeCompare(b.n!));
   if (yearly.length) {
-    const sum = yearly.reduce((a, x) => a + toBase(state, priceAt(x.s, x.n!), x.s.currency), 0);
+    const sum = yearly.reduce((a, x) => a + toBaseAt(state, priceAt(x.s, x.n!), x.s.currency), 0);
     out.push({
       id: 'yearly-window',
       tone: 'warn',
@@ -681,12 +677,15 @@ export interface YearReview {
   year: string;
   /** 当年停止的阶段截至 today 仍未退回的损失（我的份额、本位币） */
   stopLoss: number;
+  /** 当年扣款（含退款负数，全额而非我的份额，不含代付）加转让现金，本位币 */
   total: number;
+  /** 当年扣款记录笔数：含退款与失败的扣款（与月报「不含退款、失败」的笔数口径不同） */
   charges: number;
   top: Array<{ sub: Subscription; sum: number }>;
   /** 这一年每个订阅花了多少，从多到少 */
   items: Array<{ sub: Subscription; sum: number }>;
   longest?: { sub: Subscription; days: number };
+  /** 当年开始、当年结束的订阅：含代付 */
   newSubs: Subscription[];
   ended: Subscription[];
   currencies: number;
@@ -744,7 +743,8 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
  */
 export function yearCost(state: AppState, s: Subscription, today: string): number {
   const y = today.slice(0, 4);
+  // 缺汇率的扣款让合计为 NaN（显示为不可用），不当成 0
   return chargesBetween(s, `${y}-01-01`, `${y}-12-31`, today)
     .filter((c) => c.kind !== 'failed')
-    .reduce((a, c) => a + chargeValue(state, c), 0);
+    .reduce((a, c) => a + chargeBaseOrNaN(state, c), 0);
 }

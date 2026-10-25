@@ -22,6 +22,7 @@ export function prepareSubWrite(
   refs: Pick<AppState, 'fx' | 'methods'>,
 ): { sub: Subscription; error?: undefined } | { error: string } {
   let sub = reconcileRenewalRules(previous, next, today);
+  if (sub.tags == null) sub = { ...sub, tags: [] };
   // Clearing an existing exit also clears its settlement. New orphan refunds fail validation.
   if (sub.share)
     sub = {

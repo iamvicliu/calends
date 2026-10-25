@@ -13,8 +13,9 @@ import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subsc
 import { Picker } from '../components/Picker.tsx';
 import { MetricCards, Metric, Amount, ask, Cell, Group, Icon, IconButton, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { go } from '../router.ts';
-import { deletePerson, getState, mergePerson, run, savePerson, saveSub } from '../store.ts';
-import { ContactField, contactText, contactValue, contactUrl, MemberSheet, viaLabel } from './Members.tsx';
+import { copyText, toast, deletePerson, getState, mergePerson, run, savePerson, saveSub } from '../store.ts';
+import { MemberSheet } from './Members.tsx';
+import { ContactField, contactText, contactValue, contactUrl, viaLabel } from '../components/Contact.tsx';
 import { EntrySheet, LedgerSheet } from './Proxy.tsx';
 import './people-list.css';
 
@@ -351,7 +352,7 @@ function PersonSheet({
       const avatar = await compressAvatar(file);
       setF((current) => ({ ...current, avatar }));
     } catch (error) {
-      await ask(error instanceof Error ? error.message : t('server.avatarInvalid'));
+      toast(error instanceof Error ? error.message : t('server.avatarInvalid'), 'error');
     } finally {
       busyRef.current = false;
       setAvatarBusy(false);
@@ -584,7 +585,7 @@ function PersonSheet({
                           <IconButton
                             aria-label={t('family.member.copyAccount')}
                             title={t('family.member.copyAccount')}
-                            onClick={() => void run(() => navigator.clipboard.writeText(accountValue(i).trim()), t('detail.copied'))}
+                            onClick={() => void copyText(accountValue(i).trim(), t('detail.copied'))}
                           >
                             <Icon name="copy" size={14} />
                           </IconButton>

@@ -4,6 +4,7 @@
   "invalidItem": "{name}: {error}",
   "notPublic": "Este controle não é público",
   "idMismatch": "Os IDs não correspondem",
+  "invalidJson": "O corpo da requisição não é um JSON válido.",
   "invalidMethod": "Forma de pagamento inválida",
   "invalidBackup": "Arquivo de backup inválido",
   "refreshFailed": "Falha ao atualizar",

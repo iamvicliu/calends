@@ -14,11 +14,12 @@ import {
   type Subscription,
 } from '../shared/types.ts';
 import { mergePeople, refsFor, syncPerson } from '../shared/people.ts';
-import { checkSettings, deleteMethodData, deleteSubscriptionSettings, methodReferences, pruneSettingsRefs } from '../shared/ledger-edit.ts';
+import { checkSettings, deleteMethodData, deleteSubscriptionSettings, methodReferences, pruneSettingsRefs, validateMethod } from '../shared/ledger-edit.ts';
 import {
   DEFAULT_MAX_SESSIONS,
   authStatus,
   changePassword,
+  constantEqual,
   deletePasskey,
   isAuthed,
   listPasskeys,
@@ -38,7 +39,7 @@ import {
 } from './auth.ts';
 import { maskForPublic } from '../shared/mask.ts';
 import type { Env } from './env.ts';
-import { backfill, fxStatus, recordToday } from './fx.ts';
+import { backfill, fxStatus, refreshFx } from './fx.ts';
 import { buildIcs } from './ics.ts';
 import { buildDaily, buildMonthly, runScheduled, sendDigest, type Digest } from './notify.ts';
 import { renderEmail } from './email.ts';
@@ -49,6 +50,7 @@ import {
   getRev,
   getSettings,
   loadState,
+  loadMethods,
   loadSubs,
   putKv,
   replaceAll,
@@ -62,12 +64,14 @@ import { mergePrefs, type Prefs } from '../shared/prefs.ts';
 import { cleanCategories, renameInSubs } from '../shared/categories.ts';
 import { createToken, listTokens, mcp, revokeToken } from './ai/mcp.ts';
 import { fetchPublic } from './url-guard.ts';
-import { appStorePlans, searchAppStore, TOOLS, toolTitle } from './ai/mcp-tools.ts';
+import { TOOLS, toolTitle } from './ai/mcp-tools.ts';
+import { appStorePlans, searchAppStore } from './appstore.ts';
 import { exportAll, parseBackup, restoreAll } from './backup.ts';
 import { apply, chat, clearChats, listChats, saveChat, saveConfig, testConfig, viewConfig } from './ai/assistant.ts';
-import { requestLocale, settingsLocale, applyLocale } from './i18n.ts';
+import { requestLocale, settingsLocale, applyLocale, withLocaleScope } from './i18n.ts';
 import { t } from '../shared/i18n.ts';
 import { ensureMigrated } from './migrate.ts';
+import { HttpError, readJson } from './http.ts';
 
 const json = (data: unknown, status = 200, rev?: number | Revision) =>
   Response.json(data, {
@@ -79,16 +83,6 @@ const json = (data: unknown, status = 200, rev?: number | Revision) =>
     },
   });
 const bad = (msg: string, status = 400) => json({ error: msg }, status);
-
-async function refreshFx(env: Env): Promise<FxTable> {
-  const res = await fetch('https://open.er-api.com/v6/latest/USD', { cf: { cacheTtl: 3600 } });
-  const body = (await res.json()) as { result?: string; rates?: Record<string, number> };
-  if (body.result !== 'success' || !body.rates) throw new Error(t('server.fxApiError'));
-  const fx: FxTable = { base: 'USD', rates: body.rates, fetchedAt: new Date().toISOString() };
-  await putKv(env, 'fx', fx);
-  await recordToday(env, fx, (await getSettings(env)).timezone);
-  return fx;
-}
 
 /** 批量导入时第一条不合格的订阅 */
 function invalidIn(subs: Subscription[]): string | undefined {
@@ -117,10 +111,19 @@ function cleanPerson(raw: Partial<Person>, id: string): Person | undefined {
   };
 }
 
-const subsOf = async (env: Env) =>
-  (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as Subscription);
-const methodsOf = async (env: Env) =>
-  (await env.DB.prepare('SELECT data FROM methods').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as PaymentMethod);
+/**
+ * 写入一张支付方式前的校验：与 MCP update_payment_method 同一个 validateMethod（名称、币种要有汇率）。
+ * 只拦本次新引入的币种：已存记录的原币种即使汇率表里没有了也放行，免得旧卡改个备注都存不了。
+ */
+function methodError(fx: FxTable, previous: PaymentMethod | undefined, pm: PaymentMethod): string | undefined {
+  if (!pm || typeof pm !== 'object' || typeof pm.id !== 'string' || !pm.id) return t('server.invalidMethod');
+  try {
+    validateMethod({ fx: previous && previous.currency === pm.currency ? { ...fx, rates: { ...fx.rates, [pm.currency]: 1 } } : fx }, pm);
+  } catch (e) {
+    return e instanceof Error ? e.message : t('server.invalidMethod');
+  }
+  return undefined;
+}
 
 async function api(req: Request, env: Env, path: string): Promise<Response> {
   const method = req.method;
@@ -138,9 +141,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
 
   const authed = dev || (await isAuthed(req, env));
   if (path === '/api/public' && method === 'GET') {
-    const state = await loadState(env);
-    if (!state.settings.publicView && !dev) return bad(t('server.notPublic'), 404);
-    return json(maskForPublic(state));
+    // 先看是否公开；公开时也只读加载（旧数据的转换只在内存里做），未登录访客的请求从不写库
+    if (!(await getSettings(env)).publicView && !dev) return bad(t('server.notPublic'), 404);
+    return json(maskForPublic(await loadState(env, false)));
   }
   if (!authed) return bad('unauthorized', 401);
   if (path === '/api/rev' && method === 'GET') return json({ rev: await getRev(env) });
@@ -176,7 +179,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     return json(TOOLS.map((x) => ({ name: x.name, title: toolTitle(x.name), description: x.description, write: !!x.write })));
   if (path === '/api/mcp/tokens' && method === 'GET') return json((await listTokens(env)).map(({ hash: _h, ...rest }) => rest));
   if (path === '/api/mcp/tokens' && method === 'POST') {
-    const b = (await req.json()) as { name?: string; scope?: string };
+    const b = (await readJson(req)) as { name?: string; scope?: string };
     const { token, item } = await createToken(env, b.name ?? '', b.scope === 'read' ? 'read' : 'write');
     const { hash: _h, ...rest } = item;
     return json({ token, item: rest });
@@ -189,14 +192,13 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   let m = path.match(/^\/api\/subscriptions\/([\w-]+)$/);
   if (m) {
     if (method === 'PUT') {
-      let sub = (await req.json()) as Subscription;
+      let sub = (await readJson(req)) as Subscription;
       if (sub.id !== m[1]) return bad(t('server.idMismatch'));
-      const previous = (await subsOf(env)).find((x) => x.id === sub.id);
+      const previous = (await loadSubs(env)).find((x) => x.id === sub.id);
       const today = todayIn((await getSettings(env)).timezone);
-      const prepared = prepareSubWrite(previous, sub, today, { methods: await methodsOf(env), fx: await getFx(env) });
+      const prepared = prepareSubWrite(previous, sub, today, { methods: await loadMethods(env), fx: await getFx(env) });
       if (prepared.error !== undefined) return bad(prepared.error);
       sub = prepared.sub;
-      sub.updatedAt = new Date().toISOString();
       const rev = await upsert(env, 'subscriptions', sub.id, sub);
       return json(sub, 200, rev);
     }
@@ -213,17 +215,17 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const people = await getPeople(env);
     const id = m[1];
     if (m[2] && method === 'POST') {
-      const into = String(((await req.json()) as { into?: string }).into ?? '');
+      const into = String(((await readJson(req)) as { into?: string }).into ?? '');
       if (!people.some((p) => p.id === id) || !people.some((p) => p.id === into) || into === id) return bad(t('server.personNotFound'), 404);
-      const r = mergePeople(people, await subsOf(env), id, into);
-      const subscriptions = r.subs.map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
+      const r = mergePeople(people, await loadSubs(env), id, into);
+      const subscriptions = r.subs;
       const rev = await writePeople(env, r.people, subscriptions);
       return json({ people: r.people, subscriptions }, 200, rev);
     }
     if (!m[2] && method === 'PUT') {
       let p: Person | undefined;
       try {
-        p = cleanPerson((await req.json()) as Partial<Person>, id);
+        p = cleanPerson((await readJson(req)) as Partial<Person>, id);
       } catch (e) {
         return bad(e instanceof Error ? e.message : t('server.invalidPerson'));
       }
@@ -236,13 +238,13 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       } catch (e) {
         return bad(e instanceof Error ? e.message : t('server.invalidPerson'));
       }
-      const subscriptions = syncPerson(await subsOf(env), p).map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
+      const subscriptions = syncPerson(await loadSubs(env), p);
       const rev = await writePeople(env, next, subscriptions);
       return json({ person: p, subscriptions }, 200, rev);
     }
     if (!m[2] && method === 'DELETE') {
       // 还有合租、代付指向他时不删：先合并到别人名下或从那些订阅里移除，账不会悬空
-      const n = refsFor(await subsOf(env), id).length;
+      const n = refsFor(await loadSubs(env), id).length;
       if (n) return bad(t('server.personInUse', { count: n }), 409);
       const rev = await putKv(
         env,
@@ -255,8 +257,14 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   m = path.match(/^\/api\/methods\/([\w-]+)$/);
   if (m) {
     if (method === 'PUT') {
-      const pm = (await req.json()) as PaymentMethod;
-      if (pm.id !== m[1] || !pm.name?.trim()) return bad(t('server.invalidMethod'));
+      const pm = (await readJson(req)) as PaymentMethod;
+      if (pm?.id !== m[1] || !pm.name?.trim()) return bad(t('server.invalidMethod'));
+      const error = methodError(
+        await getFx(env),
+        (await loadMethods(env)).find((x) => x.id === pm.id),
+        pm,
+      );
+      if (error) return bad(error);
       const rev = await upsert(env, 'methods', pm.id, pm);
       return json(pm, 200, rev);
     }
@@ -265,7 +273,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     if (method === 'DELETE') {
       const q = new URL(req.url).searchParams;
       const into = q.get('into') || (q.get('clear') === '1' ? null : undefined);
-      const st = { subscriptions: await loadSubs(env), methods: await methodsOf(env), settings: await getSettings(env) } as AppState;
+      const st = { subscriptions: await loadSubs(env), methods: await loadMethods(env), settings: await getSettings(env) } as AppState;
       if (into === undefined && methodReferences(st, m[1]).length) return json({ error: t('server.methodInUse'), code: 'in_use' }, 409);
       let r: ReturnType<typeof deleteMethodData>;
       try {
@@ -273,8 +281,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       } catch {
         return bad(t('server.invalidMethod'));
       }
-      const now = new Date().toISOString();
-      const subscriptions = r.subscriptions.map((x) => ({ ...x, updatedAt: now }));
+      const subscriptions = r.subscriptions;
       const rev = await saveLedgerEdit(env, { settings: r.settings, subscriptions }, [m[1]]);
       return json({ ok: true, settings: r.settings, subscriptions }, 200, rev);
     }
@@ -287,14 +294,14 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   }
   if (path === '/api/settings' && method === 'PUT') {
     const cur = await getSettings(env);
-    const patch = (await req.json()) as Partial<Settings>;
+    const patch = (await readJson(req)) as Partial<Settings>;
     const next = { ...DEFAULT_SETTINGS, ...cur, ...patch, icsToken: cur.icsToken };
     // null 表示清空这个设置
     for (const k of Object.keys(next) as Array<keyof Settings>) if (next[k] === null) delete next[k];
     next.notifyHour = Math.min(23, Math.max(0, Math.round(next.notifyHour)));
     if (next.maxSessions !== undefined) next.maxSessions = Math.min(50, Math.max(1, Math.round(next.maxSessions)));
     // 与 MCP update_settings 同一套校验：只校验改动过的字段，再剔除早已失效的引用
-    const refs = { subscriptions: await subsOf(env), methods: await methodsOf(env), fx: await getFx(env) };
+    const refs = { subscriptions: await loadSubs(env), methods: await loadMethods(env), fx: await getFx(env) };
     try {
       checkSettings(refs, { ...DEFAULT_SETTINGS, ...cur }, next);
     } catch (e) {
@@ -307,13 +314,12 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   }
   // 分类表：整表保存；renames（旧名 → 新名）把相关订阅一起改掉，改名、删除时移走订阅都靠它
   if (path === '/api/categories' && method === 'PUT') {
-    const b = (await req.json()) as { categories?: unknown; renames?: Record<string, unknown> };
+    const b = (await readJson(req)) as { categories?: unknown; renames?: Record<string, unknown> };
     const r = cleanCategories(b.categories);
     if ('error' in r) return bad(r.error);
     const renames: Record<string, string> = {};
     for (const [from, to] of Object.entries(b.renames ?? {})) if (typeof to === 'string' && to.trim()) renames[from] = to.trim();
-    const now = new Date().toISOString();
-    const changed = renameInSubs(await loadSubs(env), renames).map((s) => ({ ...s, updatedAt: now }));
+    const changed = renameInSubs(await loadSubs(env), renames);
     const settings = { ...(await getSettings(env)), categories: r.list };
     const rev = await saveSettingsWithSubs(env, settings, changed);
     return json({ settings, subscriptions: changed }, 200, rev);
@@ -338,7 +344,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/backup' && method === 'POST') {
     let b;
     try {
-      b = parseBackup(await req.json());
+      b = parseBackup(await readJson(req));
     } catch (e) {
       return bad(e instanceof Error ? e.message : t('server.invalidBackup'));
     }
@@ -349,15 +355,25 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     return json({ restored, state }, 200, state.rev);
   }
   if (path === '/api/import' && method === 'POST') {
-    const body = (await req.json()) as { subscriptions?: Subscription[]; methods?: PaymentMethod[]; settings?: Partial<Settings>; mode?: 'merge' | 'replace' };
+    // 只导入订阅与支付方式；设置走 PUT /api/settings 的校验，这里不再接受
+    const body = (await readJson(req)) as { subscriptions?: Subscription[]; methods?: PaymentMethod[]; mode?: 'merge' | 'replace' };
     const subs = body.subscriptions ?? [];
     const err = invalidIn(subs);
     if (err) return bad(err);
-    await replaceAll(env, subs, body.methods ?? [], body.mode === 'replace' ? 'replace' : 'merge');
-    if (body.settings) {
-      const cur = await getSettings(env);
-      await putKv(env, 'settings', { ...cur, ...body.settings, icsToken: cur.icsToken });
+    const methods = body.methods ?? [];
+    const mode = body.mode === 'replace' ? 'replace' : 'merge';
+    // 与网页钱包、MCP 同一套支付方式校验；合并导入时已存的同 id 记录原币种放行
+    const existing = mode === 'merge' ? await loadMethods(env) : [];
+    const fx = await getFx(env);
+    for (const pm of methods) {
+      const error = methodError(
+        fx,
+        existing.find((x) => x.id === pm?.id),
+        pm,
+      );
+      if (error) return bad(t('server.invalidItem', { name: pm?.name ?? '?', error }));
     }
+    await replaceAll(env, subs, methods, mode);
     const state = await loadState(env);
     return json(state, 200, state.rev);
   }
@@ -379,7 +395,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   }
   // AI 助手（DeepSeek）
   if (path === '/api/assistant/config' && method === 'GET') return json(await viewConfig(env));
-  if (path === '/api/assistant/config' && method === 'PUT') return json(await saveConfig(env, (await req.json()) as Parameters<typeof saveConfig>[1]));
+  if (path === '/api/assistant/config' && method === 'PUT') return json(await saveConfig(env, (await readJson(req)) as Parameters<typeof saveConfig>[1]));
   if (path === '/api/assistant/test' && method === 'POST')
     return json(await testConfig(env, (await req.json().catch(() => ({}))) as { apiKey?: string; baseUrl?: string }));
   // 聊天记录
@@ -389,17 +405,17 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const cm = path.match(/^\/api\/assistant\/chats\/([\w-]{1,40})$/);
     if (cm && method === 'PUT') {
       try {
-        await saveChat(env, cm[1], await req.json());
+        await saveChat(env, cm[1], await readJson(req));
         return json({ ok: true });
       } catch (e) {
         return bad(e instanceof Error ? e.message : String(e));
       }
     }
   }
-  if (path === '/api/assistant/chat' && method === 'POST') return chat(env, (await req.json()) as Parameters<typeof chat>[1], req.signal);
+  if (path === '/api/assistant/chat' && method === 'POST') return chat(env, (await readJson(req)) as Parameters<typeof chat>[1], req.signal);
   if (path === '/api/assistant/apply' && method === 'POST') {
     try {
-      const result = await apply(env, (await req.json()) as Parameters<typeof apply>[1]);
+      const result = await apply(env, (await readJson(req)) as Parameters<typeof apply>[1]);
       // A missing revision after commit must not turn a saved change into a retryable error.
       return json(result, 200, await getRev(env).catch(() => undefined));
     } catch (e) {
@@ -461,70 +477,80 @@ async function scheduledNotifications(env: Env, now: number): Promise<void> {
 }
 
 export default {
-  async fetch(req: Request, env: Env): Promise<Response> {
-    const url = new URL(req.url);
-    const prefix = normalizeBasePath(env.BASE_PATH);
-    url.pathname = stripBase(url.pathname, prefix);
-    // 旧域名：页面跳到新域名，接口、MCP、日历订阅继续在旧域名上可用
-    if (env.OLD_HOSTS && env.SITE_URL && env.OLD_HOSTS.split(',').some((h) => h.trim() === url.hostname)) {
-      const keep = url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/');
-      if (!keep) return Response.redirect(`${siteUrl(env.SITE_URL, prefix)}${url.pathname}${url.search}`, 301);
-    }
-    // 没配置 SITE_URL 时，以当前访问的地址作为站点地址（提醒、日历里的链接）
-    env = { ...env, SITE_URL: siteUrl(env.SITE_URL || url.origin, prefix) };
-    try {
-      if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) await ensureMigrated(env);
-      // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
-      if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
-        if (url.pathname !== '/api/rev') {
-          const s = await getSettings(env);
-          applyLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
-        }
-      }
-      if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
-      if (url.pathname === '/mcp') {
-        // 在浏览器里打开 MCP 地址时，带去连接页查看令牌和配置
-        if (req.method === 'GET' && req.headers.get('accept')?.includes('text/html')) return Response.redirect(`${env.SITE_URL}/connect`, 302);
-        return await mcp(req, env);
-      }
-      const cal = url.pathname.match(/^\/cal\/([a-f0-9]{32})\.ics$/);
-      if (cal) {
-        const state = await loadState(env);
-        if (!state.settings.icsToken || state.settings.icsToken !== cal[1]) return new Response('not found', { status: 404 });
-        return new Response(buildIcs(state, env.SITE_URL ?? ''), {
-          headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'private, max-age=1800' },
-        });
-      }
-      const asset = await env.ASSETS.fetch(new Request(url, req));
-      // Assets 对 index.html 等的规范化重定向也必须留在当前安装前缀下。
-      const location = asset.headers.get('location');
-      if (prefix && asset.status >= 300 && asset.status < 400 && location) {
-        const target = new URL(location, url);
-        if (target.origin === url.origin) {
-          target.pathname = withBase(target.pathname, prefix);
-          const headers = new Headers(asset.headers);
-          headers.set('location', target.href);
-          return new Response(asset.body, { status: asset.status, headers });
-        }
-      }
-      return asset;
-    } catch (e) {
-      console.error(e);
-      return bad('server error', 500);
-    }
+  fetch(req: Request, env: Env): Promise<Response> {
+    return withLocaleScope(() => handleFetch(req, env));
   },
 
-  async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    await ensureMigrated(env);
-    // 通知每刻钟检查；原有的每日维护仍只在 UTC 整点执行。
-    if (new Date(controller.scheduledTime).getUTCMinutes() >= 15) {
-      await scheduledNotifications(env, controller.scheduledTime);
-      return;
-    }
-    const fx = await getFx(env);
-    if (Date.now() - Date.parse(fx.fetchedAt) > 20 * 3_600_000) {
-      ctx.waitUntil(refreshFx(env).catch((e) => console.error('[fx]', e)));
-    }
-    await scheduledNotifications(env, controller.scheduledTime);
+  scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+    return withLocaleScope(() => handleScheduled(controller, env, ctx));
   },
 } satisfies ExportedHandler<Env>;
+
+async function handleFetch(req: Request, env: Env): Promise<Response> {
+  const url = new URL(req.url);
+  const prefix = normalizeBasePath(env.BASE_PATH);
+  url.pathname = stripBase(url.pathname, prefix);
+  // 旧域名：页面跳到新域名，接口、MCP、日历订阅继续在旧域名上可用
+  if (env.OLD_HOSTS && env.SITE_URL && env.OLD_HOSTS.split(',').some((h) => h.trim() === url.hostname)) {
+    const keep = url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/');
+    if (!keep) return Response.redirect(`${siteUrl(env.SITE_URL, prefix)}${url.pathname}${url.search}`, 301);
+  }
+  // 没配置 SITE_URL 时，以当前访问的地址作为站点地址（提醒、日历里的链接）
+  env = { ...env, SITE_URL: siteUrl(env.SITE_URL || url.origin, prefix) };
+  try {
+    if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) await ensureMigrated(env);
+    // 公开页、静态资源不需要文案；接口、MCP、日历订阅按请求或设置切换语言
+    if (url.pathname.startsWith('/api/') || url.pathname === '/mcp' || url.pathname.startsWith('/cal/')) {
+      if (url.pathname !== '/api/rev') {
+        const s = await getSettings(env);
+        applyLocale(url.pathname === '/mcp' ? settingsLocale(s) : requestLocale(req, s));
+      }
+    }
+    if (url.pathname.startsWith('/api/')) return await api(req, env, url.pathname);
+    if (url.pathname === '/mcp') {
+      // 在浏览器里打开 MCP 地址时，带去连接页查看令牌和配置
+      if (req.method === 'GET' && req.headers.get('accept')?.includes('text/html')) return Response.redirect(`${env.SITE_URL}/connect`, 302);
+      return await mcp(req, env);
+    }
+    const cal = url.pathname.match(/^\/cal\/([a-f0-9]{32})\.ics$/);
+    if (cal) {
+      // 先定长比对令牌，对上了才只读加载账本：猜令牌的请求既得不到计时线索，也不会触发写库
+      const token = (await getSettings(env)).icsToken;
+      if (!token || !constantEqual(token, cal[1])) return new Response('not found', { status: 404 });
+      return new Response(buildIcs(await loadState(env, false), env.SITE_URL ?? ''), {
+        headers: { 'content-type': 'text/calendar; charset=utf-8', 'cache-control': 'private, max-age=1800' },
+      });
+    }
+    const asset = await env.ASSETS.fetch(new Request(url, req));
+    // Assets 对 index.html 等的规范化重定向也必须留在当前安装前缀下。
+    const location = asset.headers.get('location');
+    if (prefix && asset.status >= 300 && asset.status < 400 && location) {
+      const target = new URL(location, url);
+      if (target.origin === url.origin) {
+        target.pathname = withBase(target.pathname, prefix);
+        const headers = new Headers(asset.headers);
+        headers.set('location', target.href);
+        return new Response(asset.body, { status: asset.status, headers });
+      }
+    }
+    return asset;
+  } catch (e) {
+    if (e instanceof HttpError) return bad(e.message, e.status);
+    console.error(e);
+    return bad('server error', 500);
+  }
+}
+
+async function handleScheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
+  await ensureMigrated(env);
+  // 通知每刻钟检查；原有的每日维护仍只在 UTC 整点执行。
+  if (new Date(controller.scheduledTime).getUTCMinutes() >= 15) {
+    await scheduledNotifications(env, controller.scheduledTime);
+    return;
+  }
+  const fx = await getFx(env);
+  if (Date.now() - Date.parse(fx.fetchedAt) > 20 * 3_600_000) {
+    ctx.waitUntil(refreshFx(env).catch((e) => console.error('[fx]', e)));
+  }
+  await scheduledNotifications(env, controller.scheduledTime);
+}
