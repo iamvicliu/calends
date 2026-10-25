@@ -22,7 +22,7 @@ import type { AppState, CarRule, Person, Receipt, ShareMember, Subscription } fr
 import { isSettled, paidThrough, putRecord, removeRecord, resolveKey, setOpening, type Receivable } from '../../../shared/receivables.ts';
 import { isReceipt, PeriodStrip, ReceivableSheet, recordPeriods } from './Receivable.tsx';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle } from '../components/ui.tsx';
+import { IconButton, ask, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle, useSubmit } from '../components/ui.tsx';
 import { getState, run, savePerson, saveSub } from '../store.ts';
 import { linkPerson, PersonProfileSheet } from './People.tsx';
 import {
@@ -516,6 +516,7 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
   const removeRecordById = (id: string) =>
     run(() => saveReceivable(s, f.id, id === 'opening' ? setOpening(member!, [], undefined) : removeRecord(member!, id)), t('receivable.toastRemoved'));
 
+  const [busy, submit] = useSubmit();
   const save = () =>
     run(
       async () => {
@@ -566,16 +567,19 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
             <button
               className="btn plain"
               style={{ color: 'var(--red)' }}
+              disabled={busy}
               onClick={async () =>
                 (await ask(t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') }))) &&
-                run(async () => {
-                  const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
-                  await saveSub({
-                    ...current,
-                    share: { ...current.share!, collectFrom: collectionAnchor(current), members: current.share!.members.filter((x) => x.id !== f.id) },
-                  });
-                  onClose();
-                }, t('family.member.deleted'))
+                submit(() =>
+                  run(async () => {
+                    const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
+                    await saveSub({
+                      ...current,
+                      share: { ...current.share!, collectFrom: collectionAnchor(current), members: current.share!.members.filter((x) => x.id !== f.id) },
+                    });
+                    onClose();
+                  }, t('family.member.deleted')),
+                )
               }
             >
               {t('family.member.delete')}
@@ -585,7 +589,11 @@ function MemberForm({ state, s, member, onClose }: { state: AppState; s: Subscri
           <button className="btn" onClick={onClose}>
             {t('family.member.cancel')}
           </button>
-          <button className="btn primary" disabled={!f.name.trim() || refundInvalid(s, next) || (isNew && firstPay && payInvalid)} onClick={save}>
+          <button
+            className="btn primary"
+            disabled={busy || !f.name.trim() || refundInvalid(s, next) || (isNew && firstPay && payInvalid)}
+            onClick={() => void submit(save)}
+          >
             {isNew ? t('family.member.add') : t('family.member.save')}
           </button>
         </>

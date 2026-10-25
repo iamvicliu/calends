@@ -50,6 +50,7 @@ import {
   SubIcon,
   tipProps,
   Toolbar,
+  useSubmit,
   useWidth,
 } from '../components/ui.tsx';
 import { toBase } from '../derive.ts';
@@ -1350,6 +1351,7 @@ function ConvertSheet({ state, s, today, onClose }: { state: AppState; s: Subscr
   // 我发起时一起定收费标准：默认按价格和席位推算，改了就用改的（之后在合租详情的收费规则里也是这一份）
   const [rule, setRule] = useState<CarRule | null>(null);
   const shown = rule ?? carRule(state, { ...s, share: { role: 'owner', seats, members: [] } }, today);
+  const [busy, submit] = useSubmit();
   return (
     <Sheet
       narrow
@@ -1363,19 +1365,22 @@ function ConvertSheet({ state, s, today, onClose }: { state: AppState; s: Subscr
           </button>
           <button
             className="btn primary"
+            disabled={busy}
             onClick={() =>
-              run(
-                async () => {
-                  await saveSub({
-                    ...s,
-                    share:
-                      role === 'owner'
-                        ? { role, seats, members: [], since: today, rule: shown }
-                        : { role, seats, members: [], ownerName: ownerName.trim() || undefined, since: today },
-                  });
-                  onClose();
-                },
-                role === 'owner' ? t('family.convert.toastOwner') : t('family.convert.toastMember'),
+              submit(() =>
+                run(
+                  async () => {
+                    await saveSub({
+                      ...s,
+                      share:
+                        role === 'owner'
+                          ? { role, seats, members: [], since: today, rule: shown }
+                          : { role, seats, members: [], ownerName: ownerName.trim() || undefined, since: today },
+                    });
+                    onClose();
+                  },
+                  role === 'owner' ? t('family.convert.toastOwner') : t('family.convert.toastMember'),
+                ),
               )
             }
           >
@@ -1451,6 +1456,7 @@ function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppState; s: 
   // 下期收款日：新标准从这天起执行，也是全车往后的收款节奏；默认按现在的节奏算出的下一次
   const [next, setNext] = useState(nextCollectionDay(s, rule.billEvery, today));
   const followers = (s.share?.members ?? []).filter((m) => followsCar(state, s, m, today) && (!m.left || m.left > today)).length;
+  const [busy, submit] = useSubmit();
   const save = () =>
     run(async () => {
       const applied = applyCarRule(state, s, draft, next, today);
@@ -1468,7 +1474,7 @@ function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppState; s: 
           <button className="btn" onClick={onClose}>
             {t('family.member.cancel')}
           </button>
-          <button className="btn primary" disabled={!(draft.fee >= 0)} onClick={() => void save()}>
+          <button className="btn primary" disabled={busy || !(draft.fee >= 0)} onClick={() => void submit(save)}>
             {t('family.member.save')}
           </button>
         </>

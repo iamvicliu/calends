@@ -9,7 +9,23 @@ import { recordProxyCharge } from '../../../shared/receivable-edit.ts';
 import { ReceivableSheet } from './Receivable.tsx';
 import { DetailHead, DetailSheet, Facts, Note, Panel, Prop } from '../components/DetailKit.tsx';
 import { YearLedger } from '../components/YearLedger.tsx';
-import { MetricCards, Metric, Amount, MoneyInput, Cell, Group, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar, Icon } from '../components/ui.tsx';
+import {
+  MetricCards,
+  Metric,
+  Amount,
+  MoneyInput,
+  Cell,
+  Group,
+  NameLink,
+  PayBadge,
+  Seg,
+  Sheet,
+  StatusPill,
+  SubIcon,
+  Toolbar,
+  Icon,
+  useSubmit,
+} from '../components/ui.tsx';
 import { Plus } from 'lucide-react';
 import { contactText } from './Members.tsx';
 import { LtHead, nextSort, PlanPrice, usePhone } from '../components/LtHead.tsx';
@@ -430,6 +446,7 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
   const dirty =
     charged !== (row.charge?.amount != null ? String(row.charge.amount) : '') || (charged !== '' && chargedCcy !== (row.charge?.currency ?? row.listCurrency));
 
+  const [busy, submit] = useSubmit();
   const save = () =>
     run(async () => {
       const amount = charged === '' ? undefined : Number(charged);
@@ -459,7 +476,11 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
             {t('proxy.entry.cancel')}
           </button>
           {!future && (
-            <button className="btn primary" disabled={!dirty || (charged !== '' && !Number.isFinite(Number(charged)))} onClick={save}>
+            <button
+              className="btn primary"
+              disabled={busy || !dirty || (charged !== '' && !Number.isFinite(Number(charged)))}
+              onClick={() => void submit(save)}
+            >
               {t('proxy.entry.save')}
             </button>
           )}

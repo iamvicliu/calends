@@ -8,7 +8,7 @@ import type { Subscription } from '../../../shared/types.ts';
 import { toast } from '../store.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { CurrencySelect, Picker } from './Picker.tsx';
-import { Cell } from './ui.tsx';
+import { Cell, useSubmit } from './ui.tsx';
 
 export function stopLabel(sub: Subscription, today: string): string | undefined {
   const summary = stopSummary(sub, today);
@@ -70,17 +70,20 @@ export function StopBadge({ sub, today, readonly }: { sub: Subscription; today: 
 }
 
 /** Standalone detail action: fields plus an explicit confirmation. */
-export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: string; onApply: (s: Subscription) => void }) {
+export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: string; onApply: (s: Subscription) => unknown }) {
   const [form, setForm] = useState(() => stopForm(sub, today));
   const ended = ['ended', 'terminated'].includes(effectiveStatus(sub, today));
   const stops = phaseSubs(sub).filter((p) => p.stop);
-  const apply = () => {
-    try {
-      onApply(applyStopForm(sub, form, today));
-    } catch (error) {
-      toast(error instanceof Error ? error.message : String(error), true);
-    }
-  };
+  const [busy, submit] = useSubmit();
+  const apply = () =>
+    submit(() => {
+      try {
+        return onApply(applyStopForm(sub, form, today));
+      } catch (error) {
+        toast(error instanceof Error ? error.message : String(error), true);
+      }
+    });
+  const restore = () => submit(() => onApply(reactivate(sub, today)));
   if (sub.stop || ended)
     return (
       <div className="stop-panel">
@@ -92,7 +95,7 @@ export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: s
         ))}
         {sub.stop?.kind !== 'terminate' && sub.status !== 'terminated' && (
           <div className="cell">
-            <button type="button" className="btn" onClick={() => onApply(reactivate(sub, today))}>
+            <button type="button" className="btn" disabled={busy} onClick={restore}>
               {t('core.stop.restore')}
             </button>
           </div>
@@ -104,11 +107,11 @@ export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: s
       <StopFields sub={sub} today={today} value={form} onChange={setForm} />
       <div className="cell sheet-actions">
         {sub.end && (
-          <button type="button" className="btn" onClick={() => onApply(reactivate(sub, today))}>
+          <button type="button" className="btn" disabled={busy} onClick={restore}>
             {t('core.stop.restore')}
           </button>
         )}
-        <button type="button" className="btn primary" onClick={apply}>
+        <button type="button" className="btn primary" disabled={busy} onClick={apply}>
           {t('core.stop.title')}
         </button>
       </div>

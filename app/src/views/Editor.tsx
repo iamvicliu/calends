@@ -11,7 +11,7 @@ import { cnDateFull, flow, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Cycle, SubStatus, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle } from '../components/ui.tsx';
+import { ask, CatIcon, Cell, Group, Icon, NumInput, Seg, Sheet, Stepper, SubIcon, Toggle, useSubmit } from '../components/ui.tsx';
 import { catColor, categories, isDomainCat, presetCat } from '../derive.ts';
 import { CategorySheet } from './Categories.tsx';
 import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-form.ts';
@@ -139,6 +139,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
     handoff(f.name.trim() ? `${f.name.trim()}\n` : '', images);
   };
 
+  const [busy, submit] = useSubmit();
   const save = async () => {
     if (!priceValid) return;
     let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
@@ -238,7 +239,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           >
             {t('common.cancel')}
           </button>
-          <button className="btn primary" disabled={!f.name.trim() || !priceValid} onClick={save}>
+          <button className="btn primary" disabled={busy || !f.name.trim() || !priceValid} onClick={() => void submit(save)}>
             {isNew ? t('common.add') : t('common.done')}
           </button>
         </>

@@ -649,6 +649,27 @@ export function MoneyInput({ ccy, onChange, ...props }: { ccy: string } & JSX.In
 }
 
 /**
+ * 防重复提交：保存进行中再点（双击、回车连按）不会再执行一次。返回 [进行中, 提交]；
+ * 进行中时调用方把提交按钮设为 disabled（沿用按钮自身的禁用样式）。
+ */
+export function useSubmit(): [boolean, (fn: () => unknown) => Promise<void>] {
+  const running = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const submit = async (fn: () => unknown) => {
+    if (running.current) return;
+    running.current = true;
+    setBusy(true);
+    try {
+      await fn();
+    } finally {
+      running.current = false;
+      setBusy(false);
+    }
+  };
+  return [busy, submit];
+}
+
+/**
  * 确认弹窗：替代浏览器原生 confirm（全局禁止 alert / confirm / prompt）。
  * const ok = await ask('删除？')；取消、Esc、点遮罩都算否。由 AskLayer 统一渲染
  */
