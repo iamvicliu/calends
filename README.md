@@ -29,6 +29,7 @@ Track what you pay, when it renews, and who owes you. Calends brings subscriptio
 
 - **Flexible billing** — monthly, yearly, custom cycles and lifetime purchases, with trials, intro prices, bonus periods, pauses, advance charging and cancellation deadlines.
 - **Billing history** — keep price, plan and region changes, gaps and overlapping subscriptions. See total spent, actual monthly cost and every charge.
+- **Transfers and split payments** — count second-hand takeovers and resales in net cost, and split a charge across multiple payment methods.
 - **Multiple currencies** — historical exchange rates for past charges, current rates for forecasts, and your choice of display currency.
 - **Balances and shared plans** — track prepaid credit and gift cards, estimate when balances run out, and manage payments for friends. Shared plans have dated collection rules, member overrides, per-period receipts with skipped-period collection, prepayments and waivers, overdue tracking and exit refunds; people have private avatars and a separate account for each plan.
 - **Reports and calendar** — spending trends, cash vs. accrual, prepaid value, cancellation savings, subscription checkups and a shareable year in review. Includes month/year calendars and a private ICS feed.
@@ -78,7 +79,7 @@ docker run -d --name calends -p 8787:8787 -v calends-data:/data xizozhe/calends:
 docker logs calends
 ```
 
-Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.10.0` instead of `latest`.
+Open `http://localhost:8787/` and use the setup token printed in the logs on the login page. The named volume `calends-data` persists SQLite data at `/data`. You can also use `ghcr.io/imetn/calends:latest`. For production, pin a version tag such as `1.11.0` instead of `latest`.
 
 Alternatively, build from source with Compose. From a source checkout, Compose (in `docker/`) builds the included [Dockerfile](docker/Dockerfile) and starts the app:
 
