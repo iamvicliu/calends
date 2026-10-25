@@ -5,30 +5,30 @@ alipan.webp: Alibaba Cloud Drive app icon, App Store 512px (iTunes Search API, c
 appledev.webp: Apple Developer app icon, App Store 512px (iTunes Search API, cn storefront)
 applemusic.webp: Apple Music app icon, App Store 512px (iTunes Search API, cn storefront)
 baidupan.webp: Baidu Netdisk app icon, App Store 512px (iTunes Search API, cn storefront)
-bilibili.webp: Bilibili 大会员, 官方 App Store, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/d3/25/b7/d325b78e-392f-402d-5927-94327f0c4499/AppIcon-0-0-1x_U007epad-0-1-0-sRGB-85-220.png/512x512bb.jpg (official page: https://apps.apple.com/cn/app/%E5%93%94%E5%93%A9%E5%93%94%E5%93%A9-%E5%BC%B9%E5%B9%95%E7%95%AA%E5%89%A7%E7%9B%B4%E6%92%AD%E9%AB%98%E6%B8%85%E8%A7%86%E9%A2%91/id736536022?uo=4)
+bilibili.webp: Bilibili 大会员, 官方下载中心常规电视标识 (regular brand mark; no temporary campaign artwork), https://i0.hdslb.com/bfs/activity-plat/static/20220518/49ddaeaba3a23f61a6d2695de40d45f0/2nqyzFm9He.jpeg (official page: https://app.bilibili.com/)
 dedao.webp: Dedao app icon, App Store 512px (iTunes Search API, cn storefront)
 duolingo.webp: Duolingo app icon, App Store 512px (iTunes Search API, cn storefront)
 icloud.webp: iCloud+, 官网 apple-touch-icon, https://www.icloud.com/system/icloud.com/2638Build27/favicons/default-favicon-light-180x180.png (official page: https://www.icloud.com/)
 iqiyi.webp: iQIYI app icon, App Store 512px (iTunes Search API, cn storefront)
-jd.webp: JD.com app icon, App Store 512px (iTunes Search API, us storefront)
+jd.webp: 京东 Plus, 官网 Web App manifest 256px 图标 (regular brand mark; no temporary campaign artwork), https://img30.360buyimg.com/img/jfs/t1/399592/30/11314/40198/69a940bbF9a8c59e9/0276100100ae597d.png (official page: https://www.jd.com/manifest.json)
 leigod.webp: Leigod accelerator app icon, App Store 512px (iTunes Search API, cn storefront)
-mgtv.webp: Mango TV app icon, App Store 512px (iTunes Search API, cn storefront)
+mgtv.webp: 芒果 TV, 官网页面常规 logo 图片 (regular brand mark; no temporary campaign artwork), https://static.hitv.com/pc2/img/logo.1c1a524.png (official page: https://www.mgtv.com/)
 micloud.webp: 小米云服务, 官网 img[alt="mi cloud logo"] 内嵌 PNG, https://i.mi.com/ (official page: https://cdn.web-global.fds.api.mi-img.com/mcfe--micloud-web-home/static/static/js/header.1d813829.chunk.js)
 microsoft365.webp: Microsoft 365 icon, Wikimedia Commons, File:Microsoft 365 (2022).svg
 mubu.webp: Mubu app icon, App Store 512px (iTunes Search API, cn storefront)
 netease.webp: NetEase Cloud Music app icon, App Store 512px (iTunes Search API, cn storefront)
 netflix.webp: Netflix app icon, App Store 512px (iTunes Search API, us storefront)
 processon.webp: ProcessOn app icon, App Store 512px (iTunes Search API, cn storefront)
-qidian.webp: Qidian Reading app icon, App Store 512px (iTunes Search API, us storefront)
+qidian.webp: 起点读书, 阅文官网旗下品牌常规标识 (complete square mark extracted from official 1000x400 brand lockup at x=0, y=83, 234x234; no redraw or enlargement; no campaign artwork), https://imgservices-1252317822.image.myqcloud.com/coco/s08072025/bb2679dd.jp39pc.png (official page: https://www.yuewen.com/about?part=brand)
 qqmusic.webp: QQ Music app icon, App Store 512px (iTunes Search API, cn storefront)
 qqvip.webp: QQ app icon, App Store 512px (iTunes Search API, cn storefront)
 quark.webp: Quark Drive app icon, App Store 512px (iTunes Search API, cn storefront)
 setapp.webp: Setapp, official apple-touch-icon (native 180x180; favicon.svg embeds the same 180px raster), https://setapp.com/apple-touch-icon.png
 shimo.webp: Shimo Docs app icon, App Store 512px (iTunes Search API, cn storefront)
 spotify.webp: Spotify app icon, App Store 512px (iTunes Search API, us storefront)
-taobao.webp: Taobao app icon, App Store 512px (iTunes Search API, sg storefront)
-tencentcomic.webp: Tencent Comics app icon, App Store 512px (iTunes Search API, cn storefront)
-tencentvideo.webp: 腾讯视频, 官方 App Store, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/4e/cb/01/4ecb01eb-55a1-9d70-b503-7cd078c1cd17/AppIcon-0-0-1x_U007epad-0-1-0-0-sRGB-85-220.png/512x512bb.jpg (official page: https://apps.apple.com/cn/app/%E8%85%BE%E8%AE%AF%E8%A7%86%E9%A2%91-%E5%B0%9A%E5%85%AC%E4%B8%BB-%E4%B8%8A%E5%A4%B4%E7%88%BD%E5%97%91/id458318329?uo=4)
+taobao.webp: 淘宝 88VIP, 官网 apple-touch-icon-precomposed (regular brand mark; no temporary campaign artwork), https://img.alicdn.com/tps/i3/T1OjaVFl4dXXa.JOZB-114-114.png (official page: https://www.taobao.com/)
+tencentcomic.webp: 腾讯动漫, 官方客户端下载页 logo (regular brand mark; no temporary campaign artwork), https://gtimgcdn.ac.qq.com/h5_hd/downloadForPc/images/logo.3e14a6cd.png?v=daa0cc89ec0fd3e0 (official page: https://m.ac.qq.com/event/downloadForPc/index.html)
+tencentvideo.webp: 腾讯视频, 官网 apple-touch-icon (regular brand mark; no temporary campaign artwork), https://vfiles.gtimg.cn/wuji_dashboard/xy/starter/4ea79867.png (official page: https://v.qq.com/)
 termius.webp: Termius app icon, App Store 512px (iTunes Search API, cn storefront)
 unionpay.webp: UnionPay app icon, App Store 512px (iTunes Search API, cn storefront)
 weiyun.webp: Tencent Weiyun app icon, App Store 512px (iTunes Search API, cn storefront)
@@ -50,3 +50,5 @@ kling.webp: 可灵, 官方 App Store, https://is1-ssl.mzstatic.com/image/thumb/P
 suno.webp: Suno, 官方 App Store, https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/3f/8c/86/3f8c86b0-54f7-e247-6bd4-f7e9be6d978c/AppIcon-0-0-1x_U007ephone-0-1-0-sRGB-85-220.png/512x512bb.jpg (official page: https://apps.apple.com/cn/app/music-song-creator-suno/id6480136315?uo=4)
 
 Official-source replacements above verified 2026-10-25. Brand artwork and trademarks belong to their respective owners; no open-source license is claimed for these official assets. Rasterized/resized without enlargement, WebP metadata stripped. Original SVG assets in public/ai are retained for saved icon URLs.
+
+Catalog icon policy (2026-10-25): Use regular official brand marks. Exclude temporary event, holiday, tournament, series and promotional variants, even when they are the current App Store icon. Official-source activity replacements verified 2026-10-25; native raster sizes retained when below 256px; WebP metadata stripped.
