@@ -153,9 +153,9 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
 
   const authed = dev || (await isAuthed(req, env));
   if (path === '/api/public' && method === 'GET') {
-    const state = await loadState(env);
-    if (!state.settings.publicView && !dev) return bad(t('server.notPublic'), 404);
-    return json(maskForPublic(state));
+    // 先看是否公开；公开时也只读加载（旧数据的转换只在内存里做），未登录访客的请求从不写库
+    if (!(await getSettings(env)).publicView && !dev) return bad(t('server.notPublic'), 404);
+    return json(maskForPublic(await loadState(env, false)));
   }
   if (!authed) return bad('unauthorized', 401);
   if (path === '/api/rev' && method === 'GET') return json({ rev: await getRev(env) });

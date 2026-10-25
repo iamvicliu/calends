@@ -296,3 +296,21 @@ test('W-9 非法 JSON 请求体返回 400 而不是 500', async () => {
     assert.equal(r.status, 400, path);
   }
 });
+
+test('W-10 未登录访问 /api/public 不写库（未公开时直接 404）', async () => {
+  for (const publicView of [false, true]) {
+    const f = fixture({ DEV_BYPASS_AUTH: undefined });
+    await putKv(f.env, 'settings', { ...DEFAULT_SETTINGS, publicView });
+    // 旧数据：成员还没关联到人，loadState 默认会建档写回
+    await upsert(
+      f.env,
+      'subscriptions',
+      'legacy',
+      sub('legacy', 'Fictional legacy', { share: { role: 'owner', seats: 3, members: [{ id: 'm', name: 'Fictional member', share: 3 }] } }),
+    );
+    f.writes.length = 0;
+    const r = await f.request('/api/public');
+    assert.equal(r.status, publicView ? 200 : 404);
+    assert.deepEqual(f.writes, []);
+  }
+});
