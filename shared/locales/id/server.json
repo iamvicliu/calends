@@ -4,6 +4,7 @@
   "invalidItem": "{name}: {error}",
   "notPublic": "Buku catatan ini tidak publik",
   "idMismatch": "ID tidak cocok",
+  "invalidJson": "Isi permintaan bukan JSON yang valid.",
   "invalidMethod": "Metode pembayaran tidak valid",
   "invalidBackup": "File cadangan tidak valid",
   "refreshFailed": "Gagal memperbarui",

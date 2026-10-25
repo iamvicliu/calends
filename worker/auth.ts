@@ -15,6 +15,7 @@ import {
 import type { Env } from './env.ts';
 import { t } from '../shared/i18n.ts';
 import { getKv, getSettings, putKv } from './store.ts';
+import { readJson } from './http.ts';
 
 const COOKIE = 'sid';
 const SESSION_DAYS = 180;
@@ -371,7 +372,7 @@ export async function passkeyRegisterOptions(req: Request, env: Env): Promise<Re
 
 /** 第二步：校验浏览器返回的凭据并保存 */
 export async function passkeyRegisterVerify(req: Request, env: Env): Promise<Response> {
-  const body = (await req.json()) as { challengeId: string; response: RegistrationResponseJSON; name?: string };
+  const body = (await readJson(req)) as { challengeId: string; response: RegistrationResponseJSON; name?: string };
   const expected = await takeChallenge(env, body.challengeId, 'register');
   if (!expected) return err(t('server.auth.expired'));
   const { rpID, origin } = rp(req, env);
@@ -406,7 +407,7 @@ export async function passkeyLoginOptions(req: Request, env: Env): Promise<Respo
 export async function passkeyLoginVerify(req: Request, env: Env): Promise<Response> {
   const th = await throttle(req, env);
   if (th.blocked) return err(t('server.auth.tooMany'), 429);
-  const body = (await req.json()) as { challengeId: string; response: AuthenticationResponseJSON };
+  const body = (await readJson(req)) as { challengeId: string; response: AuthenticationResponseJSON };
   const expected = await takeChallenge(env, body.challengeId, 'login');
   if (!expected) return Response.json({ error: t('server.auth.expired'), code: 'PASSKEY_CHALLENGE_EXPIRED' }, { status: 400 });
   const row = await env.DB.prepare('SELECT * FROM passkeys WHERE id = ?1').bind(body.response.id).first<PasskeyRow>();

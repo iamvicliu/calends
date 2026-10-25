@@ -256,3 +256,18 @@ test('W-7 对话按 UTF-8 字节限长；超长工具结果截断后仍是合法
   assert.equal(parsed.original_chars, big.length);
   assert.equal(toolContent('{"a":1}'), '{"a":1}');
 });
+
+test('W-9 非法 JSON 请求体返回 400 而不是 500', async () => {
+  const f = fixture();
+  for (const [path, method] of [
+    ['/api/subscriptions/x', 'PUT'],
+    ['/api/methods/x', 'PUT'],
+    ['/api/settings', 'PUT'],
+    ['/api/import', 'POST'],
+    ['/api/mcp/tokens', 'POST'],
+    ['/api/assistant/apply', 'POST'],
+  ] as const) {
+    const r = await f.request(path, { method, body: '{not json' });
+    assert.equal(r.status, 400, path);
+  }
+});

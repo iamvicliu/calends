@@ -68,6 +68,7 @@ import { apply, chat, clearChats, listChats, saveChat, saveConfig, testConfig, v
 import { requestLocale, settingsLocale, applyLocale } from './i18n.ts';
 import { t } from '../shared/i18n.ts';
 import { ensureMigrated } from './migrate.ts';
+import { HttpError, readJson } from './http.ts';
 
 const json = (data: unknown, status = 200, rev?: number | Revision) =>
   Response.json(data, {
@@ -176,7 +177,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     return json(TOOLS.map((x) => ({ name: x.name, title: toolTitle(x.name), description: x.description, write: !!x.write })));
   if (path === '/api/mcp/tokens' && method === 'GET') return json((await listTokens(env)).map(({ hash: _h, ...rest }) => rest));
   if (path === '/api/mcp/tokens' && method === 'POST') {
-    const b = (await req.json()) as { name?: string; scope?: string };
+    const b = (await readJson(req)) as { name?: string; scope?: string };
     const { token, item } = await createToken(env, b.name ?? '', b.scope === 'read' ? 'read' : 'write');
     const { hash: _h, ...rest } = item;
     return json({ token, item: rest });
@@ -189,7 +190,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   let m = path.match(/^\/api\/subscriptions\/([\w-]+)$/);
   if (m) {
     if (method === 'PUT') {
-      let sub = (await req.json()) as Subscription;
+      let sub = (await readJson(req)) as Subscription;
       if (sub.id !== m[1]) return bad(t('server.idMismatch'));
       const previous = (await subsOf(env)).find((x) => x.id === sub.id);
       const today = todayIn((await getSettings(env)).timezone);
@@ -213,7 +214,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const people = await getPeople(env);
     const id = m[1];
     if (m[2] && method === 'POST') {
-      const into = String(((await req.json()) as { into?: string }).into ?? '');
+      const into = String(((await readJson(req)) as { into?: string }).into ?? '');
       if (!people.some((p) => p.id === id) || !people.some((p) => p.id === into) || into === id) return bad(t('server.personNotFound'), 404);
       const r = mergePeople(people, await subsOf(env), id, into);
       const subscriptions = r.subs.map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
@@ -223,7 +224,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     if (!m[2] && method === 'PUT') {
       let p: Person | undefined;
       try {
-        p = cleanPerson((await req.json()) as Partial<Person>, id);
+        p = cleanPerson((await readJson(req)) as Partial<Person>, id);
       } catch (e) {
         return bad(e instanceof Error ? e.message : t('server.invalidPerson'));
       }
@@ -255,7 +256,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   m = path.match(/^\/api\/methods\/([\w-]+)$/);
   if (m) {
     if (method === 'PUT') {
-      const pm = (await req.json()) as PaymentMethod;
+      const pm = (await readJson(req)) as PaymentMethod;
       if (pm.id !== m[1] || !pm.name?.trim()) return bad(t('server.invalidMethod'));
       const rev = await upsert(env, 'methods', pm.id, pm);
       return json(pm, 200, rev);
@@ -287,7 +288,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   }
   if (path === '/api/settings' && method === 'PUT') {
     const cur = await getSettings(env);
-    const patch = (await req.json()) as Partial<Settings>;
+    const patch = (await readJson(req)) as Partial<Settings>;
     const next = { ...DEFAULT_SETTINGS, ...cur, ...patch, icsToken: cur.icsToken };
     // null 表示清空这个设置
     for (const k of Object.keys(next) as Array<keyof Settings>) if (next[k] === null) delete next[k];
@@ -307,7 +308,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   }
   // 分类表：整表保存；renames（旧名 → 新名）把相关订阅一起改掉，改名、删除时移走订阅都靠它
   if (path === '/api/categories' && method === 'PUT') {
-    const b = (await req.json()) as { categories?: unknown; renames?: Record<string, unknown> };
+    const b = (await readJson(req)) as { categories?: unknown; renames?: Record<string, unknown> };
     const r = cleanCategories(b.categories);
     if ('error' in r) return bad(r.error);
     const renames: Record<string, string> = {};
@@ -338,7 +339,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   if (path === '/api/backup' && method === 'POST') {
     let b;
     try {
-      b = parseBackup(await req.json());
+      b = parseBackup(await readJson(req));
     } catch (e) {
       return bad(e instanceof Error ? e.message : t('server.invalidBackup'));
     }
@@ -349,7 +350,12 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     return json({ restored, state }, 200, state.rev);
   }
   if (path === '/api/import' && method === 'POST') {
-    const body = (await req.json()) as { subscriptions?: Subscription[]; methods?: PaymentMethod[]; settings?: Partial<Settings>; mode?: 'merge' | 'replace' };
+    const body = (await readJson(req)) as {
+      subscriptions?: Subscription[];
+      methods?: PaymentMethod[];
+      settings?: Partial<Settings>;
+      mode?: 'merge' | 'replace';
+    };
     const subs = body.subscriptions ?? [];
     const err = invalidIn(subs);
     if (err) return bad(err);
@@ -379,7 +385,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
   }
   // AI 助手（DeepSeek）
   if (path === '/api/assistant/config' && method === 'GET') return json(await viewConfig(env));
-  if (path === '/api/assistant/config' && method === 'PUT') return json(await saveConfig(env, (await req.json()) as Parameters<typeof saveConfig>[1]));
+  if (path === '/api/assistant/config' && method === 'PUT') return json(await saveConfig(env, (await readJson(req)) as Parameters<typeof saveConfig>[1]));
   if (path === '/api/assistant/test' && method === 'POST')
     return json(await testConfig(env, (await req.json().catch(() => ({}))) as { apiKey?: string; baseUrl?: string }));
   // 聊天记录
@@ -389,17 +395,17 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     const cm = path.match(/^\/api\/assistant\/chats\/([\w-]{1,40})$/);
     if (cm && method === 'PUT') {
       try {
-        await saveChat(env, cm[1], await req.json());
+        await saveChat(env, cm[1], await readJson(req));
         return json({ ok: true });
       } catch (e) {
         return bad(e instanceof Error ? e.message : String(e));
       }
     }
   }
-  if (path === '/api/assistant/chat' && method === 'POST') return chat(env, (await req.json()) as Parameters<typeof chat>[1], req.signal);
+  if (path === '/api/assistant/chat' && method === 'POST') return chat(env, (await readJson(req)) as Parameters<typeof chat>[1], req.signal);
   if (path === '/api/assistant/apply' && method === 'POST') {
     try {
-      const result = await apply(env, (await req.json()) as Parameters<typeof apply>[1]);
+      const result = await apply(env, (await readJson(req)) as Parameters<typeof apply>[1]);
       return json(result, 200, await getRev(env));
     } catch (e) {
       return bad(e instanceof Error ? e.message : String(e));
@@ -508,6 +514,7 @@ export default {
       }
       return asset;
     } catch (e) {
+      if (e instanceof HttpError) return bad(e.message, e.status);
       console.error(e);
       return bad('server error', 500);
     }

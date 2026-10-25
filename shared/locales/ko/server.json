@@ -4,6 +4,7 @@
   "invalidItem": "{name}: {error}",
   "notPublic": "이 장부는 공개되어 있지 않습니다",
   "idMismatch": "ID가 일치하지 않습니다",
+  "invalidJson": "요청 본문이 올바른 JSON이 아닙니다.",
   "invalidMethod": "결제 수단이 올바르지 않습니다",
   "invalidBackup": "백업 파일이 올바르지 않습니다",
   "refreshFailed": "새로 고침에 실패했습니다",

@@ -4,6 +4,7 @@
   "invalidItem": "{name}：{error}",
   "notPublic": "這個帳本沒有公開",
   "idMismatch": "id 不一致",
+  "invalidJson": "請求內容不是有效的 JSON。",
   "invalidMethod": "付款方式無效",
   "invalidBackup": "備份檔案無效",
   "refreshFailed": "更新失敗",

@@ -4,6 +4,7 @@
   "invalidItem": "{name}: {error}",
   "notPublic": "This ledger isn't public",
   "idMismatch": "ID mismatch",
+  "invalidJson": "The request body is not valid JSON.",
   "invalidMethod": "Invalid payment method",
   "invalidBackup": "Invalid backup file",
   "refreshFailed": "Refresh failed",
