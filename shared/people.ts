@@ -2,7 +2,7 @@ import { memberCashFlows, memberFlowValue } from './carpool.ts';
 // 人：合租成员与代付对象的统一名册。
 // 成员、代付上存 personId 指向名册；原来的称呼、联系方式保留为镜像副本，老数据和只认副本的地方（提醒邮件、导出）照常工作。
 // 应收按人汇总时，直接复用合租（memberDues）与代付（proxyRows）各自的算法，只是换个维度加起来。
-import { collectCurrencyOf, effectiveStatus, fnv1a, memberDues, memberAboard, memberLedger } from './billing.ts';
+import { collectCurrencyOf, effectiveStatus, fnv1a, isStopped, memberDues, memberAboard, memberLedger } from './billing.ts';
 import { toBaseAt } from './fx.ts';
 import { proxyRows, proxyTotals } from './proxy.ts';
 import { paidThrough } from './receivables.ts';
@@ -268,7 +268,7 @@ function proxyItem(state: AppState, s: Subscription, today: string): PersonItem 
     periodsOwed: open.length,
     received: done.reduce((a, r) => a + r.receivedBase!, 0),
     lastPaid: proxyTotals(rows).lastIn,
-    active: !['ended', 'terminated'].includes(effectiveStatus(s, today)),
+    active: !isStopped(effectiveStatus(s, today)),
   };
 }
 

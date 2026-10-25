@@ -1,7 +1,20 @@
 // 订阅历程的编辑操作：调价、换区/换套餐、断更、续订。全部为纯函数，返回新的订阅对象。
-import { addDays, billingPeriod, chargesBetween, collectionAnchor, currentPhase, effectiveStatus, phaseSubs, priceAt, subError, validDay } from './billing.ts';
+import {
+  addDays,
+  billingPeriod,
+  chargesBetween,
+  collectionAnchor,
+  currentPhase,
+  effectiveStatus,
+  isStopped,
+  phaseSubs,
+  priceAt,
+  subError,
+  validDay,
+} from './billing.ts';
 import type { Cycle, Payment, Phase, PricePoint, Stop, Subscription, RenewalRules } from './types.ts';
 import { t } from './i18n.ts';
+import { applyFields } from './ledger-edit.ts';
 
 export interface PlanChange extends RenewalRules {
   price: number;
@@ -501,7 +514,7 @@ export interface StopRefund {
 export function stopSubscription(s: Subscription, today: string, kind: Stop['kind'], at = today, reason?: string, refund?: StopRefund): Subscription {
   if (!validDay(at)) throw new Error(t('mcp.error.notDate', { what: 'at' }));
   if (at < s.start) throw new Error(t('mcp.error.stopBeforeStart'));
-  if (s.stop || ['ended', 'terminated'].includes(effectiveStatus(s, today))) throw new Error(t('mcp.error.subscriptionEnded'));
+  if (s.stop || isStopped(effectiveStatus(s, today))) throw new Error(t('mcp.error.subscriptionEnded'));
   const current = currentPhase(s, at);
   if (at < current.start) throw new Error(t('mcp.error.stopBeforeStart'));
   const period = billingPeriod(current, at < today ? at : today);
@@ -543,10 +556,15 @@ export function stopSubscription(s: Subscription, today: string, kind: Stop['kin
   return next;
 }
 
-export function reactivate(s: Subscription, today: string): Subscription {
-  if (s.stop?.kind === 'terminate' || effectiveStatus(s, today) === 'terminated') throw new Error(t('mcp.error.terminatedReactivate'));
+/** 清掉停用、暂停与结束日（最后一段同样），不做任何状态约束；对外用 reactivate */
+export function reopenStopped(s: Subscription): Subscription {
   const phases = s.phases?.map((p, i, all) => (i === all.length - 1 ? { ...p, end: undefined, stop: undefined } : p));
   return { ...s, phases, status: 'active', pausedAt: undefined, end: undefined, stop: undefined };
+}
+
+export function reactivate(s: Subscription, today: string): Subscription {
+  if (s.stop?.kind === 'terminate' || effectiveStatus(s, today) === 'terminated') throw new Error(t('mcp.error.terminatedReactivate'));
+  return reopenStopped(s);
 }
 
 /** API 与 MCP 共用的状态迁移约束；重新订阅必须保留原停用阶段并新增阶段。调用方已先做 subError 整体校验。 */
@@ -576,7 +594,7 @@ export function statusChangeError(previous: Subscription | undefined, next: Subs
  * 撤销今天之后才开始的计划阶段。已记录的扣款原样保留，之后不再预测扣款。
  */
 export function stopUndated(s: Subscription, kind: Stop['kind'], today: string): Subscription {
-  if (s.stop || ['ended', 'terminated'].includes(effectiveStatus(s, today))) throw new Error(t('mcp.error.subscriptionEnded'));
+  if (s.stop || isStopped(effectiveStatus(s, today))) throw new Error(t('mcp.error.subscriptionEnded'));
   // 直接去掉未来阶段，不用 dropPlan：它会给前一段补一个结束日，那就成了编造的停用日期
   const kept = s.phases?.length ? phasesOf(s).filter((p) => p.start <= today) : [];
   const c = kept.length && kept.length < s.phases!.length ? mirror(s, kept) : s;
@@ -585,7 +603,7 @@ export function stopUndated(s: Subscription, kind: Stop['kind'], today: string):
 
 /** 到期不续：只有 end，没有 stop；撤销结束日之后的阶段。 */
 export function cancelAtEnd(s: Subscription, at: string, today: string): Subscription {
-  if (s.stop || ['ended', 'terminated'].includes(effectiveStatus(s, today))) throw new Error(t('mcp.error.subscriptionEnded'));
+  if (s.stop || isStopped(effectiveStatus(s, today))) throw new Error(t('mcp.error.subscriptionEnded'));
   if (!validDay(at)) throw new Error(t('mcp.error.notDate', { what: 'at' }));
   if (at < s.start) throw new Error(t('mcp.error.stopBeforeStart'));
   let c = s;
@@ -599,12 +617,7 @@ export function editPhase(s: Subscription, start: string, patch: Partial<Phase>)
   const phases = phasesOf(s);
   const index = phases.findIndex((p) => p.start === start);
   if (index < 0) throw new Error(t('mcp.error.invalidTarget'));
-  const p = { ...phases[index] } as Record<string, unknown>;
-  for (const [key, value] of Object.entries(patch)) {
-    if (value === null) delete p[key];
-    else p[key] = value;
-  }
-  phases[index] = p as unknown as Phase;
+  phases[index] = applyFields(phases[index], patch);
   phases.sort((a, b) => a.start.localeCompare(b.start));
   if (new Set(phases.map((p) => p.start)).size !== phases.length) throw new Error(t('mcp.error.invalidTarget'));
   // 其余字段格式由写入入口统一校验（subRefsError → newShapeError）；开始日先查，后面的定位依赖它

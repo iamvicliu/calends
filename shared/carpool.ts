@@ -17,6 +17,7 @@ import {
   collectCurrencyOf,
   DAYS_PER_MONTH,
   memberSince,
+  isStopped,
 } from './billing.ts';
 import { chargeBaseOrNaN, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { yearCost } from './metrics.ts';
@@ -79,7 +80,7 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
   }, 0);
   // 买断的车只收一次，没有每年的收入；一次性收款算在发起至今的收回里
   const yearIncome =
-    (['ended', 'terminated'].includes(effectiveStatus(s, today)) || cur.cycle.unit === 'lifetime'
+    (isStopped(effectiveStatus(s, today)) || cur.cycle.unit === 'lifetime'
       ? 0
       : members.reduce((a, m) => {
           const rate = memberFee(state, s, m, today);

@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { currentPhase, LIFETIME_BILL_MONTHS } from '../../../shared/billing.ts';
+import { currentPhase, LIFETIME_BILL_MONTHS, perLabel } from '../../../shared/billing.ts';
 import { money } from '../../../shared/format.ts';
 import { yearCost } from '../../../shared/metrics.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { perLabel } from '../views/Report.tsx';
 import { Icon } from './ui.tsx';
 
 /** 每 N 个月的简写周期：月、季度、半年、年，其余写「N 个月」；接在金额后面的「/」之后 */

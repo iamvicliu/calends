@@ -104,6 +104,17 @@ export function cycleLabel(c: Cycle): string {
   return t(`core.cycle.everyN.${c.unit}`, { count: c.every });
 }
 
+/** 金额后缀用的「每…」：/月、/季、/年、/买断 */
+export function perLabel(s: Pick<Subscription, 'cycle'>): string {
+  const { unit, every } = s.cycle;
+  if (unit === 'lifetime') return t('report.per.lifetime');
+  if (every === 1) return t(`report.per.${unit}`);
+  if (unit === 'month' && every === 3) return t('report.per.quarter');
+  if (unit === 'month' && every === 6) return t('report.per.halfYear');
+  if (unit === 'year' && every === 2) return t('report.per.twoYears');
+  return t(`report.per.n.${unit}`, { count: every });
+}
+
 export function cycleShort(c: Cycle): string {
   if (c.unit === 'lifetime') return t('core.cycle.once');
   const u = { day: 'd', week: 'w', month: 'mo', year: 'yr' }[c.unit];
@@ -409,6 +420,11 @@ export function effectiveStatus(s: Subscription, today: string): 'upcoming' | 'a
   if (s.status === 'trial' && s.trialEnd && s.trialEnd > today) return 'trial';
   if (s.end) return 'ending';
   return 'active';
+}
+
+/** 已停止（到期结束或被服务商停用）：effectiveStatus 为 ended / terminated */
+export function isStopped(status: string): boolean {
+  return status === 'ended' || status === 'terminated';
 }
 
 export function priceAt(s: Subscription, day: string): number {
@@ -926,12 +942,21 @@ function billedPhases(s: Subscription, day: string): Subscription[] {
  * 给了 methodId 时只算用这个支付方式付的那几段（钱包按卡统计）
  */
 export function monthlyMine(state: AppState, s: Subscription, day: string, methodId?: string): number {
-  return billedPhases(s, day)
-    .filter((v) => (methodId === undefined || v.methodId === methodId) && ['active', 'ending'].includes(effectiveStatus(v, day)))
-    .reduce((a, v) => {
-      const m = convert(monthlyGross(v, day), v.currency, state.settings.baseCurrency, state.fx);
-      return Number.isFinite(m) ? a + m * myShareFactor(v, day) : a;
-    }, 0);
+  return billedMonthly(state, s, day, methodId).mine;
+}
+
+/** 计费中各段的每月全额与我承担的部分（本位币）；折算不了的段跳过。monthlyMine 与 totals 共用 */
+function billedMonthly(state: AppState, s: Subscription, day: string, methodId?: string): { gross: number; mine: number } {
+  let gross = 0;
+  let mine = 0;
+  for (const v of billedPhases(s, day)) {
+    if ((methodId !== undefined && v.methodId !== methodId) || !['active', 'ending'].includes(effectiveStatus(v, day))) continue;
+    const m = convert(monthlyGross(v, day), v.currency, state.settings.baseCurrency, state.fx);
+    if (!Number.isFinite(m)) continue;
+    gross += m;
+    mine += m * myShareFactor(v, day);
+  }
+  return { gross, mine };
 }
 
 export interface Totals {
@@ -942,7 +967,6 @@ export interface Totals {
 }
 
 export function totals(state: AppState, today: string): Totals {
-  const base = state.settings.baseCurrency;
   let mrr = 0;
   let gross = 0;
   let count = 0;
@@ -956,13 +980,9 @@ export function totals(state: AppState, today: string): Totals {
     // 试用期不计入数量与金额
     if (st === 'trial') continue;
     // 换区后新旧两段并行时两边都在付钱，都计入
-    for (const v of billedPhases(s, today)) {
-      const m = convert(monthlyGross(v, today), v.currency, base, state.fx);
-      if (!Number.isFinite(m)) continue;
-      if (!['active', 'ending'].includes(effectiveStatus(v, today))) continue;
-      gross += m;
-      mrr += m * myShareFactor(v, today);
-    }
+    const m = billedMonthly(state, s, today);
+    gross += m.gross;
+    mrr += m.mine;
   }
   return { mrr, grossMrr: gross, recoverMrr: gross - mrr, activeCount: count };
 }

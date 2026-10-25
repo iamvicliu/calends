@@ -2,7 +2,7 @@ import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
 import { type CSSProperties, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { addDays, addMonths, cycleLabel, diffDays, runwayFor, totals, type Charge, chargeMethodId } from '../../../shared/billing.ts';
+import { addDays, addMonths, cycleLabel, diffDays, perLabel, runwayFor, totals, type Charge, chargeMethodId } from '../../../shared/billing.ts';
 import { moneyTick, flow, cnDate, money, monthLabel, relDays } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeValue } from '../../../shared/fx.ts';
@@ -12,7 +12,6 @@ import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
 import { MetricCards, Metric, IconButton, Amount, CardTitle, CatIcon, TipTable, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
 import { allCharges, catColor, sumBase } from '../derive.ts';
-import { perLabel } from './Report.tsx';
 import { go } from '../router.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 

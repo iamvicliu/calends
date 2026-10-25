@@ -27,16 +27,6 @@ import { MetricCards, Metric, IconButton, Amount, CatIcon, CardTitle, Icon, Meth
 import { allCharges, catColor, KIND_BG, paletteColor, sumBase, toBase } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
 
-export function perLabel(s: Subscription): string {
-  const { unit, every } = s.cycle;
-  if (unit === 'lifetime') return t('report.per.lifetime');
-  if (every === 1) return t(`report.per.${unit}`);
-  if (unit === 'month' && every === 3) return t('report.per.quarter');
-  if (unit === 'month' && every === 6) return t('report.per.halfYear');
-  if (unit === 'year' && every === 2) return t('report.per.twoYears');
-  return t(`report.per.n.${unit}`, { count: every });
-}
-
 const mLabel = (m: string) => (m.endsWith('-01') ? t('report.axis.year', { yy: m.slice(2, 4), year: m.slice(0, 4) }) : monthLabel(m, { year: false }));
 const perMonth = (amount: string) => t('report.perMonth', { amount });
 
