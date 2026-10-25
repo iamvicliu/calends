@@ -3,7 +3,7 @@ import { t } from '../../../shared/i18n.ts';
 import type { AppState } from '../../../shared/types.ts';
 import { chargeMethodId, chargeSources, type Charge } from '../../../shared/billing.ts';
 import { money } from '../../../shared/format.ts';
-import { PayBadge } from './ui.tsx';
+import { PayBadge } from './marks.tsx';
 import '../views/detail.css';
 
 /**

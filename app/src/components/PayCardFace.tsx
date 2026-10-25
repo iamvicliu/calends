@@ -4,7 +4,7 @@ import type { MethodKind, PaymentMethod } from '../../../shared/types.ts';
 import { base } from '../base.ts';
 import { bankOf, brandOf, KIND_LABEL, methodLogo, methodRegion } from '../derive.ts';
 import { copyParts } from './copy.tsx';
-import { FlagImg, NetworkMark } from './ui.tsx';
+import { FlagImg, NetworkMark } from './marks.tsx';
 
 /* 钱包卡面：钱包页与编辑预览共用（.paycard，见 styles.css） */
 

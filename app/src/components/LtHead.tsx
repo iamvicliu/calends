@@ -3,7 +3,8 @@ import { money } from '../../../shared/format.ts';
 import { yearCost } from '../../../shared/metrics.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { Icon, useMedia } from './ui.tsx';
+import { Icon } from './icons.tsx';
+import { useMedia } from './inputs.tsx';
 
 /** 每 N 个月的简写周期：月、季度、半年、年，其余写「N 个月」；接在金额后面的「/」之后 */
 export function perMonths(n: number): string {

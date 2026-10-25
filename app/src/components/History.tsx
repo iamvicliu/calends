@@ -4,7 +4,7 @@ import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { pricePoints } from '../../../shared/phases.ts';
 import { DatePicker } from './DatePicker.tsx';
-import { PayBadge } from './ui.tsx';
+import { PayBadge } from './marks.tsx';
 
 /**
  * 订阅历程：阶段（地区/币种/价格/支付方式）、阶段内调价、断更空档。

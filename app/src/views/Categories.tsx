@@ -8,9 +8,12 @@ import type { AppState } from '../../../shared/types.ts';
 import { CatGlyph } from '../components/CatGlyph.tsx';
 import { CAT_ICON_GROUPS } from '../components/cat-icons.gen.ts';
 import { Picker } from '../components/Picker.tsx';
-import { IconButton, ask, Cell, Group, Icon, Sheet } from '../components/ui.tsx';
+import { IconButton, Cell, Group } from '../components/ui.tsx';
+import { ask, Sheet } from '../components/overlays.tsx';
+import { Icon } from '../components/icons.tsx';
 import { categories } from '../derive.ts';
-import { run, saveCategories, toast } from '../store.ts';
+import { run, toast } from '../toast.ts';
+import { saveCategories } from '../store.ts';
 import { useTextSearch } from '../use-search.ts';
 
 /** 分类色块：分类色的浅底 + 同色图标 */

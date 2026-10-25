@@ -2,7 +2,8 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { StickyNote, X } from 'lucide-react';
 import { t } from '../../../shared/i18n.ts';
 import { copyParts } from './copy.tsx';
-import { CardTitle, IconButton, Sheet } from './ui.tsx';
+import { CardTitle, IconButton } from './ui.tsx';
+import { Sheet } from './overlays.tsx';
 import '../views/detail.css';
 
 /*

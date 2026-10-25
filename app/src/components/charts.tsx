@@ -1,5 +1,6 @@
 import type { ReactNode as ComponentChildren } from 'react';
-import { tipProps, useWidth } from './ui.tsx';
+import { tipProps } from './overlays.tsx';
+import { useWidth } from './inputs.tsx';
 
 /** 面积折线图：SVG 只画形状，文字用 HTML 叠加，避免被拉伸 */
 export function AreaChart({

@@ -20,25 +20,14 @@ import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format
 import { toBaseAt } from '../../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
-import {
-  IconButton,
-  Amount,
-  ask,
-  Cell,
-  Group,
-  Icon,
-  MethodMark,
-  NetworkMark,
-  NumInput,
-  MoneyInput,
-  Seg,
-  Sheet,
-  SubIcon,
-  Toggle,
-  Toolbar,
-} from '../components/ui.tsx';
+import { IconButton, Cell, Group, Toolbar } from '../components/ui.tsx';
+import { Amount, NumInput, MoneyInput, Seg, Toggle } from '../components/inputs.tsx';
+import { ask, Sheet } from '../components/overlays.tsx';
+import { Icon } from '../components/icons.tsx';
+import { MethodMark, NetworkMark, SubIcon } from '../components/marks.tsx';
 import { bankOf, brandOf, domainOf, KIND_BG, KIND_LABEL, liveSubs, methodName, NETWORKS } from '../derive.ts';
-import { deleteMethod, getState, mergeEdits, reorderMethods, run, saveMethod, today } from '../store.ts';
+import { deleteMethod, getState, mergeEdits, reorderMethods, saveMethod, today } from '../store.ts';
+import { run } from '../toast.ts';
 import { methodReferences } from '../../../shared/ledger-edit.ts';
 import { go } from '../router.ts';
 import { BANKS } from '../banks.ts';

@@ -11,7 +11,9 @@ import type { AppState, Subscription } from '../../../shared/types.ts';
 import { snapshot } from '../snapshot.ts';
 import { bankOf, brandOf, catColor, methodLogo } from '../derive.ts';
 import { BarLine } from './charts.tsx';
-import { MetricCards, Metric, IconButton, CatIcon, CardTitle, Icon, MethodMark, SubIcon } from './ui.tsx';
+import { MetricCards, Metric, IconButton, CardTitle } from './ui.tsx';
+import { CatIcon, MethodMark, SubIcon } from './marks.tsx';
+import { Icon } from './icons.tsx';
 import './scope-report.css';
 
 interface Props {

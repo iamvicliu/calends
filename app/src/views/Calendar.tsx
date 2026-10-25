@@ -20,27 +20,15 @@ import {
 import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import {
-  IconButton,
-  Amount,
-  MetricCards,
-  Metric,
-  CardTitle,
-  Icon,
-  PayBadge,
-  RegionTag,
-  Seg,
-  subRegion,
-  SubIcon,
-  TipTable,
-  tipProps,
-  Toolbar,
-  useWidth,
-} from '../components/ui.tsx';
+import { IconButton, MetricCards, Metric, CardTitle, Toolbar } from '../components/ui.tsx';
+import { Amount, Seg, useWidth } from '../components/inputs.tsx';
+import { Icon } from '../components/icons.tsx';
+import { PayBadge, RegionTag, subRegion, SubIcon } from '../components/marks.tsx';
+import { TipTable, tipProps } from '../components/overlays.tsx';
 import { chargeBaseOrNaN } from '../../../shared/fx.ts';
 import { allCharges, sumBaseOrNaN } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
-import { usePref } from '../store.ts';
+import { usePref } from '../prefs.ts';
 import { monthReport } from '../../../shared/scope-report.ts';
 import { ScopeReport, SpendingDelta } from '../components/ScopeReport.tsx';
 import { StopText, stopDescription, stopLabel } from '../components/StopPanel.tsx';

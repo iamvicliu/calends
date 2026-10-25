@@ -1,6 +1,7 @@
 import { commandLabel } from '../keyboard.ts';
 import { t } from '../../../shared/i18n.ts';
-import { Cell, Group, Sheet } from './ui.tsx';
+import { Cell, Group } from './ui.tsx';
+import { Sheet } from './overlays.tsx';
 
 /** Only mounted by ?, with the same focus containment and dismissal as other sheets. */
 export function KeyboardHelp({ onClose }: { onClose: () => void }) {

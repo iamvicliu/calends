@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { symbol } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { ccyFlag, ccyName } from '../display.ts';
-import { Icon } from './ui.tsx';
+import { Icon } from './icons.tsx';
 import { Pop } from './Pop.tsx';
 import { useTextSearch } from '../use-search.ts';
 

@@ -2,9 +2,12 @@ import { copyParts } from '../components/copy.tsx';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
 import { localTime } from '../../../shared/format.ts';
-import { ask, Cell, Group, Icon, LoadFailed, Sheet } from '../components/ui.tsx';
+import { ask, LoadFailed, Sheet } from '../components/overlays.tsx';
+import { Cell, Group } from '../components/ui.tsx';
+import { Icon } from '../components/icons.tsx';
 import { Picker } from '../components/Picker.tsx';
-import { api, registerPasskey, run, saveSettings } from '../store.ts';
+import { api, registerPasskey, saveSettings } from '../store.ts';
+import { run } from '../toast.ts';
 import { t } from '../../../shared/i18n.ts';
 
 interface Device {

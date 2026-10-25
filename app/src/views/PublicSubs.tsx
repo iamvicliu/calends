@@ -3,8 +3,11 @@ import { Plus, X } from 'lucide-react';
 import { effectiveStatus, isStopped } from '../../../shared/billing.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { IconButton, Sheet, SubIcon } from '../components/ui.tsx';
-import { run, saveSettings } from '../store.ts';
+import { IconButton } from '../components/ui.tsx';
+import { Sheet } from '../components/overlays.tsx';
+import { SubIcon } from '../components/marks.tsx';
+import { run } from '../toast.ts';
+import { saveSettings } from '../store.ts';
 import './public-subs.css';
 
 /** 可以公开的订阅：代付涉及他人，从不公开；在订的排前面，其余按名称 */

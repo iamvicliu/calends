@@ -1,3 +1,4 @@
+import { readUiSource, extractUiFunction } from '../scripts/ui-test-source.ts';
 import assert from 'node:assert/strict';
 import * as transfers from './transfers.ts';
 import { numberFormat } from './intl.ts';
@@ -16,7 +17,7 @@ import { colorFor } from './people.ts';
 import { detailForecast, detailHistoryEnd } from '../app/src/views/detail-data.ts';
 import type { AppState, Subscription } from './types.ts';
 
-const read = (file: string) => readFileSync(new URL(file, import.meta.url), 'utf8');
+const read = (file: string) => readUiSource(new URL(file, import.meta.url));
 function load(file: string, name: string, source: string, deps: Record<string, unknown>) {
   const result = transformSync(file, source.replace(/export function /g, 'function '), {
     lang: 'tsx',
@@ -174,7 +175,7 @@ test('Root applies loaded/changed signed settings before rendering and changes t
 
 test('Detail charge rows and annual totals show expenses/refunds consistently, including after disabling signs', () => {
   const file = '../app/src/views/Detail.tsx';
-  const source = read(file).split('function Charges(')[1];
+  const source = extractUiFunction(new URL(file, import.meta.url), 'Charges').split('function Charges(')[1];
   const Charges = load(file, 'Charges', `function Charges(${source}`, {
     React,
     Fragment: React.Fragment,
@@ -237,7 +238,7 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
 
 test('Detail charge history lists a year flat, and folds longer histories by year with a click on the year row', () => {
   const file = '../app/src/views/Detail.tsx';
-  const source = read(file).split('function Charges(')[1];
+  const source = extractUiFunction(new URL(file, import.meta.url), 'Charges').split('function Charges(')[1];
   // 组件里有两个状态（显示全部、展开的年份）：按调用顺序存，重新渲染时沿用
   let values: unknown[] = [];
   let cursor = 0;
@@ -494,6 +495,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     Timeline: empty,
     PeriodBar: empty,
     Charges: empty,
+    Transfers: empty,
     Outcome: empty,
     Notices: empty,
     ShareCard: empty,
@@ -503,7 +505,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     RegionTag: empty,
     subRegion: (s: { region?: string }) => s.region,
   };
-  const Kpis = load(file, 'Kpis', `function Kpis(${source.split('function Kpis(')[1].split('type Range =')[0]}`, {
+  const Kpis = load(file, 'Kpis', extractUiFunction(new URL(file, import.meta.url), 'Kpis'), {
     ...deps,
     cnDateAuto,
     copyParts: (v: unknown) => v,
@@ -512,8 +514,8 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     Trend: empty,
     toBase: (_s: AppState, n: number) => n,
   });
-  const Summary = load(file, 'Summary', `function Summary(${source.split('function Summary(')[1].split('\n}\n')[0]}\n}`, { ...deps, cnDateAuto, Note: empty });
-  const Charges = load(file, 'Charges', `function Charges(${source.split('function Charges(')[1]}`, {
+  const Summary = load(file, 'Summary', extractUiFunction(new URL(file, import.meta.url), 'Summary'), { ...deps, cnDateAuto, Note: empty });
+  const Charges = load(file, 'Charges', extractUiFunction(new URL(file, import.meta.url), 'Charges'), {
     ...deps,
     Seg: empty,
     copyParts: (v: unknown) => v,
@@ -523,7 +525,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     chargeMethodIds: () => [],
     YearLedger: yearLedger({ useState: React.useState, t: deps.t }),
   });
-  const Detail = load(file, 'Detail', `function Detail(${source.split('export function Detail(')[1].split('/** 正常扣款')[0]}`, {
+  const Detail = load(file, 'Detail', extractUiFunction(new URL(file, import.meta.url), 'Detail'), {
     ...deps,
     Summary,
     Kpis,

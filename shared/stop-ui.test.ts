@@ -1,3 +1,4 @@
+import { readUiSource } from '../scripts/ui-test-source.ts';
 import { metricComponents } from '../scripts/ui-test-components.ts';
 import * as transfers from './transfers.ts';
 import assert from 'node:assert/strict';
@@ -41,12 +42,12 @@ const React = {
   },
 };
 function runtime(file: string, extra: Record<string, unknown>, names = file.includes('StopPanel') ? 'StopPanel, stopLabel, stopDescription' : 'Gantt') {
-  const source = readFileSync(new URL(file, import.meta.url), 'utf8')
+  const source = readUiSource(new URL(file, import.meta.url))
     .replace(/^import[\s\S]*?;\n/gm, '')
     .replace(/^export \{.*\};\n/gm, '');
   const copySource = readFileSync(new URL('../app/src/components/copy.tsx', import.meta.url), 'utf8').replace(/^import.*;\n/gm, '');
   // 详情类视图共用的头部、面板与事实项在 DetailKit，与被测文件一起编译
-  const kitSource = /DetailKit\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+  const kitSource = /DetailKit\.tsx/.test(readUiSource(new URL(file, import.meta.url)))
     ? readFileSync(new URL('../app/src/components/DetailKit.tsx', import.meta.url), 'utf8').replace(/^import[\s\S]*?;\n/gm, '')
     : '';
   const result = transformSync(file, source + '\n' + copySource + '\n' + kitSource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });

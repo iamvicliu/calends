@@ -2,7 +2,8 @@ import { useRef, useState } from 'react';
 import type { PaymentMethod } from '../../../shared/types.ts';
 import { KIND_LABEL } from '../derive.ts';
 import { t } from '../../../shared/i18n.ts';
-import { Icon, MethodMark } from './ui.tsx';
+import { Icon } from './icons.tsx';
+import { MethodMark } from './marks.tsx';
 import { Pop } from './Pop.tsx';
 import { useTextSearch } from '../use-search.ts';
 

@@ -1,7 +1,7 @@
 // 主题：亮色 → 暗色 → 跟随系统 三者轮换，后台与公开页共用
 import { useEffect } from 'react';
 import { t } from '../../shared/i18n.ts';
-import { usePref } from './store.ts';
+import { usePref } from './prefs.ts';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 

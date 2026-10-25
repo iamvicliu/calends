@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
 import { t } from '../../../shared/i18n.ts';
 import { snapshotCard } from '../snapshot.ts';
-import { toast } from '../store.ts';
-import { Icon, IconButton } from './ui.tsx';
+import { toast } from '../toast.ts';
+import { Icon } from './icons.tsx';
+import { IconButton } from './ui.tsx';
 
 /** Keep ClipboardItem and write in the click stack; Safari accepts the PNG promise. */
 export async function copyImage(render: () => Promise<Blob | null>): Promise<void> {

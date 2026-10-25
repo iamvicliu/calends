@@ -8,7 +8,8 @@ const when = (d: string, today: string) => (d.slice(0, 4) === today.slice(0, 4) 
 import { chargeBaseOrNaN, chargeValue } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { ShareSheet } from '../components/ShareSheet.tsx';
-import { MetricCards, Metric, FlagImg, SubIcon } from '../components/ui.tsx';
+import { MetricCards, Metric } from '../components/ui.tsx';
+import { FlagImg, SubIcon } from '../components/marks.tsx';
 import { catColor } from '../derive.ts';
 
 type Style = 'card' | 'receipt' | 'timeline' | 'poster' | 'years';

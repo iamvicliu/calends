@@ -4,9 +4,13 @@ import type { ReactNode as ComponentChildren } from 'react';
 import { useRef, useState } from 'react';
 import { flow } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
-import { toast, usePref } from '../store.ts';
+import { toast } from '../toast.ts';
+import { usePref } from '../prefs.ts';
 import type { PrefKey } from '../../../shared/prefs.ts';
-import { Icon, IconButton, Seg, Sheet, Toggle } from './ui.tsx';
+import { Icon } from './icons.tsx';
+import { IconButton } from './ui.tsx';
+import { Seg, Toggle } from './inputs.tsx';
+import { Sheet } from './overlays.tsx';
 
 /**
  * 分享图的通用弹窗：选样式 → 预览 → 复制图片 / 下载图片。年度回顾和单个订阅都用它。

@@ -5,10 +5,11 @@ import { t } from '../../../shared/i18n.ts';
 import { reactivate } from '../../../shared/phases.ts';
 import { applyStopForm, stopForm, stopPreview, type StopForm, type StopMode } from '../../../shared/stop-form.ts';
 import type { Subscription } from '../../../shared/types.ts';
-import { toast } from '../store.ts';
+import { toast } from '../toast.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { CurrencySelect, Picker } from './Picker.tsx';
-import { Cell, useSubmit } from './ui.tsx';
+import { Cell } from './ui.tsx';
+import { useSubmit } from './inputs.tsx';
 
 export function stopLabel(sub: Subscription, today: string): string | undefined {
   const summary = stopSummary(sub, today);
