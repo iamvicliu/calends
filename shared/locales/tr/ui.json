@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "Lütfen önce giriş yapın",
     "requestFailed": "İstek başarısız oldu ({status})",
-    "wholeCurrency": "{currency} tutarları tam sayı olmalıdır"
+    "wholeCurrency": "{currency} tutarları tam sayı olmalıdır",
+    "deletedElsewhere": "Bu öğe başka bir yerde silindi, değişiklikleriniz kaydedilmedi."
   },
   "theme": {
     "light": "Açık",

@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "先にログインしてください",
     "requestFailed": "リクエストに失敗しました（{status}）",
-    "wholeCurrency": "{currency} の金額は整数で入力してください"
+    "wholeCurrency": "{currency} の金額は整数で入力してください",
+    "deletedElsewhere": "この項目は別の場所で削除されたため、変更は保存されませんでした。"
   },
   "theme": {
     "light": "ライト",

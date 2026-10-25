@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "Please sign in first",
     "requestFailed": "Request failed ({status})",
-    "wholeCurrency": "{currency} amounts must be whole numbers"
+    "wholeCurrency": "{currency} amounts must be whole numbers",
+    "deletedElsewhere": "This item was deleted elsewhere, so your changes were not saved."
   },
   "theme": {
     "light": "Light",

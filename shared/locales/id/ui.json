@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "Silakan masuk terlebih dahulu",
     "requestFailed": "Permintaan gagal ({status})",
-    "wholeCurrency": "Jumlah {currency} harus berupa bilangan bulat"
+    "wholeCurrency": "Jumlah {currency} harus berupa bilangan bulat",
+    "deletedElsewhere": "Item ini dihapus di tempat lain, jadi perubahan Anda tidak disimpan."
   },
   "theme": {
     "light": "Terang",

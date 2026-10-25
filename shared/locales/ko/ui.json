@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "먼저 로그인하세요",
     "requestFailed": "요청에 실패했습니다({status})",
-    "wholeCurrency": "{currency} 금액은 정수로 입력하세요"
+    "wholeCurrency": "{currency} 금액은 정수로 입력하세요",
+    "deletedElsewhere": "이 항목은 다른 곳에서 삭제되어 변경 사항이 저장되지 않았습니다."
   },
   "theme": {
     "light": "라이트",

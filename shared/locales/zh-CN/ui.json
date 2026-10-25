@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "请先登录",
     "requestFailed": "请求失败 {status}",
-    "wholeCurrency": "{currency} 金额只能输入整数"
+    "wholeCurrency": "{currency} 金额只能输入整数",
+    "deletedElsewhere": "这一项已在别处删除，修改未保存。"
   },
   "theme": {
     "light": "亮色",

@@ -243,7 +243,8 @@ export async function boot(): Promise<void> {
  * 打开表单期间别处（另一个标签页、同步脚本）改过的其他字段不会被旧数据覆盖。
  */
 export function mergeEdits<T extends { id: string }>(original: T, edited: T, latest: T | undefined): T {
-  if (!latest) return edited;
+  // 打开表单期间在别处被删掉了：不按旧表单把它写回来
+  if (!latest) throw new Error(t('ui.error.deletedElsewhere'));
   const out: Record<string, unknown> = { ...latest };
   const keys = new Set([...Object.keys(original), ...Object.keys(edited)]);
   for (const k of keys) {
@@ -520,7 +521,10 @@ function upsertById<T extends { id: string }>(list: T[], item: T): T[] {
   return list.some((x) => x.id === item.id) ? list.map((x) => (x.id === item.id ? item : x)) : [...list, item];
 }
 
-/** 乐观更新：先改本地，失败回滚 */
+/**
+ * 乐观更新：先改本地，失败回滚。回滚用的是发起时的快照，可能抹掉期间另一笔写入的本地结果，
+ * 所以回滚后强制下一次同步拉取服务端的完整快照（等所有写入结束后），以服务端为准。
+ */
 async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T>): Promise<T> {
   const prev = store.state!;
   patchState(fn);
@@ -529,7 +533,11 @@ async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T
   try {
     return await req();
   } catch (e) {
-    if (store.phase !== 'login') patchState(() => ({ ...prev, rev: knownRev }));
+    if (store.phase !== 'login') {
+      patchState(() => ({ ...prev, rev: knownRev }));
+      forceSnapshot = true;
+      checkAgain = true;
+    }
     throw e;
   } finally {
     writes--;
@@ -549,7 +557,14 @@ export function saveSub(next: Subscription) {
   );
   return optimistic(
     (s) => ({ ...s, subscriptions: upsertById(s.subscriptions, sub) }),
-    () => api(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) }),
+    async () => {
+      // 服务端会规范化（补字段、时间戳）：本地换成它返回的那条，和下次同步拿到的一致；
+      // 期间本地又改过这一条（更晚的写入）就不覆盖
+      const saved = await api<Subscription>(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) });
+      if (saved?.id === sub.id && store.state?.subscriptions.find((x) => x.id === sub.id) === sub)
+        patchState((s) => ({ ...s, subscriptions: upsertById(s.subscriptions, saved) }));
+      return saved;
+    },
   );
 }
 
@@ -575,7 +590,11 @@ export function reorderMethods(ids: string[]) {
 export function saveMethod(m: PaymentMethod) {
   return optimistic(
     (s) => ({ ...s, methods: upsertById(s.methods, m) }),
-    () => api(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }),
+    async () => {
+      const saved = await api<PaymentMethod>(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) });
+      if (saved?.id === m.id && store.state?.methods.find((x) => x.id === m.id) === m) patchState((s) => ({ ...s, methods: upsertById(s.methods, saved) }));
+      return saved;
+    },
   );
 }
 

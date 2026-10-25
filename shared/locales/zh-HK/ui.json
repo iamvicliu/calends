@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "請先登入",
     "requestFailed": "請求失敗 {status}",
-    "wholeCurrency": "{currency} 金額只能輸入整數"
+    "wholeCurrency": "{currency} 金額只能輸入整數",
+    "deletedElsewhere": "這一項已在別處刪除，修改未儲存。"
   },
   "theme": {
     "light": "淺色",

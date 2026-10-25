@@ -631,7 +631,8 @@ function MethodDeleteSheet({ m, state, onClose, onDeleted }: { m: PaymentMethod;
 function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState; onClose: () => void }) {
   const [f, setF] = useState<PaymentMethod>(m);
   const [deleting, setDeleting] = useState(false);
-  const isNew = !state.methods.some((x) => x.id === m.id);
+  // 打开时决定：编辑期间这张卡在别处被删，保存时报错而不是当新卡建回来
+  const [isNew] = useState(() => !state.methods.some((x) => x.id === m.id));
   const up = (p: Partial<PaymentMethod>) => setF({ ...f, ...p });
   const balanceKind = BALANCE_KINDS.includes(f.kind);
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;

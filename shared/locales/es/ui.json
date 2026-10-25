@@ -3,7 +3,8 @@
   "error": {
     "loginRequired": "Inicia sesión primero",
     "requestFailed": "La solicitud falló ({status})",
-    "wholeCurrency": "Los importes en {currency} deben ser números enteros"
+    "wholeCurrency": "Los importes en {currency} deben ser números enteros",
+    "deletedElsewhere": "Este elemento se eliminó en otro lugar, así que tus cambios no se guardaron."
   },
   "theme": {
     "light": "Claro",

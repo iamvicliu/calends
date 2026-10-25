@@ -298,3 +298,28 @@ test('成功响应却不是 JSON 时报错，不当作空结果；读不到账�
   await assert.rejects(() => c.store.api('/api/prefs', { method: 'PATCH', body: '{}' }));
   await c.store.logout();
 });
+
+test('一笔写入失败回滚后，强制拉取服务端快照，不丢掉期间另一笔已成功的写入', async (t) => {
+  const c = await client(t);
+  let fail!: (response: Response) => void;
+  c.delayWrite(() => new Promise((resolve) => (fail = resolve)));
+  const first = c.store.saveMethod({ id: 'a', name: 'Fails', currency: 'USD', kind: 'bank' });
+  await settle();
+  await c.store.saveMethod({ id: 'b', name: 'Succeeds', currency: 'USD', kind: 'bank' });
+  fail(Response.json({ error: 'boom' }, { status: 500 }));
+  await assert.rejects(first);
+  await c.tick(1000);
+  await c.tick(1000);
+  assert.deepEqual(
+    c.store.getState().methods.map((m: { id: string }) => m.id),
+    ['b'],
+  );
+  await c.store.logout();
+});
+
+test('mergeEdits：表单打开期间那一项在别处被删，不把它写回来', async () => {
+  const { mergeEdits } = await import('../app/src/store.ts');
+  const a = { id: 'x', name: 'A' };
+  assert.throws(() => mergeEdits(a, { ...a, name: 'B' }, undefined));
+  assert.deepEqual(mergeEdits(a, { ...a, name: 'B' }, { id: 'x', name: 'A', extra: 1 } as typeof a), { id: 'x', name: 'B', extra: 1 });
+});
