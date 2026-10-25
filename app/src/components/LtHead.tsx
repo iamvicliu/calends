@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
 import { currentPhase, LIFETIME_BILL_MONTHS } from '../../../shared/billing.ts';
 import { money } from '../../../shared/format.ts';
 import { yearCost } from '../../../shared/metrics.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { perLabel } from '../views/Report.tsx';
-import { Icon } from './ui.tsx';
+import { Icon, useMedia } from './ui.tsx';
 
 /** 每 N 个月的简写周期：月、季度、半年、年，其余写「N 个月」；接在金额后面的「/」之后 */
 export function perMonths(n: number): string {
@@ -45,15 +44,7 @@ export function PlanPrice({ state, s, today, cost }: { state: AppState; s: Subsc
 
 /** 手机宽度：合租、代付在这里不出表格，列表视图也用卡片 */
 export function usePhone() {
-  const query = '(max-width: 640px)';
-  const [phone, setPhone] = useState(() => matchMedia(query).matches);
-  useEffect(() => {
-    const media = matchMedia(query);
-    const change = () => setPhone(media.matches);
-    media.addEventListener('change', change);
-    return () => media.removeEventListener('change', change);
-  }, []);
-  return phone;
+  return useMedia('(max-width: 640px)');
 }
 
 /**

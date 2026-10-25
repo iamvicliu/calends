@@ -168,6 +168,8 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
     useLayoutEffect: effect,
     useSyncExternalStore: (_subscribe: unknown, get: () => unknown) => get(),
     matchMedia: (query: string) => ({ matches: query.includes('portrait') ? env.narrow && env.portrait : query.includes('700px') && env.narrow }),
+    // ui.tsx useMedia：与上面的 matchMedia 同一套断点
+    useMedia: (query: string) => (query.includes('portrait') ? env.narrow && env.portrait : query.includes('700px') && env.narrow),
     getComputedStyle: () => ({ paddingLeft: env.narrow ? '12px' : '16px', paddingRight: '12px', columnGap: '8px' }),
     ResizeObserver: class {
       constructor(fn: () => void) {

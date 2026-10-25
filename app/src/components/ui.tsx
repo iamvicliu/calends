@@ -19,7 +19,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from 'react-aria-components';
-import { Children, Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
+import { Children, Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { currencyDecimals, moneyDecimals, flowSign, symbol } from '../../../shared/format.ts';
 import { FLAGS } from '../display.ts';
 import type { CardNetwork, PaymentMethod, Subscription } from '../../../shared/types.ts';
@@ -788,6 +788,26 @@ export function NameLink({ children, onClick }: { children: ComponentChildren; o
     >
       {children}
     </span>
+  );
+}
+
+/** 媒体查询订阅按查询串缓存：同一查询在每次渲染里是同一个函数，React 不必反复退订再订阅 */
+const mediaSubscribers = new Map<string, (cb: () => void) => () => void>();
+/** 订阅一个媒体查询（断点由调用处给出，各自保持原值）；服务端渲染时为 false */
+export function useMedia(query: string): boolean {
+  let subscribe = mediaSubscribers.get(query);
+  if (!subscribe) {
+    subscribe = (cb) => {
+      const mq = matchMedia(query);
+      mq.addEventListener('change', cb);
+      return () => mq.removeEventListener('change', cb);
+    };
+    mediaSubscribers.set(query, subscribe);
+  }
+  return useSyncExternalStore(
+    subscribe,
+    () => matchMedia(query).matches,
+    () => false,
   );
 }
 

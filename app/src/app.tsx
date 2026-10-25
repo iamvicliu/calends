@@ -8,7 +8,7 @@ import { Component, lazy, Suspense, useEffect, useRef, useState, type ReactNode 
 import { addDays, diffDays, effectiveStatus, nextCharge, isStopped } from '../../shared/billing.ts';
 import { cnDate, money, setSignedAmounts } from '../../shared/format.ts';
 import { avatarOf, type AppState, type Subscription } from '../../shared/types.ts';
-import { IconButton, AskLayer, Icon, SubIcon, TipLayer, Toasts } from './components/ui.tsx';
+import { IconButton, AskLayer, Icon, SubIcon, TipLayer, Toasts, useMedia } from './components/ui.tsx';
 import { authStatus, boot, login, loginPasskey, run, saveSettings, setupPassword, startPasskeyAutofill, today, usePref, useStore } from './store.ts';
 import { HIDDEN_CCY, setOrig, useOrig } from './display.ts';
 import { syncCategories } from './derive.ts';
@@ -494,16 +494,11 @@ function App() {
   useEffect(() => {
     if (loaded) prefetchViews();
   }, [loaded]);
-  const [narrow, setNarrow] = useState(() => matchMedia('(max-width: 860px)').matches);
+  const narrow = useMedia('(max-width: 860px)');
+  // 变宽后抽屉不再适用：关掉
   useEffect(() => {
-    const media = matchMedia('(max-width: 860px)');
-    const change = () => {
-      setNarrow(media.matches);
-      if (!media.matches) setDrawer(false);
-    };
-    media.addEventListener('change', change);
-    return () => media.removeEventListener('change', change);
-  }, []);
+    if (!narrow) setDrawer(false);
+  }, [narrow]);
   useEffect(() => {
     if (!drawer) return;
     const close = (e: KeyboardEvent) => {

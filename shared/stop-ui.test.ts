@@ -74,6 +74,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     useEffect() {},
     useLayoutEffect() {},
     useSyncExternalStore: (_subscribe: unknown, _get: unknown, server: () => unknown) => server(),
+    useMedia: () => false,
     useEffectEvent: (fn: unknown) => fn,
     ...billing,
     ...transfers,
