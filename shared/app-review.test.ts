@@ -56,3 +56,11 @@ test('子路径安装：本机键带安装前缀，旧的无前缀键只读兼�
   values.set('ledger:locale:/ledger', 'ja');
   assert.equal(readStored('ledger:locale'), 'ja');
 });
+
+test('备份导入的已知问题带类型，不靠比对翻译文案识别', async () => {
+  const { ImportError, readImportBackup } = await import('./import-backup.ts');
+  assert.throws(
+    () => readImportBackup(new TextEncoder().encode('not a database'), () => ({ exec: () => [], close() {} })),
+    (e) => e instanceof ImportError,
+  );
+});

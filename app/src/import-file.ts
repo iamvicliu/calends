@@ -6,7 +6,7 @@ import { t } from '../../shared/i18n.ts';
 export async function readImportFile(file: File, methods: PaymentMethod[], today: string): Promise<ImportSource> {
   if (file.size > IMPORT_LIMIT) throw new Error(t('core.import.tooLarge'));
   if (/\.csv$/i.test(file.name) || file.type === 'text/csv') return readImportCsv(await file.text(), methods, today);
-  const [{ default: initSqlJs }, { default: wasm }, { readImportBackup }] = await Promise.all([
+  const [{ default: initSqlJs }, { default: wasm }, { readImportBackup, ImportError }] = await Promise.all([
     import('sql.js'),
     import('sql.js/dist/sql-wasm.wasm?url'),
     import('../../shared/import-backup.ts'),
@@ -15,7 +15,7 @@ export async function readImportFile(file: File, methods: PaymentMethod[], today
   try {
     return readImportBackup(new Uint8Array(await file.arrayBuffer()), (data) => new SQL.Database(data));
   } catch (e) {
-    if (e instanceof Error && [t('core.import.invalid'), t('core.import.tooLarge'), t('core.import.pending')].includes(e.message)) throw e;
+    if (e instanceof ImportError) throw e;
     throw new Error(t('core.import.invalid'));
   }
 }
