@@ -1,7 +1,7 @@
 import { browserSupportsWebAuthnAutofill, startAuthentication, WebAuthnAbortService } from '@simplewebauthn/browser';
 import { beginPasskeyAutofill } from './passkey-autofill.ts';
 import { BASE_PATH, base, storageKey } from './base.ts';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 import { todayIn } from '../../shared/billing.ts';
 import type { AppState, PaymentMethod, Person, Settings, Subscription } from '../../shared/types.ts';
 import { mergePeople, syncPerson } from '../../shared/people.ts';
@@ -37,16 +37,16 @@ function set(patch: Partial<Store>) {
   updatePolling();
 }
 
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/** 组件里读整个 store：每次 set() 换新对象，订阅者随之重渲染 */
 export function useStore(): Store {
-  const [, force] = useState(0);
-  useEffect(() => {
-    const l = () => force((n) => n + 1);
-    listeners.add(l);
-    return () => {
-      listeners.delete(l);
-    };
-  }, []);
-  return store;
+  return useSyncExternalStore(subscribe, () => store);
 }
 
 export function getState(): AppState {
@@ -726,8 +726,10 @@ export interface ToastOptions {
   id?: string | number;
 }
 
-export function toast(text: string, err = false, opts: ToastOptions = {}): string | number {
-  const kind = err ? 'error' : (opts.kind ?? 'success');
+/** 提示条：第二个参数是种类（缺省成功），或带撤销按钮、替换已有提示等选项 */
+export function toast(text: string, how: ToastKind | ToastOptions = {}): string | number {
+  const opts = typeof how === 'string' ? { kind: how } : how;
+  const kind = opts.kind ?? 'success';
   return sonner[kind](text, { id: opts.id, description: opts.description, action: opts.action, duration: kind === 'error' ? 5000 : 2800 });
 }
 
@@ -739,7 +741,7 @@ export async function copyText(text: string, ok: string): Promise<boolean> {
     toast(ok);
     return true;
   } catch {
-    toast(t('ai.copyFailed'), true);
+    toast(t('ai.copyFailed'), 'error');
     return false;
   }
 }
@@ -756,11 +758,11 @@ export async function run(fn: () => Promise<unknown>, ok?: string | (ToastOption
     clearTimeout(timer);
     if (ok) {
       const o = typeof ok === 'string' ? { text: ok } : ok;
-      toast(o.text, false, { ...o, id: pending });
+      toast(o.text, { ...o, id: pending });
     } else if (pending !== undefined) sonner.dismiss(pending);
   } catch (e) {
     clearTimeout(timer);
-    toast(e instanceof Error ? e.message : String(e), true, { id: pending });
+    toast(e instanceof Error ? e.message : String(e), { kind: 'error', id: pending });
   }
 }
 
@@ -864,15 +866,7 @@ function migratePrefs() {
 /** 组件里用：值变了（本机改、别的设备改后刷新）会重新渲染 */
 export function usePref<T extends string>(key: PrefKey, fallback: T, valid?: (v: string) => v is T): [T, (v: T | null) => void] {
   // 订阅实际偏好值；公开页没有 state 时，本机值变化也必须提供新的快照。
-  const raw = useSyncExternalStore(
-    (listener) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-    () => (store.state ? (store.state.prefs?.[key] ?? null) : localPref(key)),
-  );
+  const raw = useSyncExternalStore(subscribe, () => (store.state ? (store.state.prefs?.[key] ?? null) : localPref(key)));
   const value = raw != null && (!valid || valid(raw)) ? (raw as T) : fallback;
   return [value, (v) => writePref(key, v)];
 }

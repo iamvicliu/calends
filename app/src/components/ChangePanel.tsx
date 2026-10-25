@@ -145,12 +145,12 @@ export function ChangePanel({
     try {
       setF(setPhaseEnd(f, start, end));
     } catch (e) {
-      toast(e instanceof Error ? e.message : String(e), true);
+      toast(e instanceof Error ? e.message : String(e), 'error');
     }
   };
   const apply = () => {
     const n = Number(price);
-    if (!(n >= 0) || price === '') return toast(t('editor.change.needPrice'), true);
+    if (!(n >= 0) || price === '') return toast(t('editor.change.needPrice'), 'error');
     try {
       const plan = {
         price: n,
@@ -170,7 +170,7 @@ export function ChangePanel({
         }),
       );
     } catch (e) {
-      toast(e instanceof Error ? e.message : String(e), true);
+      toast(e instanceof Error ? e.message : String(e), 'error');
     }
   };
 

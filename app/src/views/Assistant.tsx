@@ -92,7 +92,6 @@ interface Saved {
   history: ApiMessage[];
 }
 
-const STORE = ASSISTANT_KEY;
 const rid = () => Math.random().toString(36).slice(2, 10);
 const newChat = (): Saved => ({ id: rid(), createdAt: new Date().toISOString(), turns: [], history: [] });
 
@@ -108,7 +107,7 @@ function forServer(s: Saved) {
 /** 会话存在本机浏览器里（只是方便，不是账本数据）：较早的图片不存，免得撑爆存储 */
 function load(): Saved {
   try {
-    const raw = localStorage.getItem(STORE);
+    const raw = localStorage.getItem(ASSISTANT_KEY);
     // 老版本没有 id：补上，之后照常存到服务端
     if (raw) {
       const saved = settleInterrupted({ ...newChat(), ...(JSON.parse(raw) as Partial<Saved>) } as Saved);
@@ -131,7 +130,7 @@ function persist(s: Saved) {
       .reverse()
       .map((x) => (x.role === 'user' && x.images.length && ++users > 2 ? { ...x, images: [] } : x))
       .reverse();
-    localStorage.setItem(STORE, JSON.stringify({ id: s.id, createdAt: s.createdAt, turns, history: dropOldImages(s.history, 0, '[image]') }));
+    localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ id: s.id, createdAt: s.createdAt, turns, history: dropOldImages(s.history, 0, '[image]') }));
   } catch {
     /* 存不下就算了 */
   }
@@ -1207,7 +1206,7 @@ function Composer({
       const urls = await Promise.all(list.map(compress));
       setImages((x) => [...x, ...urls].slice(0, 8));
     } catch {
-      toast(t('assistant.imageFailed'), true);
+      toast(t('assistant.imageFailed'), 'error');
     }
   };
   const submit = () => {
@@ -1376,7 +1375,7 @@ function SetupSheet({
       toast(t('assistant.setup.saved'));
       onClose();
     } catch (e) {
-      toast((e as Error).message, true);
+      toast((e as Error).message, 'error');
     } finally {
       setSaving(false);
     }
@@ -1419,7 +1418,7 @@ function SetupSheet({
               (await ask(t('assistant.clearChatsConfirm'))) &&
               void api('/api/assistant/chats', { method: 'DELETE' }).then(() => {
                 try {
-                  localStorage.removeItem(STORE);
+                  localStorage.removeItem(ASSISTANT_KEY);
                 } catch {
                   /* ignore */
                 }

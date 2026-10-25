@@ -206,10 +206,10 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
       setReading(true);
       try {
         const source = await readImportFile(file, state.methods, today);
-        if (!source.rows.length) toast(t('settings.toast.csvEmpty'), true);
+        if (!source.rows.length) toast(t('settings.toast.csvEmpty'), 'error');
         else setImporting(source);
       } catch (e) {
-        toast(e instanceof Error ? e.message : t('core.import.invalid'), true);
+        toast(e instanceof Error ? e.message : t('core.import.invalid'), 'error');
       } finally {
         setReading(false);
       }
@@ -224,7 +224,7 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
       if (!Array.isArray(j.subscriptions)) throw new Error();
       setRestoring({ raw: j, subs: j.subscriptions.length, methods: j.methods?.length ?? 0, exportedAt: j.exportedAt, version: j.version ?? 1 });
     } catch {
-      toast(t('settings.toast.badBackup'), true);
+      toast(t('settings.toast.badBackup'), 'error');
     }
   };
 

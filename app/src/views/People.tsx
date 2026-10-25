@@ -351,7 +351,7 @@ function PersonSheet({
       const avatar = await compressAvatar(file);
       setF((current) => ({ ...current, avatar }));
     } catch (error) {
-      toast(error instanceof Error ? error.message : t('server.avatarInvalid'), true);
+      toast(error instanceof Error ? error.message : t('server.avatarInvalid'), 'error');
     } finally {
       busyRef.current = false;
       setAvatarBusy(false);

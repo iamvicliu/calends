@@ -80,7 +80,7 @@ export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: s
       try {
         return onApply(applyStopForm(sub, form, today));
       } catch (error) {
-        toast(error instanceof Error ? error.message : String(error), true);
+        toast(error instanceof Error ? error.message : String(error), 'error');
       }
     });
   const restore = () => submit(() => onApply(reactivate(sub, today)));
