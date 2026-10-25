@@ -718,7 +718,9 @@ function Reasoning({ part, live }: { part: Extract<Part, { kind: 'reasoning' }>;
 /** 工具调用：名称、状态，点开看参数与结果 */
 function ToolCard({ part }: { part: Extract<Part, { kind: 'tool' }> }) {
   const [open, setOpen] = useState(false);
-  const title = t(`mcp.tool.${part.name}`) || part.name;
+  // 没有本地化名称的工具（t 原样返回键名）显示工具名本身，不显示 mcp.tool.xxx
+  const key = `mcp.tool.${part.name}`;
+  const title = t(key) === key ? part.name : t(key);
   const json = (v: unknown) => {
     const s = JSON.stringify(v, null, 2);
     return s.length > 4000 ? `${s.slice(0, 4000)}\n…` : s;
