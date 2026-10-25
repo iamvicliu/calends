@@ -19,7 +19,14 @@ import {
   type Turn,
 } from '../../shared/deepseek.ts';
 import { locale, t } from '../../shared/i18n.ts';
-import { remainingFailures, writeMismatches, type AssistantOutcome, type ToolFailure, type WriteVerification } from '../../shared/assistant-result.ts';
+import {
+  draftSignature,
+  remainingFailures,
+  writeMismatches,
+  type AssistantOutcome,
+  type ToolFailure,
+  type WriteVerification,
+} from '../../shared/assistant-result.ts';
 import type { Env } from '../env.ts';
 import { decodeEntities, state, TOOLS, type Tool, type ToolCtx } from './mcp-tools.ts';
 import { searchAppStore } from '../appstore.ts';
@@ -244,7 +251,7 @@ export function chat(env: Env, body: { history?: ApiMessage[]; text?: string; im
           const tool = ASSISTANT_TOOLS.find((x) => x.name === call.function.name);
           const { args, error: parseError } = parseArgs(call.function.arguments);
           // 同一问里重复出同一个写操作草稿：不再执行、不显示，直接告诉模型已经有了
-          const sig = `${call.function.name}:${JSON.stringify({ ...args, dry_run: undefined })}`;
+          const sig = draftSignature(call.function.name, args);
           if (tool?.write && drafted.has(sig)) {
             added.push({
               role: 'tool',

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { confirmInOrder, remainingFailures, writeMismatches, type ToolFailure } from './assistant-result.ts';
+import { confirmInOrder, draftSignature, remainingFailures, writeMismatches, type ToolFailure } from './assistant-result.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 import { FALLBACK_FX } from './billing.ts';
 
@@ -22,6 +22,14 @@ const ledger = (subscriptions: Subscription[]): AppState => ({
   prefs: {},
   settings: { ...DEFAULT_SETTINGS },
   fx: FALLBACK_FX,
+});
+
+test('draft identity ignores nested object key order but retains array order and operation dates', () => {
+  const a = { subscription: 's', set: { notes: 'x', start: '2026-01-01', payments: [1, 2] } };
+  const b = { dry_run: true, set: { payments: [1, 2], start: '2026-01-01', notes: 'x' }, subscription: 's' };
+  assert.equal(draftSignature('update_subscription', a), draftSignature('update_subscription', b));
+  assert.notEqual(draftSignature('update_subscription', a), draftSignature('update_subscription', { ...a, set: { ...a.set, payments: [2, 1] } }));
+  assert.notEqual(draftSignature('update_subscription', a), draftSignature('update_subscription', { ...a, set: { ...a.set, start: '2026-01-02' } }));
 });
 
 test('read-back verifies intended entities/deletions, preserves financial dates, ignores unrelated edits and timestamps', () => {

@@ -1945,6 +1945,35 @@ test('assistant done reports unresolved failures even when the model claims full
   assert.deepEqual(await f.snapshot(), before);
 });
 
+test('reordered JSON keys do not repeat a person deletion against the draft overlay', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  await putKv(f.env, 'assistant', { apiKey: 'fictional', baseUrl: 'https://fictional.example.test' });
+  await putKv(f.env, 'people', [
+    { id: 'old', name: 'Old' },
+    { id: 'new', name: 'New' },
+  ]);
+  const before = await f.snapshot();
+  let n = 0;
+  t.mock.method(globalThis, 'fetch', async () =>
+    modelReply(
+      [
+        functionCall('delete', 'save_person', { action: 'delete', person: 'Old', migrate_to: 'New' }),
+        functionCall('repeat', 'save_person', { action: 'delete', migrate_to: 'New', person: 'Old' }),
+        { content: 'One draft ready for confirmation.' },
+      ][n++],
+    ),
+  );
+  const es = eventsOf(await chat(f.env, { text: 'Merge Old into New' }, new AbortController().signal).text());
+  assert.equal(es.filter((e) => e.type === 'proposal').length, 1);
+  assert.equal(
+    es.some((e) => e.type === 'tool' && e.status === 'error'),
+    false,
+  );
+  assert.equal(es.find((e) => e.type === 'done').outcome.status, 'complete');
+  assert.deepEqual(await f.snapshot(), before);
+});
+
 test('failed drafts can retry after their missing dependency is drafted, and only successful operations count', async (t) => {
   const f = await setup();
   t.after(() => f.db.close());

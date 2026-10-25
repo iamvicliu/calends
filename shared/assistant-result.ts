@@ -16,6 +16,13 @@ export interface WriteVerification {
   fields: string[];
 }
 
+/** Object key order and the forced preview flag do not change a draft's identity. */
+export function draftSignature(name: string, args: Record<string, unknown>): string {
+  return `${name}:${JSON.stringify({ ...args, dry_run: undefined }, (_key, value) =>
+    value && typeof value === 'object' && !Array.isArray(value) ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value,
+  )}`;
+}
+
 function canonical(value: unknown): string {
   return (
     JSON.stringify(value, (_key, v) =>
