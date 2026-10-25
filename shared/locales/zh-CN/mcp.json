@@ -9,7 +9,8 @@
     "anyRegion": "不区分地区",
     "total": "合计",
     "createCategory": "将新建分类：{name}",
-    "createdCategory": "已新建分类：{name}"
+    "createdCategory": "已新建分类：{name}",
+    "transfer": "转让"
   },
   "error": {
     "shareFull": "「{name}」已经坐满了（{seats} 个位置）",
@@ -70,7 +71,8 @@
     "stopDateRequired": "这个订阅在今天之前已经开始或扣过款，停用日不能默认今天。请用 at 给出实际日期；日期不详时传 at=null。",
     "unknownStopDetails": "日期不详的停用不能带退款或原因；要记录它们请用 at 给出日期。",
     "transferProxy": "代付订阅不能记转让",
-    "transferNotFound": "找不到 {date} 的这笔转让"
+    "transferNotFound": "找不到 {date} 的这笔转让",
+    "badMonth": "月份格式应为 YYYY-MM：{month}"
   },
   "tool": {
     "get_overview": "账本概况",

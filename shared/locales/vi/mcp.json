@@ -9,7 +9,8 @@
     "anyRegion": "Mọi khu vực",
     "total": "Tổng",
     "createCategory": "Sẽ tạo danh mục: {name}",
-    "createdCategory": "Đã tạo danh mục: {name}"
+    "createdCategory": "Đã tạo danh mục: {name}",
+    "transfer": "Chuyển nhượng"
   },
   "error": {
     "shareFull": "“{name}” đã đủ chỗ ({seats} chỗ)",
@@ -70,7 +71,8 @@
     "stopDateRequired": "Gói này đã bắt đầu hoặc bị trừ tiền trước hôm nay nên ngày dừng không thể mặc định là hôm nay. Hãy truyền ngày thực tế trong at, hoặc at=null nếu không rõ ngày.",
     "unknownStopDetails": "Lần dừng không rõ ngày không thể kèm hoàn tiền hay lý do; hãy truyền ngày trong at để ghi lại.",
     "transferProxy": "Gói trả hộ không ghi được chuyển nhượng",
-    "transferNotFound": "Không tìm thấy chuyển nhượng ngày {date}"
+    "transferNotFound": "Không tìm thấy chuyển nhượng ngày {date}",
+    "badMonth": "Tháng phải có dạng YYYY-MM: {month}"
   },
   "tool": {
     "get_overview": "Tổng quan sổ",

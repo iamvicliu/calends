@@ -89,6 +89,17 @@ export function toBaseAt(state: AppState, amount: number, ccy: string, date?: st
   return Number.isFinite(v) ? v : 0;
 }
 
+/** chargeValue() 折算不了（缺汇率）时为 true：那时它返回 0，调用方需要标记不完整而不是当成 0 */
+export function chargeFxMissing(
+  state: AppState,
+  c: { amount: number; currency: string; date: string; projected: boolean; settled?: { amount: number; currency: string } },
+  to = state.settings.baseCurrency,
+): boolean {
+  const [ccy, date] = c.settled && !c.projected ? [c.settled.currency, c.date] : [c.currency, c.projected ? undefined : c.date];
+  const v = date ? convertOn(1, ccy, to, date, state.fxHistory, state.fx) : convertOn(1, ccy, to, '9999-12-31', undefined, state.fx);
+  return !Number.isFinite(v);
+}
+
 /** 一笔扣款的本位币金额：已发生的按扣款当天汇率，预测的按当前汇率 */
 export function chargeValue(
   state: AppState,

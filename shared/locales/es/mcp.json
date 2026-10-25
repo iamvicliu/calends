@@ -9,7 +9,8 @@
     "anyRegion": "Cualquier región",
     "total": "Total",
     "createCategory": "Se creará la categoría: {name}",
-    "createdCategory": "Categoría creada: {name}"
+    "createdCategory": "Categoría creada: {name}",
+    "transfer": "Traspaso"
   },
   "error": {
     "shareFull": "«{name}» está completo ({seats} plazas)",
@@ -73,7 +74,8 @@
     "stopDateRequired": "Esta suscripción empezó o se cobró antes de hoy, así que la fecha de baja no puede ser hoy por defecto. Indica la fecha real en at, o at=null si se desconoce.",
     "unknownStopDetails": "Una baja con fecha desconocida no puede llevar reembolso ni motivo; indica la fecha en at para registrarlos.",
     "transferProxy": "Las suscripciones pagadas por otros no admiten traspasos",
-    "transferNotFound": "No hay ningún traspaso el {date}"
+    "transferNotFound": "No hay ningún traspaso el {date}",
+    "badMonth": "El mes debe tener el formato YYYY-MM: {month}"
   },
   "tool": {
     "get_overview": "Resumen del registro",

@@ -34,7 +34,7 @@ import {
   type Charge,
   validDay,
 } from '../../shared/billing.ts';
-import { chargeValue, toBaseAt } from '../../shared/fx.ts';
+import { chargeFxMissing, chargeValue, toBaseAt } from '../../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, stopLosses, topUpPlan, yearReview } from '../../shared/metrics.ts';
 import {
   editPhase,
@@ -89,13 +89,14 @@ import {
 } from '../../shared/carpool.ts';
 import { t } from '../../shared/i18n.ts';
 import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
+import { filteredSubs, LIST_FILTER, monthReportOut, scopeReportOut } from './report-tools.ts';
 import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { subError } from '../../shared/billing.ts';
 import { prepareSubWrite } from '../../shared/sub-write.ts';
 import { validateCurrency, categoryEdit } from '../../shared/ledger-edit.ts';
 import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
 import { CATEGORY_ALIASES } from '../../shared/locales/categories.gen.ts';
-import { cleanTransfers, netCost, transferredStop, transfersOf, transferValue } from '../../shared/transfers.ts';
+import { cleanTransfers, netCost, transferRows, transferredStop, transferSign, transfersOf, transferValue } from '../../shared/transfers.ts';
 
 /** App Store 搜索（也接受 App Store 链接，按 id 精确查找）；后台的名称联想和 AI 共用 */
 const storeCountry = (country: string) =>
@@ -960,7 +961,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'spending_stats',
     description:
-      'Aggregate spending over a period, grouped by month, year, category, payment method, currency, region or subscription. Cash basis: each past charge converted at its own day’s FX rate. scope=mine (default) excludes proxy payments and counts my share of shared plans.',
+      'Aggregate spending over a period, grouped by month, year, category, payment method, currency, region or subscription. Cash basis: each past charge converted at its own day’s FX rate. scope=mine (default) excludes proxy payments and counts my share of shared plans. Provider charges only by default; include_transfers=true adds second-hand transfers dated up to today (buy = cost, sell = negative; grouped under their subscription, transfer currency and month, method = "transfer"), which matches the calendar month report total for a calendar month — for that whole report prefer get_insights section=month_report. filter narrows to a subset with the same rules as the web list filter and get_insights section=scope_report (proxy payments then never match). Charges without a usable FX rate make their group and the total null with incomplete=true and fx_missing currencies.',
     inputSchema: obj({
       period: { ...PERIOD, default: 'this_year' },
       from: DATE,
@@ -968,6 +969,8 @@ const CATALOGUE: Tool[] = [
       group_by: { type: 'string', enum: ['month', 'year', 'category', 'method', 'currency', 'region', 'subscription', 'none'], default: 'category' },
       scope: { type: 'string', enum: ['mine', 'gross', 'proxy'], default: 'mine' },
       include_projected: { type: 'boolean', default: true, description: 'Include projected (future) charges inside the period.' },
+      include_transfers: { type: 'boolean', default: false, description: 'Add second-hand buy/sell cash (not with scope=proxy).' },
+      filter: LIST_FILTER,
       top: { type: 'integer', default: 30 },
       currency_out: CURRENCY_OUT,
     }),
@@ -977,33 +980,63 @@ const CATALOGUE: Tool[] = [
       const [from, to] = rangeOf(a.period ?? 'this_year', today, a.from, a.to);
       const scope = str(a.scope) ?? 'mine';
       const by = str(a.group_by) ?? 'category';
-      const groups = new Map<string, { key: string; label: string; total: number; count: number }>();
+      const ids = a.filter ? new Set(filteredSubs(st, today, a.filter as Record<string, unknown>).map((s) => s.id)) : undefined;
+      const groups = new Map<string, { key: string; label: string; total: number; count: number; missing: boolean }>();
+      const fxMissing = new Set<string>();
       let total = 0;
+      const add = (key: string, label: string, v: number, ccy: string) => {
+        const g = groups.get(key) ?? { key, label, total: 0, count: 0, missing: false };
+        if (Number.isFinite(v)) g.total += v;
+        else {
+          g.missing = true;
+          fxMissing.add(ccy);
+        }
+        g.count++;
+        groups.set(key, g);
+      };
       for (const c of chargesIn(st, from, to, today, scope)) {
         if (a.include_projected === false && c.projected) continue;
+        if (ids && !ids.has(c.sub.id)) continue;
         const sub = st.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
-        const v = chargeValue(st, c, out) * (scope === 'mine' ? myShareFactor(c.sub, c.date) : 1);
+        // 缺汇率时 chargeValue 给 0：标为不完整而不是算进 0
+        const v = chargeFxMissing(st, c, out) ? NaN : chargeValue(st, c, out) * (scope === 'mine' ? myShareFactor(c.sub, c.date) : 1);
+        const ccy = c.settled && !c.projected ? c.settled.currency : c.currency;
         // 按支付方式分组时，拆分付款按份额分到各来源
         for (const x of by === 'method' ? chargeSources(c) : [{ methodId: chargeMethodId(c), share: 1 }]) {
           const m = st.methods.find((y) => y.id === x.methodId);
           const [key, label] = groupOf(by, c, sub, m);
-          const g = groups.get(key) ?? { key, label, total: 0, count: 0 };
-          g.total += v * x.share;
-          g.count++;
-          groups.set(key, g);
+          add(key, label, v * x.share, ccy);
         }
         total += v;
       }
+      let transferTotal = 0;
+      if (a.include_transfers === true && scope !== 'proxy') {
+        const subs = st.subscriptions.filter((s) => !s.proxy && (!ids || ids.has(s.id)));
+        for (const r of transferRows({ ...st, subscriptions: subs }, from, to, today)) {
+          const v = transferSign(r.transfer) * transferValue(st, r.transfer, out);
+          const as = { date: r.date, currency: r.transfer.currency, sub: r.sub } as Charge;
+          const [key, label] = by === 'method' ? ['transfer', t('mcp.label.transfer')] : groupOf(by, as, r.sub, undefined);
+          add(key, label, v, r.transfer.currency);
+          total += v;
+          transferTotal += v;
+        }
+      }
       const list = [...groups.values()].sort((x, y) => (by === 'month' || by === 'year' ? x.key.localeCompare(y.key) : y.total - x.total));
+      const ok = Number.isFinite(total);
       return {
         from,
         to,
         currency: out,
         scope,
-        total: round(total),
-        groups: list
-          .slice(0, Number(a.top ?? 30))
-          .map((g) => ({ ...g, total: round(g.total), share_pct: total > 0 ? Math.round((g.total / total) * 1000) / 10 : 0 })),
+        total: ok ? round(total) : null,
+        ...(a.include_transfers === true ? { transfer_total: Number.isFinite(transferTotal) ? round(transferTotal) : null } : {}),
+        incomplete: !ok,
+        fx_missing: [...fxMissing].sort(),
+        groups: list.slice(0, Number(a.top ?? 30)).map(({ missing, ...g }) => ({
+          ...g,
+          total: missing ? null : round(g.total),
+          share_pct: missing || !ok ? null : total > 0 ? Math.round((g.total / total) * 1000) / 10 : 0,
+        })),
       };
     },
   },
@@ -1153,15 +1186,23 @@ const CATALOGUE: Tool[] = [
   {
     name: 'get_insights',
     description:
-      'Health check and reports: insights (renewals, price hikes, low balances, duplicates), year_review (spending and losses from stops in that year), prepaid (remaining prepaid value), cancel_savings (money saved by cancelling), stop_losses (unrefunded unused service after cancellation or provider termination, by phase and type). Stop losses cover all history through today, exclude proxy payments and count only my share, using stop-date FX; prorated full refunds have no loss. Missing FX keeps original amounts but returns null base amounts/totals with an incomplete flag.',
+      'Health check and reports: insights (renewals, price hikes, low balances, duplicates), year_review (spending and losses from stops in that year), prepaid (remaining prepaid value), cancel_savings (money saved by cancelling), stop_losses (unrefunded unused service after cancellation or provider termination, by phase and type), month_report (the calendar month report for month=YYYY-MM: net cash total/paid/pending incl. second-hand transfers, vs previous month and last year, MRR movement, composition, top, upcoming, events, losses, sharing, six-month cash series), scope_report (the web list selection report for filter: MRR, annual, paid this year, 12+3 month cash vs accrual, composition, top, upcoming, events, losses, sharing). Use month_report for "how much did I spend in <month>" so answers match the calendar, scope_report for questions about a subset (category, status, payment method, tag, region, search or named subscriptions). Report amounts are base currency at my share; charge rows also carry the original bill. Stop losses cover all history through today, exclude proxy payments and count only my share, using stop-date FX; prorated full refunds have no loss. Missing FX keeps original amounts but returns null base amounts/totals with an incomplete flag.',
     inputSchema: obj({
-      section: { type: 'string', enum: ['insights', 'year_review', 'prepaid', 'cancel_savings', 'stop_losses'], default: 'insights' },
+      section: {
+        type: 'string',
+        enum: ['insights', 'year_review', 'prepaid', 'cancel_savings', 'stop_losses', 'month_report', 'scope_report'],
+        default: 'insights',
+      },
       year: { type: 'string', description: 'year_review only, e.g. 2025.' },
+      month: { type: 'string', description: 'month_report only: YYYY-MM, default this month.' },
+      filter: { ...LIST_FILTER, description: `scope_report only. ${LIST_FILTER.description}` },
     }),
     async run(a, ctx) {
       const { st, today } = await state(ctx);
       const sec = str(a.section) ?? 'insights';
       const base = st.settings.baseCurrency;
+      if (sec === 'month_report') return monthReportOut(st, str(a.month) ?? today.slice(0, 7), today);
+      if (sec === 'scope_report') return scopeReportOut(st, today, a.filter as Record<string, unknown> | undefined);
       if (sec === 'insights')
         return { items: insights(st, today).map((i) => ({ tone: i.tone, title: i.title, body: i.body, subscriptions: i.subs?.map((s) => s.name) ?? [] })) };
       if (sec === 'year_review') {

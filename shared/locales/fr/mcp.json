@@ -9,7 +9,8 @@
     "anyRegion": "Toute région",
     "total": "Total",
     "createCategory": "Catégorie à créer : {name}",
-    "createdCategory": "Catégorie créée : {name}"
+    "createdCategory": "Catégorie créée : {name}",
+    "transfer": "Cession"
   },
   "error": {
     "shareFull": "« {name} » est complet ({seats} places)",
@@ -73,7 +74,8 @@
     "stopDateRequired": "Cet abonnement a commencé ou a été prélevé avant aujourd’hui : la date d’arrêt ne peut pas être aujourd’hui par défaut. Indiquez la date réelle dans at, ou at=null si elle est inconnue.",
     "unknownStopDetails": "Un arrêt à date inconnue ne peut pas comporter de remboursement ni de motif ; indiquez la date dans at pour les enregistrer.",
     "transferProxy": "Les abonnements payés pour autrui ne prennent pas de cessions",
-    "transferNotFound": "Aucune cession trouvée le {date}"
+    "transferNotFound": "Aucune cession trouvée le {date}",
+    "badMonth": "Le mois doit être au format YYYY-MM : {month}"
   },
   "tool": {
     "get_overview": "Aperçu du registre",
