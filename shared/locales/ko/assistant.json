@@ -256,5 +256,6 @@
     "deleteAll": "구독과 모든 결제 기록을 삭제합니다. 되돌릴 수 없습니다",
     "dateUnknown": "날짜 모름",
     "terminate": "제공자 중지"
-  }
+  },
+  "interrupted": "응답이 도중에 끊겼습니다."
 }

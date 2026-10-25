@@ -261,5 +261,6 @@
     "deleteAll": "Elimina la suscripción y todos sus cobros. No se puede deshacer.",
     "dateUnknown": "Fecha desconocida",
     "terminate": "Cancelada por el proveedor"
-  }
+  },
+  "interrupted": "La respuesta se interrumpió antes de terminar."
 }

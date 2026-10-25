@@ -14,3 +14,15 @@ test('助手草稿：只有日期字段按日期显示，category/status 等原�
   assert.equal(proposalDay(undefined), undefined);
   assert.equal(proposalDay(''), undefined);
 });
+
+test('助手：读回本机会话时残留的 streaming 回复记为中断，可以重试', async () => {
+  const { settleTurns } = await import('../app/src/views/assistant-fields.ts');
+  const turns = settleTurns([
+    { role: 'user', text: 'hi' },
+    { role: 'assistant', status: 'done', parts: [] },
+    { role: 'assistant', status: 'streaming', parts: [] },
+  ] as Array<{ role: string; status?: string; error?: { kind: string; message: string } }>);
+  assert.equal(turns[1].status, 'done');
+  assert.equal(turns[2].status, 'error');
+  assert.equal(turns[2].error?.kind, 'network');
+});

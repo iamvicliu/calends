@@ -35,9 +35,9 @@ import type { AppState, Subscription } from '../../../shared/types.ts';
 import { IconButton, ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { catColor } from '../derive.ts';
-import { api, refresh, toast } from '../store.ts';
+import { api, getState, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
-import { isDateField, proposalDay } from './assistant-fields.ts';
+import { interrupted, isDateField, proposalDay, settleTurns } from './assistant-fields.ts';
 import { compressImage as compress, takeHandoff } from '../handoff.ts';
 import './assistant.css';
 import { Streamdown, type Components } from 'streamdown';
@@ -111,7 +111,7 @@ function load(): Saved {
     const raw = localStorage.getItem(STORE);
     // 老版本没有 id：补上，之后照常存到服务端
     if (raw) {
-      const saved = { ...newChat(), ...(JSON.parse(raw) as Partial<Saved>) } as Saved;
+      const saved = settleInterrupted({ ...newChat(), ...(JSON.parse(raw) as Partial<Saved>) } as Saved);
       // 还没说过话的对话：分割线上的时间按这次打开算
       return saved.turns.length ? saved : { ...saved, createdAt: new Date().toISOString() };
     }
@@ -120,6 +120,9 @@ function load(): Saved {
   }
   return newChat();
 }
+/** 上次关页时还在流式输出的回复不会再继续：记为中断，显示重试入口 */
+const settleInterrupted = (s: Saved): Saved => ({ ...s, turns: settleTurns(s.turns ?? []) });
+
 function persist(s: Saved) {
   try {
     let users = 0;
@@ -244,6 +247,8 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
     void api<AssistantConfigView>('/api/assistant/config').then(setCfg, () => setCfg(null));
   }, []);
   useEffect(() => persist(chat), [chat]);
+  // 离开助手页时中止进行中的回复，不在后台继续消耗
+  useEffect(() => () => abort.current?.abort(), []);
   useEffect(() => {
     void api<Saved[]>('/api/assistant/chats')
       .then(
@@ -335,7 +340,11 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
       // 成功（或中途停止）才把这轮写进历史；出错的这轮不进历史，重试时原样再发
       const done = added as ApiMessage[] | null;
       if (done) setChat((c) => ({ ...c, history: [...history, ...done] }));
-      if (bot.status === 'streaming') setChat((c) => ({ ...c, turns: c.turns.map((x) => (x.id === bot.id ? { ...bot, status: 'done' } : x)) }));
+      // 连接结束却没收到 done（服务端或网络中途断开）：记为中断，可以重试，不当作已完成
+      if (bot.status === 'streaming') {
+        const cut = interrupted(bot);
+        setChat((c) => ({ ...c, turns: c.turns.map((x) => (x.id === bot.id ? cut : x)) }));
+      }
       setBusy(false);
       abort.current = null;
     }
@@ -361,8 +370,20 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
 
   /** 确认草稿：同一个 MCP 工具真正执行；结果作为备注写进历史，模型下一轮就知道已经加上了 */
   const applyProposal = async (turnId: string, p: Extract<Part, { kind: 'proposal' }>) => {
+    const retrying = p.state === 'error';
     setPart(turnId, p.id, { state: 'applying', error: undefined });
     try {
+      // 上次失败可能只是没收到响应、其实已经写入：重试前先同步账本核对，新建过的订阅不再建一次。
+      // 其他工具没有可核对的标识，仍按原参数重试（服务端幂等另行处理）
+      if (retrying) {
+        await refresh();
+        const id = p.tool === 'create_subscription' && typeof p.args.id === 'string' ? p.args.id : undefined;
+        const existing = id ? getState().subscriptions.find((s) => s.id === id) : undefined;
+        if (existing) {
+          setPart(turnId, p.id, { state: 'applied', subId: existing.id });
+          return;
+        }
+      }
       const r = await api<{ subscription?: { id: string; name: string } }>('/api/assistant/apply', {
         method: 'POST',
         body: JSON.stringify({ tool: p.tool, args: p.args }),

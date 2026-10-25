@@ -261,5 +261,6 @@
     "deleteAll": "Exclui a assinatura e todas as cobranças. Não é possível desfazer.",
     "dateUnknown": "Data desconhecida",
     "terminate": "Encerrada pelo provedor"
-  }
+  },
+  "interrupted": "A resposta foi interrompida antes de terminar."
 }
