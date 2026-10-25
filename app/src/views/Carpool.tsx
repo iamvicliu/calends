@@ -141,15 +141,9 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const view = phone ? 'grid' : savedView;
   const nextBy = new Map(all.map((s) => [s.id, nextCharge(s, addDays(today, 1)) ?? '9999-12-31']));
   const nextOf = (s: Subscription) => nextBy.get(s.id)!;
-  const owedBy = new Map(
-    all.map((s) => [
-      s.id,
-      duesOf(s)
-        .filter((d) => d.periodsOwed > 0)
-        // 算不出（缺汇率或缺金额）的一笔让合计为 NaN：状态胶囊只写「待收」，不写成少收的金额
-        .reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0),
-    ]),
-  );
+  // 待收合计（本位币）：算不出（缺汇率或缺金额）的一笔让合计为 NaN，只写「待收」，不写成少收的金额。每辆车与顶部合计同一算法
+  const owedTotal = (dues: ReturnType<typeof duesOf>) => dues.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
+  const owedBy = new Map(all.map((s) => [s.id, owedTotal(duesOf(s).filter((d) => d.periodsOwed > 0))]));
   const owedOf = (s: Subscription) => owedBy.get(s.id)!;
   // 当年盈亏：今年成本（已扣 + 预计）对比成员今年的收入（已收 + 今年还该收）
   const years = new Map(all.map((s) => [s.id, carYear(state, s, today)]));
@@ -178,7 +172,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const openSeats = owned.reduce((a, s) => a + carpoolRoster(s, today).vacancies, 0);
   const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
   const owedAll = all.flatMap(duesOf).filter((d) => d.periodsOwed > 0);
-  const owedSum = owedAll.reduce((a, d) => a + (Number.isFinite(d.owed) ? toBase(state, d.owed, d.currency) : NaN), 0);
+  const owedSum = owedTotal(owedAll);
   const [convert, setConvert] = useState<Subscription | null>(null);
   const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; editId?: string } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
