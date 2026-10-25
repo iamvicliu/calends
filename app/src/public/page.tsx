@@ -70,8 +70,10 @@ export function PublicPage() {
     document.title = title();
     fetch(appPath('/api/public'))
       .then(async (r) => {
-        const body = (await r.json()) as AppState & { error?: string };
-        if (!r.ok) throw new Error(body.error ?? t('public.loadFailed'));
+        // 不是 JSON（代理错误页、静态页顶替）或不是账本：统一显示加载失败，不露出解析异常
+        const body = (await r.json().catch(() => null)) as (AppState & { error?: string }) | null;
+        if (!r.ok) throw new Error(body?.error ?? t('public.loadFailed'));
+        if (!Array.isArray(body?.subscriptions) || !body.settings) throw new Error(t('public.loadFailed'));
         owner = body.settings.displayName ?? '';
         custom = body.settings.publicTitle ?? '';
         document.title = title();
