@@ -8,7 +8,7 @@ import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { currencyDecimals, moneyDecimals, flow, flowSign, setSignedAmounts, symbol, relDays, money, cnDateAuto, cnDateFull } from './format.ts';
 import { intlLocale, locale, setLocale } from './i18n.ts';
-import { chargeValue } from './fx.ts';
+import { chargeBaseOrNaN, chargeValue } from './fx.ts';
 import { FALLBACK_FX, addMonths, phaseSubs, diffDays } from './billing.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 import * as billing from './billing.ts';
@@ -146,16 +146,19 @@ test('Root applies loaded/changed signed settings before rendering and changes t
     preferredLocale: () => 'en',
     setSignedAmounts,
     App: 'App',
+    ErrorBoundary: 'ErrorBoundary',
   });
-  const first = Root();
+  // 根节点外面包着错误兜底，App 是它唯一的子节点
+  const app = () => Root().props.children;
+  const first = app();
   assert.equal(flow(-10, 'USD'), '−$10.00');
   state = { settings: { ...DEFAULT_SETTINGS, signedAmounts: false } };
-  const disabled = Root();
+  const disabled = app();
   assert.notEqual(disabled.key, first.key);
   assert.equal(flow(-10, 'USD'), '$10.00');
   assert.equal(flow(10, 'USD'), '$10.00');
   state = { settings: { ...DEFAULT_SETTINGS, signedAmounts: true } };
-  assert.equal(Root().key, first.key);
+  assert.equal(app().key, first.key);
   assert.equal(flow(10, 'USD'), '+$10.00');
 });
 
@@ -173,6 +176,7 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
     }),
     phaseSubs,
     chargeValue,
+    chargeBaseOrNaN,
     diffDays,
     relDays,
     flow,
@@ -238,6 +242,7 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
     YearLedger: yearLedger({ useState: hook, t: (key: string, args?: { count?: number; year?: string }) => `${key}:${args?.count ?? args?.year ?? ''}` }),
     phaseSubs,
     chargeValue,
+    chargeBaseOrNaN,
     addMonths,
     flow,
     t: (key: string, args?: { count?: number; year?: string }) => `${key}:${args?.count ?? args?.year ?? ''}`,
@@ -449,6 +454,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     relDays,
     flow,
     chargeValue,
+    chargeBaseOrNaN,
     t: (key: string) => key,
     useState: (initial: unknown) => [typeof initial === 'function' ? initial() : initial, empty],
     useRef: () => ({ current: null }),
