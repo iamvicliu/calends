@@ -7,7 +7,32 @@ import { base } from '../base.ts';
 import { createPortal } from 'react-dom';
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ArrowRight, ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share, TrendingDown, TrendingUp } from 'lucide-react';
+import {
+  ArrowDownToLine,
+  ArrowRight,
+  ArrowUpFromLine,
+  Ban,
+  CalendarClock,
+  CircleStop,
+  ExternalLink,
+  Flag,
+  Hourglass,
+  X,
+  Pause,
+  Pencil,
+  Play,
+  Plus,
+  Repeat2,
+  Settings2,
+  Share,
+  Tag,
+  TrendingDown,
+  TrendingUp,
+  Undo2,
+  Unlink,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
 import {
   activePhases,
   addDays,
@@ -807,6 +832,8 @@ function Timeline({ sub, state, today, history }: { sub: Subscription; state: Ap
 
 interface Ev {
   date: string;
+  /** 节点里的小图标：一眼看出是哪类变化 */
+  icon: LucideIcon;
   title: string;
   sub?: ReactNode;
   tone?: 'acc' | 'ok' | 'warn' | 'bad' | 'ink';
@@ -834,14 +861,16 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       const months = Math.round(days / 30.4375);
       evs.push({
         date: until!,
-        title: t('detail.ev.gap'),
-        sub: months >= 1 ? t('editor.history.gapMonths', { count: months }) : t('editor.history.gapDays', { count: days }),
+        icon: Unlink,
+        // 「断更 N 个月」本身就是标题，不再另起一行重复「断更」
+        title: months >= 1 ? t('editor.history.gapMonths', { count: months }) : t('editor.history.gapDays', { count: days }),
         tone: 'warn',
       });
     }
     if (v.start <= today || !v.planned)
       evs.push({
         date: v.start,
+        icon: i === 0 ? Play : Repeat2,
         title: i === 0 ? t('detail.ev.start') : t('detail.ev.switch'),
         sub: plan(v),
         tone: 'acc',
@@ -853,6 +882,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       const prev = hist[k - 1].amount;
       evs.push({
         date: p.from,
+        icon: p.amount > prev ? TrendingUp : TrendingDown,
         title: t('detail.ev.price'),
         sub: `${money(prev, v.currency)} → ${money(p.amount, v.currency)}${prev > 0 ? ` (${p.amount > prev ? '+' : '−'}${Math.round(Math.abs(p.amount / prev - 1) * 100)}%)` : ''}`,
         tone: p.amount > prev ? 'bad' : 'ok',
@@ -860,12 +890,13 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       });
     });
   });
-  if (sub.intro && sub.intro.until <= today) evs.push({ date: sub.intro.until, title: t('detail.intro.title'), sub: t('detail.ev.introEnd') });
-  if (sub.trialEnd) evs.push({ date: sub.trialEnd, title: t('detail.field.trialEnd'), future: sub.trialEnd > today });
-  if (sub.pausedAt && sub.status === 'paused') evs.push({ date: sub.pausedAt, title: t('detail.ev.paused'), tone: 'warn' });
+  if (sub.intro && sub.intro.until <= today) evs.push({ date: sub.intro.until, icon: Tag, title: t('detail.intro.title'), sub: t('detail.ev.introEnd') });
+  if (sub.trialEnd) evs.push({ date: sub.trialEnd, icon: Hourglass, title: t('detail.field.trialEnd'), future: sub.trialEnd > today });
+  if (sub.pausedAt && sub.status === 'paused') evs.push({ date: sub.pausedAt, icon: Pause, title: t('detail.ev.paused'), tone: 'warn' });
   if (sub.share?.since)
     evs.push({
       date: sub.share.since,
+      icon: Users,
       title: t('detail.ev.shareStart'),
       sub:
         sub.share.role === 'owner'
@@ -874,11 +905,12 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       tone: 'ok',
     });
   const up = upcomingPhase(sub, today);
-  if (up?.planned) evs.push({ date: up.start, title: t('detail.up.planned'), sub: plan(up), future: true });
+  if (up?.planned) evs.push({ date: up.start, icon: CalendarClock, title: t('detail.up.planned').split('\n')[0], sub: plan(up), future: true });
   for (const v of vs) {
     if (v.stop)
       evs.push({
         date: v.stop.date,
+        icon: v.stop.kind === 'terminate' ? Ban : CircleStop,
         title: t(v.stop.kind === 'terminate' ? 'core.stop.terminate' : 'core.stop.cancel'),
         sub: !state.readonly && v.stop.kind === 'terminate' ? v.stop.reason : undefined,
         tone: v.stop.kind === 'terminate' ? 'bad' : 'ink',
@@ -888,6 +920,7 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
         if (p.kind === 'refund')
           evs.push({
             date: p.date,
+            icon: Undo2,
             title: t('editor.payment.kind.refund'),
             tone: 'ok',
             future: p.date > today,
@@ -897,13 +930,14 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
   for (const tr of transfersOf(sub))
     evs.push({
       date: tr.date,
+      icon: tr.kind === 'sell' ? ArrowUpFromLine : ArrowDownToLine,
       title: t(`detail.transfer.kind.${tr.kind}`),
       sub: state.readonly ? undefined : tr.note,
       tone: tr.kind === 'sell' ? 'ok' : 'acc',
       future: tr.date > today,
     });
   if (sub.end && !sub.stop)
-    evs.push({ date: sub.end, title: sub.end <= today ? t('detail.ev.ended') : t('detail.ev.ending'), tone: 'ink', future: sub.end > today });
+    evs.push({ date: sub.end, icon: Flag, title: sub.end <= today ? t('detail.ev.ended') : t('detail.ev.ending'), tone: 'ink', future: sub.end > today });
   // 一条时间线，新的在上
   evs.sort((a, b) => b.date.localeCompare(a.date));
 
@@ -920,13 +954,15 @@ function Events({ sub, state, today }: { sub: Subscription; state: AppState; tod
       <ol className="dt-evs">
         {shown.map((e, i) => (
           <li key={`${e.date}-${i}`} className={`dt-ev ${e.future ? 'fut' : ''} ${e.tone ?? ''}`}>
-            <i />
-            {/* 日期在前、事件与说明紧跟在同一行，不再把日期推到最右边 */}
-            <time dateTime={e.date}>{cnDateFull(e.date)}</time>
+            <i aria-hidden>
+              <e.icon size={12} strokeWidth={2.2} />
+            </i>
+            {/* 事件名与说明同一行、日期靠右；放不下时说明才折到下一行 */}
             <div>
               <b>{e.title}</b>
-              {e.sub && <small style={e.tone === 'ok' ? { color: 'var(--dt-ok)' } : undefined}>{e.sub}</small>}
+              {e.sub && <small>{e.sub}</small>}
             </div>
+            <time dateTime={e.date}>{cnDateFull(e.date)}</time>
           </li>
         ))}
       </ol>

@@ -595,93 +595,86 @@
 .dt-evs {
   list-style: none;
   padding: 0;
-  margin-top: 8px !important;
+  margin-top: 10px !important;
 }
-/* 一条竖线串起各节点，新的在上 */
+/* 图标节点 | 事件名 + 说明 …… 日期，放不下时说明折行。一条竖线串起各节点，新的在上 */
 .dt-ev {
+  --ev: var(--label-2);
   position: relative;
   display: grid;
-  grid-template-columns: 16px 120px minmax(0, 1fr);
-  column-gap: 8px;
-  align-items: baseline;
-  padding: 6px 0;
-}
-/* 事件名与说明同一行，放不下才折行 */
-.dt-ev > div {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
   column-gap: 12px;
-  min-width: 0;
+  align-items: baseline;
+  padding: 5px 0;
 }
 .dt-ev:not(:last-child)::before {
   content: '';
   position: absolute;
-  left: 7px;
-  top: 16px;
-  bottom: -12px;
+  left: 10.5px;
+  top: 28px;
+  bottom: -5px;
   width: 1px;
   background: var(--dt-line-2);
 }
 .dt-ev > i {
   align-self: start;
-  grid-row: 1 / span 2;
-  position: relative;
-  width: 9px;
-  height: 9px;
-  margin: 5px 0 0 3px;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
   border-radius: var(--radius-pill);
-  background: var(--label-3);
-  box-shadow:
-    0 0 0 var(--hairline) var(--dt-panel),
-    0 0 0 var(--hairline) var(--dt-line-2);
+  color: var(--ev);
+  background: color-mix(in srgb, var(--ev) 12%, var(--dt-panel));
+  box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--ev) 22%, transparent);
 }
-.dt-ev.acc > i {
-  background: var(--indigo-9);
+.dt-ev.acc {
+  --ev: var(--indigo-9);
 }
-.dt-ev.ok > i {
-  background: var(--dt-ok);
+.dt-ev.ok {
+  --ev: var(--dt-ok);
 }
-.dt-ev.bad > i {
-  background: var(--dt-bad);
+.dt-ev.bad {
+  --ev: var(--dt-bad);
 }
-.dt-ev.warn > i {
-  background: var(--orange-9);
+.dt-ev.warn {
+  --ev: var(--orange-9);
 }
-.dt-ev.ink > i {
-  background: var(--label);
+.dt-ev.ink {
+  --ev: var(--label);
 }
+/* 还没发生：虚线空心节点，文字也淡一档 */
 .dt-ev.fut > i {
   background: var(--dt-panel);
-  box-shadow:
-    0 0 0 var(--hairline) var(--dt-panel),
-    inset 0 0 0 var(--hairline) var(--label-3);
+  box-shadow: none;
+  border: var(--hairline) dashed color-mix(in srgb, var(--ev) 55%, transparent);
+}
+.dt-ev > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 10px;
+  min-width: 0;
 }
 .dt-ev b {
   font-weight: 500;
+  line-height: 22px;
 }
 .dt-ev small {
   font-size: var(--fs-1);
-  line-height: 16px;
-  color: var(--label-3);
-  font-variant-numeric: tabular-nums;
-}
-.dt-ev time {
+  line-height: 18px;
   color: var(--label-2);
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
-@container detail-body (max-width: 520px) {
-  .dt-ev {
-    grid-template-columns: 16px minmax(0, 1fr);
-  }
-  .dt-ev > time {
-    grid-column: 2;
-    font-size: var(--fs-1);
-  }
-  .dt-ev > div {
-    grid-column: 2;
-  }
+.dt-ev.fut b {
+  color: var(--label-2);
+}
+.dt-ev > time {
+  color: var(--label-3);
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .dt-events .dt-link {
   margin-top: 8px;
