@@ -92,7 +92,7 @@ import { ledgerTools, paymentMethodTool } from './ledger-tools.ts';
 import { validateToolInput, type Schema } from '../../shared/tool-schema.ts';
 import { subError } from '../../shared/billing.ts';
 import { prepareSubWrite } from '../../shared/sub-write.ts';
-import { validateCurrency, categoryEdit } from '../../shared/ledger-edit.ts';
+import { validateCurrency, categoryEdit, deleteSubscriptionSettings, subRefsError } from '../../shared/ledger-edit.ts';
 import { categoryCounts, categoryList, presetCategory, PRESETS, type Category } from '../../shared/categories.ts';
 import { CATEGORY_ALIASES } from '../../shared/locales/categories.gen.ts';
 import { cleanTransfers, netCost, transferredStop, transfersOf, transferValue } from '../../shared/transfers.ts';
@@ -531,8 +531,14 @@ export async function commit(
   for (const v of phaseSubs(after)) {
     const error = subError(v);
     if (error) throw new Error(error);
-    validateCurrency(st, v.currency);
   }
+  // 与网页整条保存同一套引用校验：新写入的支付方式要存在、币种要可用；记录里原有的值放行
+  const refs = subRefsError(
+    st,
+    st.subscriptions.find((x) => x.id === after.id),
+    after,
+  );
+  if (refs) throw new Error(refs);
   const invalid = subError(after);
   if (invalid) throw new Error(invalid);
   const errs = statusChangeError(
@@ -656,19 +662,6 @@ function dropNulls(v: unknown): unknown {
   if (Array.isArray(v)) return v.map(dropNulls);
   if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).flatMap(([k, x]) => (x === null || x === undefined ? [] : [[k, dropNulls(x)]])));
   return v;
-}
-
-/** 一条订阅里引用到的所有支付方式：顶层、各阶段、单笔与拆分来源 */
-function methodIdsOf(s: Subscription): string[] {
-  const ids = new Set<string>();
-  for (const p of [s, ...(s.phases ?? [])]) {
-    if (p.methodId) ids.add(p.methodId);
-    for (const pay of p.payments ?? []) {
-      if (pay.methodId) ids.add(pay.methodId);
-      for (const f of pay.funding ?? []) if (f?.methodId) ids.add(f.methodId);
-    }
-  }
-  return [...ids];
 }
 
 /** 字段级差异：对象逐键、数组逐项展开到叶子；只列出变化的路径 */
@@ -1464,11 +1457,8 @@ const CATALOGUE: Tool[] = [
         tags: Array.isArray(raw.tags) ? raw.tags.map(String) : [],
         createdAt: previous?.createdAt ?? str(raw.createdAt) ?? today,
       } as Subscription;
-      for (const id of methodIdsOf(next))
-        if (!st.methods.some((m) => m.id === id)) throw new Error(t('mcp.error.noMethod', { q: id, list: candidates(st.methods) }));
-      const prepared = prepareSubWrite(previous, next, today);
+      const prepared = prepareSubWrite(previous, next, today, st);
       if (prepared.error !== undefined) throw new Error(prepared.error);
-      for (const v of [prepared.sub, ...phaseSubs(prepared.sub)]) validateCurrency(st, v.currency);
       const after = prepared.sub;
       const { updatedAt: _b, ...stored } = previous ?? ({} as Subscription);
       const changes = fieldChanges(previous ? stored : {}, after);
@@ -2027,10 +2017,10 @@ const CATALOGUE: Tool[] = [
       };
       if (a.dry_run) {
         ctx.overlay?.set(s.id, null);
-        ctx.draftState = { ...ctx.draftState, settings: { ...st.settings, publicHidden: st.settings.publicHidden?.filter((id) => id !== s.id) } };
+        ctx.draftState = { ...ctx.draftState, settings: deleteSubscriptionSettings(st.settings, s.id) };
         return { dry_run: true, ...preview };
       }
-      await saveLedgerEdit(ctx.env, { settings: { ...st.settings, publicHidden: st.settings.publicHidden?.filter((id) => id !== s.id) } }, [], [s.id]);
+      await saveLedgerEdit(ctx.env, { settings: deleteSubscriptionSettings(st.settings, s.id) }, [], [s.id]);
       return { ok: true, ...preview };
     },
   },

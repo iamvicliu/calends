@@ -49,5 +49,6 @@
   },
   "invalidAvatar": "Ảnh không hợp lệ",
   "avatarInvalid": "Dùng PNG/WebP vuông không có siêu dữ liệu, tối đa 128×128 và 64 KB. Tải lên PNG/JPEG/WebP tối đa 8 MB và 40 megapixel.",
-  "avatarRosterFull": "Danh sách người đã đầy. Hãy xóa một ảnh đại diện trước."
+  "avatarRosterFull": "Danh sách người đã đầy. Hãy xóa một ảnh đại diện trước.",
+  "methodInUse": "Phương thức thanh toán này vẫn đang được dùng. Hãy chuyển tham chiếu sang phương thức khác hoặc xóa trống trước."
 }

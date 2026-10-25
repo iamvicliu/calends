@@ -49,5 +49,6 @@
   },
   "invalidAvatar": "잘못된 이미지",
   "avatarInvalid": "메타데이터 없는 정사각형 PNG/WebP(최대 128×128, 64 KB)를 사용하세요. 업로드: PNG/JPEG/WebP, 최대 8 MB 및 4천만 화소.",
-  "avatarRosterFull": "인물 목록 용량이 가득 찼습니다. 먼저 아바타를 삭제하세요."
+  "avatarRosterFull": "인물 목록 용량이 가득 찼습니다. 먼저 아바타를 삭제하세요.",
+  "methodInUse": "이 결제 수단은 아직 사용 중입니다. 먼저 참조를 다른 결제 수단으로 옮기거나 비우세요."
 }

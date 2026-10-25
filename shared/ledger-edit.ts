@@ -85,25 +85,32 @@ export function methodReferences(st: AppState, id: string) {
     ...(st.settings.defaultMethodId === id ? [{ kind: 'default_method' }] : []),
   ];
 }
-export function deleteMethodData(st: AppState, id: string, into?: string) {
+/**
+ * 删除支付方式：所有层级的引用（订阅、阶段、单笔扣款、拆分来源、默认支付方式）一起处理。
+ * into 为另一张卡的 id 时迁过去；into === null 表示清空引用（仅网页删卡用，MCP 只给迁移）；
+ * 省略时有引用就拒绝。清空时含这张卡的拆分付款不再拆分（剩余金额无法再凑成合计），单笔记的卡回落到所在阶段的支付方式。
+ */
+export function deleteMethodData(st: AppState, id: string, into?: string | null) {
   const references = methodReferences(st, id);
   if (into === id || (into && !st.methods.some((m) => m.id === into))) throw new Error(t('mcp.error.invalidTarget'));
-  requireMigration(references, into);
+  if (into !== null) requireMigration(references, into);
+  const target = into ?? undefined;
   const uses = (pays?: Payment[]) => pays?.some((x) => x.methodId === id || x.funding?.some((f) => f.methodId === id));
   // 拆分付款里的来源一起迁移；迁到同一笔里已有的来源时合并成一份
-  const moveFunding = (parts: NonNullable<Payment['funding']>) => {
+  const moveFunding = (parts: NonNullable<Payment['funding']>, to: string) => {
     const merged = new Map<string, number>();
     for (const f of parts) {
-      const key = f.methodId === id ? into! : f.methodId;
+      const key = f.methodId === id ? to : f.methodId;
       merged.set(key, (merged.get(key) ?? 0) + f.amount);
     }
     return [...merged].map(([methodId, amount]) => ({ methodId, amount: Math.round(amount * 100) / 100 }));
   };
   const move = (pays?: Payment[]) =>
     pays?.map((x) => {
-      let next = x.methodId === id ? { ...x, methodId: into } : x;
+      let next = x.methodId === id ? { ...x, methodId: target } : x;
       if (x.funding?.some((f) => f.methodId === id)) {
-        const funding = moveFunding(x.funding);
+        if (!target) return { ...next, funding: undefined };
+        const funding = moveFunding(x.funding, target);
         // 合并后只剩一个来源：不再算拆分，记成这一笔单独的支付方式
         next = funding.length > 1 ? { ...next, funding } : { ...next, funding: undefined, methodId: funding[0].methodId };
       }
@@ -113,11 +120,28 @@ export function deleteMethodData(st: AppState, id: string, into?: string) {
     .filter((s) => s.methodId === id || uses(s.payments) || s.phases?.some((p) => p.methodId === id || uses(p.payments)))
     .map((s) => ({
       ...s,
-      methodId: s.methodId === id ? into : s.methodId,
+      methodId: s.methodId === id ? target : s.methodId,
       payments: move(s.payments),
-      phases: s.phases?.map((p) => ({ ...p, methodId: p.methodId === id ? into : p.methodId, payments: move(p.payments) })),
+      phases: s.phases?.map((p) => ({ ...p, methodId: p.methodId === id ? target : p.methodId, payments: move(p.payments) })),
     }));
-  return { references, subscriptions, settings: st.settings.defaultMethodId === id ? { ...st.settings, defaultMethodId: into } : st.settings };
+  return { references, subscriptions, settings: st.settings.defaultMethodId === id ? { ...st.settings, defaultMethodId: target } : st.settings };
+}
+/** 删除订阅时一并去掉它在公开页隐藏列表里的 id（网页删订阅与 MCP delete_subscription 共用） */
+export function deleteSubscriptionSettings(settings: Settings, id: string): Settings {
+  return settings.publicHidden?.includes(id) ? { ...settings, publicHidden: settings.publicHidden.filter((x) => x !== id) } : settings;
+}
+/**
+ * 去掉设置里已失效的引用：公开页隐藏列表中不存在的订阅、已删除的默认支付方式。
+ * 旧版网页删除不清这些引用；读取时在内存里剔除，下次保存设置时自然写回干净的值，不做批量迁移。
+ */
+export function pruneSettingsRefs(settings: Settings, subs: Pick<Subscription, 'id'>[], methods: Pick<PaymentMethod, 'id'>[]): Settings {
+  const hidden = settings.publicHidden?.filter((id) => subs.some((s) => s.id === id));
+  const staleHidden = hidden && hidden.length !== settings.publicHidden!.length;
+  const staleDefault = !!settings.defaultMethodId && !methods.some((m) => m.id === settings.defaultMethodId);
+  if (!staleHidden && !staleDefault) return settings;
+  const next = { ...settings, ...(staleHidden ? { publicHidden: hidden } : {}) };
+  if (staleDefault) delete next.defaultMethodId;
+  return next;
 }
 export function categoryEdit(st: AppState, action: string, ref: string | undefined, patch: Partial<Category>, into?: string, order?: string[]) {
   let categories = categoryList(st.settings, st.subscriptions);
@@ -169,10 +193,10 @@ export function personEdit(st: AppState, person: Person, deleting: boolean, into
   validatePeopleAvatars(people);
   return { people, subscriptions: syncPerson(st.subscriptions, person), references };
 }
-export function validateCurrency(st: AppState, code: string): void {
+export function validateCurrency(st: Pick<AppState, 'fx'>, code: string): void {
   if (!/^[A-Z]{3}$/.test(code) || !(st.fx.rates[code] > 0)) throw new Error(t('mcp.error.unsupportedCurrency', { code }));
 }
-export function validateMethod(st: AppState, m: PaymentMethod): void {
+export function validateMethod(st: Pick<AppState, 'fx'>, m: PaymentMethod): void {
   if (!m.name?.trim()) throw new Error(t('mcp.error.invalidInput', { field: 'name' }));
   validateCurrency(st, m.currency);
 }
@@ -187,25 +211,39 @@ export function safeSettings(st: AppState) {
     prefs: Object.fromEntries(PREF_KEYS.filter((k) => st.prefs?.[k] !== undefined).map((k) => [k, st.prefs![k]])),
   };
 }
+/**
+ * 设置写入的共用校验（网页 PUT /api/settings 与 MCP update_settings）：只校验相对 prev 改动过的字段，
+ * 已存的旧值即使不再合法也不拦，避免一处历史脏数据让所有设置都存不了。公开页隐藏列表只校验新加的 id。
+ */
+export function checkSettings(st: Pick<AppState, 'fx' | 'methods' | 'subscriptions'>, prev: Settings, next: Settings): void {
+  const changed = (k: keyof Settings) => JSON.stringify(prev[k]) !== JSON.stringify(next[k]);
+  if (changed('baseCurrency')) validateCurrency(st, next.baseCurrency);
+  if (next.collectCurrency && changed('collectCurrency')) validateCurrency(st, next.collectCurrency);
+  if (next.defaultMethodId && changed('defaultMethodId') && !st.methods.some((m) => m.id === next.defaultMethodId))
+    throw new Error(t('mcp.error.invalidTarget'));
+  if (changed('timezone'))
+    try {
+      new Intl.DateTimeFormat('en', { timeZone: next.timezone }).format();
+    } catch {
+      throw new Error(t('mcp.error.invalidInput', { field: 'timezone' }));
+    }
+  if (next.language && changed('language') && !isLocale(next.language)) throw new Error(t('mcp.error.invalidInput', { field: 'language' }));
+  const added = next.publicHidden?.filter((id) => !prev.publicHidden?.includes(id)) ?? [];
+  if (added.some((id) => !st.subscriptions.some((s) => s.id === id))) throw new Error(t('mcp.error.invalidTarget'));
+  if (next.avatar && changed('avatar') && (!/^(https?:\/\/|data:image\/(png|jpeg|webp|gif|svg\+xml);base64,)/.test(next.avatar) || next.avatar.length > 300000))
+    throw new Error(t('server.invalidAvatar'));
+}
 export function settingsEdit(
   st: AppState,
   patch: Record<string, unknown>,
   switches: Array<{ id: string; enabled: boolean }> = [],
   prefs: Record<string, string | null> = {},
 ) {
-  const settings = { ...DEFAULT_SETTINGS, ...applyFields(st.settings, patch) };
-  validateCurrency(st, settings.baseCurrency);
-  if (settings.collectCurrency) validateCurrency(st, settings.collectCurrency);
-  if (settings.defaultMethodId && !st.methods.some((m) => m.id === settings.defaultMethodId)) throw new Error(t('mcp.error.invalidTarget'));
-  try {
-    new Intl.DateTimeFormat('en', { timeZone: settings.timezone }).format();
-  } catch {
-    throw new Error(t('mcp.error.invalidInput', { field: 'timezone' }));
-  }
-  if (settings.language && !isLocale(settings.language)) throw new Error(t('mcp.error.invalidInput', { field: 'language' }));
-  if (settings.publicHidden?.some((id) => !st.subscriptions.some((s) => s.id === id))) throw new Error(t('mcp.error.invalidTarget'));
-  if (settings.avatar && (!/^(https?:\/\/|data:image\/(png|jpeg|webp|gif|svg\+xml);base64,)/.test(settings.avatar) || settings.avatar.length > 300000))
-    throw new Error(t('mcp.error.invalidInput', { field: 'avatar' }));
+  const prev = { ...DEFAULT_SETTINGS, ...st.settings };
+  const patched = { ...DEFAULT_SETTINGS, ...applyFields(st.settings, patch) };
+  // 先校验本次改动（新加的非法值报错），再剔除早已失效的旧引用
+  checkSettings(st, prev, patched);
+  const settings = pruneSettingsRefs(patched, st.subscriptions, st.methods);
   if (switches.length) {
     const channels = channelsOf(settings);
     if (new Set(switches.map((x) => x.id)).size !== switches.length || switches.some((x) => !channels.some((c) => c.id === x.id)))
@@ -213,6 +251,40 @@ export function settingsEdit(
     settings.channels = channels.map((c) => ({ ...c, enabled: switches.find((x) => x.id === c.id)?.enabled ?? c.enabled }));
   }
   return { settings, prefs: mergePrefs(st.prefs ?? {}, prefs) };
+}
+
+/** 一条订阅里引用到的所有支付方式：顶层、各阶段、单笔与拆分来源 */
+export function methodIdsOf(s: Subscription | undefined): string[] {
+  const ids = new Set<string>();
+  for (const p of s ? [s, ...(s.phases ?? [])] : []) {
+    if (p.methodId) ids.add(p.methodId);
+    for (const pay of p.payments ?? []) {
+      if (pay.methodId) ids.add(pay.methodId);
+      for (const f of pay.funding ?? []) if (f?.methodId) ids.add(f.methodId);
+    }
+  }
+  return [...ids];
+}
+const currenciesOf = (s: Subscription | undefined) => (s ? [s.currency, ...(s.phases ?? []).map((p) => p.currency)] : []);
+/**
+ * 整条订阅写入的引用校验（网页 PUT /api/subscriptions、MCP save_subscription 与其余订阅写工具共用）：
+ * 新写入的支付方式必须存在，新写入的币种必须有汇率。previous 里本来就有的值放行（删卡遗留、汇率表变化），
+ * 这样未改动的历史记录仍能保存，只拒绝本次新引入的非法值。
+ */
+export function subRefsError(st: Pick<AppState, 'fx' | 'methods'>, previous: Subscription | undefined, next: Subscription): string | undefined {
+  const knownMethods = new Set(methodIdsOf(previous));
+  for (const id of methodIdsOf(next))
+    if (!knownMethods.has(id) && !st.methods.some((m) => m.id === id))
+      return t('mcp.error.noMethod', { q: id, list: st.methods.map((m) => t('mcp.item', { name: m.name, id: m.id })).join(t('mcp.sep')) });
+  const knownCurrencies = new Set(currenciesOf(previous));
+  for (const code of currenciesOf(next))
+    if (!knownCurrencies.has(code))
+      try {
+        validateCurrency(st, code);
+      } catch (e) {
+        return (e as Error).message;
+      }
+  return undefined;
 }
 
 // Replace/delete one indexed record, with optional optimistic snapshot protection.
