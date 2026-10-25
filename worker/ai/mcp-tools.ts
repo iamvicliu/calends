@@ -216,8 +216,7 @@ export const toolTitle = (name: string) => t(`mcp.tool.${name}`);
 /** 候选列表：「名称（id）、名称（id）」 */
 const candidates = (xs: Array<{ name: string; id: string }>) => xs.map((x) => t('mcp.item', { name: x.name, id: x.id })).join(t('mcp.sep'));
 
-/** Connection metadata is private, credential-free and reflects the actual caller's permissions. */
-/** 连接信息只用到设置：握手时不必读整份账本 */
+/** 连接信息：私有、不含凭据，反映调用方实际权限；只用到设置，握手时不必读整份账本 */
 export function connectionInfo(ctx: ToolCtx, settings: AppState['settings'], today: string) {
   const scope = ctx.access?.scope ?? 'read';
   let site: string | null = null;
@@ -568,13 +567,13 @@ const FUNDING = {
   items: obj({ method: { type: 'string', description: 'Payment method id or name.' }, amount: { type: 'number', minimum: 0 } }, ['method', 'amount']),
 };
 
-/** 写入：dry_run 只返回预览；否则保存并返回最新一行 + 接下来几笔扣款 */
 /** 模型偶尔把名称里的 & 等写成 HTML 实体（AT&amp;T），存之前还原 */
 export const decodeEntities = (s: string) =>
   s.replace(/&(amp|lt|gt|quot|#39|apos);/g, (_, e: string) => ({ amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", apos: "'" })[e]!);
 
 type CategoryCreation = { category: Category; categories: Category[] };
 
+/** 写入：校验后交给 persist；dry_run 只返回预览，否则保存并返回最新一行 + 接下来几笔扣款 */
 export async function commit(
   ctx: ToolCtx,
   st: AppState,
@@ -1395,7 +1394,6 @@ const CATALOGUE: Tool[] = [
     },
   },
 
-  // ---------- 写入 ----------
   {
     name: 'search_app_store',
     description:
@@ -1407,6 +1405,8 @@ const CATALOGUE: Tool[] = [
       return { results: await searchAppStore(String(a.query ?? ''), str(a.country) ?? 'us') };
     },
   },
+
+  // ---------- 写入 ----------
   {
     name: 'create_subscription',
     description:
