@@ -333,3 +333,20 @@ test('W-11 并发请求各用各的语言，不会被另一个请求切换的语
   assert.match(jaMsg, /[぀-ヿ一-鿿]/);
   assert.notEqual(zhMsg, jaMsg);
 });
+
+test('W-12 取不到访客 IP 时连续输错不会把站长锁在门外；有 IP 时照常限速', async () => {
+  const f = fixture({ DEV_BYPASS_AUTH: undefined, SETUP_TOKEN: 'fictional-setup' });
+  const login = (password: string, ip?: string) =>
+    f.request('/api/login', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...(ip ? { 'cf-connecting-ip': ip } : {}) },
+      body: JSON.stringify({ password }),
+    });
+  const setup = await f.request('/api/auth/setup', { method: 'POST', body: JSON.stringify({ setupToken: 'fictional-setup', password: 'correct-horse' }) });
+  assert.equal(setup.status, 200);
+  for (let i = 0; i < 6; i++) assert.equal((await login('wrong-password')).status, 401);
+  assert.equal((await login('correct-horse')).status, 200);
+  for (let i = 0; i < 6; i++) assert.equal((await login('wrong-password', '203.0.113.5')).status, 401);
+  assert.equal((await login('correct-horse', '203.0.113.5')).status, 429);
+  assert.equal((await login('correct-horse', '203.0.113.6')).status, 200);
+});

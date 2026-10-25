@@ -151,9 +151,22 @@ async function startSession(req: Request, env: Env, method: 'password' | 'passke
   );
 }
 
-/** 按 IP 限速：15 分钟内失败 6 次就先锁住 */
+/** 取不到访客 IP 时每次失败的等待：不锁定，只放慢尝试 */
+const NO_IP_DELAY_MS = 750;
+
+/**
+ * 按 IP 限速：15 分钟内失败 6 次就先锁住。
+ * Cloudflare 总带 cf-connecting-ip，Docker 由前置转发按真实连接写入；只有直接跑 wrangler dev 等情况取不到。
+ * 取不到时所有人会落进同一个桶，锁定会让任何人都能把站长锁在门外，所以不锁，只在每次失败后等一会儿（PBKDF2 本身也有开销）。
+ */
 async function throttle(req: Request, env: Env) {
-  const ip = clientIp(req, env) || 'unknown';
+  const ip = clientIp(req, env);
+  if (!ip)
+    return {
+      blocked: false,
+      fail: () => new Promise((r) => setTimeout(r, NO_IP_DELAY_MS)),
+      clear: async () => undefined,
+    };
   const now = Date.now();
   const rec = await env.DB.prepare('SELECT fails, window_start FROM login_attempts WHERE ip = ?1').bind(ip).first<{ fails: number; window_start: number }>();
   const fresh = !rec || now - rec.window_start >= WINDOW_MS;
