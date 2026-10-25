@@ -46,6 +46,7 @@ export interface NetCost {
   currency: string;
   /** 服务商扣款（实扣、退款为负），同详情「累计」口径；有扣款缺汇率时为 NaN */
   service: number;
+  /** 至今的扣款记录笔数：含退款与失败的扣款 */
   charges: number;
   /** 转入付出的钱、转出收回的钱（正数）；缺汇率时为 NaN */
   bought: number;

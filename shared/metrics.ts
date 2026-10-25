@@ -677,12 +677,15 @@ export interface YearReview {
   year: string;
   /** 当年停止的阶段截至 today 仍未退回的损失（我的份额、本位币） */
   stopLoss: number;
+  /** 当年扣款（含退款负数，全额而非我的份额，不含代付）加转让现金，本位币 */
   total: number;
+  /** 当年扣款记录笔数：含退款与失败的扣款（与月报「不含退款、失败」的笔数口径不同） */
   charges: number;
   top: Array<{ sub: Subscription; sum: number }>;
   /** 这一年每个订阅花了多少，从多到少 */
   items: Array<{ sub: Subscription; sum: number }>;
   longest?: { sub: Subscription; days: number };
+  /** 当年开始、当年结束的订阅：含代付 */
   newSubs: Subscription[];
   ended: Subscription[];
   currencies: number;

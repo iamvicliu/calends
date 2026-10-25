@@ -29,6 +29,7 @@ export function stopForm(sub: Subscription, today: string): StopForm {
     refundDate: payment?.date,
     reason: sub.stop?.reason ?? '',
     settled: payment?.settled ? String(-payment.settled.amount) : '',
+    // 没记过卡上实退时的默认币种写死为 USD（不随卡或本位币）；改默认会改变表单初始显示，留待决定
     settledCurrency: payment?.settled?.currency ?? 'USD',
   };
 }
