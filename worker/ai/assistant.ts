@@ -20,7 +20,8 @@ import {
 } from '../../shared/deepseek.ts';
 import { locale, t } from '../../shared/i18n.ts';
 import type { Env } from '../env.ts';
-import { decodeEntities, searchAppStore, TOOLS, type Tool, type ToolCtx } from './mcp-tools.ts';
+import { decodeEntities, TOOLS, type Tool, type ToolCtx } from './mcp-tools.ts';
+import { searchAppStore } from '../appstore.ts';
 import { getKv, loadState, putKv } from '../store.ts';
 
 const KEY = 'assistant';

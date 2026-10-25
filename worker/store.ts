@@ -170,6 +170,12 @@ export async function replaceAll(env: Env, subs: Subscription[], methods: Paymen
   return mutate(env, stmts);
 }
 
+/** 支付方式原样读取（不排序）；网页、导入写入前的校验用 */
+export async function loadMethods(env: Env): Promise<PaymentMethod[]> {
+  return (await env.DB.prepare('SELECT data FROM methods').all<{ data: string }>()).results.map((r) => JSON.parse(r.data) as PaymentMethod);
+}
+
+/** 订阅（续费规则按旧数据兼容转换，与 loadState 同一口径） */
 export async function loadSubs(env: Env): Promise<Subscription[]> {
   return (await env.DB.prepare('SELECT data FROM subscriptions').all<{ data: string }>()).results.map((r) =>
     migrateRenewalRules(JSON.parse(r.data) as Subscription),
