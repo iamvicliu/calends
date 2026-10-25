@@ -419,3 +419,20 @@ test('W-14 工具入参运行时校验 pattern、maxItems，nullable 处理数�
   assert.equal(r.isError, true);
   assert.match(r.content[0].text, /periods/);
 });
+
+test('W-15 订阅 updatedAt 由存储层统一写入：网页保存、MCP 账本工具、分类改名都会更新', async () => {
+  const f = await ledger();
+  await upsert(f.env, 'subscriptions', 'u1', sub('u1', 'Fictional stamp', { updatedAt: '2000-01-01T00:00:00.000Z' }));
+  const stampOf = async () => (await loadState(f.env, false)).subscriptions.find((s) => s.id === 'u1')!.updatedAt!;
+  const first = await stampOf();
+  assert.notEqual(first, '2000-01-01T00:00:00.000Z');
+  // 直接写一个旧时间，再经 MCP save_category 改名（ledger-tools 的写入管线）
+  f.db.prepare('UPDATE subscriptions SET data = json_set(data, ?, ?) WHERE id = ?').run('$.updatedAt', '2000-01-01T00:00:00.000Z', 'u1');
+  const r = await f.call('save_category', { action: 'update', category: 'Test', set: { name: 'Renamed' } });
+  assert.ok(!r.isError, JSON.stringify(r));
+  assert.notEqual(await stampOf(), '2000-01-01T00:00:00.000Z');
+  f.db.prepare('UPDATE subscriptions SET data = json_set(data, ?, ?) WHERE id = ?').run('$.updatedAt', '2000-01-01T00:00:00.000Z', 'u1');
+  const put = await f.request('/api/categories', { method: 'PUT', body: JSON.stringify({ categories: [{ name: 'Again' }], renames: { Renamed: 'Again' } }) });
+  assert.equal(put.status, 200);
+  assert.notEqual(await stampOf(), '2000-01-01T00:00:00.000Z');
+});

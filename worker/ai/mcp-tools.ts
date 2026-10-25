@@ -634,7 +634,7 @@ async function persist(
     ctx.overlay?.set(after.id, after);
     return { dry_run: true, ...preview };
   }
-  const saved = { ...after, updatedAt: new Date().toISOString() };
+  const saved = { ...after };
   // 新建的分类、人与订阅同一个事务写入
   if (categoryCreation || people)
     await saveLedgerEdit(ctx.env, {

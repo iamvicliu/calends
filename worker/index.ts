@@ -212,7 +212,6 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       const prepared = prepareSubWrite(previous, sub, today, { methods: await methodsOf(env), fx: await getFx(env) });
       if (prepared.error !== undefined) return bad(prepared.error);
       sub = prepared.sub;
-      sub.updatedAt = new Date().toISOString();
       const rev = await upsert(env, 'subscriptions', sub.id, sub);
       return json(sub, 200, rev);
     }
@@ -232,7 +231,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       const into = String(((await readJson(req)) as { into?: string }).into ?? '');
       if (!people.some((p) => p.id === id) || !people.some((p) => p.id === into) || into === id) return bad(t('server.personNotFound'), 404);
       const r = mergePeople(people, await subsOf(env), id, into);
-      const subscriptions = r.subs.map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
+      const subscriptions = r.subs;
       const rev = await writePeople(env, r.people, subscriptions);
       return json({ people: r.people, subscriptions }, 200, rev);
     }
@@ -252,7 +251,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       } catch (e) {
         return bad(e instanceof Error ? e.message : t('server.invalidPerson'));
       }
-      const subscriptions = syncPerson(await subsOf(env), p).map((x) => ({ ...x, updatedAt: new Date().toISOString() }));
+      const subscriptions = syncPerson(await subsOf(env), p);
       const rev = await writePeople(env, next, subscriptions);
       return json({ person: p, subscriptions }, 200, rev);
     }
@@ -295,8 +294,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
       } catch {
         return bad(t('server.invalidMethod'));
       }
-      const now = new Date().toISOString();
-      const subscriptions = r.subscriptions.map((x) => ({ ...x, updatedAt: now }));
+      const subscriptions = r.subscriptions;
       const rev = await saveLedgerEdit(env, { settings: r.settings, subscriptions }, [m[1]]);
       return json({ ok: true, settings: r.settings, subscriptions }, 200, rev);
     }
@@ -334,8 +332,7 @@ async function api(req: Request, env: Env, path: string): Promise<Response> {
     if ('error' in r) return bad(r.error);
     const renames: Record<string, string> = {};
     for (const [from, to] of Object.entries(b.renames ?? {})) if (typeof to === 'string' && to.trim()) renames[from] = to.trim();
-    const now = new Date().toISOString();
-    const changed = renameInSubs(await loadSubs(env), renames).map((s) => ({ ...s, updatedAt: now }));
+    const changed = renameInSubs(await loadSubs(env), renames);
     const settings = { ...(await getSettings(env)), categories: r.list };
     const rev = await saveSettingsWithSubs(env, settings, changed);
     return json({ settings, subscriptions: changed }, 200, rev);

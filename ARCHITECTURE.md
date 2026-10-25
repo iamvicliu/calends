@@ -155,14 +155,14 @@ Reminder preview groups today's candidates and sends separately from recent hist
 
 `worker/store.ts` is the persistence layer. The database stores:
 
-| Storage                                                     | Contents                                                                                                                        |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `subscriptions`, `methods`                                  | JSON records keyed by ID, plus update timestamps.                                                                               |
-| `kv`                                                        | Settings, the people roster, preferences, current FX and credential/configuration records. This SQL table is not Cloudflare KV. |
-| `fx_daily`                                                  | Exchange rates and source by date.                                                                                              |
-| `sessions`, `passkeys`, `auth_challenges`, `login_attempts` | Authentication and device state.                                                                                                |
-| `notify_log`                                                | Delivery records with deduplication keys.                                                                                       |
-| `chats`                                                     | Stored assistant conversations.                                                                                                 |
+| Storage                                                     | Contents                                                                                                                                                                                                  |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `subscriptions`, `methods`                                  | JSON records keyed by ID, plus update timestamps. Subscription JSON `updatedAt` is stamped only by `worker/store.ts` on every store write (imports and restores keep the stored value); nothing reads it. |
+| `kv`                                                        | Settings, the people roster, preferences, current FX and credential/configuration records. This SQL table is not Cloudflare KV.                                                                           |
+| `fx_daily`                                                  | Exchange rates and source by date.                                                                                                                                                                        |
+| `sessions`, `passkeys`, `auth_challenges`, `login_attempts` | Authentication and device state.                                                                                                                                                                          |
+| `notify_log`                                                | Delivery records with deduplication keys.                                                                                                                                                                 |
+| `chats`                                                     | Stored assistant conversations.                                                                                                                                                                           |
 
 SQL files in `worker/migrations/` define schema history. `scripts/migrations.mjs` generates `worker/migrations.gen.ts` during `npm run build`; `ensureMigrated()` applies missing migrations and records them in `d1_migrations`. The generator uses Wrangler's SQLite-aware statement splitter so multiline trigger bodies stay intact. Wrangler's migration command uses the same tracking table. Add migrations rather than editing already-applied ones.
 
