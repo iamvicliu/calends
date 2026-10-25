@@ -153,7 +153,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       set({ phase: 'login', state: undefined });
       throw new Error(t('ui.error.loginRequired'));
     }
-    const body = (await res.json().catch(() => ({}))) as T & { error?: string; code?: string };
+    const body = (await readBody(res)) as T & { error?: string; code?: string };
     if (!res.ok) throw Object.assign(new Error(body.error ?? t('ui.error.requestFailed', { status: res.status })), { code: body.code });
     if (writing) acknowledgeWrite(res);
     return body;
@@ -166,21 +166,48 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
 }
 
+/**
+ * 响应正文：空正文（含 204）当作 {}；成功响应却不是 JSON（被代理、登录页、静态页顶替）算请求失败，
+ * 不能当作空结果交给调用方。失败响应的正文不是 JSON 时仍按状态码报错。
+ */
+async function readBody(res: Response): Promise<unknown> {
+  const text = res.status === 204 ? '' : await res.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    if (res.ok) throw new Error(t('ui.error.requestFailed', { status: res.status }));
+    return {};
+  }
+}
+
+/** 至少是一本账：读缓存、读接口时都先确认，坏数据不能显示成空账本 */
+export function isLedger(x: unknown): x is AppState {
+  const s = x as Partial<AppState> | null;
+  return !!s && typeof s === 'object' && Array.isArray(s.subscriptions) && Array.isArray(s.methods) && !!s.settings && typeof s.settings === 'object';
+}
+
+async function loadState(init?: RequestInit): Promise<AppState> {
+  const state = await api<unknown>('/api/state', init);
+  if (!isLedger(state)) throw new Error(t('ui.error.requestFailed', { status: 200 }));
+  return state;
+}
+
 export async function boot(): Promise<void> {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
-    if (raw) {
-      const state = JSON.parse(raw) as AppState;
+    const state: unknown = raw ? JSON.parse(raw) : undefined;
+    if (isLedger(state)) {
       knownRev = state.rev;
       set({ phase: 'ready', state });
-    }
+    } else if (raw) localStorage.removeItem(CACHE_KEY);
   } catch {
     /* ignore */
   }
   try {
     const seq = writeSeq;
     const startWrites = writes;
-    const state = await api<AppState>('/api/state');
+    const state = await loadState();
     if (!state.readonly && !canApplySnapshot(startWrites, writes, seq, writeSeq, state.rev, knownRev)) {
       checkAgain = true;
       resumeSync();
@@ -236,7 +263,7 @@ let writeSeq = 0;
 async function freshState(): Promise<AppState | undefined> {
   const seq = writeSeq;
   const startWrites = writes;
-  const state = await api<AppState>('/api/state', { cache: 'no-store', signal: AbortSignal.timeout(15_000) });
+  const state = await loadState({ cache: 'no-store', signal: AbortSignal.timeout(15_000) });
   return canApplySnapshot(startWrites, writes, seq, writeSeq, state.rev, knownRev) ? state : undefined;
 }
 
@@ -642,7 +669,9 @@ export async function rotateIcs() {
 }
 
 export async function importData(body: { subscriptions: Subscription[]; methods: PaymentMethod[]; mode: 'merge' | 'replace' }) {
-  replaceSyncedState(await api<AppState>('/api/import', { method: 'POST', body: JSON.stringify(body) }));
+  const state = await api<unknown>('/api/import', { method: 'POST', body: JSON.stringify(body) });
+  if (!isLedger(state)) throw new Error(t('ui.error.requestFailed', { status: 200 }));
+  replaceSyncedState(state);
 }
 
 export async function refreshFx() {

@@ -275,3 +275,26 @@ test('改界面偏好只换偏好，不换账本对象，依赖账本的派生�
   assert.ok(c.requests.includes('prefs'), '偏好照常同步到服务端');
   await c.store.logout();
 });
+
+test('成功响应却不是 JSON 时报错，不当作空结果；读不到账本时不进入空账本', async (t) => {
+  const c = await client(t, true, false);
+  // 坏缓存：不是账本形状，丢弃而不是显示成空账本
+  c.values.set('ledger:state:v1:/ledger', JSON.stringify({ hello: 1 }));
+  c.delayState(async () => new Response('<!doctype html><title>proxy</title>', { status: 200, headers: { 'content-type': 'text/html' } }));
+  await c.store.boot();
+  assert.equal(c.store.useStore().phase, 'offline');
+  assert.equal(c.store.useStore().state, undefined);
+  assert.equal(c.values.has('ledger:state:v1:/ledger'), false);
+  // 200 但正文是 JSON 却不是账本（例如 {}）同样不能进入空账本
+  c.delayState(async () => Response.json({}));
+  await c.store.boot();
+  assert.equal(c.store.useStore().state, undefined);
+  // 空正文（204）仍然算成功
+  c.delayWrite(async () => new Response(null, { status: 204 }));
+  await c.store.boot();
+  assert.equal(c.store.useStore().phase, 'ready');
+  await assert.doesNotReject(() => c.store.api('/api/prefs', { method: 'PATCH', body: '{}' }));
+  c.delayWrite(async () => new Response('<html>', { status: 200 }));
+  await assert.rejects(() => c.store.api('/api/prefs', { method: 'PATCH', body: '{}' }));
+  await c.store.logout();
+});
