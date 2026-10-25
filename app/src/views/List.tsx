@@ -359,11 +359,7 @@ export function List({
                         </span>
                       )}
                       {st === 'upcoming' && !up && <span className="badge blue">{t('list.status.upcoming')}</span>}
-                      {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
-                      {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
-                      {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
-                      {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
-                      {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
+                      <StatusBadges st={st} />
                       <StopBadge sub={s} today={today} />
                       {s.share?.role === 'owner' && <span className="badge blue">{t('list.badge.share')}</span>}
                       {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
@@ -460,11 +456,7 @@ export function List({
                             )}
                           />
                           {st === 'upcoming' && <span className="badge blue">{t('list.status.upcoming')}</span>}
-                          {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
-                          {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
-                          {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
-                          {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
-                          {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
+                          <StatusBadges st={st} />
                           {s.share?.role === 'owner' && s.share.members.length > 0 && <span className="badge blue">{t('list.badge.share')}</span>}
                           {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
                           {s.proxy && (
@@ -748,4 +740,17 @@ function CardGlow({ sub }: { sub: Subscription }) {
       : subImage(sub);
   const tint = useIconTint(src);
   return <div className="sc-glow" style={{ '--glow': tint ?? catColor(sub.category) } as Record<string, string>} />;
+}
+
+/** 卡片与列表视图共用的状态徽章（试用、即将到期、暂停、已结束、被停用）；未开始、合租、代付的徽章两处规则不同，各自保留 */
+function StatusBadges({ st }: { st: string }) {
+  return (
+    <>
+      {st === 'trial' && <span className="badge green">{t('list.status.trialShort')}</span>}
+      {st === 'ending' && <span className="badge orange">{t('list.status.ending')}</span>}
+      {st === 'paused' && <span className="badge">{t('list.status.pausedShort')}</span>}
+      {st === 'ended' && <span className="badge">{t('list.status.ended')}</span>}
+      {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
+    </>
+  );
 }
