@@ -1,5 +1,6 @@
 // 浏览器端加载语言包：每种语言打成一个独立的 chunk，用到才下载
 import { createElement, Fragment } from 'react';
+import { readStored, storageKey } from './base.ts';
 import { fallbackChain, flatten, isLocale, matchLocale, setLocale, t, type Locale, type MessageTree, type Messages } from '../../shared/i18n.ts';
 
 const PACKS = import.meta.glob<{ default: Record<string, { default: MessageTree }> }>('./locales/*.ts');
@@ -26,7 +27,7 @@ export async function loadLocale(loc: Locale): Promise<void> {
   setLocale(loc, await Promise.all(chain.map(pack)));
   document.documentElement.lang = loc;
   try {
-    localStorage.setItem(KEY, loc);
+    localStorage.setItem(storageKey(KEY), loc);
   } catch {
     /* 隐私模式等 */
   }
@@ -35,7 +36,7 @@ export async function loadLocale(loc: Locale): Promise<void> {
 /** 首屏先用上次的语言或浏览器语言，拿到设置后再校正 */
 export function initialLocale(): Locale {
   try {
-    const saved = localStorage.getItem(KEY);
+    const saved = readStored(KEY);
     if (isLocale(saved)) return saved;
   } catch {
     /* ignore */

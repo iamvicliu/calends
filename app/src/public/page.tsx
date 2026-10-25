@@ -1,5 +1,5 @@
 import { copyParts } from '../components/copy.tsx';
-import { base as appPath } from '../base.ts';
+import { base as appPath, readStored, storageKey } from '../base.ts';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from 'recharts';
@@ -29,13 +29,6 @@ import { IconPile } from './components/icon-pile.tsx';
 /** 公开页可切换的币种：本位币，和（本位币不是美元时）美元 */
 type Ccy = string;
 
-const pref = (key: string): string | null => {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-};
 const save = (key: string, v: string) => {
   try {
     localStorage.setItem(key, v);
@@ -143,7 +136,7 @@ function ThemeButton() {
 
 function Ledger({ state }: { state: AppState }) {
   const base = state.settings.baseCurrency;
-  const [ccy, setCcy] = useState<Ccy>(() => (base !== 'USD' && pref('ledger:public-ccy') === 'USD' ? 'USD' : base));
+  const [ccy, setCcy] = useState<Ccy>(() => (base !== 'USD' && readStored('ledger:public-ccy') === 'USD' ? 'USD' : base));
   const today = todayIn(state.settings.timezone);
   const d = useMemo(() => derive(state, today), [state, today]);
 
@@ -178,7 +171,7 @@ function Ledger({ state }: { state: AppState }) {
               value={ccy}
               onValueChange={(v: string) => {
                 setCcy(v);
-                save('ledger:public-ccy', v);
+                save(storageKey('ledger:public-ccy'), v);
               }}
             >
               <TabsList aria-label={t('public.currency')}>

@@ -1,7 +1,7 @@
 import { isDataIcon } from '../../../shared/icon.ts';
 import { copyParts } from '../components/copy.tsx';
 import { preserveRenewalHistory, migrateRenewalRules } from '../../../shared/billing.ts';
-import { base } from '../base.ts';
+import { base, readStored, storageKey } from '../base.ts';
 import { useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { StopFields } from '../components/StopPanel.tsx';
 import { ReceiptText } from 'lucide-react';
@@ -65,9 +65,9 @@ const draftKey = (isNew: boolean, id: string) => `ledger:draft:${isNew ? 'new' :
 const sig = (x: Subscription) => JSON.stringify({ ...x, id: '' });
 function readDraft(key: string, base: string): Draft | undefined {
   try {
-    const d = JSON.parse(localStorage.getItem(key) ?? 'null') as Draft | null;
+    const d = JSON.parse(readStored(key) ?? 'null') as Draft | null;
     if (d && d.base === base) return d;
-    localStorage.removeItem(key);
+    localStorage.removeItem(storageKey(key));
   } catch {
     /* 隐私模式或坏数据 */
   }
@@ -75,8 +75,8 @@ function readDraft(key: string, base: string): Draft | undefined {
 }
 function writeDraft(key: string, d: Draft | undefined) {
   try {
-    if (d) localStorage.setItem(key, JSON.stringify(d));
-    else localStorage.removeItem(key);
+    if (d) localStorage.setItem(storageKey(key), JSON.stringify(d));
+    else localStorage.removeItem(storageKey(key));
   } catch {
     /* ignore */
   }

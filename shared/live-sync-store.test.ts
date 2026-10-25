@@ -323,3 +323,21 @@ test('mergeEdits：表单打开期间那一项在别处被删，不把它写回�
   assert.throws(() => mergeEdits(a, { ...a, name: 'B' }, undefined));
   assert.deepEqual(mergeEdits(a, { ...a, name: 'B' }, { id: 'x', name: 'A', extra: 1 } as typeof a), { id: 'x', name: 'B', extra: 1 });
 });
+
+test('登录失效与退出登录统一清掉本机私有数据：账本缓存、助手会话、编辑草稿', async (t) => {
+  const c = await client(t);
+  const keys = ['ledger:state:v1:/ledger', 'calends.assistant:/ledger', 'ledger:draft:new:/ledger', 'ledger:draft:abc:/ledger'];
+  const others = ['ledger:draft:new', 'ledger:locale:/ledger', 'ledger:theme:/ledger'];
+  for (const k of [...keys, ...others]) c.values.set(k, '{}');
+  // 让假 localStorage 支持遍历
+  Object.assign(globalThis.localStorage, {
+    get length() {
+      return c.values.size;
+    },
+    key: (i: number) => [...c.values.keys()][i] ?? null,
+  });
+  c.expire();
+  await assert.rejects(() => c.store.saveMethod({ id: 'm', name: 'Local card', currency: 'USD', kind: 'bank' }));
+  for (const k of keys) assert.equal(c.values.has(k), false, k);
+  for (const k of others) assert.equal(c.values.has(k), true, k);
+});

@@ -1,5 +1,5 @@
 import { copyParts } from '../components/copy.tsx';
-import { base, storageKey } from '../base.ts';
+import { base } from '../base.ts';
 import type { ReactNode } from 'react';
 import { Fragment, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import {
@@ -35,7 +35,7 @@ import type { AppState, Subscription } from '../../../shared/types.ts';
 import { IconButton, ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { Picker } from '../components/Picker.tsx';
 import { catColor } from '../derive.ts';
-import { api, getState, refresh, toast } from '../store.ts';
+import { api, ASSISTANT_KEY, getState, refresh, toast } from '../store.ts';
 import { newSub } from './Editor.tsx';
 import { interrupted, isDateField, proposalDay, settleTurns } from './assistant-fields.ts';
 import { compressImage as compress, takeHandoff } from '../handoff.ts';
@@ -92,7 +92,7 @@ interface Saved {
   history: ApiMessage[];
 }
 
-const STORE = storageKey('calends.assistant');
+const STORE = ASSISTANT_KEY;
 const rid = () => Math.random().toString(36).slice(2, 10);
 const newChat = (): Saved => ({ id: rid(), createdAt: new Date().toISOString(), turns: [], history: [] });
 

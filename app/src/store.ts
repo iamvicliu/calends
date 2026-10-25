@@ -14,6 +14,11 @@ import { toast as sonner } from 'sonner';
 import { advanceRevision, canApplySnapshot, CHECK_THROTTLE, shouldCheck, shouldPoll, syncedPrefs, SYNC_INTERVAL } from '../../shared/live-sync.ts';
 
 const CACHE_KEY = storageKey('ledger:state:v1');
+/** 助手会话（本机副本）与新建表单交给助手的内容：都属于登录后的私有数据 */
+export const ASSISTANT_KEY = storageKey('calends.assistant');
+export const HANDOFF_KEY = storageKey('calends.assistant.handoff');
+/** 编辑草稿的键 ledger:draft:<new|id>（经 storageKey）；只认本安装的 */
+const isDraftKey = (k: string) => k.startsWith('ledger:draft:') && (BASE_PATH ? k.endsWith(`:${BASE_PATH}`) : !k.includes(':/'));
 
 type Phase = 'loading' | 'login' | 'ready' | 'offline';
 
@@ -142,15 +147,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
       headers: { 'content-type': 'application/json', 'x-locale': locale(), ...init.headers },
     });
     if (res.status === 401 && path !== '/api/login' && !path.startsWith('/api/auth/')) {
-      knownRev = undefined;
-      ownRevisions = [];
-      try {
-        localStorage.removeItem(CACHE_KEY);
-      } catch {
-        /* ignore */
-      }
-      await globalThis.caches?.delete(`calends:${base('/')}:data-v5`).catch(() => false);
-      set({ phase: 'login', state: undefined });
+      await clearLocalSession();
       throw new Error(t('ui.error.loginRequired'));
     }
     const body = (await readBody(res)) as T & { error?: string; code?: string };
@@ -223,16 +220,8 @@ export async function boot(): Promise<void> {
       mirrorPrefs();
     }
   } catch (e) {
-    if (store.phase === 'login') {
-      // 401 时丢弃旧缓存，避免他人设备残留数据
-      try {
-        localStorage.removeItem(CACHE_KEY);
-      } catch {
-        /* ignore */
-      }
-      set({ state: undefined });
-      return;
-    }
+    // 401 时 api() 已清掉本机私有数据（含旧缓存），避免他人设备残留
+    if (store.phase === 'login') return;
     if (store.state) set({ phase: 'offline' });
     else set({ phase: 'offline', error: e instanceof Error ? e.message : String(e) });
   }
@@ -501,14 +490,28 @@ export async function registerPasskey(name: string): Promise<void> {
 
 export async function logout(): Promise<void> {
   await api('/api/logout', { method: 'POST' }).catch(() => {});
-  await globalThis.caches?.delete(`calends:${base('/')}:data-v5`).catch(() => false);
-  try {
-    localStorage.removeItem(CACHE_KEY);
-  } catch {
-    /* ignore */
-  }
+  await clearLocalSession();
+}
+
+/**
+ * 退出登录或登录失效（401）：清掉本机的私有数据——账本缓存、离线缓存、助手会话、编辑草稿、交给助手的内容，
+ * 回到登录页。界面偏好与语言不属于账本内容，保留。
+ */
+async function clearLocalSession() {
   knownRev = undefined;
   ownRevisions = [];
+  try {
+    localStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(ASSISTANT_KEY);
+    for (let i = (localStorage.length ?? 0) - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && isDraftKey(k)) localStorage.removeItem(k);
+    }
+    sessionStorage.removeItem(HANDOFF_KEY);
+  } catch {
+    /* 隐私模式等 */
+  }
+  await globalThis.caches?.delete(`calends:${base('/')}:data-v5`).catch(() => false);
   set({ phase: 'login', state: undefined });
 }
 
