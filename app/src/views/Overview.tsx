@@ -11,7 +11,7 @@ import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
 import { MetricCards, Metric, IconButton, Amount, CardTitle, CatIcon, TipTable, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
-import { allCharges, catColor, sortValue, sumBaseOrNaN } from '../derive.ts';
+import { allCharges, catColor, sortValue, sumBaseOrNaN, firstStart } from '../derive.ts';
 import { perLabel } from './Report.tsx';
 import { go } from '../router.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
@@ -80,7 +80,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
           </span>
         </div>
       </div>
-      <Timeline load={load} today={today} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
+      <Timeline load={load} today={today} start={firstStart(state, today)} />
     </section>
   );
 }
@@ -91,7 +91,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
   const [scale, setScale] = useState<Scale>('month');
   const [hidden, setHidden] = useState<string[]>([]);
   const [selKey, setSelKey] = useState<string | undefined>();
-  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const first = firstStart(state, today);
 
   const ranges = useMemo(() => {
     const out: Array<{ key: string; label: string; from: string; to: string }> = [];

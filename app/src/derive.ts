@@ -247,6 +247,9 @@ export function toBase(state: AppState, amount: number, ccy: string): number {
   return convert(amount, ccy, state.settings.baseCurrency, state.fx);
 }
 
+/** 账本里最早的开始日（没有更早的就是今天）：时间线、年份选择从这里开始 */
+export const firstStart = (state: AppState, today: string) => state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+
 /** 排序用：缺汇率（NaN）的排在最后，其余按数值；正常数据与直接相减相同 */
 export const sortValue = (v: number) => (Number.isFinite(v) ? v : -Infinity);
 

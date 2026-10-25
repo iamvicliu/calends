@@ -9,7 +9,7 @@ import type { AppState } from '../../../shared/types.ts';
 import { packCircles } from '../components/charts.tsx';
 import { ShareSheet } from '../components/ShareSheet.tsx';
 import { MetricCards, Metric, Seg, SubIcon } from '../components/ui.tsx';
-import { allCharges, catColor, sortValue } from '../derive.ts';
+import { allCharges, catColor, sortValue, firstStart } from '../derive.ts';
 
 type Style = 'receipt' | 'poster' | 'card' | 'stars';
 const STYLES = (): Array<[Style, string]> => [
@@ -40,7 +40,7 @@ interface Ctx {
 /** 年度回顾分享：选一种样式，生成图片后复制或下载 */
 export function Review({ state, today, onClose }: { state: AppState; today: string; onClose: () => void }) {
   const years: string[] = [];
-  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today).slice(0, 4);
+  const first = firstStart(state, today).slice(0, 4);
   for (let y = Number(today.slice(0, 4)); y >= Number(first) && years.length < 4; y--) years.push(String(y));
   const [year, setYear] = useState(years[0]);
   const r = useMemo(() => yearReview(state, today, year), [state, today, year]);

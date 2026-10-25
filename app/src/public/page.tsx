@@ -9,7 +9,7 @@ import { t, type Params } from '../../../shared/i18n.ts';
 import { chargeValue, toBaseAt, toBaseOrNaN } from '../../../shared/fx.ts';
 import { cancelSavings, contributionOn, mrrSeries } from '../../../shared/metrics.ts';
 import { avatarOf, type AppState, type Subscription } from '../../../shared/types.ts';
-import { allCharges, catIcon, periodRange, sumBase, syncCategories } from '../derive.ts';
+import { allCharges, catIcon, periodRange, sumBase, syncCategories, firstStart } from '../derive.ts';
 import { CatGlyph } from '../components/CatGlyph.tsx';
 import { THEME_LABEL, ThemeIcon, useThemeMode } from '../theme.tsx';
 import { AppIcon } from '@/public/components/app-icon';
@@ -213,7 +213,7 @@ function Ledger({ state }: { state: AppState }) {
                   {rich('public.timeline.upcoming', { count: d.upcoming.length }, { amount: <Num value={d.upcoming.reduce((a, c) => a + c.value, 0) * k} ccy={ccy} prefix={sym} className="text-foreground" /> })}
                 </span>
               </div>
-              <Timeline today={today} load={loadTimeline} start={state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today)} />
+              <Timeline today={today} load={loadTimeline} start={firstStart(state, today)} />
             </CardContent>
 
             <Separator />
@@ -335,7 +335,7 @@ type Derived = ReturnType<typeof derive>;
 function derive(state: AppState, today: string) {
   syncCategories(state);
   const base = state.settings.baseCurrency;
-  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const first = firstStart(state, today);
   const past = allCharges(state, first, today, today);
   const yearAgo = `${Number(today.slice(0, 4)) - 1}${today.slice(4)}`;
 

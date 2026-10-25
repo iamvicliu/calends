@@ -117,6 +117,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     // 显示用合计与排序（app/src/derive.ts）：缺汇率为 NaN
     sumBaseOrNaN: (s: AppState, rows: billing.Charge[]) => rows.reduce((n, c) => n + fx.chargeBaseOrNaN(s, c), 0),
     sortValue: (v: number) => (Number.isFinite(v) ? v : -Infinity),
+    firstStart: (state: AppState, at: string) => state.subscriptions.reduce((m, x) => (x.start < m ? x.start : m), at),
     // 防重复提交（ui.tsx useSubmit）：测试里直接执行
     useSubmit: () => [false, async (fn: () => unknown) => void (await fn())],
     LoadFailed: 'LoadFailed',

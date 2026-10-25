@@ -24,7 +24,7 @@ import {
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
 import { MetricCards, Metric, IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
-import { allCharges, catColor, KIND_BG, paletteColor, sumBaseOrNaN, toBase } from '../derive.ts';
+import { allCharges, catColor, KIND_BG, paletteColor, sumBaseOrNaN, toBase, firstStart } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
 
 export function perLabel(s: Subscription): string {
@@ -84,7 +84,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const [range, setRange] = useState<'12' | '36' | 'all'>('36');
   const [hist, setHist] = useState(true);
-  const first = state.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const first = firstStart(state, today);
   const allMonths = monthsSince(first, today);
   const months = range === 'all' ? Math.ceil(allMonths) : Number(range);
   const series = useMemo(() => mrrSeries(state, today, months, hist), [state, today, months, hist]);
