@@ -24,5 +24,7 @@
   },
   "working": "İşleniyor…",
   "undo": "Geri al",
-  "restored": "Geri yüklendi"
+  "restored": "Geri yüklendi",
+  "loadFailed": "Yüklenemedi",
+  "retry": "Yeniden dene"
 }

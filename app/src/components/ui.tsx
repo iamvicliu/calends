@@ -1036,3 +1036,12 @@ export function Cell({
     <div className="cell">{inner}</div>
   );
 }
+
+/** 读取失败：一行提示加重试（沿用 Cell 的可点行），不把失败显示成空列表 */
+export function LoadFailed({ onRetry }: { onRetry: () => void }) {
+  return (
+    <Cell label={t('ui.loadFailed')} onClick={onRetry}>
+      {t('ui.retry')}
+    </Cell>
+  );
+}

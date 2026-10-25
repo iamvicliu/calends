@@ -24,5 +24,7 @@
   },
   "working": "處理中…",
   "undo": "復原",
-  "restored": "已還原"
+  "restored": "已還原",
+  "loadFailed": "載入失敗",
+  "retry": "重試"
 }

@@ -24,5 +24,7 @@
   },
   "working": "Working…",
   "undo": "Undo",
-  "restored": "Restored"
+  "restored": "Restored",
+  "loadFailed": "Couldn’t load",
+  "retry": "Retry"
 }

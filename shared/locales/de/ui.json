@@ -24,5 +24,7 @@
   },
   "working": "Wird ausgeführt…",
   "undo": "Rückgängig",
-  "restored": "Wiederhergestellt"
+  "restored": "Wiederhergestellt",
+  "loadFailed": "Konnte nicht geladen werden",
+  "retry": "Erneut versuchen"
 }

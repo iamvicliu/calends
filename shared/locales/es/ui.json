@@ -24,5 +24,7 @@
   },
   "working": "Procesando…",
   "undo": "Deshacer",
-  "restored": "Restaurado"
+  "restored": "Restaurado",
+  "loadFailed": "No se pudo cargar",
+  "retry": "Reintentar"
 }

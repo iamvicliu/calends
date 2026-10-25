@@ -24,5 +24,7 @@
   },
   "working": "Memproses…",
   "undo": "Urungkan",
-  "restored": "Dipulihkan"
+  "restored": "Dipulihkan",
+  "loadFailed": "Gagal memuat",
+  "retry": "Coba lagi"
 }

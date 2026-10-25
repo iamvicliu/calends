@@ -8,7 +8,7 @@ import type { ImportSource } from '../../../shared/import-ledger.ts';
 import { readImportFile } from '../import-file.ts';
 import { ImportSheet } from './ImportSheet.tsx';
 import { avatarOf, type AppState, type Subscription } from '../../../shared/types.ts';
-import { IconButton, Cell, Group, CardTitle, Icon, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { IconButton, Cell, Group, CardTitle, Icon, LoadFailed, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
 import { api, copyText, logout, refreshFx, rotateIcs, run, saveSettings, saveSub, syncFx, toast } from '../store.ts';
 import { MethodPicker } from '../components/MethodPicker.tsx';
 import { ChannelsGroup } from './Channels.tsx';
@@ -164,15 +164,25 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
   const [importing, setImporting] = useState<ImportSource | null>(null);
   const [reading, setReading] = useState(false);
 
+  // 读取失败要显示出来：不能把失败当成「今天没有提醒」「汇率覆盖未知」
+  const [failed, setFailed] = useState({ preview: false, fx: false });
   const loadPreview = () =>
-    api<Preview>('/api/notify/preview')
-      .then(setPreview)
-      .catch(() => {});
+    api<Preview>('/api/notify/preview').then(
+      (v) => {
+        setPreview(v);
+        setFailed((f) => ({ ...f, preview: false }));
+      },
+      () => setFailed((f) => ({ ...f, preview: true })),
+    );
   const [fxs, setFxs] = useState<{ needed: number; covered: number; sources: Record<string, number>; first?: string } | null>(null);
   const loadFx = () =>
-    api<typeof fxs>('/api/fx/status')
-      .then(setFxs)
-      .catch(() => {});
+    api<typeof fxs>('/api/fx/status').then(
+      (v) => {
+        setFxs(v);
+        setFailed((f) => ({ ...f, fx: false }));
+      },
+      () => setFailed((f) => ({ ...f, fx: true })),
+    );
   useEffect(() => {
     loadPreview();
     loadFx();
@@ -425,7 +435,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
 
         <ChannelsGroup state={state} />
 
-        <ReminderPreview preview={preview} timezone={s.timezone} />
+        {failed.preview && !preview ? (
+          <Group>
+            <LoadFailed onRetry={() => void loadPreview()} />
+          </Group>
+        ) : (
+          <ReminderPreview preview={preview} timezone={s.timezone} />
+        )}
 
         <Group title={t('settings.books.title')}>
           <Cell label={t('settings.books.defaultMethod')}>
@@ -465,9 +481,13 @@ export function Settings({ state, today }: { state: AppState; today: string }) {
           >
             1 USD = {state.fx.rates.CNY?.toFixed(2)} CNY
           </Cell>
-          <Cell label={t('settings.fx.history')} sub={fxs?.first ? t('settings.fx.earliest', { date: fxs.first }) : undefined}>
-            {fxs ? t('settings.fx.coverage', { covered: fxs.covered, count: fxs.needed }) : '…'}
-          </Cell>
+          {failed.fx && !fxs ? (
+            <LoadFailed onRetry={() => void loadFx()} />
+          ) : (
+            <Cell label={t('settings.fx.history')} sub={fxs?.first ? t('settings.fx.earliest', { date: fxs.first }) : undefined}>
+              {fxs ? t('settings.fx.coverage', { covered: fxs.covered, count: fxs.needed }) : '…'}
+            </Cell>
+          )}
           {fxs && fxs.covered < fxs.needed && (
             <Cell
               label={<span style={{ color: 'var(--accent)' }}>{t('settings.fx.fill')}</span>}

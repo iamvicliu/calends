@@ -24,5 +24,7 @@
   },
   "working": "처리 중…",
   "undo": "실행 취소",
-  "restored": "복원했습니다"
+  "restored": "복원했습니다",
+  "loadFailed": "불러오지 못했습니다",
+  "retry": "다시 시도"
 }

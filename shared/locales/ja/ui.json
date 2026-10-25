@@ -24,5 +24,7 @@
   },
   "working": "処理中…",
   "undo": "取り消す",
-  "restored": "元に戻しました"
+  "restored": "元に戻しました",
+  "loadFailed": "読み込めませんでした",
+  "retry": "再試行"
 }
