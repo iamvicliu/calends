@@ -368,27 +368,27 @@ async function liveModels({ base, api, seed, subs, spotify, rpc, catalogue }) {
             assert.deepEqual(s.share.rule, { fee: 30, currency: 'CNY', billEvery: 3 });
             for (const name of ['Alice', 'Partial']) {
               const m = s.share.members.find((m) => m.id === name);
-              assert.equal(memberRate(s, m, today).amount, 10);
-              assert.deepEqual(memberRate(s, m, future), { amount: 30, currency: 'CNY', billEvery: 3 });
+              assert.equal(memberRate(s, m, today, 'CNY').amount, 10);
+              assert.deepEqual(memberRate(s, m, future, 'CNY'), { amount: 30, currency: 'CNY', billEvery: 3 });
             }
           }
           if (i === 2) {
             const m = s.share.members.find((m) => m.id === 'Alice');
             assert.equal(m.custom, true);
-            assert.deepEqual(memberRate(s, m, today), { amount: 100, currency: 'CNY', billEvery: 12 });
-            assert.deepEqual(memberRate(s, m, future), { amount: 100, currency: 'CNY', billEvery: 12 });
+            assert.deepEqual(memberRate(s, m, today, 'CNY'), { amount: 100, currency: 'CNY', billEvery: 12 });
+            assert.deepEqual(memberRate(s, m, future, 'CNY'), { amount: 100, currency: 'CNY', billEvery: 12 });
             assert.ok(writes.some((c) => c.name === 'save_share_member' && c.args.fee === 100 && c.args.bill_every === 12));
           }
           if (i === 3) {
             const m = s.share.members.find((m) => m.id === 'Bob');
             assert.equal(m.custom, undefined);
-            assert.deepEqual(memberRate(s, m, today), { amount: 30, currency: 'CNY', billEvery: 3 });
+            assert.deepEqual(memberRate(s, m, today, 'CNY'), { amount: 30, currency: 'CNY', billEvery: 3 });
             assert.ok(writes.some((c) => c.name === 'save_share_member' && c.args.follow_rule === true));
           }
           if (i === 4) {
             const m = s.share.members.find((m) => m.name === 'Carol');
             assert.ok(m && !m.custom);
-            assert.deepEqual(memberRate(s, m, today), { amount: 30, currency: 'CNY', billEvery: 3 });
+            assert.deepEqual(memberRate(s, m, today, 'CNY'), { amount: 30, currency: 'CNY', billEvery: 3 });
           }
           const oldMembers = before.find((s) => s.id === 'spotify').share.members;
           for (const old of oldMembers) {
