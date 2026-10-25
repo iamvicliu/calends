@@ -503,7 +503,7 @@ function Kpis({ sub, state, today, history }: { sub: Subscription; state: AppSta
         value={sub.estimateFrom && lifetime && !history.length ? '—' : lifetime ? t('detail.kpi.perMonthValue', { amount: amount(monthly) }) : amount(monthly)}
         // 与其他格一样三行：折到每天多少；算不出来就不写这一行
         note={Number.isFinite(monthly) ? t('detail.kpi.perDay', { amount: flow(-monthly / 30.44, base) }) : undefined}
-        accessory={!lifetime ? <Trend pct={perTrend} /> : undefined}
+        accessory={!lifetime && !transferred ? <Trend pct={perTrend} /> : undefined}
       />
     </MetricCards>
   );
