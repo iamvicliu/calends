@@ -48,7 +48,13 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
         .replace(/^import[\s\S]*?;\n/gm, '')
         .replace(/export (function|const) /g, '$1 ')
     : '';
-  const result = transformSync(file, source + '\n' + copySource + '\n' + kitSource + '\n' + ledgerSource + '\n' + receivableSource, {
+  // 联系方式工具在 components/Contact.tsx：一起编译
+  const contactSource = /Contact\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+    ? readFileSync(new URL('../app/src/components/Contact.tsx', import.meta.url), 'utf8')
+        .replace(/^import[\s\S]*?;\n/gm, '')
+        .replace(/export (function|const) /g, '$1 ')
+    : '';
+  const result = transformSync(file, source + '\n' + copySource + '\n' + kitSource + '\n' + ledgerSource + '\n' + receivableSource + '\n' + contactSource, {
     lang: 'tsx',
     jsx: { runtime: 'classic' },
     reactCompiler: false,

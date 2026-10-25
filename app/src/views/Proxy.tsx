@@ -27,7 +27,7 @@ import {
   useSubmit,
 } from '../components/ui.tsx';
 import { Plus } from 'lucide-react';
-import { contactText } from './Members.tsx';
+import { contactText } from '../components/Contact.tsx';
 import { LtHead, nextSort, PlanPrice, usePhone } from '../components/LtHead.tsx';
 import { getState, run, saveSub, usePref } from '../store.ts';
 import { CurrencySelect } from '../components/Picker.tsx';

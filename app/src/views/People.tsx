@@ -14,7 +14,8 @@ import { Picker } from '../components/Picker.tsx';
 import { MetricCards, Metric, Amount, ask, Cell, Group, Icon, IconButton, Seg, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
 import { go } from '../router.ts';
 import { copyText, toast, deletePerson, getState, mergePerson, run, savePerson, saveSub } from '../store.ts';
-import { ContactField, contactText, contactValue, contactUrl, MemberSheet, viaLabel } from './Members.tsx';
+import { MemberSheet } from './Members.tsx';
+import { ContactField, contactText, contactValue, contactUrl, viaLabel } from '../components/Contact.tsx';
 import { EntrySheet, LedgerSheet } from './Proxy.tsx';
 import './people-list.css';
 

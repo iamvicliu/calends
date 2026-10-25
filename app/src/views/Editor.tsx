@@ -18,7 +18,8 @@ import { applyStopForm, stopForm, type StopForm } from '../../../shared/stop-for
 import { affectedPriceCharges, changePrice, syncPhase, toEditForm, reactivate } from '../../../shared/phases.ts';
 import { ChangePanel, cycleName, CYCLES as RENEW_CYCLES } from '../components/ChangePanel.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { ContactField, contactText, FeeRuleFields } from './Members.tsx';
+import { FeeRuleFields } from './Members.tsx';
+import { ContactField, contactText } from '../components/Contact.tsx';
 import { applyCarRule, carRule, followsCar, nextCollectionDay, sameRule } from '../../../shared/carpool.ts';
 import { api, deleteSub, getState, mergeEdits, run, savePerson, saveSettings, saveSub } from '../store.ts';
 import { linkPerson, PersonPicker, PersonProfileSheet } from './People.tsx';
