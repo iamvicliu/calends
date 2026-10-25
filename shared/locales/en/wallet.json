@@ -118,6 +118,7 @@
   "delete": {
     "title": "Delete “{name}”",
     "usedBy": { "one": "{count} subscription uses this payment method.", "other": "{count} subscriptions use this payment method." },
+    "usedInHistory": { "one": "{count} more subscription used it in its history.", "other": "{count} more subscriptions used it in their history." },
     "isDefault": "It is the default payment method for new subscriptions.",
     "moveTo": "Move references to",
     "clear": "Clear (no payment method)",

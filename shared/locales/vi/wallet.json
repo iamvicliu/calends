@@ -118,6 +118,7 @@
   "delete": {
     "title": "Xóa “{name}”",
     "usedBy": "{count} gói đăng ký dùng phương thức thanh toán này.",
+    "usedInHistory": "Ngoài ra {count} gói đăng ký từng dùng nó trong lịch sử.",
     "isDefault": "Đây là phương thức thanh toán mặc định cho gói đăng ký mới.",
     "moveTo": "Chuyển tham chiếu sang",
     "clear": "Xóa trống (không có phương thức thanh toán)",

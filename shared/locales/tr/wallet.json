@@ -118,6 +118,7 @@
   "delete": {
     "title": "“{name}” sil",
     "usedBy": { "one": "{count} abonelik bu ödeme yöntemini kullanıyor.", "other": "{count} abonelik bu ödeme yöntemini kullanıyor." },
+    "usedInHistory": { "one": "{count} abonelik daha geçmişinde bunu kullandı.", "other": "{count} abonelik daha geçmişinde bunu kullandı." },
     "isDefault": "Yeni abonelikler için varsayılan ödeme yöntemidir.",
     "moveTo": "Referansları taşı",
     "clear": "Temizle (ödeme yöntemi yok)",

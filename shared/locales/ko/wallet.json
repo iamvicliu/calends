@@ -136,6 +136,7 @@
   "delete": {
     "title": "‘{name}’ 삭제",
     "usedBy": "구독 {count}개가 이 결제 수단을 사용합니다.",
+    "usedInHistory": "그 밖에 구독 {count}개의 기록에서 사용되었습니다.",
     "isDefault": "새 구독의 기본 결제 수단입니다.",
     "moveTo": "참조 이동 대상",
     "clear": "비우기(결제 수단 없음)",

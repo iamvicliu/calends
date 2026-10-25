@@ -118,6 +118,7 @@
   "delete": {
     "title": "刪除「{name}」",
     "usedBy": "有 {count} 個訂閱用到這個支付方式。",
+    "usedInHistory": "另有 {count} 個訂閱的歷史紀錄用過它。",
     "isDefault": "它是新訂閱的預設支付方式。",
     "moveTo": "引用遷移到",
     "clear": "清空（不指定支付方式）",

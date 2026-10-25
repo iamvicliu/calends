@@ -136,6 +136,7 @@
   "delete": {
     "title": "「{name}」を削除",
     "usedBy": "{count} 件のサブスクがこの支払い方法を使っています。",
+    "usedInHistory": "ほかに {count} 件のサブスクの履歴で使われています。",
     "isDefault": "新しいサブスクの既定の支払い方法です。",
     "moveTo": "参照の移行先",
     "clear": "クリア（支払い方法なし）",

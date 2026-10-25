@@ -118,6 +118,7 @@
   "delete": {
     "title": "Hapus “{name}”",
     "usedBy": "{count} langganan memakai metode pembayaran ini.",
+    "usedInHistory": "{count} langganan lain pernah memakainya dalam riwayat.",
     "isDefault": "Ini metode pembayaran default untuk langganan baru.",
     "moveTo": "Pindahkan referensi ke",
     "clear": "Kosongkan (tanpa metode pembayaran)",

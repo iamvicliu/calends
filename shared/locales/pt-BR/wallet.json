@@ -121,6 +121,7 @@
   "delete": {
     "title": "Apagar “{name}”",
     "usedBy": { "one": "{count} assinatura usa esta forma de pagamento.", "other": "{count} assinaturas usam esta forma de pagamento." },
+    "usedInHistory": { "one": "Mais {count} assinatura a usou no histórico.", "other": "Mais {count} assinaturas a usaram no histórico." },
     "isDefault": "É a forma de pagamento padrão para novas assinaturas.",
     "moveTo": "Mover referências para",
     "clear": "Limpar (sem forma de pagamento)",

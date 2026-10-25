@@ -142,6 +142,7 @@
   "delete": {
     "title": "„{name}“ löschen",
     "usedBy": { "one": "{count} Abo nutzt diese Zahlungsmethode.", "other": "{count} Abos nutzen diese Zahlungsmethode." },
+    "usedInHistory": { "one": "{count} weiteres Abo hat sie früher genutzt.", "other": "{count} weitere Abos haben sie früher genutzt." },
     "isDefault": "Sie ist die Standard-Zahlungsmethode für neue Abos.",
     "moveTo": "Verweise verschieben nach",
     "clear": "Leeren (keine Zahlungsmethode)",

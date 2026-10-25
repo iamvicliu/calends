@@ -121,6 +121,7 @@
   "delete": {
     "title": "Eliminar «{name}»",
     "usedBy": { "one": "{count} suscripción usa este método de pago.", "other": "{count} suscripciones usan este método de pago." },
+    "usedInHistory": { "one": "{count} suscripción más lo usó en su historial.", "other": "{count} suscripciones más lo usaron en su historial." },
     "isDefault": "Es el método de pago predeterminado para nuevas suscripciones.",
     "moveTo": "Mover referencias a",
     "clear": "Vaciar (sin método de pago)",

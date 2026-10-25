@@ -563,11 +563,20 @@ function TopupSheet({ m, current, today, onClose }: { m: PaymentMethod; current:
 function MethodDeleteSheet({ m, state, onClose, onDeleted }: { m: PaymentMethod; state: AppState; onClose: () => void; onDeleted: () => void }) {
   const others = state.methods.filter((x) => x.id !== m.id);
   const refs = methodReferences(state, m.id);
-  const subs = new Set(refs.flatMap((r) => ('subscription' in r ? [r.subscription] : []))).size;
+  // 与卡片「关联订阅」同一口径：当前方案用它的；只在历史阶段或单笔扣款里用过的另算
+  const all = new Set(refs.flatMap((r) => ('subscription' in r ? [r.subscription] : [])));
+  const subs = state.subscriptions.filter((s) => s.methodId === m.id && all.has(s.id)).length;
+  const past = all.size - subs;
   const isDefault = refs.some((r) => r.kind === 'default_method');
   // 空字符串表示清空引用
   const [target, setTarget] = useState(others[0]?.id ?? '');
-  const usage = [subs ? t('wallet.delete.usedBy', { count: subs }) : '', isDefault ? t('wallet.delete.isDefault') : ''].filter(Boolean).join('\n');
+  const usage = [
+    subs ? t('wallet.delete.usedBy', { count: subs }) : '',
+    past ? t('wallet.delete.usedInHistory', { count: past }) : '',
+    isDefault ? t('wallet.delete.isDefault') : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
   return (
     <Sheet
       narrow
@@ -593,7 +602,9 @@ function MethodDeleteSheet({ m, state, onClose, onDeleted }: { m: PaymentMethod;
       }
     >
       <div className="stack">
-        <p className="ask-msg">{copyParts(usage)}</p>
+        <p className="ask-msg" style={{ whiteSpace: 'pre-line' }}>
+          {usage}
+        </p>
         <Group foot={target ? undefined : t('wallet.delete.clearHint')}>
           <Cell label={t('wallet.delete.moveTo')}>
             <Picker

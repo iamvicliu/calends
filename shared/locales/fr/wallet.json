@@ -142,6 +142,10 @@
   "delete": {
     "title": "Supprimer « {name} »",
     "usedBy": { "one": "{count} abonnement utilise ce moyen de paiement.", "other": "{count} abonnements utilisent ce moyen de paiement." },
+    "usedInHistory": {
+      "one": "{count} autre abonnement l’a utilisé dans son historique.",
+      "other": "{count} autres abonnements l’ont utilisé dans leur historique."
+    },
     "isDefault": "C’est le moyen de paiement par défaut des nouveaux abonnements.",
     "moveTo": "Déplacer les références vers",
     "clear": "Vider (aucun moyen de paiement)",
