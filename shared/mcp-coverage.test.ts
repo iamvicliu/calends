@@ -1723,3 +1723,32 @@ test('PUT /api/subscriptions 校验转让并原样保存；备份导出带上转
   const backup = await (await f.request('backup')).json();
   assert.deepEqual(backup.subscriptions.find((x: Subscription) => x.id === 's').transfers, transfers);
 });
+
+test('MCP 改开始日与网页 movePhaseStart 一致：默认保留扣款锚点，shift_billing 才平移', async (t) => {
+  const f = await setup();
+  t.after(() => f.db.close());
+  const s: Subscription = { ...sub(), start: '2026-01-15', share: undefined, proxy: undefined };
+  await upsert(f.env, 'subscriptions', 's', s);
+  const days = (r: { structuredContent: { next_charges: Array<{ date: string }> } }) => r.structuredContent.next_charges.map((c) => c.date.slice(8));
+  const before = await f.snapshot();
+  for (const [tool, args] of [
+    ['update_subscription', { subscription: 's', set: { start: '2026-01-10' } }],
+    ['change_plan', { subscription: 's', action: 'edit', at: '2026-01-15', set: { start: '2026-01-10' } }],
+  ] as const) {
+    const kept = await f.call(tool, { ...args, dry_run: true });
+    assert.equal(kept.isError, undefined, JSON.stringify(kept));
+    assert.deepEqual(new Set(days(kept)), new Set(['15']), tool);
+    assert.equal(kept.structuredContent.after.start, '2026-01-10');
+    const shifted = await f.call(tool, { ...args, shift_billing: true, dry_run: true });
+    assert.equal(shifted.isError, undefined, JSON.stringify(shifted));
+    assert.deepEqual(new Set(days(shifted)), new Set(['10']), tool);
+  }
+  assert.deepEqual(await f.snapshot(), before);
+  assert.equal((await f.call('update_subscription', { subscription: 's', set: { notes: 'x' }, shift_billing: true, dry_run: true })).isError, true);
+  const saved = await f.call('update_subscription', { subscription: 's', set: { start: '2026-01-10' } });
+  assert.equal(saved.isError, undefined, JSON.stringify(saved));
+  const stored = (await f.snapshot()).subscriptions.find((x) => x.id === 's')!;
+  assert.equal(stored.start, '2026-01-10');
+  assert.equal(stored.billingStart, '2026-01-15');
+  assert.equal((await f.call('get_subscription', { subscription: 's' })).structuredContent.next_charge.slice(8), '15');
+});

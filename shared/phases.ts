@@ -313,8 +313,9 @@ export function setPhaseEnd(s: Subscription, start: string, end: string | undefi
  * 改阶段标识（开始日），不移动实际发生的付款、停止、优惠、赠送和合租覆盖日期。
  * billingStart 固定原计费锚点，提前开始日时向前补周期，之后的扣款日不变；买断固化原购买记录。
  * priceHistory 中的初始价随标识迁移；跨过调价点时保留原历史并补新起点的有效价。
+ * shiftBilling：扣款锚点随开始日一起平移（未来扣款日跟着变），买断的购买日也随之移动；默认保留原锚点。
  */
-export function movePhaseStart(s: Subscription, start: string, nextStart: string): Subscription {
+export function movePhaseStart(s: Subscription, start: string, nextStart: string, opts: { shiftBilling?: boolean } = {}): Subscription {
   if (!validDay(nextStart)) throw new Error(t('core.subError.start'));
   const phases = phasesOf(s);
   const i = phases.findIndex((p) => p.start === start);
@@ -331,13 +332,14 @@ export function movePhaseStart(s: Subscription, start: string, nextStart: string
   const priceHistory = crossed
     ? [...hist, ...(hist.some((h) => h.from === nextStart) ? [] : [{ from: nextStart, amount: priceAt(v, nextStart) }])]
     : hist.map((h) => (h.from === start ? { ...h, from: nextStart } : h));
-  const payments = p.cycle.unit === 'lifetime' && !p.payments?.length ? [{ date: start, amount: priceAt(v, start) }] : p.payments;
+  const shift = !!opts.shiftBilling;
+  const payments = !shift && p.cycle.unit === 'lifetime' && !p.payments?.length ? [{ date: start, amount: priceAt(v, start) }] : p.payments;
   phases[i] = {
     ...p,
     start: nextStart,
     priceHistory: p.priceHistory ? priceHistory : undefined,
     payments,
-    billingStart: p.billingStart ?? start,
+    billingStart: shift ? undefined : (p.billingStart ?? start),
   };
   const share = s.share && i === 0 ? { ...s.share, collectFrom: collectionAnchor(s), since: s.share.since ?? s.start } : s.share;
   const next = s.phases?.length ? mirror({ ...s, start: phases[0].start, share }, phases) : { ...s, ...phases[0], share };

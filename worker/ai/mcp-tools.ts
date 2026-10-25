@@ -57,6 +57,7 @@ import {
   statusChangeError,
   cancelAtEnd,
   stopUndated,
+  movePhaseStart,
 } from '../../shared/phases.ts';
 import { proxyLedger } from '../../shared/proxy.ts';
 import { paidThrough, setOpening, type LedgerPeriod } from '../../shared/receivables.ts';
@@ -485,6 +486,12 @@ const CYCLE = {
   properties: { unit: { type: 'string', enum: ['day', 'week', 'month', 'year', 'lifetime'] }, every: { type: 'integer', minimum: 1, default: 1 } },
   required: ['unit'],
   description: 'Billing cycle, e.g. {"unit":"month","every":1}; lifetime = one-time purchase.',
+};
+const SHIFT_BILLING = {
+  type: 'boolean',
+  default: false,
+  description:
+    'Only with a start change. Default false keeps the original billing anchor, like the web editor: later charge dates stay the same and cycles added before it follow the original day. true moves the anchor with the start, shifting every estimated future charge.',
 };
 const DRY = { type: 'boolean', default: false, description: 'Preview the result without saving.' };
 const CATEGORY = { type: 'string', description: 'Existing category code or name from list_categories; localized names are case-insensitive.' };
@@ -1482,7 +1489,7 @@ const CATALOGUE: Tool[] = [
   {
     name: 'update_subscription',
     description:
-      'Change descriptive fields and settings of a subscription (name, category, tags, url, notes, payment method, region, reminder days, end date (no renewal after it), next due date, trial end). Only provided keys change. For price changes use change_price; for plan/region switches use change_plan. Call list_categories before assigning a category. Unknown names fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.',
+      'Change descriptive fields and settings of a subscription (name, category, tags, url, notes, icon, payment method, region, reminder days, start, end date (no renewal after it), next due date, trial end). Only provided keys change. A start correction keeps the original billing anchor and future charge dates (preview next_charges) unless shift_billing=true. For price changes use change_price; for plan/region switches use change_plan. Call list_categories before assigning a category. Unknown names fail; use save_category action=create or create_category=true with optional category_icon/category_color to explicitly create one.',
     write: true,
     inputSchema: obj(
       {
@@ -1490,7 +1497,7 @@ const CATALOGUE: Tool[] = [
         set: obj({
           icon: { type: ['string', 'null'] },
           show_on_public: { type: 'boolean' },
-          start: DATE,
+          start: { ...DATE, description: 'Service start (single-phase only). Keeps the billing anchor unless shift_billing=true.' },
           intro: {
             type: ['object', 'null'],
             properties: { price: { type: 'number', minimum: 0 }, until: DATE },
@@ -1516,6 +1523,7 @@ const CATALOGUE: Tool[] = [
           cancelLeadDays: { type: 'integer', minimum: 0, maximum: 3660 },
         }),
         ...CATEGORY_CREATE,
+        shift_billing: SHIFT_BILLING,
         dry_run: DRY,
       },
       ['subscription', 'set'],
@@ -1524,8 +1532,14 @@ const CATALOGUE: Tool[] = [
       const { st, today } = await state(ctx);
       const s = findSub(st, a.subscription);
       const set = (a.set ?? {}) as Record<string, unknown>;
+      // 改开始日与网页同一套：默认保留原扣款锚点（之后的扣款日不变），shift_billing=true 才整体平移
+      let base = s;
+      if ('start' in set) {
+        if (s.phases?.length) throw new Error(t('mcp.error.invalidInput', { field: 'start: use change_plan edit for phased subscriptions' }));
+        base = movePhaseStart(s, s.start, date(set.start, 'start'), { shiftBilling: a.shift_billing === true });
+      } else if (a.shift_billing != null) throw new Error(t('mcp.error.invalidInput', { field: 'shift_billing requires set.start' }));
       // 多段订阅：顶层字段先换成今天所在的那段，改完再同步回去
-      const next: Subscription = toEditForm({ ...s }, today);
+      const next: Subscription = toEditForm({ ...base }, today);
       const changed: string[] = [];
       const put = <K extends keyof Subscription>(k: K, v: Subscription[K], label = String(k)) => {
         next[k] = v;
@@ -1535,10 +1549,7 @@ const CATALOGUE: Tool[] = [
       if ('cancelLeadDays' in set) put('cancelLeadDays', Number(set.cancelLeadDays));
       if ('icon' in set) put('icon', str(set.icon));
       if ('show_on_public' in set) put('showOnPublic', set.show_on_public as boolean);
-      if ('start' in set) {
-        if (s.phases?.length) throw new Error(t('mcp.error.invalidInput', { field: 'start: use change_plan edit for phased subscriptions' }));
-        put('start', date(set.start, 'start'));
-      }
+      if ('start' in set) changed.push('start');
       if ('intro' in set) put('intro', set.intro == null ? undefined : (set.intro as Subscription['intro']));
       if ('bonus' in set) put('bonus', set.bonus == null ? undefined : (set.bonus as Subscription['bonus']));
       if ('name' in set) put('name', String(set.name).trim());
@@ -1561,7 +1572,7 @@ const CATALOGUE: Tool[] = [
         if (k in set) put(f, set[k] == null ? undefined : date(set[k], k), k);
       }
       if (!changed.length) throw new Error(t('mcp.error.noFields'));
-      return commit(ctx, st, today, syncPhase(preserveRenewalHistory(s, next, today), today), a.dry_run, changed, category?.creation);
+      return commit(ctx, st, today, syncPhase(preserveRenewalHistory(base, next, today), today), a.dry_run, changed, category?.creation);
     },
   },
   {
@@ -1604,7 +1615,7 @@ const CATALOGUE: Tool[] = [
     name: 'change_plan',
     destructive: true,
     description:
-      'Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. action=remove deletes that phase and its payments, requires at least two phases. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
+      'Correct an existing phase using action=edit, at=its exact start date, set=only changed fields (camelCase; null clears); preserves unrelated phases and payments. set.start moves the phase start like the web editor: recorded payments, stops and the billing anchor stay, so future charge dates are unchanged (preview next_charges); shift_billing=true moves the anchor too. action=remove deletes that phase and its payments, requires at least two phases. Preview before rewriting history. Start a new phase of the same subscription: switch plan, region, currency or payment method from a date (action=switch), resubscribe after a gap or provider termination (action=resume, preserves the stopped phase), add missing history BEFORE the subscription’s start (action=earlier: at = when that earlier phase began, e.g. a one-time purchase before it became a subscription; it runs until the current first phase starts, or until earlier_until if there was a gap), or confirm / drop a planned future phase (action=confirm|drop, at = that phase’s start). Set plan.planned=true for an uncertain future switch. For action=switch, keep_previous_until keeps the previous phase running (and billing) in parallel until that date — e.g. a new Turkey account while the prepaid US one runs out; omit it for a seamless switch.',
     write: true,
     inputSchema: obj(
       {
@@ -1612,7 +1623,7 @@ const CATALOGUE: Tool[] = [
         action: { type: 'string', enum: ['switch', 'resume', 'earlier', 'confirm', 'drop', 'edit', 'remove'] },
         at: DATE,
         set: obj({
-          start: DATE,
+          start: { ...DATE, description: 'New phase start; keeps the billing anchor unless shift_billing=true.' },
           end: { type: ['string', 'null'], format: 'date' },
           price: { type: 'number', minimum: 0 },
           currency: { type: 'string' },
@@ -1653,6 +1664,7 @@ const CATALOGUE: Tool[] = [
           description: 'action=switch only: the previous phase keeps running until this date (after `at`), overlapping the new one.',
         },
         earlier_until: { ...DATE, description: 'action=earlier only: the earlier phase ended on this date (a gap before the next one).' },
+        shift_billing: SHIFT_BILLING,
         dry_run: DRY,
       },
       ['subscription', 'action', 'at'],
@@ -1672,12 +1684,17 @@ const CATALOGUE: Tool[] = [
           delete patch.method;
         }
         if (patch.currency) validateCurrency(st, String(patch.currency));
-        const after = act === 'remove' ? removePhase(s, index) : editPhase(s, at, patch);
+        if (a.shift_billing != null && (act !== 'edit' || patch.start == null)) throw new Error(t('mcp.error.invalidInput', { field: 'shift_billing requires set.start' }));
+        // 改开始日走网页同一个 movePhaseStart（保留扣款锚点）；其余字段再按新开始日修改
+        const { start: moveTo, ...rest } = patch;
+        const moved = act === 'edit' && moveTo != null && moveTo !== at ? movePhaseStart(s, at, date(moveTo, 'set.start'), { shiftBilling: a.shift_billing === true }) : s;
+        const target = act === 'edit' && moveTo != null ? String(moveTo) : at;
+        const after = act === 'remove' ? removePhase(s, index) : Object.keys(rest).length ? editPhase(moved, target, rest) : moved;
         return {
           ...(await commit(ctx, st, today, after, a.dry_run, [act])),
           affected_estimated_charges: affectedPriceCharges(s, after, today),
           before: phases[index],
-          after: act === 'remove' ? null : after.phases?.find((p) => p.start === (patch.start ?? at)),
+          after: act === 'remove' ? null : (after.phases?.find((p) => p.start === target) ?? phaseSubs(after).find((p) => p.start === target)),
           references: { subscription: s.id, phase: at, removed_payments: act === 'remove' ? (phases[index].payments ?? []) : [] },
         };
       }
