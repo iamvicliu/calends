@@ -62,7 +62,13 @@
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
-    "noCategory": "Категория не найдена или неоднозначна: {q}. Варианты: {list}"
+    "noCategory": "Категория не найдена или неоднозначна: {q}. Варианты: {list}",
+    "proxyPeriodsShort": {
+      "one": "С {from} осталось только {count} списание — меньше, чем покрывает платёж",
+      "few": "С {from} осталось только {count} списания — меньше, чем покрывает платёж",
+      "many": "С {from} осталось только {count} списаний — меньше, чем покрывает платёж",
+      "other": "С {from} осталось только {count} списания — меньше, чем покрывает платёж"
+    }
   },
   "tool": {
     "get_overview": "Обзор учёта",

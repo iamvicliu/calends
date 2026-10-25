@@ -62,7 +62,8 @@
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
-    "noCategory": "カテゴリが見つからないか、曖昧です：{q}。候補：{list}"
+    "noCategory": "カテゴリが見つからないか、曖昧です：{q}。候補：{list}",
+    "proxyPeriodsShort": "{from} 以降は {count} 回分しかなく、対象回数に足りません"
   },
   "tool": {
     "get_overview": "台帳の概要",

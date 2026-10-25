@@ -62,7 +62,8 @@
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
-    "noCategory": "Kategori tidak ditemukan atau ambigu: {q}. Pilihan: {list}"
+    "noCategory": "Kategori tidak ditemukan atau ambigu: {q}. Pilihan: {list}",
+    "proxyPeriodsShort": "Mulai {from} hanya tersisa {count} tagihan, kurang dari cakupan penerimaan ini"
   },
   "tool": {
     "get_overview": "Ringkasan buku catatan",

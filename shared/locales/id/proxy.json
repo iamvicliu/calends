@@ -43,7 +43,10 @@
     "diff": "Selisih",
     "record": "Catat",
     "even": "Impas",
-    "none": "Belum ada tagihan."
+    "none": "Belum ada tagihan.",
+    "title": "Rincian per periode",
+    "notCharged": "Belum ditagih",
+    "batch": "{amount} dibagi {count} tagihan"
   },
   "entry": {
     "markedDue": "Ditandai tertunggak",
@@ -80,9 +83,28 @@
     "noneIn": "Belum ada yang diterima",
     "diffAvg": "{count} dikembalikan, rata-rata {amount} per periode",
     "perPeriod": "Rata-rata {amount} per periode",
-    "owedRate": "Kurs pada hari tagihan"
+    "owedRate": "Kurs pada hari tagihan",
+    "prepaid": "Ditambah {amount} dibayar di muka untuk {count} tagihan mendatang"
   },
   "paid": "Sudah ditalangi",
   "periods": "{count} periode",
-  "lastIn": "Terakhir {date}"
+  "lastIn": "Terakhir {date}",
+  "prepaidTo": "Dibayar di muka hingga {date}",
+  "receipt": {
+    "add": "Catat penerimaan",
+    "title": "Catat penerimaan",
+    "covers": "Mencakup",
+    "from": "Mulai dari",
+    "periods": "Jumlah tagihan",
+    "owedTag": "ditagih, belum diterima",
+    "coversFootOne": "Mencakup tagihan {from}.",
+    "coversFootMany": "Mencakup {count} tagihan dari {from} hingga {to}, melewati yang sudah dibayar. Jumlah dibagi rata dan laba dihitung per tagihan.",
+    "total": "Jumlah diterima",
+    "perFoot": "{per} per tagihan.",
+    "baseFoot": "{amount} dengan kurs pada hari diterima.",
+    "none": "Tidak ada tagihan tertunda atau mendatang.",
+    "undo": "Batalkan penerimaan ini",
+    "batchFoot": "Bagian dari satu penerimaan untuk beberapa periode. Untuk mengubah jumlah atau periode, batalkan lalu catat ulang.",
+    "perPeriod": "{count} tagihan, masing-masing {amount}"
+  }
 }

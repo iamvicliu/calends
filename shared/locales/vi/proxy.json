@@ -43,7 +43,10 @@
     "diff": "Chênh lệch",
     "record": "Ghi nhận",
     "even": "Hòa",
-    "none": "Chưa có khoản phí nào."
+    "none": "Chưa có khoản phí nào.",
+    "title": "Chi tiết từng kỳ",
+    "notCharged": "Chưa trừ tiền",
+    "batch": "{amount} chia cho {count} kỳ"
   },
   "entry": {
     "markedDue": "Đã đánh dấu chưa trả lại",
@@ -80,9 +83,28 @@
     "noneIn": "Chưa nhận lại",
     "diffAvg": "Đã thu {count} kỳ, trung bình {amount} mỗi kỳ",
     "perPeriod": "Trung bình {amount} mỗi kỳ",
-    "owedRate": "Theo tỷ giá ngày trừ tiền"
+    "owedRate": "Theo tỷ giá ngày trừ tiền",
+    "prepaid": "Thêm {amount} trả trước cho {count} kỳ sắp tới"
   },
   "paid": "Đã trả hộ",
   "periods": "{count} kỳ",
-  "lastIn": "Gần nhất {date}"
+  "lastIn": "Gần nhất {date}",
+  "prepaidTo": "Đã trả trước đến {date}",
+  "receipt": {
+    "add": "Ghi khoản nhận",
+    "title": "Ghi một khoản nhận",
+    "covers": "Áp dụng cho",
+    "from": "Bắt đầu từ kỳ",
+    "periods": "Số kỳ",
+    "owedTag": "đã trừ, chưa nhận",
+    "coversFootOne": "Áp dụng cho kỳ {from}.",
+    "coversFootMany": "Áp dụng {count} kỳ từ {from} đến {to}, bỏ qua các kỳ đã nhận. Số tiền chia đều, lãi/lỗ tính theo từng kỳ.",
+    "total": "Số tiền nhận",
+    "perFoot": "Mỗi kỳ {per}.",
+    "baseFoot": "{amount} theo tỷ giá ngày nhận.",
+    "none": "Không có kỳ chờ nhận hoặc sắp tới.",
+    "undo": "Hủy khoản nhận này",
+    "batchFoot": "Kỳ này thuộc một khoản nhận cho nhiều kỳ. Muốn đổi số tiền hoặc kỳ, hãy hủy rồi ghi lại.",
+    "perPeriod": "{count} kỳ, mỗi kỳ {amount}"
+  }
 }

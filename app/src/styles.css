@@ -5572,6 +5572,15 @@ a.car-toggle {
 .ld-date {
   color: var(--label-2);
 }
+.ld-batch {
+  display: none;
+}
+/* 已预收、还没扣款的期：日期与预计实扣淡一级 */
+.ld-ahead .ld-date,
+.ld-ahead > span:nth-child(2),
+.ld-ahead > .ld-cost {
+  color: var(--label-3);
+}
 .ld-th {
   border-top: 0;
   cursor: default;
@@ -5601,6 +5610,9 @@ a.car-toggle {
   }
   .ld-cost-inline {
     display: none;
+  }
+  .ld-batch {
+    display: block;
   }
 }
 

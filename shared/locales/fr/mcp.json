@@ -62,7 +62,11 @@
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
-    "noCategory": "Catégorie introuvable ou ambiguë : {q}. Options : {list}"
+    "noCategory": "Catégorie introuvable ou ambiguë : {q}. Options : {list}",
+    "proxyPeriodsShort": {
+      "one": "À partir du {from}, il ne reste que {count} paiement, moins que couvert",
+      "other": "À partir du {from}, il ne reste que {count} paiements, moins que couvert"
+    }
   },
   "tool": {
     "get_overview": "Aperçu du registre",

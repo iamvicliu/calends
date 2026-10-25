@@ -43,7 +43,10 @@
     "diff": "차액",
     "record": "기록",
     "even": "차액 없음",
-    "none": "아직 결제가 없습니다."
+    "none": "아직 결제가 없습니다.",
+    "title": "회차별 내역",
+    "notCharged": "아직 결제 전",
+    "batch": "{amount}을 {count}회로 나눔"
   },
   "entry": {
     "markedDue": "미수로 표시했습니다",
@@ -80,9 +83,28 @@
     "noneIn": "아직 받은 금액 없음",
     "diffAvg": "회수 {count}회, 회당 평균 {amount}",
     "perPeriod": "회당 평균 {amount}",
-    "owedRate": "결제일 환율 기준"
+    "owedRate": "결제일 환율 기준",
+    "prepaid": "그 외 선수금 {count}회 {amount} (결제 후 반영)"
   },
   "paid": "대신 낸 금액",
   "periods": "{count}회",
-  "lastIn": "최근 {date}"
+  "lastIn": "최근 {date}",
+  "prepaidTo": "{date}까지 선수금",
+  "receipt": {
+    "add": "입금 기록",
+    "title": "입금 기록",
+    "covers": "적용 회차",
+    "from": "시작 회차",
+    "periods": "회차 수",
+    "owedTag": "결제 후 미수",
+    "coversFootOne": "{from} 1회분입니다.",
+    "coversFootMany": "{from}~{to} 총 {count}회(이미 받은 회차는 건너뜀). 금액은 균등하게 나누고 손익은 회차별로 계산합니다.",
+    "total": "받은 금액",
+    "perFoot": "회당 {per}.",
+    "baseFoot": "받은 날 환율로 {amount}.",
+    "none": "미수 또는 선수할 회차가 없습니다.",
+    "undo": "이 입금 취소",
+    "batchFoot": "여러 회차를 한 번에 받은 입금의 일부입니다. 금액이나 회차를 바꾸려면 취소 후 다시 기록하세요.",
+    "perPeriod": "{count}회, 회당 {amount}"
+  }
 }

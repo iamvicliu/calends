@@ -45,7 +45,10 @@
     "diff": "Fark",
     "record": "Kayıt",
     "even": "Eşit",
-    "none": "Henüz ödeme yok."
+    "none": "Henüz ödeme yok.",
+    "title": "Dönem dökümü",
+    "notCharged": "Henüz çekilmedi",
+    "batch": "{amount}, {count} ödemeye bölündü"
   },
   "entry": {
     "markedDue": "Borç olarak işaretlendi",
@@ -84,9 +87,28 @@
     "noneIn": "Henüz alınan yok",
     "diffAvg": "{count} geri ödendi, dönem başına ort. {amount}",
     "perPeriod": "Dönem başına ort. {amount}",
-    "owedRate": "Ödeme günü kuruyla"
+    "owedRate": "Ödeme günü kuruyla",
+    "prepaid": "Ayrıca {count} gelecek ödeme için {amount} peşin"
   },
   "paid": "Ödenen",
   "periods": "{count} dönem",
-  "lastIn": "Son {date}"
+  "lastIn": "Son {date}",
+  "prepaidTo": "{date} tarihine kadar peşin alındı",
+  "receipt": {
+    "add": "Tahsilat kaydet",
+    "title": "Tahsilat kaydet",
+    "covers": "Kapsam",
+    "from": "Başlangıç",
+    "periods": "Ödeme sayısı",
+    "owedTag": "çekildi, alınmadı",
+    "coversFootOne": "{from} ödemesini kapsar.",
+    "coversFootMany": "{from} – {to} arası {count} ödemeyi kapsar, önceden alınanları atlar. Tutar eşit bölünür, kâr ödeme başına hesaplanır.",
+    "total": "Alınan tutar",
+    "perFoot": "Ödeme başına {per}.",
+    "baseFoot": "Alındığı günün kuruyla {amount}.",
+    "none": "Bekleyen veya yaklaşan ödeme yok.",
+    "undo": "Bu tahsilatı geri al",
+    "batchFoot": "Birden çok dönemi kapsayan bir tahsilatın parçası. Tutarı veya dönemleri değiştirmek için geri alıp yeniden kaydedin.",
+    "perPeriod": "{count} ödeme, her biri {amount}"
+  }
 }

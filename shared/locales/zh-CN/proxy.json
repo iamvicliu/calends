@@ -39,7 +39,10 @@
     "diff": "差额",
     "record": "记收款",
     "even": "持平",
-    "none": "还没有扣过款。"
+    "none": "还没有扣过款。",
+    "title": "逐期明细",
+    "notCharged": "未扣款",
+    "batch": "一笔 {amount} 分 {count} 期"
   },
   "entry": {
     "markedDue": "已改为待收",
@@ -72,9 +75,28 @@
     "noneIn": "还没有收回",
     "diffAvg": "已收 {count} 期，平均每期 {amount}",
     "perPeriod": "平均每期 {amount}",
-    "owedRate": "按扣款当天汇率"
+    "owedRate": "按扣款当天汇率",
+    "prepaid": "另预收 {count} 期 {amount}，扣款后计入"
   },
   "paid": "已代付",
   "periods": "{count} 期",
-  "lastIn": "最近 {date}"
+  "lastIn": "最近 {date}",
+  "prepaidTo": "已预收至 {date}",
+  "receipt": {
+    "add": "记一笔收款",
+    "title": "记一笔收款",
+    "covers": "覆盖哪几期",
+    "from": "从这期起",
+    "periods": "期数",
+    "owedTag": "已扣未收",
+    "coversFootOne": "覆盖 {from} 这一期。",
+    "coversFootMany": "覆盖 {from} 至 {to} 共 {count} 期，已收回的期自动跳过；金额按期均摊，盈亏按每期这一份计算。",
+    "total": "收到金额",
+    "perFoot": "每期均摊 {per}。",
+    "baseFoot": "按收款当天汇率折合 {amount}。",
+    "none": "没有待收或可预收的期。",
+    "undo": "撤销这笔收款",
+    "batchFoot": "这一期属于一笔多期收款。要改金额或覆盖期，先撤销整笔再重记。",
+    "perPeriod": "{count} 期，每期 {amount}"
+  }
 }

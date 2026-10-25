@@ -62,7 +62,8 @@
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
-    "noCategory": "Kategori bulunamadı veya belirsiz: {q}. Seçenekler: {list}"
+    "noCategory": "Kategori bulunamadı veya belirsiz: {q}. Seçenekler: {list}",
+    "proxyPeriodsShort": "{from} tarihinden itibaren yalnızca {count} ödeme kaldı; kapsanandan az"
   },
   "tool": {
     "get_overview": "Defter özeti",

@@ -45,7 +45,13 @@
     "diff": "Differenz",
     "record": "Erfassen",
     "even": "Ausgeglichen",
-    "none": "Noch keine Abbuchungen."
+    "none": "Noch keine Abbuchungen.",
+    "title": "Zahlungen",
+    "notCharged": "Noch nicht abgebucht",
+    "batch": {
+      "one": "{amount} für {count} Zahlung",
+      "other": "{amount} auf {count} Zahlungen verteilt"
+    }
   },
   "entry": {
     "markedDue": "Als offen markiert",
@@ -84,12 +90,40 @@
     "noneIn": "Noch nichts erhalten",
     "diffAvg": "{count} zurückgezahlt, im Schnitt {amount} je Zeitraum",
     "perPeriod": "Im Schnitt {amount} je Zeitraum",
-    "owedRate": "Zum Kurs am Abbuchungstag"
+    "owedRate": "Zum Kurs am Abbuchungstag",
+    "prepaid": {
+      "one": "Zusätzlich {amount} im Voraus für {count} kommende Zahlung",
+      "other": "Zusätzlich {amount} im Voraus für {count} kommende Zahlungen"
+    }
   },
   "paid": "Ausgelegt",
   "periods": {
     "one": "{count} Zeitraum",
     "other": "{count} Zeiträume"
   },
-  "lastIn": "Zuletzt {date}"
+  "lastIn": "Zuletzt {date}",
+  "prepaidTo": "Vorausbezahlt bis {date}",
+  "receipt": {
+    "add": "Zahlung erfassen",
+    "title": "Zahlung erfassen",
+    "covers": "Deckt ab",
+    "from": "Ab",
+    "periods": "Abgedeckte Zahlungen",
+    "owedTag": "abgebucht, offen",
+    "coversFootOne": "Deckt die Zahlung vom {from} ab.",
+    "coversFootMany": {
+      "one": "Deckt {count} Zahlung von {from} bis {to} ab.",
+      "other": "Deckt {count} Zahlungen von {from} bis {to} ab; bereits erstattete werden übersprungen. Der Betrag wird gleichmäßig verteilt, Gewinn je Zahlung berechnet."
+    },
+    "total": "Erhaltener Betrag",
+    "perFoot": "{per} je Zahlung.",
+    "baseFoot": "{amount} zum Kurs am Eingangstag.",
+    "none": "Nichts offen oder bevorstehend.",
+    "undo": "Diese Zahlung rückgängig machen",
+    "batchFoot": "Teil einer Zahlung über mehrere Perioden. Zum Ändern von Betrag oder Perioden rückgängig machen und neu erfassen.",
+    "perPeriod": {
+      "one": "{count} Zahlung, {amount}",
+      "other": "{count} Zahlungen, je {amount}"
+    }
+  }
 }

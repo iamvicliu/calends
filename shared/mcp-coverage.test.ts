@@ -266,6 +266,15 @@ const mutations: Array<[string, object, (st: AppState) => unknown]> = [
     (st) => st.subscriptions[0].proxy?.entries.some((e) => e.charge === '2026-01-01' && e.charged === 5),
   ],
   [
+    'record_receivable',
+    // 预收：一笔覆盖接下来 3 期（今天这期已收，跳过），按期均摊
+    { subscription: 's', kind: 'proxy', amount: 30, currency: 'USD', periods: 3 },
+    (st) => {
+      const prepaid = st.subscriptions[0].proxy?.entries.filter((e) => e.batch?.periods === 3) ?? [];
+      return prepaid.length === 3 && prepaid.every((e) => e.received === 10 && e.charge > todayIn('UTC'));
+    },
+  ],
+  [
     'update_subscription',
     { subscription: 's', set: { icon: '🌱', show_on_public: true, bonus: { from: '2026-11-01', until: '2026-11-10' } } },
     (st) => st.subscriptions[0].showOnPublic === true,

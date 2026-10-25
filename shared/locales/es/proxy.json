@@ -45,7 +45,13 @@
     "diff": "Diferencia",
     "record": "Registrar",
     "even": "Igual",
-    "none": "Aún no hay cobros."
+    "none": "Aún no hay cobros.",
+    "title": "Pagos",
+    "notCharged": "Aún sin cobrar",
+    "batch": {
+      "one": "{amount} para {count} pago",
+      "other": "{amount} repartido en {count} pagos"
+    }
   },
   "entry": {
     "markedDue": "Marcado como pendiente",
@@ -84,12 +90,40 @@
     "noneIn": "Aún no se ha recibido nada",
     "diffAvg": "{count} devueltos, {amount} de media por periodo",
     "perPeriod": "{amount} de media por periodo",
-    "owedRate": "Al tipo del día del cobro"
+    "owedRate": "Al tipo del día del cobro",
+    "prepaid": {
+      "one": "Además {amount} prepagado para {count} pago próximo",
+      "other": "Además {amount} prepagado para {count} pagos próximos"
+    }
   },
   "paid": "Adelantado",
   "periods": {
     "one": "{count} periodo",
     "other": "{count} periodos"
   },
-  "lastIn": "Último {date}"
+  "lastIn": "Último {date}",
+  "prepaidTo": "Prepagado hasta {date}",
+  "receipt": {
+    "add": "Registrar cobro",
+    "title": "Registrar un cobro",
+    "covers": "Cubre",
+    "from": "Desde",
+    "periods": "Pagos cubiertos",
+    "owedTag": "cobrado, pendiente",
+    "coversFootOne": "Cubre el pago del {from}.",
+    "coversFootMany": {
+      "one": "Cubre {count} pago del {from} al {to}.",
+      "other": "Cubre {count} pagos del {from} al {to}, omitiendo los ya devueltos. El importe se reparte por igual y la ganancia se calcula por pago."
+    },
+    "total": "Importe recibido",
+    "perFoot": "{per} por pago.",
+    "baseFoot": "{amount} al tipo del día de recepción.",
+    "none": "No hay pagos pendientes ni próximos.",
+    "undo": "Deshacer este cobro",
+    "batchFoot": "Forma parte de un cobro que cubre varios periodos. Para cambiar importe o periodos, deshazlo y regístralo de nuevo.",
+    "perPeriod": {
+      "one": "{count} pago, {amount}",
+      "other": "{count} pagos, {amount} cada uno"
+    }
+  }
 }

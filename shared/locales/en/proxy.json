@@ -45,7 +45,13 @@
     "diff": "Difference",
     "record": "Record",
     "even": "Even",
-    "none": "No charges yet."
+    "none": "No charges yet.",
+    "title": "Payments",
+    "notCharged": "Not charged yet",
+    "batch": {
+      "one": "{amount} for {count} payment",
+      "other": "{amount} split over {count} payments"
+    }
   },
   "entry": {
     "markedDue": "Marked as due",
@@ -84,12 +90,40 @@
     "noneIn": "Nothing received yet",
     "diffAvg": "Over {count} paid back: {amount} each on average",
     "perPeriod": "{amount} per period on average",
-    "owedRate": "At charge-date rates"
+    "owedRate": "At charge-date rates",
+    "prepaid": {
+      "one": "Plus {amount} prepaid for {count} upcoming payment",
+      "other": "Plus {amount} prepaid for {count} upcoming payments"
+    }
   },
   "paid": "Paid on behalf",
   "periods": {
     "one": "{count} period",
     "other": "{count} periods"
   },
-  "lastIn": "Last {date}"
+  "lastIn": "Last {date}",
+  "prepaidTo": "Prepaid to {date}",
+  "receipt": {
+    "add": "Record payment",
+    "title": "Record a payment",
+    "covers": "Covers",
+    "from": "Starting with",
+    "periods": "Payments covered",
+    "owedTag": "charged, unpaid",
+    "coversFootOne": "Covers the {from} payment.",
+    "coversFootMany": {
+      "one": "Covers {count} payment from {from} to {to}.",
+      "other": "Covers {count} payments from {from} to {to}, skipping ones already repaid. The amount is split evenly and profit is counted per payment."
+    },
+    "total": "Amount received",
+    "perFoot": "{per} per payment.",
+    "baseFoot": "{amount} at the rate on the day received.",
+    "none": "Nothing due or upcoming to record.",
+    "undo": "Undo this payment",
+    "batchFoot": "Part of one payment covering several periods. To change the amount or periods, undo it and record it again.",
+    "perPeriod": {
+      "one": "{count} payment, {amount}",
+      "other": "{count} payments, {amount} each"
+    }
+  }
 }

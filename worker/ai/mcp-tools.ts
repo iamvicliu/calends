@@ -55,7 +55,7 @@ import {
   statusChangeError,
   cancelAtEnd,
 } from '../../shared/phases.ts';
-import { matchEntries } from '../../shared/proxy.ts';
+import { matchEntries, proxyAhead, recordProxyReceipt } from '../../shared/proxy.ts';
 import { normName, peopleLedger, type PersonLedger } from '../../shared/people.ts';
 import type { AppState, Payment, PaymentMethod, Person, ShareMember, Subscription } from '../../shared/types.ts';
 import type { Env } from '../env.ts';
@@ -779,6 +779,12 @@ const CATALOGUE: Tool[] = [
                 charge: c.date,
                 received: matched!.get(c.date)?.received ?? null,
                 received_currency: matched!.get(c.date)?.receivedCurrency ?? null,
+              })),
+              // 已预收、还没到扣款日的期
+              prepaid: proxyAhead(st, s, today).map((r) => ({
+                charge: r.date,
+                received: r.entry!.received,
+                received_currency: r.entry!.receivedCurrency ?? null,
               })),
             }
           : null,
@@ -1996,7 +2002,7 @@ const CATALOGUE: Tool[] = [
     name: 'record_receivable',
     destructive: true,
     description:
-      'Record, update or delete actual receivables. Use action=update|delete with kind=share, member and index to revise/remove a receipt (receipt patch); with kind=proxy and exact charge to revise/remove a proxy entry (entry patch includes charged/received fields; action=record with entry can create a charged-only record; null clears). Read full records/indices with get_subscription. Removing proxy entries restores inferred unpaid charges. Record money received from others: a shared-plan member paid their share (kind=share; omitted coverage and amount default to their next unpaid collection, including a prorated first period; free partial first periods are skipped. Explicit amount is the actual receipt even if different from the suggested fee, and covers the selected period without leaving a balance. Returns receipt plus member paid_until and next_collection_date after recording), or a proxy charge was repaid (kind=proxy; charge = the charge date being repaid). Pass person (name or id) instead of subscription/member/kind to record it for that person: their only open item is picked (pass subscription when they owe on several).',
+      'Record, update or delete actual receivables. Use action=update|delete with kind=share, member and index to revise/remove a receipt (receipt patch); with kind=proxy and exact charge to revise/remove a proxy entry (entry patch includes charged/received fields; action=record with entry can create a charged-only record; null clears). Read full records/indices with get_subscription. Removing proxy entries restores inferred unpaid charges. Record money received from others: a shared-plan member paid their share (kind=share; omitted coverage and amount default to their next unpaid collection, including a prorated first period; free partial first periods are skipped. Explicit amount is the actual receipt even if different from the suggested fee, and covers the selected period without leaving a balance. Returns receipt plus member paid_until and next_collection_date after recording), or a proxy charge was repaid (kind=proxy; charge = the charge date being repaid). For proxy prepayment or one payment covering several charges, pass periods (and optionally charge as the earliest covered date, which may be in the future): the amount is split evenly over that many consecutive unpaid charges, skipping ones already repaid, and fails if the subscription has fewer charges left. Pass person (name or id) instead of subscription/member/kind to record it for that person: their only open item is picked (pass subscription when they owe on several).',
     write: true,
     inputSchema: obj(
       {
@@ -2043,7 +2049,16 @@ const CATALOGUE: Tool[] = [
         person: { type: 'string', description: 'Person id or name (see list_people). Picks the matching member or proxy payment automatically.' },
         kind: { type: 'string', enum: ['share', 'proxy'], description: 'Inferred when person is given.' },
         member: { type: 'string', description: 'share: member id or name.' },
-        charge: { ...DATE, description: 'proxy: which charge date is being repaid (defaults to the oldest unpaid).' },
+        charge: {
+          ...DATE,
+          description: 'proxy: which charge date is being repaid (defaults to the oldest unpaid). With periods: earliest covered charge, may be future.',
+        },
+        periods: {
+          type: 'integer',
+          minimum: 1,
+          maximum: 120,
+          description: 'proxy only: number of unpaid charges this one payment covers (prepayment allowed); amount is split evenly per charge.',
+        },
         amount: {
           type: 'number',
           minimum: 0,
@@ -2141,6 +2156,20 @@ const CATALOGUE: Tool[] = [
       }
       const amount = num(a.amount, 'amount');
       if (!s.proxy) throw new Error(t('mcp.error.notProxy', { name: s.name }));
+      // 按笔记：预收（扣款日在今天之后）或一笔覆盖多期，均摊到连续几期还没收的扣款
+      if (a.periods != null || (a.charge && date(a.charge, 'charge') > today)) {
+        const from = a.charge ? date(a.charge, 'charge') : s.start;
+        const { entries, covered } = recordProxyReceipt(
+          s,
+          { id: uid(), date: on, amount, currency: ccy, from, periods: Number(a.periods ?? 1), note: str(a.note) },
+          today,
+        );
+        return {
+          ...(await commit(ctx, st, today, { ...s, proxy: { ...s.proxy, entries } }, a.dry_run, [`proxy_received:${covered.join(',')}`])),
+          covered,
+          per_period: { amount: round(amount / covered.length), currency: ccy },
+        };
+      }
       const cs = chargesBetween(s, s.start, today, today);
       const matched = matchEntries(
         s.proxy.entries,

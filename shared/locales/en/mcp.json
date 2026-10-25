@@ -62,7 +62,11 @@
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
-    "noCategory": "Category not found or ambiguous: {q}. Options: {list}"
+    "noCategory": "Category not found or ambiguous: {q}. Options: {list}",
+    "proxyPeriodsShort": {
+      "one": "Only {count} payment left from {from}, fewer than this payment covers",
+      "other": "Only {count} payments left from {from}, fewer than this payment covers"
+    }
   },
   "tool": {
     "get_overview": "Ledger overview",

@@ -45,7 +45,13 @@
     "diff": "Diferença",
     "record": "Registrar",
     "even": "Zerado",
-    "none": "Nenhuma cobrança ainda."
+    "none": "Nenhuma cobrança ainda.",
+    "title": "Pagamentos",
+    "notCharged": "Ainda não cobrado",
+    "batch": {
+      "one": "{amount} para {count} pagamento",
+      "other": "{amount} dividido em {count} pagamentos"
+    }
   },
   "entry": {
     "markedDue": "Marcado como pendente",
@@ -84,12 +90,40 @@
     "noneIn": "Nada recebido ainda",
     "diffAvg": "{count} devolvidos, média de {amount} por período",
     "perPeriod": "Média de {amount} por período",
-    "owedRate": "Pela cotação do dia da cobrança"
+    "owedRate": "Pela cotação do dia da cobrança",
+    "prepaid": {
+      "one": "Mais {amount} antecipado para {count} pagamento futuro",
+      "other": "Mais {amount} antecipado para {count} pagamentos futuros"
+    }
   },
   "paid": "Adiantado",
   "periods": {
     "one": "{count} período",
     "other": "{count} períodos"
   },
-  "lastIn": "Último {date}"
+  "lastIn": "Último {date}",
+  "prepaidTo": "Pago antecipado até {date}",
+  "receipt": {
+    "add": "Registrar recebimento",
+    "title": "Registrar um recebimento",
+    "covers": "Cobre",
+    "from": "A partir de",
+    "periods": "Pagamentos cobertos",
+    "owedTag": "cobrado, pendente",
+    "coversFootOne": "Cobre o pagamento de {from}.",
+    "coversFootMany": {
+      "one": "Cobre {count} pagamento de {from} a {to}.",
+      "other": "Cobre {count} pagamentos de {from} a {to}, ignorando os já reembolsados. O valor é dividido igualmente e o lucro calculado por pagamento."
+    },
+    "total": "Valor recebido",
+    "perFoot": "{per} por pagamento.",
+    "baseFoot": "{amount} pela cotação do dia do recebimento.",
+    "none": "Nenhum pagamento pendente ou futuro.",
+    "undo": "Desfazer este recebimento",
+    "batchFoot": "Faz parte de um recebimento que cobre vários períodos. Para alterar valor ou períodos, desfaça e registre novamente.",
+    "perPeriod": {
+      "one": "{count} pagamento, {amount}",
+      "other": "{count} pagamentos, {amount} cada"
+    }
+  }
 }

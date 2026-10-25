@@ -43,7 +43,10 @@
     "diff": "差額",
     "record": "記録",
     "even": "差額なし",
-    "none": "まだ請求はありません。"
+    "none": "まだ請求はありません。",
+    "title": "明細",
+    "notCharged": "未引き落とし",
+    "batch": "{amount} を {count} 回分に按分"
   },
   "entry": {
     "markedDue": "未回収にしました",
@@ -80,9 +83,28 @@
     "noneIn": "まだ受け取りなし",
     "diffAvg": "回収 {count} 期、1 期あたり平均 {amount}",
     "perPeriod": "1 期あたり平均 {amount}",
-    "owedRate": "請求日のレート"
+    "owedRate": "請求日のレート",
+    "prepaid": "ほかに前受け {count} 回分 {amount}（引き落とし後に計上）"
   },
   "paid": "立て替え済み",
   "periods": "{count} 期",
-  "lastIn": "最終 {date}"
+  "lastIn": "最終 {date}",
+  "prepaidTo": "{date} まで前受け済み",
+  "receipt": {
+    "add": "入金を記録",
+    "title": "入金を記録",
+    "covers": "対象",
+    "from": "開始回",
+    "periods": "回数",
+    "owedTag": "引き落とし済み・未回収",
+    "coversFootOne": "{from} の 1 回分です。",
+    "coversFootMany": "{from}〜{to} の {count} 回分（回収済みの回はスキップ）。金額は均等に按分し、損益は回ごとに計算します。",
+    "total": "受取金額",
+    "perFoot": "1 回あたり {per}。",
+    "baseFoot": "受取日のレートで {amount}。",
+    "none": "未回収または前受けできる回はありません。",
+    "undo": "この入金を取り消す",
+    "batchFoot": "複数回分をまとめた入金の一部です。金額や対象回を変えるには、取り消して記録し直してください。",
+    "perPeriod": "{count} 回分、1 回 {amount}"
+  }
 }

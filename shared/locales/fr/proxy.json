@@ -45,7 +45,13 @@
     "diff": "Écart",
     "record": "Saisir",
     "even": "Équilibré",
-    "none": "Aucun prélèvement pour l’instant."
+    "none": "Aucun prélèvement pour l’instant.",
+    "title": "Paiements",
+    "notCharged": "Pas encore prélevé",
+    "batch": {
+      "one": "{amount} pour {count} paiement",
+      "other": "{amount} réparti sur {count} paiements"
+    }
   },
   "entry": {
     "markedDue": "Marqué comme dû",
@@ -84,12 +90,40 @@
     "noneIn": "Rien reçu pour l’instant",
     "diffAvg": "{count} remboursés, {amount} en moyenne par période",
     "perPeriod": "{amount} en moyenne par période",
-    "owedRate": "Au taux du jour du prélèvement"
+    "owedRate": "Au taux du jour du prélèvement",
+    "prepaid": {
+      "one": "Plus {amount} prépayé pour {count} paiement à venir",
+      "other": "Plus {amount} prépayé pour {count} paiements à venir"
+    }
   },
   "paid": "Avancé",
   "periods": {
     "one": "{count} période",
     "other": "{count} périodes"
   },
-  "lastIn": "Dernier {date}"
+  "lastIn": "Dernier {date}",
+  "prepaidTo": "Prépayé jusqu’au {date}",
+  "receipt": {
+    "add": "Enregistrer un remboursement",
+    "title": "Enregistrer un remboursement",
+    "covers": "Couvre",
+    "from": "À partir de",
+    "periods": "Paiements couverts",
+    "owedTag": "prélevé, non remboursé",
+    "coversFootOne": "Couvre le paiement du {from}.",
+    "coversFootMany": {
+      "one": "Couvre {count} paiement du {from} au {to}.",
+      "other": "Couvre {count} paiements du {from} au {to}, en ignorant ceux déjà remboursés. Le montant est réparti à parts égales et le gain calculé par paiement."
+    },
+    "total": "Montant reçu",
+    "perFoot": "{per} par paiement.",
+    "baseFoot": "{amount} au taux du jour de réception.",
+    "none": "Aucun paiement dû ou à venir.",
+    "undo": "Annuler ce remboursement",
+    "batchFoot": "Fait partie d’un remboursement couvrant plusieurs périodes. Pour modifier le montant ou les périodes, annulez-le puis enregistrez-le à nouveau.",
+    "perPeriod": {
+      "one": "{count} paiement, {amount}",
+      "other": "{count} paiements, {amount} chacun"
+    }
+  }
 }

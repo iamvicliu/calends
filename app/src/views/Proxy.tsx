@@ -1,18 +1,35 @@
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
-import { addDays, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn } from '../../../shared/billing.ts';
+import { addDays, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn, uid } from '../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, ProxyEntry, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { DetailHead, DetailSheet, Facts, Note, Prop } from '../components/DetailKit.tsx';
-import { MetricCards, Metric, Amount, MoneyInput, Cell, Group, NameLink, PayBadge, Seg, Sheet, StatusPill, SubIcon, Toolbar } from '../components/ui.tsx';
+import {
+  MetricCards,
+  Metric,
+  Amount,
+  MoneyInput,
+  Cell,
+  Group,
+  NameLink,
+  PayBadge,
+  Seg,
+  Sheet,
+  StatusPill,
+  SubIcon,
+  Toolbar,
+  CardTitle,
+  Stepper,
+} from '../components/ui.tsx';
+import { Plus } from 'lucide-react';
 import { contactText } from './Members.tsx';
 import { LtHead, nextSort, PlanPrice, usePhone } from '../components/LtHead.tsx';
 import { run, saveSub, usePref } from '../store.ts';
-import { CurrencySelect } from '../components/Picker.tsx';
-import { proxyRows, proxyTotals, type ProxyRow } from '../../../shared/proxy.ts';
+import { CurrencySelect, Picker } from '../components/Picker.tsx';
+import { proxyAhead, proxyOpenPeriods, proxyRows, proxyTotals, recordProxyReceipt, removeProxyBatch, type ProxyRow } from '../../../shared/proxy.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 
 /** 代付的状态文案：进行中、到期停付、已停止是代付自己的说法，其余沿用订阅状态 */
@@ -51,12 +68,13 @@ function proxySummary(state: AppState, today: string) {
 }
 
 /**
- * 右上角的状态胶囊：已停止 > 待收 > 已结清（各期都收回）；其余按订阅状态，计费中不显示。
+ * 右上角的状态胶囊：已停止 > 待收 > 已预收到哪期 > 已结清（各期都收回）；其余按订阅状态，计费中不显示。
  * 结清后第三格改为盈亏，「已结清」只在这里说一次
  */
-function proxyStatus(st: string, list: Row[]): ['stop' | 'owe' | 'done' | 'ok' | 'notice', string] {
+function proxyStatus(st: string, list: Row[], ahead: Row[]): ['stop' | 'owe' | 'done' | 'ok' | 'notice', string] {
   if (['ended', 'terminated'].includes(st)) return ['stop', t('proxy.status.ended')];
   if (list.some((r) => r.receivedBase == null)) return ['owe', t('proxy.owed')];
+  if (ahead.length) return ['done', t('proxy.prepaidTo', { date: cnDate(ahead[0].date) })];
   if (list.length) return ['done', t('proxy.settled')];
   return [st === 'active' || st === 'lifetime' ? 'ok' : 'notice', statusLabel(st)];
 }
@@ -96,13 +114,14 @@ function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscription; onO
   const today = todayIn(state.settings.timezone);
   const base = state.settings.baseCurrency;
   const list = rows(state, s, today);
+  const ahead = proxyAhead(state, s, today);
   const [ledger, setLedger] = useState(false);
   const next = nextCharge(s, addDays(today, 1));
   const method = state.methods.find((m) => m.id === s.methodId);
   const { charged, received } = proxyTotals(list);
   const st = effectiveStatus(s, today);
   const stopped = ['ended', 'terminated'].includes(st);
-  const [tone, label] = proxyStatus(st, list);
+  const [tone, label] = proxyStatus(st, list, ahead);
 
   return (
     <>
@@ -156,7 +175,9 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const base = state.settings.baseCurrency;
   const live = state.subscriptions.find((x) => x.id === s.id) ?? s;
   const list = rows(state, live, today);
+  const ahead = proxyAhead(state, live, today);
   const [edit, setEdit] = useState<Row | null>(null);
+  const [adding, setAdding] = useState(false);
   const ro = !!state.readonly;
   const px = live.proxy!;
   const st = effectiveStatus(live, today);
@@ -181,7 +202,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               {live.name}
             </NameLink>
           }
-          badge={<StatusPill tone={proxyStatus(st, list)[0]}>{proxyStatus(st, list)[1]}</StatusPill>}
+          badge={<StatusPill tone={proxyStatus(st, list, ahead)[0]}>{proxyStatus(st, list, ahead)[1]}</StatusPill>}
           meta={
             <>
               <b>
@@ -204,7 +225,20 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               label={t('proxy.received')}
               value={flow(received, base)}
               valueClassName="green"
-              note={lastIn ? t('proxy.page.lastIn', { date: cnDateFull(lastIn) }) : t('proxy.page.noneIn')}
+              note={
+                // 预收的期还没扣款，不计入已收回，在这里单独说一句
+                ahead.length
+                  ? t('proxy.page.prepaid', {
+                      count: ahead.length,
+                      amount: money(
+                        ahead.reduce((a, r) => a + r.receivedBase!, 0),
+                        base,
+                      ),
+                    })
+                  : lastIn
+                    ? t('proxy.page.lastIn', { date: cnDateFull(lastIn) })
+                    : t('proxy.page.noneIn')
+              }
             />
             <OwedOrNet list={list} base={base} exact />
             {/* 还有待收时，已收各期的汇差单列；全部结清后第三格就是盈亏，不再重复 */}
@@ -239,6 +273,14 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             {px.note && <Note text={px.note} />}
           </Facts>
 
+          {!ro && (
+            <div className="dt-ph row">
+              <CardTitle>{t('proxy.table.title')}</CardTitle>
+              <button className="dt-btn sm dt-add" onClick={() => setAdding(true)}>
+                <Plus size={14} /> {t('proxy.receipt.add')}
+              </button>
+            </div>
+          )}
           <div className="ld-table">
             <div className="ld-row ld-th table-head">
               <span>{t('proxy.table.date')}</span>
@@ -247,9 +289,24 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               <span>{t('proxy.table.received')}</span>
               <span>{t('proxy.table.diff')}</span>
             </div>
+            {/* 已预收、还没到扣款日的期排在最上面：实扣是预计金额，盈亏等扣款后再算 */}
+            {ahead.map((r) => (
+              <button key={r.date} className="ld-row ld-ahead" disabled={ro} onClick={() => setEdit(r)}>
+                <span className="ld-date">
+                  {cnDate(r.date)}
+                  <small>{t('proxy.table.notCharged')}</small>
+                </span>
+                <span>
+                  {flow(-r.charged, r.currency)}
+                  {r.currency !== base && <small className="ld-cost-inline">≈ {flow(-r.chargedBase, base)}</small>}
+                </span>
+                <span className="ld-cost">{flow(-r.chargedBase, base)}</span>
+                <ReceivedCell r={r} base={base} />
+                <span className="muted">—</span>
+              </button>
+            ))}
             {list.map((r) => {
               const d = r.receivedBase == null ? undefined : r.receivedBase - r.chargedBase;
-              const rc = r.entry?.receivedCurrency ?? base;
               return (
                 <button key={r.date} className="ld-row" disabled={ro} onClick={() => setEdit(r)}>
                   <span className="ld-date">{cnDate(r.date)}</span>
@@ -259,28 +316,13 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                     {r.currency !== base && <small className="ld-cost-inline">≈ {flow(-r.chargedBase, base)}</small>}
                   </span>
                   <span className="ld-cost">{flow(-r.chargedBase, base)}</span>
-                  <span className={r.receivedBase != null ? 'green' : undefined}>
-                    {r.receivedBase == null ? (
+                  {r.receivedBase == null ? (
+                    <span>
                       <em className="todo">{ro ? t('proxy.owed') : t('proxy.table.record')}</em>
-                    ) : (
-                      <>
-                        <b className="green">{flow(r.entry!.received!, rc)}</b>
-                        {/* 当天就收回的不再写收款日，和左边的扣款日重复 */}
-                        {((r.entry?.receivedOn && r.entry.receivedOn !== r.date) || rc !== base) && (
-                          <small style={{ color: 'var(--green)' }}>
-                            {copyParts(
-                              [
-                                r.entry?.receivedOn && r.entry.receivedOn !== r.date && t('proxy.table.receivedOn', { date: cnDate(r.entry.receivedOn) }),
-                                rc !== base && `≈ ${flow(r.receivedBase, base)}`,
-                              ]
-                                .filter(Boolean)
-                                .join('\n'),
-                            )}
-                          </small>
-                        )}
-                      </>
-                    )}
-                  </span>
+                    </span>
+                  ) : (
+                    <ReceivedCell r={r} base={base} />
+                  )}
                   <span className={d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss'}>
                     {d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base)}
                   </span>
@@ -307,13 +349,169 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
         </div>
       </div>
       {edit && <EntrySheet state={state} s={live} row={edit} onClose={() => setEdit(null)} />}
+      {adding && <ReceiptSheet state={state} s={live} onClose={() => setAdding(false)} />}
     </DetailSheet>
+  );
+}
+
+/** 收回一列：收到的金额；收款日与扣款日不同、外币折合、一笔分几期时在下面补一行 */
+function ReceivedCell({ r, base }: { r: Row; base: string }) {
+  const e = r.entry!;
+  const rc = e.receivedCurrency ?? base;
+  const lines = [
+    // 当天就收回的不再写收款日，和左边的扣款日重复
+    e.receivedOn && e.receivedOn !== r.date && t('proxy.table.receivedOn', { date: cnDate(e.receivedOn) }),
+    rc !== base && `≈ ${flow(r.receivedBase!, base)}`,
+  ].filter(Boolean);
+  return (
+    <span className="green">
+      <b className="green">{flow(e.received!, rc)}</b>
+      {lines.length > 0 && <small style={{ color: 'var(--green)' }}>{copyParts(lines.join('\n'))}</small>}
+      {/* 一笔分几期只在宽屏写；窄屏点开这一期能看到 */}
+      {e.batch && e.batch.periods > 1 && (
+        <small className="ld-batch" style={{ color: 'var(--green)' }}>
+          {t('proxy.table.batch', { amount: money(e.batch.amount, rc), count: e.batch.periods })}
+        </small>
+      )}
+    </span>
+  );
+}
+
+/**
+ * 记一笔收款：可以早于扣款日（预收），也可以一次覆盖多期；从选定的期起，依次覆盖还没收回的期，金额按期均摊
+ */
+function ReceiptSheet({ state, s, onClose }: { state: AppState; s: Subscription; onClose: () => void }) {
+  const base = state.settings.baseCurrency;
+  const today = todayIn(state.settings.timezone);
+  // 可选的起始期：已扣未收的在前，接着是未来的期
+  const open = proxyOpenPeriods(s, s.start, 36, today);
+  const [from, setFrom] = useState(open[0]?.date ?? '');
+  const tail = proxyOpenPeriods(s, from, 36, today);
+  const [count, setCount] = useState(1);
+  const n = Math.min(count, tail.length);
+  const [amount, setAmount] = useState('');
+  const [ccy, setCcy] = useState(base);
+  const [on, setOn] = useState<string | undefined>(today);
+  const [note, setNote] = useState('');
+  const val = (ev: { target: EventTarget | null }) => (ev.target as HTMLInputElement).value;
+  const amountN = amount === '' ? undefined : Number(amount);
+  const valid = amountN != null && Number.isFinite(amountN) && amountN >= 0 && n > 0 && !!on;
+  const covered = tail.slice(0, n);
+
+  const save = () =>
+    run(async () => {
+      const { entries } = recordProxyReceipt(
+        s,
+        { id: uid(), date: on!, amount: amountN!, currency: ccy, from, periods: n, note: note.trim() || undefined },
+        today,
+      );
+      await saveSub({ ...s, proxy: { ...s.proxy!, entries } });
+      onClose();
+    }, t('proxy.entry.saved'));
+
+  return (
+    <Sheet
+      narrow
+      title={t('proxy.receipt.title')}
+      onClose={onClose}
+      foot={
+        <>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
+            {t('proxy.entry.cancel')}
+          </button>
+          <button className="btn primary" disabled={!valid} onClick={save}>
+            {t('proxy.entry.save')}
+          </button>
+        </>
+      }
+    >
+      <div className="stack">
+        <div className="row">
+          <PersonAvatar p={personFor(state, s.proxy!.personId, s.proxy!.forName)} size={36} />
+          <b>{s.proxy!.forName}</b>
+        </div>
+        {open.length === 0 ? (
+          <div className="muted">{t('proxy.receipt.none')}</div>
+        ) : (
+          <>
+            <Group
+              title={t('proxy.receipt.covers')}
+              foot={
+                n > 0 &&
+                t(n > 1 ? 'proxy.receipt.coversFootMany' : 'proxy.receipt.coversFootOne', {
+                  count: n,
+                  from: cnDateFull(covered[0].date),
+                  to: cnDateFull(covered[n - 1].date),
+                })
+              }
+            >
+              <Cell label={t('proxy.receipt.from')}>
+                <Picker
+                  value={from}
+                  search={false}
+                  options={open.map((p) => ({ value: p.date, label: cnDateFull(p.date), hint: p.date > today ? undefined : t('proxy.receipt.owedTag') }))}
+                  onChange={(v) => {
+                    setFrom(v);
+                    setCount(1);
+                  }}
+                />
+              </Cell>
+              {/* 期数用加减器，与合租收款同一个；覆盖到哪一期写在页脚 */}
+              <Cell label={t('proxy.receipt.periods')}>
+                <Stepper
+                  label={t('proxy.receipt.periods')}
+                  value={n}
+                  min={1}
+                  max={Math.max(1, tail.length)}
+                  unit={(k) => t('family.collect.periodUnit', { count: k })}
+                  onChange={setCount}
+                />
+              </Cell>
+            </Group>
+            <Group
+              title={s.proxy!.forName ? t('proxy.entry.paidBack', { name: s.proxy!.forName }) : t('proxy.entry.paidBackAnon')}
+              // 金额按期均摊；收的是外币时，折合按收款当天汇率
+              foot={
+                amountN != null && Number.isFinite(amountN) && n > 0
+                  ? copyParts(
+                      [
+                        n > 1 && t('proxy.receipt.perFoot', { per: money(amountN / n, ccy) }),
+                        ccy !== base && t('proxy.receipt.baseFoot', { amount: money(toBaseAt(state, amountN, ccy, on ?? today), base) }),
+                      ]
+                        .filter(Boolean)
+                        .join('\n'),
+                    )
+                  : undefined
+              }
+            >
+              <Cell label={t('proxy.receipt.total')}>
+                <MoneyInput ccy={ccy} className="num" autoFocus value={amount} placeholder="0" onChange={(ev) => setAmount(val(ev))} />
+              </Cell>
+              <Cell label={t('proxy.entry.currency')}>
+                <CurrencySelect value={ccy} onChange={setCcy} />
+              </Cell>
+              <Cell label={t('proxy.entry.receivedOn')}>
+                <DatePicker value={on} onChange={setOn} />
+              </Cell>
+              <Cell label={t('proxy.note')}>
+                <input value={note} placeholder={t('proxy.entry.notePlaceholder')} onChange={(ev) => setNote(val(ev))} />
+              </Cell>
+            </Group>
+          </>
+        )}
+      </div>
+    </Sheet>
   );
 }
 
 export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Subscription; row: Row; onClose: () => void }) {
   const base = state.settings.baseCurrency;
+  const today = todayIn(state.settings.timezone);
   const e = row.entry;
+  // 按笔记的收款在这里只能整笔撤销，金额和覆盖期在「记一笔收款」里重记
+  const batch = e?.received != null && e.batch && e.batch.periods > 1 ? e.batch : undefined;
+  const future = row.date > today;
   const [charged, setCharged] = useState(e?.charged != null ? String(e.charged) : '');
   const [chargedCcy, setChargedCcy] = useState(e?.chargedCurrency ?? row.listCurrency);
   const [received, setReceived] = useState(e?.received != null ? String(e.received) : '');
@@ -329,15 +527,23 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
   const diff = recvBase == null ? undefined : recvBase - chargedBase;
 
   const save = (clearReceipt = false) => {
-    const next: ProxyEntry = {
-      charge: row.date,
-      charged: charged === '' ? undefined : Number(charged),
-      chargedCurrency: charged === '' || chargedCcy === row.listCurrency ? undefined : chargedCcy,
-      received: clearReceipt ? undefined : recvN,
-      receivedCurrency: clearReceipt || recvN == null ? undefined : ccy,
-      receivedOn: clearReceipt || recvN == null ? undefined : on,
-      note: note.trim() || undefined,
-    };
+    const next: ProxyEntry = batch
+      ? {
+          ...e!,
+          charged: charged === '' ? undefined : Number(charged),
+          chargedCurrency: charged === '' || chargedCcy === row.listCurrency ? undefined : chargedCcy,
+        }
+      : {
+          charge: row.date,
+          charged: charged === '' ? undefined : Number(charged),
+          chargedCurrency: charged === '' || chargedCcy === row.listCurrency ? undefined : chargedCcy,
+          received: clearReceipt ? undefined : recvN,
+          receivedCurrency: clearReceipt || recvN == null ? undefined : ccy,
+          receivedOn: clearReceipt || recvN == null ? undefined : on,
+          note: note.trim() || undefined,
+          // 单期的按笔收款改了金额仍按扣款日精确对上
+          batch: e?.batch && !clearReceipt && recvN != null ? { ...e.batch, amount: recvN } : undefined,
+        };
     // 去掉这一期原来那条（可能是按相近日期对上的旧记录），换成新的
     const others = (s.proxy?.entries ?? []).filter((x) => x.charge !== row.date && x.charge !== row.entry?.charge);
     const keep = next.charged != null || next.received != null || next.note;
@@ -349,6 +555,11 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       clearReceipt ? t('proxy.entry.markedDue') : t('proxy.entry.saved'),
     );
   };
+  const undoBatch = () =>
+    run(async () => {
+      await saveSub({ ...s, proxy: { ...s.proxy!, entries: removeProxyBatch(s.proxy!.entries, batch!.id) } });
+      onClose();
+    }, t('proxy.entry.markedDue'));
 
   return (
     <Sheet
@@ -358,21 +569,24 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       foot={
         <>
           {e?.received != null && (
-            <button className="btn plain" style={{ color: 'var(--red)' }} onClick={() => save(true)}>
-              {t('proxy.entry.markDue')}
+            <button className="btn plain" style={{ color: 'var(--red)' }} onClick={() => (batch ? undoBatch() : save(true))}>
+              {batch ? t('proxy.receipt.undo') : t('proxy.entry.markDue')}
             </button>
           )}
           <span className="grow" />
           <button className="btn" onClick={onClose}>
             {t('proxy.entry.cancel')}
           </button>
-          <button
-            className="btn primary"
-            disabled={(charged !== '' && !Number.isFinite(Number(charged))) || (recvN != null && !Number.isFinite(recvN))}
-            onClick={() => save()}
-          >
-            {t('proxy.entry.save')}
-          </button>
+          {/* 未到扣款日、又属于一笔多期收款的期没有可改的内容，只能整笔撤销 */}
+          {!(future && batch) && (
+            <button
+              className="btn primary"
+              disabled={(charged !== '' && !Number.isFinite(Number(charged))) || (recvN != null && !Number.isFinite(recvN))}
+              onClick={() => save()}
+            >
+              {t('proxy.entry.save')}
+            </button>
+          )}
         </>
       }
     >
@@ -381,48 +595,73 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
           <PersonAvatar p={personFor(state, s.proxy!.personId, s.proxy!.forName)} size={36} />
           <b>{s.proxy!.forName}</b>
         </div>
-        <Group
-          title={t('proxy.table.charged')}
-          foot={t('proxy.entry.chargedFoot', { amount: flow(-chargedBase, base), list: money(row.list, row.listCurrency) })}
-        >
-          <Cell label={t('proxy.entry.amount')}>
-            <MoneyInput ccy={chargedCcy} className="num" value={charged} placeholder={String(row.list)} onChange={(ev) => setCharged(val(ev))} />
-          </Cell>
-          <Cell label={t('proxy.entry.currency')}>
-            <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
-          </Cell>
-        </Group>
-        <Group
-          title={s.proxy!.forName ? t('proxy.entry.paidBack', { name: s.proxy!.forName }) : t('proxy.entry.paidBackAnon')}
-          foot={
-            diff == null
-              ? t('proxy.entry.receivedEmpty')
-              : t(Math.abs(diff) < 0.5 ? 'proxy.entry.receivedEven' : diff > 0 ? 'proxy.entry.receivedMore' : 'proxy.entry.receivedLess', {
-                  amount: flow(recvBase!, base),
-                  diff: money(Math.abs(diff), base),
-                })
-          }
-        >
-          <Cell label={t('proxy.entry.amount')}>
-            <MoneyInput
-              ccy={ccy}
-              className="num"
-              autoFocus
-              value={received}
-              placeholder={t('proxy.entry.notReceived')}
-              onChange={(ev) => setReceived(val(ev))}
-            />
-          </Cell>
-          <Cell label={t('proxy.entry.currency')}>
-            <CurrencySelect value={ccy} onChange={setCcy} />
-          </Cell>
-          <Cell label={t('proxy.entry.receivedOn')}>
-            <DatePicker value={on} onChange={setOn} />
-          </Cell>
-          <Cell label={t('proxy.note')}>
-            <input value={note} placeholder={t('proxy.entry.notePlaceholder')} onChange={(ev) => setNote(val(ev))} />
-          </Cell>
-        </Group>
+        {/* 还没到扣款日的期没有实扣可改 */}
+        {!future && (
+          <Group
+            title={t('proxy.table.charged')}
+            foot={t('proxy.entry.chargedFoot', { amount: flow(-chargedBase, base), list: money(row.list, row.listCurrency) })}
+          >
+            <Cell label={t('proxy.entry.amount')}>
+              <MoneyInput ccy={chargedCcy} className="num" value={charged} placeholder={String(row.list)} onChange={(ev) => setCharged(val(ev))} />
+            </Cell>
+            <Cell label={t('proxy.entry.currency')}>
+              <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
+            </Cell>
+          </Group>
+        )}
+        {batch ? (
+          <Group
+            title={s.proxy!.forName ? t('proxy.entry.paidBack', { name: s.proxy!.forName }) : t('proxy.entry.paidBackAnon')}
+            foot={t('proxy.receipt.batchFoot')}
+          >
+            <Cell label={t('proxy.receipt.total')}>
+              <span className="num">{money(batch.amount, e!.receivedCurrency ?? base)}</span>
+            </Cell>
+            <Cell label={t('proxy.receipt.periods')}>
+              <span>{t('proxy.receipt.perPeriod', { count: batch.periods, amount: money(e!.received!, e!.receivedCurrency ?? base) })}</span>
+            </Cell>
+            <Cell label={t('proxy.entry.receivedOn')}>
+              <span>{e!.receivedOn ? cnDateFull(e!.receivedOn) : '—'}</span>
+            </Cell>
+            {e!.note && (
+              <Cell label={t('proxy.note')}>
+                <span>{e!.note}</span>
+              </Cell>
+            )}
+          </Group>
+        ) : (
+          <Group
+            title={s.proxy!.forName ? t('proxy.entry.paidBack', { name: s.proxy!.forName }) : t('proxy.entry.paidBackAnon')}
+            foot={
+              diff == null
+                ? t('proxy.entry.receivedEmpty')
+                : t(Math.abs(diff) < 0.5 ? 'proxy.entry.receivedEven' : diff > 0 ? 'proxy.entry.receivedMore' : 'proxy.entry.receivedLess', {
+                    amount: flow(recvBase!, base),
+                    diff: money(Math.abs(diff), base),
+                  })
+            }
+          >
+            <Cell label={t('proxy.entry.amount')}>
+              <MoneyInput
+                ccy={ccy}
+                className="num"
+                autoFocus
+                value={received}
+                placeholder={t('proxy.entry.notReceived')}
+                onChange={(ev) => setReceived(val(ev))}
+              />
+            </Cell>
+            <Cell label={t('proxy.entry.currency')}>
+              <CurrencySelect value={ccy} onChange={setCcy} />
+            </Cell>
+            <Cell label={t('proxy.entry.receivedOn')}>
+              <DatePicker value={on} onChange={setOn} />
+            </Cell>
+            <Cell label={t('proxy.note')}>
+              <input value={note} placeholder={t('proxy.entry.notePlaceholder')} onChange={(ev) => setNote(val(ev))} />
+            </Cell>
+          </Group>
+        )}
       </div>
     </Sheet>
   );
@@ -469,6 +708,7 @@ function useProxySort(state: AppState, today: string, subs: Subscription[]) {
     return {
       s,
       list,
+      ahead: proxyAhead(state, s, today),
       st,
       stopped,
       ...proxyTotals(list),
@@ -535,8 +775,8 @@ function ProxyTable({
             { label: t('family.strip.profit'), sort: 'profit', num: true },
           ]}
         />
-        {sorted.map(({ s, list, st, stopped, next, charged, done, open, received, owed, diff, lastIn, priceBase }) => {
-          const [tone, label] = proxyStatus(st, list);
+        {sorted.map(({ s, list, ahead, st, stopped, next, charged, done, received, owed, diff, lastIn }) => {
+          const [tone, label] = proxyStatus(st, list, ahead);
           const px = s.proxy!;
           return (
             <button key={s.id} className={`lt-row ${stopped ? 'st-ended' : ''}`} role="row" onClick={() => setLedger(s.id)}>

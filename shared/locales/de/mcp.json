@@ -62,7 +62,11 @@
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
-    "noCategory": "Kategorie nicht gefunden oder mehrdeutig: {q}. Optionen: {list}"
+    "noCategory": "Kategorie nicht gefunden oder mehrdeutig: {q}. Optionen: {list}",
+    "proxyPeriodsShort": {
+      "one": "Ab {from} bleibt nur {count} Zahlung, weniger als abgedeckt",
+      "other": "Ab {from} bleiben nur {count} Zahlungen, weniger als abgedeckt"
+    }
   },
   "tool": {
     "get_overview": "Kontoübersicht",

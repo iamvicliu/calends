@@ -62,7 +62,8 @@
     "invalidTarget": "Target is missing, ambiguous, duplicated or invalid. Read the current records and specify an exact id/index.",
     "references": "This item is still referenced. Supply migrate_to or remove these references first: {references}",
     "staleRecord": "This record changed since the preview. Read and preview again.",
-    "noCategory": "카테고리가 없거나 모호합니다: {q}. 선택 가능: {list}"
+    "noCategory": "카테고리가 없거나 모호합니다: {q}. 선택 가능: {list}",
+    "proxyPeriodsShort": "{from}부터 {count}회만 남아 이 입금이 적용할 회차보다 적습니다"
   },
   "tool": {
     "get_overview": "장부 개요",

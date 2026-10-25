@@ -62,7 +62,8 @@
     "invalidTarget": "目标不存在、不唯一、重复或不合法。请先读取最新记录并指定准确的 ID/索引。",
     "references": "此项仍被引用。请指定 migrate_to 或先移除这些引用：{references}",
     "staleRecord": "记录在预览后已变化，请重新读取并预览。",
-    "noCategory": "分類不存在或有歧義：{q}。可選分類：{list}"
+    "noCategory": "分類不存在或有歧義：{q}。可選分類：{list}",
+    "proxyPeriodsShort": "從 {from} 起只剩 {count} 期，不夠這筆要涵蓋的期數"
   },
   "tool": {
     "get_overview": "帳本概況",

@@ -148,6 +148,15 @@ export interface ProxyEntry {
   /** 实际收到的日期，用于按当天汇率折算 */
   receivedOn?: string;
   note?: string;
+  /** 按笔记的收款，覆盖一期或多期（可早于扣款日预收）：每期各记一条，received 是均摊后的一份 */
+  batch?: ProxyBatch;
+}
+
+/** 一笔收款：收了多少（received 同币种）、分摊到几期；同一笔的各期共用 id */
+export interface ProxyBatch {
+  id: string;
+  amount: number;
+  periods: number;
 }
 
 /** 代付：替别人付的订阅。钱从我的卡上扣，但不算我的支出，每期向对方收回 */
