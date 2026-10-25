@@ -549,10 +549,8 @@ export function reactivate(s: Subscription, today: string): Subscription {
   return { ...s, phases, status: 'active', pausedAt: undefined, end: undefined, stop: undefined };
 }
 
-/** API 与 MCP 共用的状态迁移约束；重新订阅必须保留原停用阶段并新增阶段。 */
+/** API 与 MCP 共用的状态迁移约束；重新订阅必须保留原停用阶段并新增阶段。调用方已先做 subError 整体校验。 */
 export function statusChangeError(previous: Subscription | undefined, next: Subscription, today: string): string | undefined {
-  const error = subError(next);
-  if (error) return error;
   if (previous && !previous.stop && next.stop) {
     // An existing end date can be corrected into an explicit stop by the full editor.
     // Action-based MCP callers still reject ended subscriptions before reaching this validator.

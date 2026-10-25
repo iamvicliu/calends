@@ -29,11 +29,6 @@ import { transferRows, transferredStop } from './transfers.ts';
 
 const MONTH = 30.4375;
 
-/** 不带日期 = 当前汇率（固定汇率口径）；带日期 = 当天汇率 */
-function toBase(state: AppState, amount: number, ccy: string, date?: string): number {
-  return toBaseAt(state, amount, ccy, date);
-}
-
 /** day 当天这个订阅贡献的月成本（本位币，我承担的部分）；不在计费状态则为 0 */
 export function contributionOn(state: AppState, s: Subscription, day: string, fxDate?: string): number {
   // 多阶段：当天在跑的各段相加（换区后新旧两段并行时两边都在付钱）
@@ -45,7 +40,7 @@ export function contributionOn(state: AppState, s: Subscription, day: string, fx
   if (s.status === 'cancelled' && !s.end) return 0;
   if (s.status === 'paused' && (s.pausedAt ?? day) <= day) return 0;
   if (s.status === 'trial' && s.trialEnd && s.trialEnd > day) return 0;
-  return toBase(state, monthlyGross(s, day), s.currency, fxDate) * myShareFactor(s, day);
+  return toBaseAt(state, monthlyGross(s, day), s.currency, fxDate) * myShareFactor(s, day);
 }
 
 /** fxDate 缺省为当前汇率；传入则按该日汇率 */
@@ -136,7 +131,7 @@ export interface LedgerEvent {
 function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[] {
   const out: LedgerEvent[] = [];
   if (s.cycle.unit === 'lifetime') {
-    if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'buy', delta: toBase(state, s.price, s.currency) });
+    if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'buy', delta: toBaseAt(state, s.price, s.currency) });
     return out;
   }
   const after = (d: string) => contributionOn(state, s, d);
@@ -145,7 +140,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       date: s.start,
       sub: s,
       kind: 'start',
-      delta: after(s.start) || after(addDays(s.start, 1)) || toBase(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.start),
+      delta: after(s.start) || after(addDays(s.start, 1)) || toBaseAt(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.start),
     });
   const hist = (s.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
   for (let i = 1; i < hist.length; i++) {
@@ -157,7 +152,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       date: hist[i].from,
       sub: s,
       kind: 'price',
-      delta: toBase(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, hist[i].from),
+      delta: toBaseAt(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, hist[i].from),
       note: `${prev} → ${cur} ${s.currency}`,
     });
   }
@@ -166,7 +161,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       date: s.intro.until,
       sub: s,
       kind: 'intro-end',
-      delta: toBase(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until),
+      delta: toBaseAt(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until),
     });
   }
   if (s.stop && s.stop.date <= today)
@@ -410,7 +405,7 @@ export function cancelSavings(
   const items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> = [];
   for (const s of state.subscriptions) {
     if (s.proxy || s.cycle.unit === 'lifetime' || !s.end || s.end > today) continue;
-    const monthly = toBase(state, (priceAt(s, s.end) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.end);
+    const monthly = toBaseAt(state, (priceAt(s, s.end) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.end);
     const since = s.stop ? s.stop.paidThrough : s.end;
     const saved = (monthly * Math.max(0, diffDays(since, today))) / MONTH;
     if (saved > 0) items.push({ sub: s, saved, since, monthly });
@@ -561,7 +556,7 @@ export function insights(state: AppState, today: string): Insight[] {
     .filter((x) => x.n && diffDays(today, x.n) <= 60)
     .sort((a, b) => a.n!.localeCompare(b.n!));
   if (yearly.length) {
-    const sum = yearly.reduce((a, x) => a + toBase(state, priceAt(x.s, x.n!), x.s.currency), 0);
+    const sum = yearly.reduce((a, x) => a + toBaseAt(state, priceAt(x.s, x.n!), x.s.currency), 0);
     out.push({
       id: 'yearly-window',
       tone: 'warn',

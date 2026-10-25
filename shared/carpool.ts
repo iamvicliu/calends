@@ -90,7 +90,7 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
   // 发起日：没填就依次用第一笔收款、最早加入的成员、订阅开始日，「发起至今」总能算出来
   const firstJoin = members.map((m) => m.joined).reduce<string | undefined>((a, d) => (d && (!a || d < a) ? d : a), undefined);
   const since = s.share?.since ?? firstPay ?? firstJoin ?? s.start;
-  const paid = since ? chargesBetween(s, since, today, today).reduce((a, c) => a + chargeBaseOrNaN(state, c), 0) : 0;
+  const paid = chargesBetween(s, since, today, today).reduce((a, c) => a + chargeBaseOrNaN(state, c), 0);
   const received = members.flatMap(memberCashFlows).reduce((a, p) => a + memberFlowValue(state, p), 0);
   return {
     hasRecords: members.some((m) => memberCashFlows(m).length > 0),
@@ -135,11 +135,6 @@ export function cycleMonths(s: Subscription): number {
   // 买断没有周期：按收一次（与成员的买断收费周期一致）算，份额就是一次性的那份
   if (s.cycle.unit === 'lifetime') return LIFETIME_BILL_MONTHS;
   return Math.max(0.25, cycleDays(s.cycle) / 30.4375);
-}
-
-/** 按收费周期应收的金额：每期份额 × 周期月数 ÷ 订阅一期的月数 */
-export function billAmount(s: Subscription, m: ShareMember): number {
-  return Math.round((((m.share || 0) * memberBillMonths(s, m)) / cycleMonths(s)) * 100) / 100;
 }
 
 /** 每次向这位成员收多少：填了收费标准就用它，否则由每期份额换算（订阅币种） */
