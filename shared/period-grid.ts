@@ -75,7 +75,14 @@ export function periodGrid(periods: LedgerPeriod[], today: string, mode = period
       rowFor(String(q), Math.floor(q / 4), (q % 4) + 1).segments.push({ period: p, column: week % 13, span: 1, start: true, end: true });
     }
   } else {
-    visible.forEach((p, i) => rowFor(String(Math.floor(i / columns))).segments.push({ period: p, column: i % columns, span: 1, start: true, end: true }));
+    // 不按月对齐（自定义天数周期，或改过收费后同一个月里切出两期）：仍按年分行、标出年份，一格一期，一年超过 12 期就换行
+    const used = new Map<number, number>();
+    for (const p of visible) {
+      const year = Number(p.from.slice(0, 4));
+      const i = used.get(year) ?? 0;
+      used.set(year, i + 1);
+      rowFor(`${year}-${Math.floor(i / columns)}`, year).segments.push({ period: p, column: i % columns, span: 1, start: true, end: true });
+    }
   }
   return { mode, columns, rows };
 }

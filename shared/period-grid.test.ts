@@ -107,7 +107,7 @@ test('提前预收两期只展示下一期；中间两期欠款、免收和免�
   assert.equal(periodTipData(shown.at(-1)!).receipt?.count, keys.length);
   assert.equal(periodTipData(shown[10]).note, 'Fictional waiver');
 });
-test('周付每行13格、跨年仍保留每一期；日付与非整数月逐期换行', () => {
+test('周付每行13格、跨年仍保留每一期；日付与非整数月按年分行逐期排列', () => {
   const weeks = Array.from({ length: 60 }, (_, i) => {
     const from = addDays('2025-12-01', i * 7);
     return { key: from, from, until: addDays(from, 6), due: 5, currency: 'USD', status: 'due' as const };
@@ -127,7 +127,10 @@ test('周付每行13格、跨年仍保留每一期；日付与非整数月逐期
       until: addDays('2026-01-01', (i + 1) * days - 1),
     }));
     assert.equal(periodGridMode(list), 'periods');
-    assert.equal(periodGrid(list, '2099-01-01').rows.length, 5);
+    // 按年分行、标年份，每行至多 12 格，一期不丢；同一年的行不和下一年混排
+    const rows = periodGrid(list, '2099-01-01').rows;
+    assert.equal(rows.flatMap((r) => r.segments).length, 60);
+    assert.ok(rows.every((r) => r.year != null && r.segments.length <= 12 && r.segments.every((seg) => Number(seg.period.from.slice(0, 4)) === r.year)));
   }
   assert.deepEqual(periodGrid([], '2026-01-01').rows, []);
 });
@@ -166,4 +169,22 @@ test('月内重启的两段不能静默漏掉：回退为逐期网格', () => {
   const grid = periodGrid(periods, '2026-10-26', 'months');
   assert.equal(grid.mode, 'periods');
   assert.equal(grid.rows.flatMap((r) => r.segments).length, 4);
+});
+
+test('改过收费后同一个月切出两期：退回逐期排列时仍按年分行并标出年份', () => {
+  const list = [
+    { from: '2021-10-14', until: '2022-01-09' },
+    { from: '2022-01-10', until: '2022-01-16' },
+    { from: '2022-01-17', until: '2022-07-16' },
+    { from: '2022-07-17', until: '2023-01-16' },
+  ].map((p) => ({ ...p, key: p.from, due: 10, currency: 'USD', status: 'paid' as const }));
+  const grid = periodGrid(list, '2023-01-01');
+  assert.equal(grid.mode, 'periods');
+  assert.deepEqual(
+    grid.rows.map((r) => [r.year, r.segments.length]),
+    [
+      [2021, 1],
+      [2022, 3],
+    ],
+  );
 });
