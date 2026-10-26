@@ -118,7 +118,7 @@
 }
 /* 标题右侧的「记一笔」：不要胶囊，只是一行小字按钮，不把标题区撑高 */
 .dt-btn.dt-add {
-  height: 24px;
+  height: var(--ctl-h-sm);
   padding: 0 2px;
   gap: 4px;
   font-size: var(--fs-1);

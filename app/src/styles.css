@@ -1670,7 +1670,7 @@ a {
   font-size: var(--fs-1);
 }
 .login-card .login-account input {
-  height: 38px;
+  height: var(--ctl-h-lg);
   font-size: var(--fs-2);
   color: var(--label-2);
   background: transparent;
@@ -9124,7 +9124,7 @@ img.mm-flag {
   display: grid;
   place-items: center;
   width: 28px;
-  height: 28px;
+  height: var(--ctl-h-sm);
   padding: 0;
   border: 0;
   border-radius: var(--radius-pill);
