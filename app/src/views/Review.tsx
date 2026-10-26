@@ -1,3 +1,4 @@
+import { paymentMethodGroups } from '../../../shared/payment-groups.ts';
 import { copyParts } from '../components/copy.tsx';
 import { useMemo, useState } from 'react';
 import { totals, chargeSources } from '../../../shared/billing.ts';
@@ -55,15 +56,9 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
   const byMethod = useMemo(() => {
     const from = `${year}-01-01`;
     const to = `${year}-12-31` < today ? `${year}-12-31` : today;
-    const sums = new Map<string, number>();
-    for (const c of allCharges(state, from, to, today)) {
-      for (const x of chargeSources(c)) {
-        const name = state.methods.find((m) => m.id === x.methodId)?.name ?? t('review.unassigned');
-        sums.set(name, (sums.get(name) ?? 0) + chargeBaseOrNaN(state, c) * x.share);
-      }
-    }
-    // 缺汇率的支付方式合计为 NaN，显示「—」并排在最后
-    return [...sums].map(([name, sum]) => ({ name, sum })).sort((a, b) => sortValue(b.sum) - sortValue(a.sum));
+    return paymentMethodGroups(state.methods, allCharges(state, from, to, today).flatMap((c) =>
+      chargeSources(c).map((x) => ({ methodId: x.methodId, value: chargeBaseOrNaN(state, c) * x.share, item: c }))), t('review.unassigned'))
+      .map(({ id, name, sum }) => ({ id, name, sum })).sort((a, b) => sortValue(b.sum) - sortValue(a.sum));
   }, [state, today, year]);
   return (
     <ShareSheet

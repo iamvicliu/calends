@@ -1,3 +1,5 @@
+import { paymentMethodGroups } from '../../../shared/payment-groups.ts';
+import { currentPhase } from '../../../shared/billing.ts';
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { snapshotCard } from '../snapshot.ts';
 import { copyParts } from '../components/copy.tsx';
@@ -468,7 +470,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   const total = live.reduce((a, x) => a + x.v, 0);
   const keyOf = (s: Subscription) => {
     if (dim === 'cat') return s.category;
-    if (dim === 'pay') return state.methods.find((m) => m.id === s.methodId)?.name ?? t('report.comp.unassigned');
+    if (dim === 'pay') return currentPhase(s, today).methodId ?? '';
     if (dim === 'ccy') return s.currency;
     const days = cycleDays(s.cycle);
     return days >= 300 ? t('report.comp.yearly') : days >= 80 ? t('report.comp.quarterly') : t('report.comp.monthly');
@@ -478,13 +480,15 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
     const k = keyOf(x.s);
     groups.set(k, [...(groups.get(k) ?? []), x]);
   }
-  const entries = [...groups.entries()]
-    .map(([k, xs]) => ({ k, xs: xs.sort((a, b) => b.v - a.v), v: xs.reduce((a, x) => a + x.v, 0) }))
+  const entries = (dim === 'pay'
+    ? paymentMethodGroups(state.methods, live.map((x) => ({ methodId: currentPhase(x.s, today).methodId, value: x.v, item: x })), t('report.comp.unassigned')).map((g) => ({ k: g.id, name: g.name, xs: g.items, v: g.sum }))
+    : [...groups.entries()].map(([k, xs]) => ({ k, name: k, xs, v: xs.reduce((a, x) => a + x.v, 0) })))
+    .map((e) => ({ ...e, xs: e.xs.sort((a, b) => b.v - a.v) }))
     .sort((a, b) => b.v - a.v);
   const color = (k: string, i: number) => {
     if (dim === 'cat') return catColor(k);
     if (dim === 'pay') {
-      const m = state.methods.find((x) => x.name === k);
+      const m = state.methods.find((x) => x.id === k);
       return m ? paletteColor(m.color, KIND_BG[m.kind]) : 'var(--c9)';
     }
     return `var(--c${(i % 10) + 1})`;
@@ -521,7 +525,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   return (
     <div className="card copy-card" data-copy-card>
       <div className="card-h">
-        <CardTitle>{copyParts(sel ? `${sel.k}\n${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title'))}</CardTitle>
+        <CardTitle>{copyParts(sel ? `${sel.name}\n${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title'))}</CardTitle>
         <div className="copy-controls">
           <CopyImageButton hover />
           {sel ? (
@@ -562,11 +566,11 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
                       <button
                         className="tm-head"
                         onClick={() => setFocus(e.k)}
-                        {...tipProps(() => t('report.comp.groupTip', { name: e.k, count: e.xs.length, amount: flow(-e.v, base) }))}
+                        {...tipProps(() => t('report.comp.groupTip', { name: e.name, count: e.xs.length, amount: flow(-e.v, base) }))}
                       >
                         <b className="icon-text">
                           {dim === 'cat' && <CatIcon cat={e.k} size={11} />}
-                          <span>{e.k}</span>
+                          <span>{e.name}</span>
                         </b>
                         {g.w > 150 && (
                           <span>
