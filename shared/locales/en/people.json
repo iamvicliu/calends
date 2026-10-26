@@ -52,6 +52,7 @@
     "profile": "Profile",
     "notePh": "e.g. coworker, pays at month end",
     "color": "Color",
+    "customColor": "Custom color",
     "syncFoot": {
       "one": "Name and contact changes apply everywhere this person appears ({count} place).",
       "other": "Name and contact changes apply everywhere this person appears ({count} places)."

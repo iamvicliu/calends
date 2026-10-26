@@ -297,3 +297,17 @@ test('personLink：已关联沿用并报告改动，同名唯一复用，联系�
   assert.deepEqual(personLink(people, { name: '  ' }), { id: undefined });
   assert.equal(personLink(people, { personId: 'kept', name: 'Fictional New' }).created?.id, 'kept');
 });
+
+test('人员颜色：预设名原样，色盘自选的 #rrggbb 统一小写，其余丢弃；MCP 用同一条规则', async () => {
+  const { personColor, isCustomColor, PERSON_COLOR_PATTERN } = await import('./people.ts');
+  assert.equal(personColor('teal'), 'teal');
+  assert.equal(personColor('#A1B2C3'), '#a1b2c3');
+  assert.equal(personColor('#abc'), undefined);
+  assert.equal(personColor('chartreuse'), undefined);
+  assert.equal(personColor(42), undefined);
+  assert.equal(isCustomColor('#a1b2c3'), true);
+  assert.equal(isCustomColor('blue'), false);
+  const re = new RegExp(PERSON_COLOR_PATTERN, 'u');
+  assert.ok(re.test('indigo') && re.test('#A1B2C3'));
+  assert.ok(!re.test('#a1b2c') && !re.test('url(x)'));
+});

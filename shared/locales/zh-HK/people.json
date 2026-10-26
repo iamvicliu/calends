@@ -40,6 +40,7 @@
     "profile": "資料",
     "notePh": "例如：同事，月尾過數",
     "color": "顏色",
+    "customColor": "自選顏色",
     "syncFoot": "修改稱呼或聯絡方式會同步到 {count} 處共享和代付。",
     "merge": "合併到",
     "mergePick": "選擇…",

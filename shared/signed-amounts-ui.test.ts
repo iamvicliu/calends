@@ -15,7 +15,7 @@ import { chargeBaseOrNaN, chargeValue } from './fx.ts';
 import { FALLBACK_FX, addMonths, phaseSubs, diffDays } from './billing.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 import * as billing from './billing.ts';
-import { colorFor } from './people.ts';
+import { colorFor, isCustomColor } from './people.ts';
 import { detailForecast, detailHistoryEnd } from '../app/src/views/detail-data.ts';
 import type { AppState, Subscription } from './types.ts';
 
@@ -383,7 +383,7 @@ test('shared-plan avatars retain owner images, initials, dues colors and overflo
     '../app/src/components/PersonAvatar.tsx',
     'PersonAvatar',
     read('../app/src/components/PersonAvatar.tsx').split('/** Shared private-person')[1].split('*/')[1],
-    { React, useState: React.useState, colorFor },
+    { React, useState: React.useState, colorFor, isCustomColor },
   );
   const ShareAvatars = load(file, 'ShareAvatars', `function ShareAvatars(${source}`, {
     React,

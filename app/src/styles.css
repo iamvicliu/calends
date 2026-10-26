@@ -8159,6 +8159,32 @@ a.car-toggle {
 .pp-dot:active {
   transform: scale(0.9);
 }
+/* 自选色：没选过是虚线圈加号，选过填那个颜色；原生色盘输入铺满、透明 */
+.pp-dot.custom {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: none;
+  color: var(--label-3);
+  box-shadow: inset 0 0 0 1px var(--gray-7);
+}
+.pp-dot.custom .i {
+  width: 12px;
+  height: 12px;
+}
+.pp-dot.custom.on {
+  background: var(--pc);
+}
+.pp-dot.custom input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
 
 /* 时间线左右平移：范围标签在中间，点它回到当前；拖动时显示抓手 */
 .gt-nav {

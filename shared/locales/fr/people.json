@@ -52,6 +52,7 @@
     "profile": "Profil",
     "notePh": "ex. collègue, paie en fin de mois",
     "color": "Couleur",
+    "customColor": "Couleur personnalisée",
     "syncFoot": {
       "one": "Les changements de nom et de contact s’appliquent à {count} endroit.",
       "other": "Les changements de nom et de contact s’appliquent aux {count} endroits."

@@ -52,6 +52,7 @@
     "profile": "Profil",
     "notePh": "z. B. Kollege, zahlt zum Monatsende",
     "color": "Farbe",
+    "customColor": "Eigene Farbe",
     "syncFoot": {
       "one": "Änderungen an Name und Kontakt gelten an {count} Stelle.",
       "other": "Änderungen an Name und Kontakt gelten an allen {count} Stellen."

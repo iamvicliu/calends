@@ -40,6 +40,7 @@
     "profile": "资料",
     "notePh": "比如：同事，月底转账",
     "color": "颜色",
+    "customColor": "自选颜色",
     "syncFoot": "改称呼或联系方式会同步到 {count} 处合租和代付。",
     "merge": "合并到",
     "mergePick": "选择…",

@@ -52,6 +52,7 @@
     "profile": "Profil",
     "notePh": "ör. iş arkadaşı, ay sonu öder",
     "color": "Renk",
+    "customColor": "Özel renk",
     "syncFoot": {
       "one": "Ad ve iletişim değişiklikleri {count} yerin tümüne uygulanır.",
       "other": "Ad ve iletişim değişiklikleri {count} yerin tümüne uygulanır."

@@ -40,6 +40,7 @@
     "profile": "프로필",
     "notePh": "예: 회사 동료, 월말 송금",
     "color": "색상",
+    "customColor": "사용자 지정 색상",
     "syncFoot": "이름이나 연락처를 바꾸면 {count}곳 모두에 반영돼요.",
     "merge": "병합 대상",
     "mergePick": "선택…",

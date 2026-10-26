@@ -4,7 +4,6 @@ import { normalizeBasePath, stripBase, siteUrl, withBase } from '../shared/base.
 import { addDays, todayIn } from '../shared/billing.ts';
 import {
   DEFAULT_SETTINGS,
-  PERSON_COLORS,
   type AppState,
   type Channel,
   type FxTable,
@@ -13,7 +12,7 @@ import {
   type Settings,
   type Subscription,
 } from '../shared/types.ts';
-import { mergePeople, refsFor, syncPerson } from '../shared/people.ts';
+import { mergePeople, personColor, refsFor, syncPerson } from '../shared/people.ts';
 import { checkSettings, deleteMethodData, deleteSubscriptionSettings, methodReferences, pruneSettingsRefs, validateMethod } from '../shared/ledger-edit.ts';
 import {
   DEFAULT_MAX_SESSIONS,
@@ -106,7 +105,7 @@ function cleanPerson(raw: Partial<Person>, id: string): Person | undefined {
     contact,
     note: s(raw.note),
     avatar: validateAvatar(raw.avatar),
-    color: PERSON_COLORS.includes(raw.color as never) ? raw.color : undefined,
+    color: personColor(raw.color),
     createdAt: s(raw.createdAt) ?? new Date().toISOString(),
   };
 }

@@ -195,6 +195,8 @@ export interface Proxy {
 /** 头像底色：只存色名，显示时按主题取色 */
 export const PERSON_COLORS = ['blue', 'green', 'orange', 'pink', 'purple', 'teal', 'indigo', 'red'] as const;
 export type PersonColor = (typeof PERSON_COLORS)[number];
+/** 色盘自选的颜色：#rrggbb（小写） */
+export type CustomColor = `#${string}`;
 
 /** 名册里的一个人：同一位朋友在多个合租、代付里只记一次，改联系方式处处生效 */
 export interface Person {
@@ -203,7 +205,7 @@ export interface Person {
   contactVia?: string;
   contact?: string;
   note?: string;
-  color?: PersonColor;
+  color?: PersonColor | CustomColor;
   /** Private PNG/WebP data URL, square, at most 128px and 64 KiB. */
   avatar?: string;
   createdAt?: string;

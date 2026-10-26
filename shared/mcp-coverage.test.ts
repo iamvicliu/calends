@@ -223,6 +223,7 @@ const mutations: Array<[string, object, (st: AppState) => unknown]> = [
   ],
   ['save_category', { action: 'delete', category: 'Test', migrate_to: 'Other' }, (st) => st.subscriptions[0].category === 'Other'],
   ['save_person', { action: 'create', id: 'new', set: { name: 'New person', color: 'green' } }, (st) => st.people?.some((p) => p.id === 'new')],
+  ['save_person', { action: 'update', person: 'person', set: { color: '#A1B2C3' } }, (st) => st.people?.find((p) => p.id === 'person')?.color === '#a1b2c3'],
   [
     'save_person',
     { action: 'update', person: 'person', set: { name: 'Renamed', contactVia: 'Email', contact: 'fiction@example.test' } },

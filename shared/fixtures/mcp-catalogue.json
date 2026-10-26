@@ -14,7 +14,7 @@
       true,
       null,
       "Create/update a person in the shared-plan/proxy roster, or delete/merge one. person accepts id or unambiguous name; create requires set.name. set: name/contactVia/contact/note/color, null clears optional fields. Avatar upload: avatar_base64 plus mime (image/png or image/webp), square <=128px and <=64KiB, no metadata. avatar=null removes it. Remote URLs are unsupported; upload a prepared thumbnail. All linked names and contacts update together. Accounts belong to person × shared-plan memberships; use save_share_member.account, never save_person. Delete blocks references unless migrate_to identifies another existing person (merge); preserves receipts and returns reference summary. Use list_people for ids.",
-      "{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"create\",\"update\",\"delete\"]},\"id\":{\"type\":\"string\"},\"person\":{\"type\":\"string\"},\"avatar\":{\"type\":\"null\"},\"avatar_base64\":{\"type\":\"string\"},\"mime\":{\"type\":\"string\",\"enum\":[\"image/png\",\"image/webp\"]},\"migrate_to\":{\"type\":\"string\"},\"set\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"contactVia\":{\"type\":[\"string\",\"null\"]},\"contact\":{\"type\":[\"string\",\"null\"]},\"note\":{\"type\":[\"string\",\"null\"]},\"color\":{\"type\":[\"string\",\"null\"],\"enum\":[\"blue\",\"green\",\"orange\",\"pink\",\"purple\",\"teal\",\"indigo\",\"red\"]}},\"required\":[],\"additionalProperties\":false},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"action\"],\"additionalProperties\":false}"
+      "{\"type\":\"object\",\"properties\":{\"action\":{\"type\":\"string\",\"enum\":[\"create\",\"update\",\"delete\"]},\"id\":{\"type\":\"string\"},\"person\":{\"type\":\"string\"},\"avatar\":{\"type\":\"null\"},\"avatar_base64\":{\"type\":\"string\"},\"mime\":{\"type\":\"string\",\"enum\":[\"image/png\",\"image/webp\"]},\"migrate_to\":{\"type\":\"string\"},\"set\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"contactVia\":{\"type\":[\"string\",\"null\"]},\"contact\":{\"type\":[\"string\",\"null\"]},\"note\":{\"type\":[\"string\",\"null\"]},\"color\":{\"type\":[\"string\",\"null\"],\"pattern\":\"^(blue|green|orange|pink|purple|teal|indigo|red|#[0-9a-fA-F]{6})$\",\"description\":\"One of blue, green, orange, pink, purple, teal, indigo, red, or a custom #RRGGBB.\"}},\"required\":[],\"additionalProperties\":false},\"dry_run\":{\"type\":\"boolean\",\"description\":\"Preview before/after and references without saving.\"}},\"required\":[\"action\"],\"additionalProperties\":false}"
     ],
     [
       "get_settings",
@@ -375,7 +375,8 @@
               },
               "color": {
                 "type": ["string", "null"],
-                "enum": ["blue", "green", "orange", "pink", "purple", "teal", "indigo", "red"]
+                "pattern": "^(blue|green|orange|pink|purple|teal|indigo|red|#[0-9a-fA-F]{6})$",
+                "description": "One of blue, green, orange, pink, purple, teal, indigo, red, or a custom #RRGGBB."
               }
             },
             "required": [],

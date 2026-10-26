@@ -7,7 +7,7 @@ import { collectCurrencyOf, effectiveStatus, fnv1a, isStopped, memberDues, membe
 import { toBaseOrNaN } from './fx.ts';
 import { proxyRows, proxyTotals } from './proxy.ts';
 import { paidThrough } from './receivables.ts';
-import { PERSON_COLORS, type AppState, type Person, type PersonColor, type ShareMember, type Subscription } from './types.ts';
+import { PERSON_COLORS, type AppState, type CustomColor, type Person, type PersonColor, type ShareMember, type Subscription } from './types.ts';
 
 // ---------- 归一化：判断两条记录是不是同一个人 ----------
 
@@ -31,6 +31,19 @@ export const personKey = (name: string | undefined, via?: string, contact?: stri
 const hash = fnv1a;
 
 export const colorFor = (seed: string): PersonColor => PERSON_COLORS[hash(seed) % PERSON_COLORS.length];
+
+/** 人员颜色：八种预设之一，或色盘自选的 #rrggbb；MCP 参数用同一条规则 */
+export const PERSON_COLOR_PATTERN = `^(${PERSON_COLORS.join('|')}|#[0-9a-fA-F]{6})$`;
+export const isCustomColor = (c: unknown): c is CustomColor => typeof c === 'string' && /^#[0-9a-f]{6}$/.test(c);
+/** 读入时规整：预设名原样，自选色统一小写；其余一律丢弃 */
+export const personColor = (c: unknown): PersonColor | CustomColor | undefined =>
+  typeof c !== 'string'
+    ? undefined
+    : PERSON_COLORS.includes(c as PersonColor)
+      ? (c as PersonColor)
+      : /^#[0-9a-f]{6}$/i.test(c)
+        ? (c.toLowerCase() as CustomColor)
+        : undefined;
 
 // ---------- 引用：订阅里哪些地方指向人 ----------
 

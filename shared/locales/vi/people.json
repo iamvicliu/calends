@@ -40,6 +40,7 @@
     "profile": "Hồ sơ",
     "notePh": "vd: đồng nghiệp, chuyển cuối tháng",
     "color": "Màu",
+    "customColor": "Màu tùy chọn",
     "syncFoot": "Đổi tên hoặc liên hệ sẽ áp dụng cho cả {count} chỗ.",
     "merge": "Gộp vào",
     "mergePick": "Chọn…",

@@ -1,9 +1,9 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type CSSProperties } from 'react';
 import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { compressAvatar } from '../handoff.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
-import { colorFor, peopleLedger, refsFor, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
+import { colorFor, isCustomColor, peopleLedger, personColor, refsFor, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
 import { Picker } from '../components/Picker.tsx';
 import { Cell, Group } from '../components/ui.tsx';
@@ -251,6 +251,23 @@ export function PersonSheet({
                     onClick={() => up({ color: c })}
                   />
                 ))}
+                {/* 最后一个点打开色盘：选过自选色就显示那个颜色，没选过是虚线圈加号 */}
+                <label
+                  className={`pp-dot custom ${isCustomColor(f.color) ? 'on' : ''}`}
+                  style={isCustomColor(f.color) ? ({ '--pc': f.color } as CSSProperties) : undefined}
+                  title={t('people.sheet.customColor')}
+                >
+                  {!isCustomColor(f.color) && <Icon name="plus" />}
+                  <input
+                    type="color"
+                    role="radio"
+                    aria-checked={isCustomColor(f.color)}
+                    aria-label={t('people.sheet.customColor')}
+                    disabled={ro}
+                    value={isCustomColor(f.color) ? f.color : '#5b8def'}
+                    onChange={(e) => up({ color: personColor(e.target.value) })}
+                  />
+                </label>
               </span>
             </Cell>
             {!ro && others.length > 0 && (

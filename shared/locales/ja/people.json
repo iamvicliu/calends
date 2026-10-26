@@ -40,6 +40,7 @@
     "profile": "プロフィール",
     "notePh": "例：同僚、月末に振込",
     "color": "カラー",
+    "customColor": "カスタムカラー",
     "syncFoot": "呼び名や連絡先を変えると、{count} か所すべてに反映されます。",
     "merge": "統合先",
     "mergePick": "選択…",

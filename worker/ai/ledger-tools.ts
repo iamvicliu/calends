@@ -21,7 +21,7 @@ import {
   validateCurrency,
   validateMethod,
 } from '../../shared/ledger-edit.ts';
-import { personLink } from '../../shared/people.ts';
+import { PERSON_COLOR_PATTERN, personColor, personLink } from '../../shared/people.ts';
 import { state, findSub, findPerson, methodRef, commit, writeLedger, type Tool, type ToolCtx } from './tool-kit.ts';
 
 const action = (values: string[]) => ({ type: 'string', enum: values });
@@ -186,7 +186,7 @@ export const ledgerTools = (connectionInfo: (ctx: ToolCtx, settings: AppState['s
           contactVia: nullable(text),
           contact: nullable(text),
           note: nullable(text),
-          color: nullable({ type: 'string', enum: [...PERSON_COLORS] }),
+          color: nullable({ type: 'string', pattern: PERSON_COLOR_PATTERN, description: `One of ${PERSON_COLORS.join(', ')}, or a custom #RRGGBB.` }),
         }),
         dry_run: dry,
       },
@@ -198,6 +198,7 @@ export const ledgerTools = (connectionInfo: (ctx: ToolCtx, settings: AppState['s
       const id = old?.id ?? String(a.id ?? uid());
       if (!old && st.people?.some((p) => p.id === id)) throw new Error(t('mcp.error.invalidTarget'));
       const person = applyFields(old ?? { id, createdAt: today }, body(a.set)) as Person;
+      if (person.color) person.color = personColor(person.color);
       if ('avatar' in a && ('avatar_base64' in a || 'mime' in a)) throw new Error(t('server.avatarInvalid'));
       if ('avatar_base64' in a || 'mime' in a) person.avatar = validateAvatar(`data:${a.mime};base64,${a.avatar_base64}`);
       if (a.avatar === null) delete person.avatar;
