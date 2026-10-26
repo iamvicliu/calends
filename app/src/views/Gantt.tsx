@@ -61,8 +61,6 @@ interface Row {
 /** 并行的段往下错开的距离（条高 18） */
 const LANE = 21;
 
-/** 一个周期至少这么宽才按续费切开，太窄会密成一串圆点 */
-const CYCLE_MIN_PX = 28;
 const GAP_TUCK = 9;
 
 /**
@@ -569,14 +567,12 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           </Fragment>
                         );
                       // 段内按调价、首期优惠切成几截，每截标自己的价格；
-                      // 周期够宽时再按每次续费切开：每个周期一颗圆角胶囊，连续续订的首尾相接
+                      // 按每次续费切开；有实付记录时 chargesBetween 使用实际日期。
+                      // 逐个合并不足一个正圆宽的切点，不用最初的间隔决定整段是否切分。
                       const renewals = chargesBetween(g.v, g.from, to, today)
                         .filter((c) => c.amount > 0 && c.date > g.from && c.date < to)
                         .map((c) => c.date);
-                      const perCycle = renewals.length > 1 ? diffDays(renewals[0], renewals[1]) * k : Infinity;
-                      // 短窗口优先给价格留空间，避免窄屏每期都切开后没有一截能放下价格。
-                      const cycleMin = zoom === '3m' || zoom === '6m' ? 80 : CYCLE_MIN_PX;
-                      const cycleCuts = new Set(perCycle >= cycleMin ? renewals : []);
+                      const cycleCuts = new Set(renewals);
                       const cuts = [
                         ...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), ...cycleCuts, to]),
                       ]
@@ -587,6 +583,31 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           if (i === 0 || i === all.length - 1 || (x(d) - x(kept[kept.length - 1]) >= BAR && x(to) - x(d) >= BAR)) kept.push(d);
                           return kept;
                         }, []);
+                      const priceRun = (d: string) => `${priceAt(g.v, d)}|${g.v.intro && d < g.v.intro.until ? 1 : 0}`;
+                      // 短窗口中同价的一串若没有一截放得下价格，只合并第一处可见标签需要的相邻周期。
+                      // 调价/优惠边界不为标签合并；已有足够宽的截时保留全部周期切点。
+                      if (zoom === '3m' || zoom === '6m') {
+                        for (let first = 0; first < cuts.length - 1;) {
+                          let until = first + 1;
+                          while (until < cuts.length - 1 && cycleCuts.has(cuts[until]) && priceRun(cuts[until]) === priceRun(cuts[first])) until++;
+                          const seenWidth = (a: string, b: string) => {
+                            const seen = visible(x(a), x(b) - x(a));
+                            return seen.r - seen.l;
+                          };
+                          const hasRoom = cuts.slice(first, until).some((a, i) => seenWidth(a, cuts[first + i + 1]) > 70);
+                          if (!hasRoom) {
+                            let a = first;
+                            while (a < until && seenWidth(cuts[a], cuts[a + 1]) <= 0) a++;
+                            let b = a + 1;
+                            while (b <= until && seenWidth(cuts[a], cuts[b]) <= 70) b++;
+                            if (b <= until && b > a + 1) {
+                              cuts.splice(a + 1, b - a - 1);
+                              until -= b - a - 1;
+                            }
+                          }
+                          first = until;
+                        }
+                      }
                       let labeled = '';
                       return (
                         <Fragment key={g.from}>

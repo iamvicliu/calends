@@ -548,3 +548,50 @@ test('时间轴每一截至少一个正圆宽，过近的切点不画成细竖�
     }
   }
 });
+
+test('不规则季付逐次按实际付款切分，局部窄间隔不吞掉整段，年付仍每年一截', () => {
+  const dates = ['2017-10-30'];
+  for (let year = 2018; year <= 2026; year++) {
+    for (const md of ['01-24', '04-07', '07-13', '10-30']) {
+      const date = `${year}-${md}`;
+      if (date <= '2026-10-26') dates.push(date);
+    }
+  }
+  for (const zoom of ['all', '3y']) {
+    for (const width of [214, 900]) {
+      const host = mount(zoom, width, '2026-10-26');
+      const quarterly: Subscription = {
+        ...host.sub,
+        id: 'quarterly',
+        start: dates[0],
+        cycle: { unit: 'month', every: 3 },
+        payments: dates.map((date) => ({ date, amount: 30 })),
+        nextDue: '2026-10-30',
+      };
+      const annual: Subscription = { ...host.sub, id: 'annual', start: dates[0], cycle: { unit: 'year', every: 1 } };
+      const rows = host.render([quarterly, annual]).filter((el) => el.props.className === 'gt-row');
+      const segments = (row: Element) => all(row).filter((el) => el.props.className?.split(' ').includes('gt-seg'));
+      const parts = segments(rows[0]);
+      assert.ok(parts.length > 2, `${zoom} ${width}: irregular payments must produce multiple capsules, got ${parts.length}`);
+      for (const row of rows) for (const part of segments(row)) assert.ok(part.props.style.width >= 22);
+      if (zoom === 'all' && width === 900) {
+        assert.equal(segments(rows[1]).length, 9, 'annual history keeps one capsule per drawable year');
+        const window = gantt.ganttWindow('all', '2026-10-26', dates[0], gantt.ganttOpenEnd(annual, '2026-10-26'));
+        const scale = width / billing.diffDays(window.start, window.end);
+        const early = parts.find((part) => Math.abs(part.props.style.left - billing.diffDays(window.start, '2018-01-24') * scale) < 0.001);
+        assert.ok(early, 'a wide renewal cut survives even when the following 73-day interval is narrow');
+      }
+    }
+  }
+});
+
+test('短窗口只合并价格所需切点，同价仍只标一次且保留其余周期胶囊', () => {
+  for (const zoom of ['3m', '6m']) {
+    const host = mount(zoom, 214, '2026-10-26');
+    const nodes = host.render([{ ...host.sub, start: '2026-01-01' }]);
+    const parts = nodes.filter((el) => el.props.className?.split(' ').includes('gt-seg'));
+    assert.ok(parts.length > 2, `${zoom}: merging for a label must not remove all renewal cuts`);
+    assert.equal(nodes.filter((el) => el.type === 'em').length, 1, `${zoom}: one price per unchanged run`);
+    assert.ok(parts.every((part) => part.props.style.width >= 22));
+  }
+});
