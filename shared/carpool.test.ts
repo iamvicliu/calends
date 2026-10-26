@@ -324,3 +324,56 @@ test('下期收款日：按车的收款节奏取今天之后的下一次；当�
   assert.equal(nextCollectionDay(plan, 1, '2026-10-25'), '2026-11-01');
   assert.equal(nextCollectionDay(plan, 12, '2025-10-01'), '2025-11-01');
 });
+
+test('改车的收款日：已有成员的历史各期与已收的期不重切，从新收款日起按新节奏；新成员按新日子对齐', async () => {
+  const { moveCollectFrom } = await import('./carpool.ts');
+  const paid = ['2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01'];
+  const s: Subscription = {
+    id: 's',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 30,
+    currency: 'CNY',
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: {
+      role: 'owner',
+      seats: 3,
+      collectFrom: '2026-01-01',
+      members: [
+        {
+          id: 'm',
+          name: 'M',
+          fee: 10,
+          feeCurrency: 'CNY',
+          billEvery: 1,
+          joined: '2026-01-01',
+          receipts: paid.map((p, i) => ({ id: `r${i}`, date: p, amount: 10, currency: 'CNY', periods: [p] })),
+        },
+      ],
+    },
+  };
+  const today = '2026-05-20';
+  const before = memberDues(s, today, 'CNY')[0];
+  assert.equal(before.owed, 0);
+  const moved = moveCollectFrom(s, '2026-06-15');
+  assert.equal(moved.share!.collectFrom, '2026-06-15');
+  const m = moved.share!.members[0];
+  assert.equal(m.anchor, '2026-01-01');
+  // 原来的五期原样、仍然结清；5 月那期截到 6 月 14 日，6 月 15 日起是新节奏
+  const periods = memberPeriods(moved, m, '2026-08-01', 'CNY');
+  assert.deepEqual(
+    periods.slice(0, 7).map((p) => p.from),
+    ['2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01', '2026-06-01', '2026-06-15'],
+  );
+  assert.equal(periods.find((p) => p.from === '2026-07-15')?.until, '2026-08-14');
+  assert.equal(memberDues(moved, today, 'CNY')[0].owed, 0);
+  // 之后加入的人按新收款日对齐
+  const newcomer = { id: 'n', name: 'N', fee: 10, feeCurrency: 'CNY', billEvery: 1, joined: '2026-07-01' };
+  const withNew = { ...moved, share: { ...moved.share!, members: [...moved.share!.members, newcomer] } };
+  assert.equal(memberPeriods(withNew, newcomer, '2026-07-01', 'CNY')[0].until, '2026-07-14');
+  // 收款日没变：什么都不钉
+  assert.equal(moveCollectFrom(s, '2026-01-01').share!.members[0].anchor, undefined);
+});

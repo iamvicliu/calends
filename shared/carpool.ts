@@ -18,6 +18,7 @@ import {
   collectCurrencyOf,
   DAYS_PER_MONTH,
   memberSince,
+  memberPeriods,
   isStopped,
 } from './billing.ts';
 import { chargeBaseOrNaN, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
@@ -281,6 +282,24 @@ export function followsCar(state: AppState, s: Subscription, m: ShareMember, tod
   if (s.share?.rule) return true;
   const r = memberRate(s, m, today, collectCurrencyOf(state.settings));
   return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, carRule(state, s, today));
+}
+
+/**
+ * 改车的收款日（collectFrom）：新加入的成员按新日子对齐；已经加入的成员钉住原来的基准日，
+ * 历史各期、已收的期都不重切，从新收款日起按新节奏接着收（那天不是现成的期起点时记一个 restarts）
+ */
+export function moveCollectFrom(s: Subscription, next: string): Subscription {
+  if (!s.share) return s;
+  const before = collectionAnchor(s);
+  if (before === next) return { ...s, share: { ...s.share, collectFrom: next } };
+  const members = s.share.members.map((m) => {
+    if (memberSince(s, m) >= next) return m;
+    const pinned: ShareMember = { ...m, anchor: m.anchor ?? before };
+    if (m.left && m.left <= next) return pinned;
+    const starts = memberPeriods(s, pinned, next, s.currency).map((p) => p.from);
+    return starts.includes(next) || (pinned.restarts ?? []).includes(next) ? pinned : { ...pinned, restarts: [...(pinned.restarts ?? []), next].sort() };
+  });
+  return { ...s, share: { ...s.share, collectFrom: next, members } };
 }
 
 /**

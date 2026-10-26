@@ -2,7 +2,7 @@ import type { AppState, Subscription } from '../../../../shared/types.ts';
 import { preserveRenewalHistory } from '../../../../shared/billing.ts';
 import { changePrice, syncPhase } from '../../../../shared/phases.ts';
 import { applyStopForm, type StopForm } from '../../../../shared/stop-form.ts';
-import { applyCarRule, carRule, nextCollectionDay, sameRule } from '../../../../shared/carpool.ts';
+import { applyCarRule, carRule, moveCollectFrom, nextCollectionDay, sameRule } from '../../../../shared/carpool.ts';
 import { mergeEdits } from '../../../../shared/ledger-edit.ts';
 export function prepareEditorSave(sub: Subscription, f: Subscription, today: string, isNew: boolean, basePrice: number, stop?: StopForm): Subscription {
   let out: Subscription = { ...f, name: f.name.trim(), account: f.account?.trim() || undefined };
@@ -32,7 +32,7 @@ export function mergeEditorSave(
       // 新标准从下期收款日起执行；没改日期时按现在的节奏算
       const next = ruleFrom ?? nextCollectionDay(latest, rule.billEvery, today);
       const applied = applyCarRule(state, { ...final, share: { ...final.share!, rule: latest.share.rule } }, rule, next, today);
-      final = { ...applied, share: { ...applied.share!, collectFrom: next } };
+      final = moveCollectFrom(applied, next);
     }
   }
 

@@ -16,7 +16,17 @@ import { chargeBaseOrNaN } from '../../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../../shared/types.ts';
 
 import { FeeRuleFields, perBill } from '../member-fields.tsx';
-import { applyCarRule, carLedger, carRule, carYear, followsCar, memberCashFlows, memberFlowValue, nextCollectionDay } from '../../../../shared/carpool.ts';
+import {
+  applyCarRule,
+  carLedger,
+  carRule,
+  carYear,
+  followsCar,
+  memberCashFlows,
+  memberFlowValue,
+  moveCollectFrom,
+  nextCollectionDay,
+} from '../../../../shared/carpool.ts';
 import type { CarRule } from '../../../../shared/types.ts';
 import { DatePicker } from '../../components/DatePicker.tsx';
 import { MetricCards, Cell, Group, IconButton } from '../../components/ui.tsx';
@@ -333,8 +343,8 @@ export function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppSta
   const [busy, submit] = useSubmit();
   const save = () =>
     run(async () => {
-      const applied = applyCarRule(state, s, draft, next, today);
-      await saveSub({ ...applied, share: { ...applied.share!, collectFrom: next } });
+      // 改了收款日：已有成员钉住原基准，历史不重切，从这天起按新节奏收
+      await saveSub(moveCollectFrom(applyCarRule(state, s, draft, next, today), next));
       onClose();
     }, t('family.member.saved'));
   return (

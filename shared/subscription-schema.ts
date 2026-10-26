@@ -106,6 +106,7 @@ const member = record(
     firstPeriod: { type: 'string', enum: ['prorate', 'full', 'free'] },
     firstAmount: positive,
     restarts: list(day),
+    anchor: day,
     receipts: list(receipt),
     waivers: list(waiver),
     note: text,

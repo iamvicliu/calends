@@ -1172,9 +1172,9 @@ export function collectionAnchor(s: Subscription): string {
   return starts.sort()[0] ?? s.start;
 }
 
-/** 包含 day 的对齐期。每次从原始 anchor 加月，短月夹紧不会累积漂移。 */
+/** 包含 day 的对齐期。每次从原始 anchor 加月，短月夹紧不会累积漂移。成员钉了自己的基准日（车改过收款日）时用它。 */
 export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
-  const anchor = collectionAnchor(s);
+  const anchor = m.anchor ?? collectionAnchor(s);
   const every = memberBillMonths(s, m, memberSince(s, m));
   const monthIndex = (d: string) => Number(d.slice(0, 4)) * 12 + Number(d.slice(5, 7));
   let k = Math.floor((monthIndex(day) - monthIndex(anchor)) / every);

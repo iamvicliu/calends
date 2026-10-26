@@ -14,6 +14,7 @@ import { personLink } from '../../shared/people.ts';
 import type { Receipt, ShareMember, Subscription } from '../../shared/types.ts';
 import {
   applyCarRule,
+  moveCollectFrom,
   suggestedLeaveRefund,
   updateMemberLeave,
   carLedger,
@@ -150,10 +151,13 @@ export const set_share: Tool = {
       members: cur?.members ?? [],
       ownerName: role === 'member' ? ('owner_name' in a ? str(a.owner_name) : cur?.ownerName) : undefined,
       since: 'since' in a ? (a.since == null ? undefined : date(a.since, 'since')) : cur ? cur.since : today,
-      collectFrom: 'collect_from' in a ? (a.collect_from == null ? undefined : date(a.collect_from, 'collect_from')) : cur?.collectFrom,
+      collectFrom: cur?.collectFrom,
       rule: role === 'owner' ? cur?.rule : undefined,
     } as NonNullable<Subscription['share']>;
     let after: Subscription = { ...s, share };
+    // 改收款日：已有成员钉住原基准，历史各期不重切（与界面同一个 moveCollectFrom）；null 清掉存的基准日、回到推算
+    if ('collect_from' in a)
+      after = a.collect_from == null ? { ...after, share: { ...share, collectFrom: undefined } } : moveCollectFrom(after, date(a.collect_from, 'collect_from'));
     if (a.rule != null) {
       if (role !== 'owner') throw new Error(t('mcp.error.notShareOwner', { name: s.name }));
       const r = a.rule as Record<string, unknown>;
