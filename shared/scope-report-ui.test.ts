@@ -2957,3 +2957,26 @@ test('cumulative composition opens the original subscription rather than a histo
   assert.equal(opened, s);
   assert.equal(opened!.methodId, 'current');
 });
+
+test('selection cash keeps its chart without data disclosure; legacy cash retains the data table', () => {
+  const r = harness('../app/src/components/ScopeReport.tsx', 'ScopeReport', {}, { useId: () => 'scope', intlLocale: () => 'en-US' });
+  const sub: Subscription = {
+    id: 'cash',
+    name: 'Fictional Cash',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    status: 'active',
+  };
+  const state = { ...st, subscriptions: [sub] };
+  const report = reports.scopeReport(state, [sub], today);
+  const props = { report, state, today, onOpen() {}, title: 'Report', animate: false, open: true, onToggle() {} };
+  let nodes = r.render('ScopeReport', props);
+  assert.ok(nodes.some((n) => n.type === 'BarLine'));
+  assert.ok(!nodes.some((n) => n.props.className === 'scope-chart-data'));
+  nodes = r.render('ScopeReport', { ...props, report: { blocks: report.blocks } });
+  assert.ok(nodes.some((n) => n.props.className === 'scope-chart-data'));
+});

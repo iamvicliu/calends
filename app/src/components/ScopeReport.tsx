@@ -258,18 +258,20 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                   </>
                 )}
               />
-              <details className="scope-chart-data">
-                <summary>{t('scope.chartData')}</summary>
-                {block.rows.map((r) => (
-                  <div className="scope-row" key={r.month}>
-                    <span>
-                      {monthLabel(r.month)}
-                      {copyParts(r.projected && `\n${t('scope.forecast')}`)}
-                    </span>
-                    <b className="num">{expense(r.cash, r.partial.cash)}</b>
-                  </div>
-                ))}
-              </details>
+              {!report.lifecycle && (
+                <details className="scope-chart-data">
+                  <summary>{t('scope.chartData')}</summary>
+                  {block.rows.map((r) => (
+                    <div className="scope-row" key={r.month}>
+                      <span>
+                        {monthLabel(r.month)}
+                        {copyParts(r.projected && `\n${t('scope.forecast')}`)}
+                      </span>
+                      <b className="num">{expense(r.cash, r.partial.cash)}</b>
+                    </div>
+                  ))}
+                </details>
+              )}
             </>
           );
         const mv = block.movement;
