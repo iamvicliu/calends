@@ -1,4 +1,5 @@
-import { metricComponents } from '../scripts/ui-test-components.ts';
+import * as fxTotals from './fx-total.ts';
+import { metricComponents, fxAmountComponent } from '../scripts/ui-test-components.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -285,7 +286,7 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
       .replace(/export function /g, 'function ');
     const result = transformSync(file, source + '\n' + copySource, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: false });
     assert.equal(result.fatal, false);
-    const components = { ...deps, ...metricComponents(deps.React) };
+    const components = { ...deps, ...fxTotals, FxAmount: fxAmountComponent(deps.React, 'Amount'), ...metricComponents(deps.React) };
     return new Function(...Object.keys(components), `${result.code}; return { ${names.join(', ')} };`)(...Object.values(components));
   };
   const all = (node: unknown): Element[] => {
@@ -369,7 +370,7 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     assert.equal(all(empty).filter((e) => e.props.className === 'stop-row').length, 0);
     const unknown = stopSubscription({ ...original, currency: 'XYZ' }, today, 'terminate');
     const unknownTree = StopsCard({ state: { ...st, subscriptions: [unknown] }, today, onOpen() {} });
-    assert.ok(text(unknownTree).includes(t('core.stop.fxMissing')));
+    assert.ok(text(unknownTree).includes(fxTotals.totalNote(stopLosses({ ...st, subscriptions: [unknown] }, today).partial)));
     assert.ok(text(unknownTree).includes(t('report.stops.details')));
     const r = yearReview(st, today);
     const ctx = {
@@ -378,7 +379,7 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
       name: 'Alex',
       whose: 'Alex',
       ongoing: true,
-      m: (n: number) => flow(n, 'USD'),
+      m: (n: number, part?: fxTotals.FxTotal) => (part?.incomplete ? fxTotals.formatTotal(part, 'USD', { direction: 1 }) : flow(n, 'USD')),
       pct: () => '50%',
       byMethod: [],
       tip: 'Tip',
@@ -390,7 +391,11 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
       const line = t('review.stopLoss', { amount: flow(-26, 'USD') });
       assert.ok(text(style({ ...ctx, hide: false })).includes(line));
       assert.ok(!text(style({ ...ctx, hide: true })).includes(line));
-      assert.ok(text(style({ ...ctx, r: { ...r, stopLoss: NaN }, hide: false })).includes(t('core.stop.fxMissing')));
+      assert.ok(
+        text(style({ ...ctx, r: { ...r, stopLoss: NaN, partial: { ...r.partial, stopLoss: fxTotals.amountTotal(10, 'XYZ', NaN) } }, hide: false })).includes(
+          'XYZ',
+        ),
+      );
       assert.equal(all(style({ ...ctx, r: { ...r, stopLoss: 0 }, hide: false })).filter((e) => e.props.className === 'review-loss').length, 0);
     }
   }

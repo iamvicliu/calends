@@ -1,6 +1,7 @@
+import { amountTotal, convertedTotal, emptyTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
 // 代付：每一期扣款是一笔应收，和合租共用一套按期记账的规则（receivables.ts）。页面和提醒邮件共用，保证两边说法一致
 import { addDays, addMonths, chargesBetween } from './billing.ts';
-import { toBaseAt } from './fx.ts';
+import { toBaseOrNaN as toBaseAt } from './fx.ts';
 import { settle, type LedgerPeriod, type Period } from './receivables.ts';
 import type { AppState, ProxyCharge, Subscription } from './types.ts';
 
@@ -37,6 +38,7 @@ export function proxyLedger(s: Subscription, today: string, through = today) {
 }
 
 export interface ProxyRow extends LedgerPeriod {
+  partial?: { charged: FxTotal; received: FxTotal };
   /** 扣款日（同 key） */
   date: string;
   /** 这一期记的实扣 */
@@ -62,7 +64,22 @@ function row(state: AppState, p: LedgerPeriod & { list: number; listCurrency: st
         : p.share == null
           ? chargedBase
           : toBaseAt(state, p.share, p.receipt!.currency, p.receipt!.date);
-  return { ...p, date: p.from, charged: p.due, chargedBase, receivedBase };
+  return {
+    ...p,
+    date: p.from,
+    charged: p.due,
+    chargedBase,
+    receivedBase,
+    partial: {
+      charged: convertedTotal(state, p.due, p.currency, p.from),
+      received:
+        p.status === 'waived' || p.status !== 'paid'
+          ? emptyTotal()
+          : p.share == null
+            ? convertedTotal(state, p.due, p.currency, p.from)
+            : convertedTotal(state, p.share, p.receipt!.currency, p.receipt!.date),
+    },
+  };
 }
 
 /** 已经扣过款的每一期（新的在前）：卡上实扣多少、折合多少，对方还了多少、折合多少 */
@@ -100,6 +117,17 @@ export function proxyTotals(rows: ProxyRow[]) {
   return {
     done,
     open,
+    partial: {
+      charged: sumTotals(rows.map((r) => r.partial?.charged ?? amountTotal(r.charged, r.currency, r.chargedBase))),
+      received: sumTotals(done.map((r) => r.partial?.received ?? amountTotal(r.share ?? r.charged, r.receipt?.currency ?? r.currency, r.receivedBase!))),
+      owed: sumTotals(open.map((r) => r.partial?.charged ?? amountTotal(r.charged, r.currency, r.chargedBase))),
+      diff: sumTotals(
+        done.flatMap((r) => [
+          r.partial?.received ?? amountTotal(r.share ?? r.charged, r.receipt?.currency ?? r.currency, r.receivedBase!),
+          scaleTotal(r.partial?.charged ?? amountTotal(r.charged, r.currency, r.chargedBase), -1),
+        ]),
+      ),
+    },
     charged: rows.reduce((a, r) => a + r.chargedBase, 0),
     received: done.reduce((a, r) => a + r.receivedBase!, 0),
     owed: open.reduce((a, r) => a + r.chargedBase, 0),

@@ -1,3 +1,6 @@
+import { chargesTotal, formatTotal, scaleTotal, totalNote } from '../../../shared/fx-total.ts';
+import { FxAmount } from '../components/FxAmount.tsx';
+import { mrrTotal } from '../../../shared/metrics.ts';
 import { DAYS_PER_MONTH } from '../../../shared/billing.ts';
 import { paymentMethodGroups } from '../../../shared/payment-groups.ts';
 import { currentPhase } from '../../../shared/billing.ts';
@@ -31,7 +34,7 @@ import { Amount, Seg, useWidth } from '../components/inputs.tsx';
 import { CatIcon, MethodMark, SubIcon } from '../components/marks.tsx';
 import { Icon } from '../components/icons.tsx';
 import { tipProps } from '../components/overlays.tsx';
-import { allCharges, catColor, KIND_BG, paletteColor, sumBaseOrNaN, toBase, firstStart } from '../derive.ts';
+import { allCharges, catColor, KIND_BG, paletteColor, toBase, firstStart } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
 
 const mLabel = (m: string) => (m.endsWith('-01') ? t('report.axis.year', { yy: m.slice(2, 4), year: m.slice(0, 4) }) : monthLabel(m, { year: false }));
@@ -86,7 +89,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   const months = range === 'all' ? Math.ceil(allMonths) : Number(range);
   const series = useMemo(() => mrrSeries(state, today, months, hist), [state, today, months, hist]);
   const tot = totals(state, today);
-  const now = series[series.length - 1].mrr;
+  const current = series[series.length - 1].partial;
   const yearAgo = series.length > 12 ? series[series.length - 13].mrr : undefined;
   const evDates = new Set(
     events(state, today)
@@ -103,15 +106,18 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           {t('report.hero.label')}
         </CardTitle>
         <div className="hero-num">
-          <Amount value={-now} ccy={base} />
+          <FxAmount total={current} ccy={base} direction={-1} />
         </div>
         <div className="hero-delta">
           {yearAgo != null && yearAgo > 0 && <span className="muted">{copyParts(t('report.hero.yearAgo', { amount: signed(-yearAgo) }))}</span>}
         </div>
         <MetricCards plain>
-          <Metric label={t('report.hero.annual')} value={signed(-now * 12)} />
-          <Metric label={t('report.hero.perDay')} value={signed(-now / DAYS_PER_MONTH, false)} />
-          <Metric label={t('report.hero.active')} value={tot.activeCount} note={tot.incomplete ? t('core.fxIncomplete') : undefined} />
+          <Metric label={t('report.hero.annual')} value={formatTotal(scaleTotal(current, 12), base, { direction: -1, compact: true, main: true })} />
+          <Metric
+            label={t('report.hero.perDay')}
+            value={formatTotal(scaleTotal(current, 1 / DAYS_PER_MONTH), base, { direction: -1, main: true, average: true })}
+          />
+          <Metric label={t('report.hero.active')} value={tot.activeCount} note={totalNote(current) || undefined} />
           {tot.recoverMrr > 1 && <Metric label={t('report.hero.recover')} value={signed(tot.recoverMrr)} valueClassName="gain" />}
         </MetricCards>
       </div>
@@ -139,12 +145,13 @@ function Hero({ state, today }: { state: AppState; today: string }) {
           />
         </div>
         <AreaChart
-          values={series.map((p) => p.mrr)}
+          values={series.map((p) => p.partial.value)}
           labels={series.map((p) => mLabel(p.month))}
           markers={markers}
           tip={(i) => (
             <>
-              <b>{series[i].month}</b> <span className="copy-gap" aria-hidden="true" /> {perMonth(flow(-series[i].mrr, base, { compact: true }))}
+              <b>{series[i].month}</b> <span className="copy-gap" aria-hidden="true" />{' '}
+              {perMonth(formatTotal(series[i].partial, base, { direction: -1, compact: true }))}
             </>
           )}
         />
@@ -198,9 +205,14 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
         </div>
       </div>
       <MetricCards inline>
-        {offset !== 0 && <Metric label={offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')} value={perMonth(flow(-mv.to, base, { compact: true }))} />}
+        {offset !== 0 && (
+          <Metric
+            label={offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd')}
+            value={perMonth(formatTotal(mv.partial.to, base, { direction: -1, compact: true }))}
+          />
+        )}
         <Metric
-          label={t('report.wf.vsFrom', { amount: flow(-mv.from, base, { compact: true }) })}
+          label={t('report.wf.vsFrom', { amount: formatTotal(mv.partial.from, base, { direction: -1, compact: true }) })}
           value={Math.abs(delta) < 0.5 ? t('report.wf.flat') : <SpendingDelta value={{ amount: delta, percent: mv.from > 0 ? pct : undefined }} base={base} />}
           valueClassName={Math.abs(delta) < 0.5 ? '' : delta > 0 ? 'loss' : 'gain'}
         />
@@ -301,7 +313,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const rows = useMemo(() => cashVsAccrual(state, today, 23, 12), [state, today]);
   const pv = useMemo(() => prepaidValue(state, today), [state, today]);
-  const next90 = sumBaseOrNaN(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
+  const next90 = chargesTotal(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
   const peak = rows.filter((r) => r.projected).sort((a, b) => b.cash - a.cash)[0];
   return (
     <div className="card copy-card" data-copy-card>
@@ -325,8 +337,8 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
       </div>
       <div className="cash-grid">
         <BarLine
-          bars={rows.map((r) => r.cash)}
-          line={rows.map((r) => r.accrual)}
+          bars={rows.map((r) => r.partial.cash.value)}
+          line={rows.map((r) => r.partial.accrual.value)}
           future={rows.map((r) => r.projected)}
           labels={rows.map((r) => mLabel(r.month))}
           tip={(i) => (
@@ -334,7 +346,12 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
               <b>{rows[i].month}</b>
               {copyParts(rows[i].projected ? t('report.cash.forecast') : '')}
               <br />
-              {copyParts(t('report.cash.tip', { cash: flow(-rows[i].cash, base, { compact: true }), cost: flow(-rows[i].accrual, base, { compact: true }) }))}
+              {copyParts(
+                t('report.cash.tip', {
+                  cash: formatTotal(rows[i].partial.cash, base, { direction: -1, compact: true }),
+                  cost: formatTotal(rows[i].partial.accrual, base, { direction: -1, compact: true }),
+                }),
+              )}
             </>
           )}
         />
@@ -345,27 +362,27 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
                 .slice(0, 6)
                 .map((x) => (
                   <div key={x.sub.id}>
-                    {copyParts(t('report.cash.prepaidItem', { name: x.sub.name, amount: money(x.value, base, { compact: true }), until: x.until }))}
+                    {copyParts(t('report.cash.prepaidItem', { name: x.sub.name, amount: formatTotal(x.partial, base, { compact: true }), until: x.until }))}
                   </div>
                 )),
             )}
             label={t('report.cash.prepaid')}
-            value={<Amount plain value={pv.total} ccy={base} compact />}
-            note={<small>{t('report.cash.prepaidSub', { count: pv.items.length })}</small>}
+            value={<FxAmount plain total={pv.partial} ccy={base} compact />}
+            note={<small>{totalNote(pv.partial) || t('report.cash.prepaidSub', { count: pv.items.length })}</small>}
           />
           <Metric
             label={t('report.cash.next90')}
-            value={<Amount value={-next90} ccy={base} compact />}
+            value={<FxAmount total={next90} direction={-1} ccy={base} compact />}
             note={
               <>
-                <small>{t('report.cash.fullPaidHint')}</small>
+                <small>{totalNote(next90) || t('report.cash.fullPaidHint')}</small>
                 <small>
                   {copyParts(
                     peak
                       ? t('report.cash.peak', {
                           n: Number(peak.month.slice(5)),
                           month: monthLabel(peak.month.slice(0, 7), { year: false }),
-                          amount: flow(-peak.cash, base, { compact: true }),
+                          amount: formatTotal(peak.partial.cash, base, { direction: -1, compact: true }),
                         })
                       : '',
                   )}
@@ -397,30 +414,30 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
         <Metric
           {...tipProps(() =>
             saved.items.map((i) => (
-              <div key={i.sub.id}>{copyParts(t('report.cash.savedItem', { name: i.sub.name, amount: money(i.saved, base), since: i.since }))}</div>
+              <div key={i.sub.id}>{copyParts(t('report.cash.savedItem', { name: i.sub.name, amount: formatTotal(i.partial, base), since: i.since }))}</div>
             )),
           )}
           label={t('report.stops.saved')}
           value={
             <>
               {saved.total > 0 ? '+' : ''}
-              <Amount plain value={saved.total} ccy={base} compact />
+              <FxAmount plain total={saved.partial} ccy={base} compact />
             </>
           }
           valueClassName="green"
-          note={t('report.stops.savedHint')}
+          note={totalNote(saved.partial) || t('report.stops.savedHint')}
         />
         {losses.items.length !== 1 && (
           <Metric
             label={t('report.stops.loss')}
-            value={<Amount value={-losses.total} ccy={base} compact />}
+            value={<FxAmount total={losses.partial} ccy={base} direction={-1} compact />}
             // 没有损失时 ¥0 不标红
             valueClassName={losses.total > 0 || !Number.isFinite(losses.total) ? 'loss' : ''}
             note={t('report.stops.lossHint')}
           />
         )}
       </MetricCards>
-      {losses.incomplete && <p className="stop-basis red">{t('core.stop.fxMissing')}</p>}
+      {losses.incomplete && <p className="stop-basis red">{totalNote(losses.partial)}</p>}
       {/* 没有未退款损失时，上面的指标已写 ¥0，不再放一个空的明细区块 */}
       {losses.items.length > 0 && (
         <>
@@ -469,6 +486,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   const H = W < 560 ? 320 : 400;
   const live = state.subscriptions.map((s) => ({ s, v: contributionOn(state, s, today) })).filter((x) => x.v > 0);
   const total = live.reduce((a, x) => a + x.v, 0);
+  const partial = mrrTotal(state, today);
   const keyOf = (s: Subscription) => {
     if (dim === 'cat') return s.category;
     if (dim === 'pay') return currentPhase(s, today).methodId ?? '';
@@ -532,7 +550,9 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
   return (
     <div className="card copy-card" data-copy-card>
       <div className="card-h">
-        <CardTitle>{copyParts(sel ? `${sel.name}\n${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title'))}</CardTitle>
+        <CardTitle hint={totalNote(partial) || undefined}>
+          {copyParts(sel ? `${sel.name}\n${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title'))}
+        </CardTitle>
         <div className="copy-controls">
           <CopyImageButton hover />
           {sel ? (
@@ -581,7 +601,12 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
                         </b>
                         {g.w > 150 && (
                           <span>
-                            {Math.round((e.v / total) * 100)}% <span className="copy-gap" aria-hidden="true" /> {flow(-e.v, base, { compact: true })}
+                            {!partial.incomplete && (
+                              <>
+                                {Math.round((e.v / total) * 100)}% <span className="copy-gap" aria-hidden="true" />
+                              </>
+                            )}{' '}
+                            {flow(-e.v, base, { compact: true })}
                           </span>
                         )}
                       </button>
@@ -637,11 +662,13 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
               {copyParts(
                 t('report.topup.summary', {
                   balance: money(p.current, p.method.currency, { compact: true }),
-                  monthly: flow(-p.monthly, p.method.currency, { compact: true }),
+                  monthly: formatTotal(p.partial.monthly, p.method.currency, { direction: -1, compact: true }),
                 }),
               )}
             </div>
-            {p.need > 0 ? (
+            {p.incomplete ? (
+              <div className="topup-why soft">{totalNote(p.partial.due)}</div>
+            ) : p.need > 0 ? (
               <>
                 <div className="topup-why">
                   {t('report.topup.why', {
@@ -797,8 +824,16 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
                 <b className={`num ${tone === 'buy' ? '' : up ? 'red' : 'green'}`}>
                   {copyParts(
                     tone === 'buy'
-                      ? money(e.delta, base, { compact: true })
-                      : perMonth(`${e.delta > 0 ? '↑' : e.delta < 0 ? '↓' : ''} ${money(Math.abs(e.delta), base, { compact: true })}`),
+                      ? e.partial
+                        ? formatTotal(e.partial, base, { compact: true })
+                        : money(e.delta, base, { compact: true })
+                      : perMonth(
+                          Number.isFinite(e.delta)
+                            ? `${e.delta > 0 ? '↑' : e.delta < 0 ? '↓' : ''} ${money(Math.abs(e.delta), base, { compact: true })}`
+                            : e.partial
+                              ? formatTotal(e.partial, base, { compact: true })
+                              : '—',
+                        ),
                   )}
                 </b>
               </button>

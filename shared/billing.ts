@@ -1,3 +1,4 @@
+import { amountTotal, chargeTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
 import {
   LIFETIME_BILL_MONTHS,
   type AppState,
@@ -958,7 +959,19 @@ function billedMonthly(state: AppState, s: Subscription, day: string, methodId?:
   return { gross, mine };
 }
 
+/** Monthly totals keep the billing/status and built-in current-FX fallback rules. */
+export function monthlyTotal(state: AppState, s: Subscription, day: string, methodId?: string, gross = false, to = state.settings.baseCurrency): FxTotal {
+  return sumTotals(
+    billedPhases(s, day)
+      .filter((v) => (methodId === undefined || v.methodId === methodId) && ['active', 'ending'].includes(effectiveStatus(v, day)))
+      .map((v) => {
+        const original = monthlyGross(v, day) * (gross ? 1 : myShareFactor(v, day));
+        return amountTotal(original, v.currency, convert(original, v.currency, to, state.fx));
+      }),
+  );
+}
 export interface Totals {
+  partial: { mrr: FxTotal; gross: FxTotal; recover: FxTotal };
   mrr: number; // 我承担的部分，正数，展示时加负号
   grossMrr: number;
   recoverMrr: number; // 合租每月回血
@@ -984,12 +997,23 @@ export function totals(state: AppState, today: string): Totals {
     gross += m.gross;
     mrr += m.mine;
   }
-  return { mrr, grossMrr: gross, recoverMrr: gross - mrr, activeCount: count, incomplete: !Number.isFinite(mrr) || !Number.isFinite(gross) };
+  const eligible = state.subscriptions.filter((s) => !s.proxy && ['active', 'ending'].includes(effectiveStatus(s, today)));
+  const mine = sumTotals(eligible.map((s) => monthlyTotal(state, s, today)));
+  const full = sumTotals(eligible.map((s) => monthlyTotal(state, s, today, undefined, true)));
+  return {
+    partial: { mrr: mine, gross: full, recover: sumTotals([full, scaleTotal(mine, -1)]) },
+    mrr,
+    grossMrr: gross,
+    recoverMrr: gross - mrr,
+    activeCount: count,
+    incomplete: !Number.isFinite(mrr) || !Number.isFinite(gross),
+  };
 }
 
 // ---------- 余额续航 ----------
 
 export interface Runway {
+  partial: { current: FxTotal; monthlyDrain: FxTotal; topUp12m: FxTotal };
   method: PaymentMethod;
   /** 今天的估算余额（asOf 之后的扣款已扣除） */
   current: number;
@@ -1004,7 +1028,7 @@ export interface Runway {
   /** 有扣款或月消耗缺汇率：从那一笔起余额、充值额为 NaN，不跳过 */
   incomplete: boolean;
   /** 完整推演，供充值计划使用；明细单独截断 */
-  forecast: Array<Charge & { balanceAfter: number; amountInMethod: number }>;
+  forecast: Array<Charge & { balanceAfter: number; amountInMethod: number; partial: FxTotal; balancePartial: FxTotal }>;
   upcoming: Runway['forecast'];
 }
 
@@ -1032,13 +1056,18 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   let covered = 0;
   let current = bal;
   let incomplete = false;
+  let balancePartial = amountTotal(method.balance, method.currency, method.balance);
+  let currentPartial = balancePartial;
   for (const { c, share } of charges) {
     const entry = proxyCharges.get(c.sub.id)?.get(c.date);
     const settled = c.kind === 'failed' ? undefined : entry?.amount != null ? { amount: entry.amount, currency: entry.currency ?? c.currency } : c.settled;
     const amt = chargeBaseOrNaN(state, { ...c, settled }, method.currency) * share;
     // 缺汇率的扣款照样扣：余额从这里起不可知（NaN），而不是假装没扣
     if (!Number.isFinite(amt)) incomplete = true;
+    const partial = scaleTotal(chargeTotal(state, { ...c, settled }, method.currency), share);
+    balancePartial = sumTotals([balancePartial, scaleTotal(partial, -1)]);
     if (c.date <= today) {
+      currentPartial = balancePartial;
       bal -= amt;
       current = bal;
       continue;
@@ -1046,7 +1075,7 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
     if (!shortfall && bal - amt < -1e-9) shortfall = c;
     bal -= amt;
     if (!shortfall && Number.isFinite(bal)) covered++;
-    forecast.push({ ...c, balanceAfter: bal, amountInMethod: amt });
+    forecast.push({ ...c, balanceAfter: bal, amountInMethod: amt, partial, balancePartial });
   }
   const yearOut = addMonths(today, 12);
   const need12 = forecast.filter((c) => c.date <= yearOut).reduce((a, c) => a + c.amountInMethod, 0);
@@ -1057,6 +1086,15 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   }
   if (!Number.isFinite(monthlyDrain)) incomplete = true;
   return {
+    partial: {
+      current: currentPartial,
+      monthlyDrain: sumTotals(
+        subs
+          .filter((s) => ['active', 'ending'].includes(effectiveStatus(s, today)))
+          .map((s) => amountTotal(monthlyGross(s, today), s.currency, convert(monthlyGross(s, today), s.currency, method.currency, state.fx))),
+      ),
+      topUp12m: sumTotals([sumTotals(forecast.filter((c) => c.date <= yearOut).map((c) => c.partial)), scaleTotal(currentPartial, -1)]),
+    },
     method,
     current,
     monthlyDrain,

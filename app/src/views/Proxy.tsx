@@ -1,3 +1,5 @@
+import { formatTotal, totalNote } from '../../../shared/fx-total.ts';
+import { FxAmount } from '../components/FxAmount.tsx';
 import { currentPhase } from '../../../shared/billing.ts';
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
@@ -7,7 +9,7 @@ import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { MetricCards, Metric, Toolbar } from '../components/ui.tsx';
-import { Amount, Seg } from '../components/inputs.tsx';
+import { Seg } from '../components/inputs.tsx';
 import { NameLink, PayBadge, StatusPill, SubIcon } from '../components/marks.tsx';
 import { contactText } from '../components/Contact.tsx';
 import { LtHead, nextSort, PlanPrice, usePhone } from '../components/LtHead.tsx';
@@ -33,7 +35,7 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
   const [ledger, setLedger] = useState(false);
   const next = nextCharge(s, addDays(today, 1));
   const method = state.methods.find((m) => m.id === s.methodId);
-  const { charged, received } = proxyTotals(list);
+  const { partial } = proxyTotals(list);
   const st = effectiveStatus(s, today);
   const stopped = isStopped(st);
   const [tone, label] = proxyStatus(st, list, ahead);
@@ -73,8 +75,17 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
         </div>
 
         <MetricCards inline>
-          <Metric label={t('proxy.paidPeriods', { count: list.length })} value={flow(-charged, base, { compact: true })} />
-          <Metric label={t('proxy.received')} value={flow(received, base, { compact: true })} valueClassName="green" />
+          <Metric
+            label={t('proxy.paidPeriods', { count: list.length })}
+            value={formatTotal(partial.charged, base, { direction: -1, compact: true, main: true })}
+            note={totalNote(partial.charged) || undefined}
+          />
+          <Metric
+            label={t('proxy.received')}
+            value={formatTotal(partial.received, base, { direction: 1, compact: true, main: true })}
+            note={totalNote(partial.received) || undefined}
+            valueClassName="green"
+          />
           <OwedOrNet list={list} base={base} />
         </MetricCards>
       </div>
@@ -176,7 +187,6 @@ export function ProxyTable({
   const today = todayIn(state.settings.timezone);
   const [ledger, setLedger] = useState<string | null>(null);
   const ledgerSub = ledger ? state.subscriptions.find((x) => x.id === ledger) : undefined;
-  const fmt = (v: number) => flow(v, base, { compact: true });
   return (
     <div className="ltable-wrap">
       <div className="ltable lt-x proxy-lt" role="table">
@@ -245,13 +255,13 @@ export function ProxyTable({
                 )}
               </span>
               <span className="lt-num" data-p={3}>
-                {fmt(-charged)}
+                {formatTotal(proxyTotals(list).partial.charged, base, { direction: -1, compact: true })}
                 <small>{t('proxy.periods', { count: list.length })}</small>
               </span>
               <span className="lt-num" data-p={3}>
                 {done.length ? (
                   <>
-                    {fmt(received)}
+                    {formatTotal(proxyTotals(list).partial.received, base, { direction: 1, compact: true })}
                     {lastIn && <small>{t('proxy.lastIn', { date: cnDate(lastIn) })}</small>}
                   </>
                 ) : (
@@ -259,7 +269,13 @@ export function ProxyTable({
                 )}
               </span>
               <span className={`lt-num ${Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'gain' : 'loss'}`}>
-                {!done.length ? <small>—</small> : Math.abs(diff) < 0.5 ? t('proxy.table.even') : fmt(diff)}
+                {!done.length ? (
+                  <small>—</small>
+                ) : Math.abs(diff) < 0.5 ? (
+                  t('proxy.table.even')
+                ) : (
+                  formatTotal(proxyTotals(list).partial.diff, base, { direction: 1, compact: true })
+                )}
               </span>
             </button>
           );
@@ -315,32 +331,37 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
         <MetricCards>
           <Metric
             label={t('proxy.paidPeriods', { count: sum.count })}
-            value={<Amount value={-sum.charged} ccy={base} />}
-            note={sum.next ? t('proxy.page.liveNext', { count: sum.live, date: cnDate(sum.next) }) : t('proxy.page.subs', { count: sum.subs.length })}
+            value={<FxAmount total={sum.partial.charged} ccy={base} direction={-1} />}
+            note={
+              totalNote(sum.partial.charged) ||
+              (sum.next ? t('proxy.page.liveNext', { count: sum.live, date: cnDate(sum.next) }) : t('proxy.page.subs', { count: sum.subs.length }))
+            }
           />
           <Metric
             label={t('proxy.received')}
-            value={<Amount value={sum.received} ccy={base} />}
+            value={<FxAmount total={sum.partial.received} ccy={base} direction={1} />}
             valueStyle={{ color: 'var(--green)' }}
-            note={sum.lastIn ? t('proxy.page.lastIn', { date: cnDateFull(sum.lastIn) }) : t('proxy.page.noneIn')}
+            note={totalNote(sum.partial.received) || (sum.lastIn ? t('proxy.page.lastIn', { date: cnDateFull(sum.lastIn) }) : t('proxy.page.noneIn'))}
           />
           <Metric
             label={t('family.strip.profit')}
-            value={Math.abs(sum.diff) < 0.5 ? t('proxy.table.even') : <Amount value={sum.diff} ccy={base} />}
+            value={Math.abs(sum.diff) < 0.5 ? t('proxy.table.even') : <FxAmount total={sum.partial.diff} ccy={base} direction={1} />}
             valueStyle={{ color: Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}
             note={
               // 持平时平均每期是 ±0，改写口径说明，不出现 −¥0.00
-              sum.closedCount && Math.abs(sum.diff) >= 0.5
-                ? t('proxy.page.diffAvg', { count: sum.closedCount, amount: flow(sum.diff / sum.closedCount, base) })
-                : t('proxy.page.diffSub')
+              sum.partial.diff.incomplete
+                ? totalNote(sum.partial.diff)
+                : sum.closedCount && Math.abs(sum.diff) >= 0.5
+                  ? t('proxy.page.diffAvg', { count: sum.closedCount, amount: flow(sum.diff / sum.closedCount, base) })
+                  : t('proxy.page.diffSub')
             }
           />
           {sum.owedCount > 0 && (
             <Metric
               label={t('proxy.owed')}
-              value={<Amount plain value={sum.owed} ccy={base} />}
+              value={<FxAmount plain total={sum.partial.owed} ccy={base} direction={1} />}
               valueStyle={{ color: 'var(--orange)' }}
-              note={t('proxy.page.owedSub', { count: sum.owedCount })}
+              note={totalNote(sum.partial.owed) || t('proxy.page.owedSub', { count: sum.owedCount })}
             />
           )}
         </MetricCards>

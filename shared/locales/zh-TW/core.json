@@ -200,5 +200,7 @@
     "nextDue": "下次扣款日",
     "end": "結束日"
   },
-  "fxIncomplete": "部分金額缺少匯率無法換算，這裡的結果不完整。"
+  "fxIncomplete": "部分金額缺少匯率無法換算，這裡的結果不完整。",
+  "fxUnconverted": "未換算：{amount}",
+  "fxOther": "等 {count} 種幣別"
 }

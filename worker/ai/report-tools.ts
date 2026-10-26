@@ -1,3 +1,5 @@
+import { partialOut } from './tool-views.ts';
+import { emptyTotal } from '../../shared/fx-total.ts';
 import { addDays, addMonths, chargesBetween, phaseSubs } from '../../shared/billing.ts';
 import { chargeFxMissing, convertOn } from '../../shared/fx.ts';
 import { t } from '../../shared/i18n.ts';
@@ -112,6 +114,7 @@ function chargeOut(st: AppState, r: ChargeRow) {
     bill: { amount: round(c.amount), currency: c.currency },
     ...(c.settled ? { settled: { amount: round(c.settled.amount), currency: c.settled.currency } } : {}),
     /** Base currency, my share; refunds negative. */
+    ...(r.partial ? partialOut(r.partial) : {}),
     amount: missing ? null : num(r.amount),
     ...(missing ? { fx_missing: true } : {}),
   };
@@ -122,6 +125,7 @@ function compOut(st: AppState, rows: CompositionRow[], kind: 'category' | 'metho
     key: r.other ? null : r.key,
     label: r.other ? null : kind === 'category' ? r.key : (st.methods.find((m) => m.id === r.key)?.name ?? t('mcp.label.unassigned')),
     ...(r.other ? { other: true } : {}),
+    ...(r.partial ? partialOut(r.partial) : {}),
     amount: missing ? null : num(r.amount),
     share_pct: missing ? null : pct(r.share),
   }));
@@ -137,6 +141,15 @@ interface Missing {
 }
 
 function blockOut(st: AppState, b: Block, m: Missing): Record<string, unknown> {
+  const out = blockValues(st, b, m);
+  if (b.partial) {
+    const primary = b.partial.total ?? b.partial.mrr ?? b.partial.loss ?? b.partial.received;
+    if (primary) Object.assign(out, partialOut(primary));
+    out.totals = Object.fromEntries(Object.entries(b.partial).map(([key, value]) => [key, partialOut(value)]));
+  }
+  return out;
+}
+function blockValues(st: AppState, b: Block, m: Missing): Record<string, unknown> {
   const sub = (s: Subscription, n: number) => (m.subs.has(s.id) ? null : num(n));
   switch (b.type) {
     case 'headline': {
@@ -269,6 +282,8 @@ export function monthReportOut(st: AppState, month: string, today: string) {
   const transfers = transferRows(scoped, from, to, today);
   return {
     month,
+    known_total: partialOut(r.blocks.find((b) => b.type === 'headline')?.partial?.total ?? emptyTotal()).known_total,
+    totals: partialOut(r.blocks.find((b) => b.type === 'headline')?.partial?.total ?? emptyTotal()),
     today,
     currency: st.settings.baseCurrency,
     basis:
@@ -277,6 +292,7 @@ export function monthReportOut(st: AppState, month: string, today: string) {
     blocks: r.blocks.map((b) => blockOut(st, b, missing)),
     months: r.months.map((x) => ({
       month: x.month,
+      ...partialOut(x.partial?.total ?? emptyTotal()),
       total: bad(`${x.month}-01`) ? null : num(x.total),
       paid: bad(`${x.month}-01`) ? null : num(x.paid),
       pending: bad(`${x.month}-01`) ? null : num(x.pending),
@@ -296,16 +312,21 @@ export function monthReportOut(st: AppState, month: string, today: string) {
 export function scopeReportOut(st: AppState, today: string, f: Record<string, unknown> | undefined) {
   const subs = filteredSubs(st, today, f);
   const g = fxGaps(st, subs, '0001-01-01', monthEnd(addMonths(today, 3).slice(0, 7)), today);
+  const report = scopeReport(st, subs, today);
+  const head = report.blocks.find((b) => b.type === 'headline');
+  const partial = head?.partial?.mrr ?? head?.partial?.total ?? emptyTotal();
   const bad = g.currencies.size > 0;
   const missing: Missing = { headline: bad, previous: bad, yearly: bad, trend: bad, composition: bad, subs: g.subs };
   return {
     as_of: today,
+    known_total: partialOut(partial).known_total,
+    totals: partialOut(partial),
     currency: st.settings.baseCurrency,
     basis:
       'Same as the web list selection report: headline MRR/annual at current FX, paid this year and stop losses at my share; trend = 12 cash months including this month plus 3 forecast months (cash vs accrual); upcoming = next 30 days. Transfers are not part of this report. When nothing has recurring cost, the headline switches to lifetime totals (mode=total).',
     count: subs.length,
     subscriptions: subs.map((s) => ({ id: s.id, name: s.name })),
     ...gapsOut(g, addMonths(today, -12), addDays(today, 30)),
-    blocks: subs.length ? scopeReport(st, subs, today).blocks.map((b) => blockOut(st, b, missing)) : [],
+    blocks: subs.length ? report.blocks.map((b) => blockOut(st, b, missing)) : [],
   };
 }

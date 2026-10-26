@@ -1,3 +1,4 @@
+import { chargesTotal, convertedTotal, formatTotal, sumTotals, totalNote } from '../../../../shared/fx-total.ts';
 import { currentPhase } from '../../../../shared/billing.ts';
 import { CopyImageButton } from '../../components/CopyImageButton.tsx';
 import { DetailHead, DetailSheet, Panel } from '../../components/DetailKit.tsx';
@@ -11,7 +12,7 @@ import { createPortal } from 'react-dom';
 import { flow, cnDate, cnDateFull, money } from '../../../../shared/format.ts';
 import { t } from '../../../../shared/i18n.ts';
 import { tx } from '../../i18n.ts';
-import { chargeBaseOrNaN, convertOn } from '../../../../shared/fx.ts';
+import { chargeBaseOrNaN } from '../../../../shared/fx.ts';
 import type { AppState, ShareMember, Subscription } from '../../../../shared/types.ts';
 
 import { FeeRuleFields, perBill } from '../member-fields.tsx';
@@ -63,9 +64,9 @@ export function CarSheet({
   const roster = carpoolRoster(s, today);
   const dues = memberDues(s, today, collectCurrencyOf(state.settings), state).filter((d) => d.periodsOwed > 0);
   const owe = dues.length;
-  const oweSum = dues.reduce((a, d) => a + convertOn(d.owed, d.currency, base, today, undefined, state.fx), 0);
+  const owePartial = sumTotals(dues.map((d) => convertedTotal(state, d.owed, d.currency)));
+  const oweSum = owePartial.incomplete ? NaN : owePartial.value;
   const hasPending = oweSum > 0 || !Number.isFinite(oweSum);
-  const fmt = (v: number) => flow(v, base, { compact: true });
   const rule = carRule(state, s, today);
   const [editingRule, setEditingRule] = useState(false);
   const actual = -book.net;
@@ -125,25 +126,31 @@ export function CarSheet({
           <MetricCards>
             <div>
               <small>{t('family.strip.paid')}</small>
-              <b>{fmt(-book.paid)}</b>
-              <span aria-hidden="true">&nbsp;</span>
+              <b>{formatTotal(book.partial.paid, base, { direction: -1, compact: true, main: true })}</b>
+              <span aria-hidden={book.partial.paid.incomplete ? undefined : true}>{totalNote(book.partial.paid) || ' '}</span>
             </div>
             <div>
               <small>{t('family.strip.received')}</small>
-              <b className={book.received > 0 ? 'done' : undefined}>{fmt(book.received)}</b>
-              <span aria-hidden="true">&nbsp;</span>
+              <b className={book.received > 0 ? 'done' : undefined}>{formatTotal(book.partial.received, base, { direction: 1, compact: true, main: true })}</b>
+              <span aria-hidden={book.partial.paid.incomplete ? undefined : true}>{totalNote(book.partial.received) || ' '}</span>
             </div>
             <div>
               <small>{t('family.strip.profit')}</small>
-              <b className={actual > 0 ? 'done' : actual < 0 ? 'loss' : undefined}>{fmt(actual)}</b>
+              <b className={actual > 0 ? 'done' : actual < 0 ? 'loss' : undefined}>
+                {formatTotal(book.partial.net, base, { direction: -1, compact: true, main: true })}
+              </b>
               {/* 小字是当年盈亏，与列表的「当年盈亏」同一口径；买断的车也有今年的账 */}
-              <span>{tx('family.strip.thisYear', { amount: <span className="nowrap">{fmt(carYear(state, s, today).net)}</span> })}</span>
+              <span>
+                {tx('family.strip.thisYear', {
+                  amount: <span className="nowrap">{formatTotal(carYear(state, s, today).partial.net, base, { direction: 1, compact: true })}</span>,
+                })}
+              </span>
             </div>
             {hasPending && (
               <div>
                 <small>{t('family.pool.owed')}</small>
-                <b className="warn">{money(oweSum, base, { compact: true })}</b>
-                <span>{t('family.pool.owedSub', { count: owe })}</span>
+                <b className="warn">{formatTotal(owePartial, base, { compact: true, main: true })}</b>
+                <span>{totalNote(owePartial) || t('family.pool.owedSub', { count: owe })}</span>
               </div>
             )}
           </MetricCards>
@@ -182,7 +189,6 @@ export function CarSheet({
                     dateOf={(r) => r.c.date}
                     head={[t('family.sheet.chargeDate'), t('detail.field.method'), t('proxy.table.charged'), t('proxy.table.cost')]}
                     yearCells={(ys) => {
-                      const total = ys.reduce((a, r) => a + r.base, 0);
                       return {
                         second: <YearMethods ids={chargeMethodIds(ys.map((r) => r.c))} state={state} />,
                         orig: copyParts(
@@ -192,7 +198,14 @@ export function CarSheet({
                             (sum, ccy) => flow(-sum, ccy),
                           ),
                         ),
-                        base: Number.isFinite(total) ? flow(-total, base) : '—',
+                        base: formatTotal(
+                          chargesTotal(
+                            state,
+                            ys.map((r) => r.c),
+                          ),
+                          base,
+                          { direction: -1 },
+                        ),
                       };
                     }}
                     row={({ c, base: v }) => ({
@@ -243,10 +256,7 @@ export function CarSheet({
                       );
                     })(),
                     orig: copyParts(currencyTotals(ys, (r) => r.p, flow)),
-                    base: flow(
-                      ys.reduce((a, r) => a + r.base, 0),
-                      base,
-                    ),
+                    base: formatTotal(sumTotals(ys.map((r) => convertedTotal(state, r.p.amount, r.p.currency, r.p.date))), base, { direction: 1 }),
                   })}
                   row={({ m, p, base: v }) => ({
                     date: <time dateTime={p.date}>{cnDateFull(p.date)}</time>,
@@ -292,7 +302,6 @@ export function CarSheet({
  */
 /** 车卡上的数字：这辆车从发起到现在一共付出、收回多少，赚还是亏；按年的在弹窗里看 */
 export function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: string }) {
-  const fmt = (v: number) => flow(v, base, { compact: true });
   const net = book.yearIncome - book.yearCost;
   // 卡片看这辆车现在每年的账：量级稳定、各车可比；累计历史放在详情页
   return (
@@ -300,15 +309,15 @@ export function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; b
       <MetricCards inline>
         <div>
           <small>{t('family.facts.yearCost')}</small>
-          <b>{fmt(-book.yearCost)}</b>
+          <b>{formatTotal(book.partial.yearCost, base, { direction: -1, compact: true })}</b>
         </div>
         <div>
           <small>{t('family.facts.yearIncome')}</small>
-          <b className={book.yearIncome > 0 ? 'green' : undefined}>{fmt(book.yearIncome)}</b>
+          <b className={book.yearIncome > 0 ? 'green' : undefined}>{formatTotal(book.partial.yearIncome, base, { direction: 1, compact: true })}</b>
         </div>
         <div>
           <small>{t('family.strip.yearNet')}</small>
-          <b className={net > 0 ? 'gain' : net < 0 ? 'loss' : undefined}>{fmt(net)}</b>
+          <b className={net > 0 ? 'gain' : net < 0 ? 'loss' : undefined}>{formatTotal(book.partial.yearNet, base, { direction: -1, compact: true })}</b>
         </div>
       </MetricCards>
     </div>

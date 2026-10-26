@@ -1,3 +1,5 @@
+import { formatTotal, scaleTotal, sumTotals } from '../../../shared/fx-total.ts';
+import { monthlyTotal } from '../../../shared/billing.ts';
 import { isMarked, nextSort } from '../components/LtHead.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { StopBadge, StopText, stopDescription, stopLabel } from '../components/StopPanel.tsx';
@@ -15,7 +17,7 @@ import {
   upcomingPhase,
   isStopped,
 } from '../../../shared/billing.ts';
-import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
+import { cnDate, money, relDays } from '../../../shared/format.ts';
 import { toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { IconButton, Toolbar } from '../components/ui.tsx';
@@ -194,7 +196,7 @@ export function List({
     }
     return dir === 'asc' ? asc(a, b) : asc(b, a);
   });
-  const sum = rows.reduce((a, s) => a + (isStopped(effectiveStatus(s, today)) ? 0 : mo(s)), 0);
+  const sum = sumTotals(rows.filter((s) => !isStopped(effectiveStatus(s, today))).map((s) => monthlyTotal(state, s, today)));
   const saved = new Map(cancelSavings(state, today).items.map((x) => [x.sub.id, x.saved]));
   // 只按筛选范围识别报告，排序、视图及时间轴窗口不影响报告。
   const reportKey = JSON.stringify([category ?? null, filter, cat, pay, words.join(' ')]);
@@ -216,7 +218,11 @@ export function List({
         sub={
           reportVisible
             ? undefined
-            : t('list.summary', { count: rows.length, monthly: flow(-sum, base, { compact: true }), yearly: flow(-sum * 12, base, { compact: true }) })
+            : t('list.summary', {
+                count: rows.length,
+                monthly: formatTotal(sum, base, { direction: -1, compact: true }),
+                yearly: formatTotal(scaleTotal(sum, 12), base, { direction: -1, compact: true }),
+              })
         }
       >
         <label className="tb-search">

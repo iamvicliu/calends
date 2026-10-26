@@ -1,3 +1,4 @@
+import * as fxTotals from '../shared/fx-total.ts';
 import { readUiSource } from './ui-test-source.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -17,7 +18,7 @@ import { flatten, setLocale, t } from '../shared/i18n.ts';
 const source = readUiSource(new URL('../app/src/views/Carpool.tsx', import.meta.url));
 const ast = await parsers.typescript.parse(source);
 const nodes = ast.body.map((n) => n.declaration ?? n);
-const locales = ['family', 'detail', 'calendar'].reduce((all, ns) => {
+const locales = ['family', 'detail', 'calendar', 'core'].reduce((all, ns) => {
   return { ...all, ...flatten(ns, JSON.parse(readFileSync(new URL(`../shared/locales/en/${ns}.json`, import.meta.url), 'utf8'))) };
 }, {});
 setLocale('en', [locales]);
@@ -57,6 +58,7 @@ function compile(names, extra = {}) {
     ...carpool,
     ...format,
     ...fx,
+    ...fxTotals,
     carpoolRoster,
     carpoolTimeline,
     t,
@@ -232,7 +234,7 @@ test('零盈亏保持中性，亏损为红色，缺失汇率不隐藏尚未确�
   const unavailable = { ...state, settings: { ...state.settings, baseCurrency: 'USD' }, fx: { base: 'USD', rates: {}, fetchedAt: today } };
   const html = render(unavailable, carpool.carLedger(unavailable, s, today));
   assert.equal(metricCells(html), 4);
-  assert.match(html, /—/);
+  assert.match(html, /Unconverted/);
 });
 
 test('合租图片入口在头部，沿用当前 summary 和打码状态', async () => {

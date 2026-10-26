@@ -1,3 +1,4 @@
+import { amountTotal, chargesTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
 import { DAYS_PER_MONTH } from './billing.ts';
 // 转让收付：二手转入时付给原主的钱、转出时收到的钱。都是实际现金，不推算剩余服务价值。
 // 不是服务商扣款：不进 MRR、续费预测、余额消耗、退款与扣款笔数；只进生命周期净成本和年度、月度现金流。
@@ -42,6 +43,7 @@ export function holdingPeriod(s: Subscription, today: string): { from: string; u
 }
 
 export interface NetCost {
+  partial: FxTotal;
   currency: string;
   /** 服务商扣款（实扣、退款为负），同详情「累计」口径；有扣款缺汇率时为 NaN */
   service: number;
@@ -76,6 +78,12 @@ export function netCost(state: AppState, s: Subscription, today: string, to = st
   const held = holdingPeriod(s, today);
   const perMonth = net / Math.max(1, held.days / DAYS_PER_MONTH);
   return {
+    partial: sumTotals([
+      chargesTotal(state, history, to),
+      ...transfersOf(s)
+        .filter((tr) => tr.date <= today)
+        .map((tr) => scaleTotal(amountTotal(tr.amount, tr.currency, transferValue(state, tr, to)), transferSign(tr))),
+    ]),
     currency: to,
     service,
     charges: history.filter((c) => c.kind !== 'refund' && c.kind !== 'failed').length,

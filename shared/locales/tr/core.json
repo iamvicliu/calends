@@ -231,5 +231,7 @@
     "nextDue": "sonraki ödeme tarihi",
     "end": "bitiş tarihi"
   },
-  "fxIncomplete": "Döviz kuru eksik olduğu için bazı tutarlar çevrilemiyor; sonuç eksik."
+  "fxIncomplete": "Döviz kuru eksik olduğu için bazı tutarlar çevrilemiyor; sonuç eksik.",
+  "fxUnconverted": "Dönüştürülmeyen: {amount}",
+  "fxOther": "ve {count} diğer para birimi"
 }

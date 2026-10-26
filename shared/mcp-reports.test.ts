@@ -110,7 +110,7 @@ test('month_report 与日历 monthReport() 同一口径，含转让收付，排�
     assert.equal(h.vs_previous_month.amount, r2(head.previous.amount));
     assert.deepEqual(
       out.months,
-      expected.months.map((m) => ({ month: m.month, total: r2(m.total), paid: r2(m.paid), pending: r2(m.pending) })),
+      expected.months.map((m) => ({ month: m.month, total: r2(m.total), paid: r2(m.paid), pending: r2(m.pending), known_total: r2(m.total), unconverted: {} })),
     );
     assert.deepEqual(
       out.blocks.map((b: { type: string }) => b.type),

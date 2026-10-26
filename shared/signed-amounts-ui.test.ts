@@ -1,3 +1,4 @@
+import * as fxTotals from './fx-total.ts';
 import { readUiSource, extractUiFunction } from '../scripts/ui-test-source.ts';
 import assert from 'node:assert/strict';
 import * as transfers from './transfers.ts';
@@ -25,6 +26,7 @@ function load(file: string, name: string, source: string, deps: Record<string, u
     reactCompiler: false,
   });
   assert.equal(result.fatal, false);
+  deps = { ...fxTotals, ...deps };
   return new Function(...Object.keys(deps), `${result.code}; return ${name};`)(...Object.values(deps));
 }
 const text = (html: string) => html.replace(/<[^>]*>/g, '');

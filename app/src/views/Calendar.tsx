@@ -1,3 +1,5 @@
+import { chargesTotal, formatTotal, sumTotals, type FxTotal } from '../../../shared/fx-total.ts';
+import { FxAmount } from '../components/FxAmount.tsx';
 import { canUseSingleKey } from '../keyboard.ts';
 import { copyParts } from '../components/copy.tsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -21,12 +23,12 @@ import { flow, cnDate, cnDateAuto, monthLabel, relDays, weekdayShort } from '../
 import { t } from '../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { IconButton, MetricCards, Metric, CardTitle, Toolbar } from '../components/ui.tsx';
-import { Amount, Seg, useWidth } from '../components/inputs.tsx';
+import { Seg, useWidth } from '../components/inputs.tsx';
 import { Icon } from '../components/icons.tsx';
 import { PayBadge, RegionTag, subRegion, SubIcon } from '../components/marks.tsx';
 import { TipTable, tipProps } from '../components/overlays.tsx';
 import { chargeBaseOrNaN } from '../../../shared/fx.ts';
-import { allCharges, sumBaseOrNaN } from '../derive.ts';
+import { allCharges } from '../derive.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';
 import { usePref } from '../prefs.ts';
 import { monthReport } from '../../../shared/scope-report.ts';
@@ -96,7 +98,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
   const byDay = new Map<string, Charge[]>();
   for (const c of charges) byDay.set(c.date, [...(byDay.get(c.date) ?? []), c]);
   // 显示用合计：有一笔缺汇率就显示「—」，不按 0 算
-  const sumOf = (list: Charge[] = []) => sumBaseOrNaN(state, list);
+  const sumOf = (list: Charge[] = []) => chargesTotal(state, list);
   const monthCharges = charges.filter((c) => c.date.startsWith(month));
   const yearCharges = charges.filter((c) => c.date.startsWith(year));
   // 翻月清空选择；今天按钮和 T 明确选中今天。
@@ -144,7 +146,9 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
       <Toolbar
         title={mode === 'month' ? monthLabel(month, { long: true }) : t('calendar.yearTitle', { year })}
         // 月视图的笔数与合计放进右侧的指标卡；年视图没有右栏，仍写在标题下
-        sub={mode === 'year' ? t('calendar.summary', { count: list.length, amount: flow(-sumOf(list), base, { compact: true }) }) : undefined}
+        sub={
+          mode === 'year' ? t('calendar.summary', { count: list.length, amount: formatTotal(sumOf(list), base, { direction: -1, compact: true }) }) : undefined
+        }
       >
         <Seg
           value={mode}
@@ -214,7 +218,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
                           <b>{Number(d.slice(8))}</b>
                           {items.length > 0 && (
                             <span className="sum">
-                              <Amount value={-sumOf(items)} ccy={base} decimals={0} />
+                              <FxAmount total={sumOf(items)} direction={-1} ccy={base} decimals={0} />
                             </span>
                           )}
                         </div>
@@ -398,7 +402,7 @@ function YearHeat({
   year: string;
   byDay: Map<string, Charge[]>;
   today: string;
-  sumOf: (l?: Charge[]) => number;
+  sumOf: (l?: Charge[]) => FxTotal;
   base: string;
   onPick: (m: string) => void;
   weekStart: 0 | 1;
@@ -413,7 +417,7 @@ function YearHeat({
         // 固定 6 行，让 12 张月卡等高对齐
         const grid = Array.from({ length: 42 }, (_, k) => addDays(monthGrid(m, weekStart)[0], k));
         const days = grid.filter((d) => d.startsWith(m));
-        const total = days.reduce((a, d) => a + sumOf(byDay.get(d)), 0);
+        const total = sumTotals(days.map((d) => sumOf(byDay.get(d))));
         const count = days.reduce((a, d) => a + (byDay.get(d)?.length ?? 0), 0);
         return (
           <button
@@ -431,7 +435,7 @@ function YearHeat({
               {monthLabel(m, { year: false })}
               <span>
                 {copyParts(count ? t('calendar.heatCount', { count }) : '')}
-                {flow(-total, base, { compact: true })}
+                {formatTotal(total, base, { direction: -1, compact: true })}
               </span>
             </div>
             <div className="heat-g">
@@ -454,7 +458,7 @@ function YearHeat({
                     className={cls}
                     {...tipProps(() => (
                       <TipTable
-                        head={[cnDate(d, true), list.length > 1 ? flow(-sumOf(list), base, { compact: true }) : '']}
+                        head={[cnDate(d, true), list.length > 1 ? formatTotal(sumOf(list), base, { direction: -1, compact: true }) : '']}
                         rows={list.map((c, i) => ({ key: `${c.sub.id}-${i}`, label: c.sub.name, value: flow(-c.amount, c.currency) }))}
                       />
                     ))}
@@ -479,7 +483,7 @@ function YearHeat({
 function MiniReport({ report, base, today, onExpand }: { report: ReturnType<typeof monthReport>; base: string; today: string; onExpand: () => void }) {
   const headline = report.blocks.find((b) => b.type === 'headline');
   if (!headline || headline.mode !== 'month') return null;
-  const peak = Math.max(1, ...report.months.map((r) => Math.abs(r.paid) + Math.abs(r.pending)));
+  const peak = Math.max(1, ...report.months.map((r) => Math.abs(r.partial!.paid.value) + Math.abs(r.partial!.pending.value)));
   return (
     <section className="card cal-stat">
       <div className="cal-mini-head">
@@ -491,11 +495,11 @@ function MiniReport({ report, base, today, onExpand }: { report: ReturnType<type
         </IconButton>
       </div>
       <div className="cal-stat-big">
-        <b className={headline.total < 0 ? 'green' : undefined}>{flow(-headline.total, base)}</b>
+        <b className={headline.total < 0 ? 'green' : undefined}>{formatTotal(headline.partial!.total, base, { direction: -1 })}</b>
       </div>
       <MetricCards inline>
-        <Metric label={t('scope.paid')} value={flow(-headline.paid, base)} />
-        <Metric label={t('scope.pending')} value={flow(-headline.pending, base)} />
+        <Metric label={t('scope.paid')} value={formatTotal(headline.partial!.paid, base, { direction: -1 })} />
+        <Metric label={t('scope.pending')} value={formatTotal(headline.partial!.pending, base, { direction: -1 })} />
       </MetricCards>
       <div className="cal-comparisons">
         <div>
@@ -514,20 +518,21 @@ function MiniReport({ report, base, today, onExpand }: { report: ReturnType<type
           <div
             key={r.month}
             role="img"
-            aria-label={`${monthLabel(r.month)}\n${flow(-r.total, base)}`}
+            aria-label={`${monthLabel(r.month)}\n${formatTotal(r.partial!.total, base, { direction: -1 })}`}
             className={`cal-mini-month ${r.month === headline.month ? 'current' : ''}`}
             {...tipProps(
-              () => `${monthLabel(r.month)}\n${flow(-r.total, base)}${r.month >= today.slice(0, 7) && r.pending !== 0 ? `\n${t('scope.forecast')}` : ''}`,
+              () =>
+                `${monthLabel(r.month)}\n${formatTotal(r.partial!.total, base, { direction: -1 })}${r.month >= today.slice(0, 7) && r.pending !== 0 ? `\n${t('scope.forecast')}` : ''}`,
             )}
           >
-            <div className={`cal-mini-bars ${report.months.some((m) => m.paid < 0 || m.pending < 0) ? 'signed' : ''}`}>
+            <div className={`cal-mini-bars ${report.months.some((m) => m.partial!.paid.value < 0 || m.partial!.pending.value < 0) ? 'signed' : ''}`}>
               <div className="cal-mini-positive">
-                <i style={{ height: `${(Math.max(0, r.paid) / peak) * 100}%` }} />
-                <i className="forecast" style={{ height: `${(Math.max(0, r.pending) / peak) * 100}%` }} />
+                <i style={{ height: `${(Math.max(0, r.partial!.paid.value) / peak) * 100}%` }} />
+                <i className="forecast" style={{ height: `${(Math.max(0, r.partial!.pending.value) / peak) * 100}%` }} />
               </div>
               <div className="cal-mini-negative">
-                <i style={{ height: `${(Math.max(0, -r.paid) / peak) * 100}%` }} />
-                <i className="forecast" style={{ height: `${(Math.max(0, -r.pending) / peak) * 100}%` }} />
+                <i style={{ height: `${(Math.max(0, -r.partial!.paid.value) / peak) * 100}%` }} />
+                <i className="forecast" style={{ height: `${(Math.max(0, -r.partial!.pending.value) / peak) * 100}%` }} />
               </div>
             </div>
             <small>{monthLabel(r.month, { year: false })}</small>

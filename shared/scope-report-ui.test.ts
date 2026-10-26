@@ -1,6 +1,7 @@
+import * as fxTotals from './fx-total.ts';
 import { readUiSource } from '../scripts/ui-test-source.ts';
 import * as phase2Icons from 'lucide-react';
-import { metricComponents } from '../scripts/ui-test-components.ts';
+import { metricComponents, fxAmountComponent } from '../scripts/ui-test-components.ts';
 import * as transfers from './transfers.ts';
 import * as listScope from './list-scope.ts';
 import { canUseSingleKey } from '../app/src/keyboard.ts';
@@ -71,6 +72,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
       createElement: (type: string | ((p: any) => unknown), props: Node['props'], ...children: unknown[]) =>
         typeof type === 'function' &&
         [
+          'FxAmount',
           'MetricCards',
           'Metric',
           'YearLedger',
@@ -94,6 +96,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...transfers,
     ...format,
     ...fx,
+    ...fxTotals,
     ...reports,
     ...carpool,
     statusOf: carpool.memberStatus,
@@ -189,6 +192,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...extra,
   };
   const components = { ...deps, ...metricComponents(deps.React) };
+  Object.assign(components, { FxAmount: fxAmountComponent(deps.React, 'Amount') });
   const exports = new Function(...Object.keys(components), `${result.code.replace(/export /g, '')}; return {${names}};`)(...Object.values(components));
   return {
     prefs,
@@ -358,7 +362,17 @@ test('report changes use unsigned spending direction and omit the current total 
     'Waterfall',
     {},
     {
-      monthMovement: () => ({ from: 100, to: 80, fx: 0, added: 0, expansion: 0, contraction: 0, churned: 20, items: [] }),
+      monthMovement: () => ({
+        partial: { from: fxTotals.amountTotal(100, 'USD', 100), to: fxTotals.amountTotal(80, 'USD', 80) },
+        from: 100,
+        to: 80,
+        fx: 0,
+        added: 0,
+        expansion: 0,
+        contraction: 0,
+        churned: 20,
+        items: [],
+      }),
     },
   );
   const nodes = r.render('Waterfall', { state: st, today, onOpen() {} });
@@ -378,7 +392,17 @@ test('report changes use unsigned spending direction and omit the current total 
     'Waterfall',
     {},
     {
-      monthMovement: () => ({ from: 100, to: 110, fx: 0, added: 30, expansion: 0, contraction: 0, churned: 20, items: [] }),
+      monthMovement: () => ({
+        partial: { from: fxTotals.amountTotal(100, 'USD', 100), to: fxTotals.amountTotal(80, 'USD', 80) },
+        from: 100,
+        to: 110,
+        fx: 0,
+        added: 30,
+        expansion: 0,
+        contraction: 0,
+        churned: 20,
+        items: [],
+      }),
     },
   );
   const mixedNodes = mixed.render('Waterfall', { state: st, today, onOpen() {} });
@@ -2652,7 +2676,7 @@ test('phase2 rendered ledger sections and assistant summaries retain their froze
     st,
     'USD',
   );
-  const normalized = JSON.parse(JSON.stringify(output, (_k, v) => (typeof v === 'function' ? '[handler]' : v)));
+  const normalized = JSON.parse(JSON.stringify(output, (_k, v) => (_k === 'partial' ? undefined : typeof v === 'function' ? '[handler]' : v)));
   const path = new URL('./fixtures/phase2-views.json', import.meta.url);
   if (process.env.CALENDS_UPDATE_FROZEN_VIEWS === '1') writeFileSync(path, JSON.stringify(normalized, null, 2) + '\n');
   assert.deepEqual(normalized, JSON.parse(readFileSync(path, 'utf8')));

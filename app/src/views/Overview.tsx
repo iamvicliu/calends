@@ -1,3 +1,5 @@
+import { chargesTotal, formatTotal, scaleTotal, totalNote } from '../../../shared/fx-total.ts';
+import { FxAmount } from '../components/FxAmount.tsx';
 import { DAYS_PER_MONTH } from '../../../shared/billing.ts';
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
@@ -12,7 +14,7 @@ import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
 import { MetricCards, Metric, IconButton, CardTitle, Toolbar } from '../components/ui.tsx';
-import { Amount, Seg } from '../components/inputs.tsx';
+import { Seg } from '../components/inputs.tsx';
 import { CatIcon, MethodMark, SubIcon } from '../components/marks.tsx';
 import { TipTable } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
@@ -52,7 +54,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
   const base = state.settings.baseCurrency;
   const past30 = useMemo(() => {
     // 缺汇率的一笔让合计为 NaN（显示「—」），不当作 0
-    return sumBaseOrNaN(state, allCharges(state, addDays(today, -29), today, today));
+    return chargesTotal(state, allCharges(state, addDays(today, -29), today, today));
   }, [state, today]);
   // 时间线按需加载：拖到哪段算哪段
   const load = useCallback(
@@ -80,7 +82,7 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
         <div className="copy-tools">
           <CopyImageButton hover />
           <span className="sec-sub" style={{ marginTop: 0 }}>
-            {copyParts(t('overview.timeline.past', { amount: flow(-past30, base, { compact: true }) }))}
+            {copyParts(t('overview.timeline.past', { amount: formatTotal(past30, base, { direction: -1, compact: true }) }))}
           </span>
         </div>
       </div>
@@ -130,23 +132,20 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
 
   const curKey = scale === 'month' ? today.slice(0, 7) : today.slice(0, 4);
   // 柱高用缺汇率按 0 的值（图表几何必须是有限数）；提示框里显示的金额用缺汇率为 NaN 的值，显示「—」
-  const exact = new Map<string, Map<string, number>>();
   const buckets: Bucket[] = data.map(({ r, cs }) => {
     const parts = new Map<string, number>();
-    const shown = new Map<string, number>();
     for (const c of cs) {
       const k = c.projected && r.key === curKey ? PROJ : c.sub.category;
       parts.set(k, (parts.get(k) ?? 0) + chargeValue(state, c));
-      shown.set(k, (shown.get(k) ?? 0) + chargeBaseOrNaN(state, c));
     }
-    exact.set(r.key, shown);
     const arr = [...parts.entries()].map(([k, v]) => ({ k, v })).sort((a, b) => (a.k === PROJ ? 1 : b.k === PROJ ? -1 : b.v - a.v));
     return { key: r.key, label: r.label, parts: arr, total: arr.reduce((a, p) => a + p.v, 0), future: r.key > curKey, current: r.key === curKey };
   });
 
   const sel = selKey && buckets.some((b) => b.key === selKey) ? selKey : curKey;
   const selData = data.find((d) => d.r.key === sel);
-  const selTotal = selData ? sumBaseOrNaN(state, selData.cs) : 0;
+  const selPart = chargesTotal(state, selData?.cs ?? []);
+  const selTotal = selPart.value;
   const selPaid = selData
     ? sumBaseOrNaN(
         state,
@@ -176,7 +175,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
       <div className="ov-head">
         <div>
           {/* 「浅色为预计」并入说明，标题下不再单列一行 */}
-          <CardTitle as="h3" className="sec-title" hint={`${t('report.cash.fullPaidHint')}\n${t('overview.spending.sub')}`}>
+          <CardTitle as="h3" className="sec-title" hint={`${t('report.cash.fullPaidHint')}\n${totalNote(selPart) || t('overview.spending.sub')}`}>
             {t('overview.spending.title')}
           </CardTitle>
         </div>
@@ -205,17 +204,28 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
         fmt={(v) => moneyTick(v, base)}
         tip={(b) => (
           <TipTable
-            head={[b.label, flow(-b.parts.reduce((a, p) => a + (exact.get(b.key)?.get(p.k) ?? NaN), 0), base, { compact: true })]}
+            head={[b.label, formatTotal(chargesTotal(state, data.find((d) => d.r.key === b.key)?.cs ?? []), base, { direction: -1, compact: true })]}
             rows={b.parts
               .filter((p) => p.k !== PROJ)
               .slice(0, 5)
-              .map((p) => ({ key: p.k, label: p.k, value: flow(-(exact.get(b.key)?.get(p.k) ?? p.v), base, { compact: true }) }))}
+              .map((p) => ({
+                key: p.k,
+                label: p.k,
+                value: formatTotal(
+                  chargesTotal(
+                    state,
+                    (data.find((d) => d.r.key === b.key)?.cs ?? []).filter((c) => c.sub.category === p.k),
+                  ),
+                  base,
+                  { direction: -1, compact: true },
+                ),
+              }))}
           />
         )}
       />
 
       <div className="legend-chips">
-        {cats.map(([k, v]) => (
+        {cats.map(([k]) => (
           <button
             key={k}
             className={`lc ${hidden.includes(k) ? 'off' : ''}`}
@@ -223,7 +233,18 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
           >
             <CatIcon cat={k} size={13} />
             {k}
-            <b>{flow(-v, base, { compact: true })}</b>
+            <b>
+              {formatTotal(
+                chargesTotal(
+                  state,
+                  allRanges(state, ranges, today)
+                    .flatMap((r) => r.cs)
+                    .filter((c) => c.sub.category === k),
+                ),
+                base,
+                { direction: -1, compact: true },
+              )}
+            </b>
           </button>
         ))}
       </div>
@@ -235,7 +256,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
             {copyParts(isFuture ? t('overview.spending.projected') : sel === curKey ? t('overview.spending.inProgress') : '')}
           </h4>
           <div className="big">
-            <Amount value={-selTotal} ccy={base} />
+            <FxAmount total={selPart} direction={-1} ccy={base} />
           </div>
           <div className="muted" style={{ fontSize: 'var(--fs-1)', marginTop: 2 }}>
             {t('overview.n.subs', { count: items.length })} <span className="copy-gap" aria-hidden="true" />{' '}
@@ -256,7 +277,16 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
                 {e.sub.name}
                 {e.n > 1 ? ` ×${e.n}` : ''}
               </span>
-              <b>{flow(-e.v, base, { compact: true })}</b>
+              <b>
+                {formatTotal(
+                  chargesTotal(
+                    state,
+                    (selData?.cs ?? []).filter((c) => c.sub.id === e.sub.id),
+                  ),
+                  base,
+                  { direction: -1, compact: true },
+                )}
+              </b>
             </button>
           ))}
         </div>
@@ -276,7 +306,7 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
   const pair = useMoneyPair(state);
   const base = state.settings.baseCurrency;
   const cs = allCharges(state, addDays(today, 1), addDays(today, 30), today).filter((c) => c.amount > 0 && c.kind !== 'refund' && c.kind !== 'failed');
-  const total = sumBaseOrNaN(state, cs);
+  const total = chargesTotal(state, cs);
   const groups: Array<['thisWeek' | 'later', Charge[]]> = [
     ['thisWeek', cs.filter((c) => diffDays(today, c.date) <= 6)],
     ['later', cs.filter((c) => diffDays(today, c.date) > 6)],
@@ -286,7 +316,8 @@ function DueSoon({ state, today, onOpen }: { state: AppState; today: string; onO
       <div className="card-h">
         <CardTitle>{t('overview.due.title')}</CardTitle>
         <span className="meta">
-          {t('overview.n.charges', { count: cs.length })} <span className="copy-gap" aria-hidden="true" /> {flow(-total, base, { compact: true })}
+          {t('overview.n.charges', { count: cs.length })} <span className="copy-gap" aria-hidden="true" />{' '}
+          {formatTotal(total, base, { direction: -1, compact: true })}
         </span>
       </div>
       {cs.length === 0 && <div className="empty">{t('overview.due.empty')}</div>}
@@ -351,9 +382,9 @@ function WalletBrief({ state, today }: { state: AppState; today: string }) {
                   <small>
                     {copyParts(
                       t('overview.wallet.balance', {
-                        amount: money(r.current, m.currency, { compact: true }),
-                        status: !Number.isFinite(r.monthlyDrain)
-                          ? '—'
+                        amount: formatTotal(r.partial.current, m.currency, { compact: true }),
+                        status: r.incomplete
+                          ? totalNote(r.partial.monthlyDrain)
                           : r.shortfall
                             ? r.coveredCharges
                               ? t('overview.wallet.covered', { count: r.coveredCharges, date: cnDate(r.shortfall.date) })
@@ -439,7 +470,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
   const tot = totals(state, today);
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);
   const delta = mrrChangeSinceLastMonth(state, today);
-  const ytd = useMemo(() => sumBaseOrNaN(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
+  const ytd = useMemo(() => chargesTotal(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
   const loss = useMemo(() => (state.readonly ? 0 : stopLosses(state, today, { from: `${today.slice(0, 4)}-01-01`, to: today }).total), [state, today]);
   const live = useMemo(
     () =>
@@ -461,8 +492,10 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
     return () => ro.disconnect();
   }, []);
   const h = bubbles[0]?.h ?? 1;
-  const max = Math.max(1, ...series.map((p) => p.mrr));
-  const path = series.map((p, i) => `${i ? 'L' : 'M'}${((i / (series.length - 1)) * 100).toFixed(2)},${(30 - (p.mrr / max) * 28).toFixed(2)}`).join('');
+  const max = Math.max(1, ...series.map((p) => p.partial.value));
+  const path = series
+    .map((p, i) => `${i ? 'L' : 'M'}${((i / (series.length - 1)) * 100).toFixed(2)},${(30 - (p.partial.value / max) * 28).toFixed(2)}`)
+    .join('');
   const [hover, setHover] = useState<number | null>(null);
   const hv = hover != null ? live[hover] : undefined;
 
@@ -476,7 +509,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
           {t('overview.stmt.kicker')}
         </CardTitle>
         <div className="stmt-num">
-          <Amount value={-tot.mrr} ccy={base} />
+          <FxAmount total={tot.partial.mrr} direction={-1} ccy={base} />
         </div>
         <div className="stmt-delta">
           <span className={delta > 0.5 ? 'up' : delta < -0.5 ? 'down' : ''}>
@@ -495,10 +528,10 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
           </defs>
         </svg>
         <MetricCards plain>
-          <Metric label={t('overview.stmt.annual')} value={flow(-tot.mrr * 12, base, { compact: true })} />
+          <Metric label={t('overview.stmt.annual')} value={formatTotal(scaleTotal(tot.partial.mrr, 12), base, { direction: -1, compact: true, main: true })} />
           <Metric
             label={t('overview.stmt.ytd', { year: today.slice(0, 4) })}
-            value={flow(-ytd, base, { compact: true })}
+            value={formatTotal(ytd, base, { direction: -1, compact: true, main: true })}
             note={
               <div className="stmt-paid-note">
                 {!state.readonly && loss !== 0 && (
@@ -509,8 +542,19 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
               </div>
             }
           />
-          <Metric label={t('overview.stmt.perDay')} value={flow(-tot.mrr / DAYS_PER_MONTH, base)} />
-          <Metric label={t('overview.stmt.active')} value={tot.activeCount} note={tot.incomplete ? t('core.fxIncomplete') : undefined} />
+          <Metric
+            label={t('overview.stmt.perDay')}
+            value={formatTotal(scaleTotal(tot.partial.mrr, 1 / DAYS_PER_MONTH), base, { direction: -1, main: true, average: true })}
+          />
+          <Metric
+            label={t('overview.stmt.active')}
+            value={tot.activeCount}
+            note={
+              [totalNote(tot.partial.mrr), ytd.incomplete ? `${t('overview.stmt.ytd', { year: today.slice(0, 4) })}: ${totalNote(ytd)}` : '']
+                .filter(Boolean)
+                .join('\n') || undefined
+            }
+          />
         </MetricCards>
       </div>
       <div className="stmt-r">
@@ -518,7 +562,11 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
           {hv ? (
             <>
               <b>{hv.s.name}</b> <span className="copy-gap" aria-hidden="true" />{' '}
-              {copyParts(t('overview.stmt.share', { amount: flow(-hv.v, base, { compact: true }), pct: Math.round((hv.v / tot.mrr) * 100) }))}
+              {copyParts(
+                tot.incomplete
+                  ? flow(-hv.v, base, { compact: true })
+                  : t('overview.stmt.share', { amount: flow(-hv.v, base, { compact: true }), pct: Math.round((hv.v / tot.mrr) * 100) }),
+              )}
             </>
           ) : (
             <>{copyParts(t('overview.stmt.caption'))}</>

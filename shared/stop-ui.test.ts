@@ -1,5 +1,6 @@
+import * as fxTotals from './fx-total.ts';
 import { readUiSource } from '../scripts/ui-test-source.ts';
-import { metricComponents } from '../scripts/ui-test-components.ts';
+import { metricComponents, fxAmountComponent } from '../scripts/ui-test-components.ts';
 import * as transfers from './transfers.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -85,6 +86,8 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     ...gantt,
     ...metrics,
     ...fx,
+    ...fxTotals,
+    FxAmount: fxAmountComponent(extra.React ?? React, 'Amount'),
     getState: () => ({ methods: [], settings: DEFAULT_SETTINGS }),
     ...carpool,
     perBill: (key: string) => key,

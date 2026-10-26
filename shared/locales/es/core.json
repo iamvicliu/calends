@@ -231,5 +231,7 @@
     "nextDue": "fecha del próximo pago",
     "end": "fecha de fin"
   },
-  "fxIncomplete": "Algunos importes no se pueden convertir porque faltan tipos de cambio, así que el resultado está incompleto."
+  "fxIncomplete": "Algunos importes no se pueden convertir porque faltan tipos de cambio, así que el resultado está incompleto.",
+  "fxUnconverted": "Sin convertir: {amount}",
+  "fxOther": "y otras {count} monedas"
 }

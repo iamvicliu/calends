@@ -1,3 +1,4 @@
+import { amountTotal, chargesTotal, type FxTotal } from '../../shared/fx-total.ts';
 import { personSummary } from '../../shared/avatar.ts';
 import {
   renewalDates,
@@ -23,17 +24,22 @@ import {
 } from '../../shared/billing.ts';
 import { chargeBaseOrNaN, toBaseOrNaN } from '../../shared/fx.ts';
 import { paidThrough, type LedgerPeriod } from '../../shared/receivables.ts';
-import { type PersonLedger } from '../../shared/people.ts';
+import { personAmounts, type PersonLedger } from '../../shared/people.ts';
 import type { AppState, Person, ShareMember, Subscription } from '../../shared/types.ts';
 import { carRule, followsCar } from '../../shared/carpool.ts';
 
 export function money(st: AppState, amount: number, currency: string, date?: string, to = st.settings.baseCurrency) {
   const conv = !Number.isFinite(amount) ? NaN : currency === to ? amount : toBaseOrNaN(st, amount, currency, date, to);
-  return { amount: fin(amount), currency, converted: fin(conv), convertedCurrency: to };
+  return { amount: fin(amount), currency, converted: fin(conv), convertedCurrency: to, ...partialOut(amountTotal(amount, currency, conv)) };
 }
 
 export const round = (n: number) => Math.round(n * 100) / 100;
 
+/** Additive partial totals; existing null and FX-gap fields retain their meaning. */
+export const partialOut = (total: FxTotal) => ({
+  known_total: round(total.value),
+  unconverted: Object.fromEntries(Object.entries(total.unconverted).map(([c, v]) => [c, round(v)])),
+});
 export const fin = (n: number): number | null => (Number.isFinite(n) ? round(n) : null);
 
 export function fxGaps() {
@@ -62,7 +68,10 @@ export const contactLine = (p: Pick<Person, 'contactVia' | 'contact'>) => {
 
 export function personRow(st: AppState, l: PersonLedger, out: string, today: string) {
   const conv = (v: number) => fin(toBaseOrNaN(st, v, st.settings.baseCurrency, undefined, out));
+  const partial = personAmounts(st, l, today, out);
   return {
+    ...partialOut(partial.owed),
+    totals: { owed: partialOut(partial.owed), received: partialOut(partial.received) },
     person_id: l.person.id || null,
     name: l.person.name,
     contact: contactLine(l.person),
@@ -230,7 +239,7 @@ export function computedOf(st: AppState, s: Subscription, today: string) {
     status: effectiveStatus(s, today),
     next_charge: nextCharge(s, today) ?? null,
     last_charge: lastCharge(s, today) ?? null,
-    spent_total: { amount: fin(spent), currency: st.settings.baseCurrency, charges: all.length, ...gaps.out() },
+    spent_total: { amount: fin(spent), currency: st.settings.baseCurrency, charges: all.length, ...gaps.out(), ...partialOut(chargesTotal(st, all)) },
     stop: stopSummary(currentPhase(s, today), today) ?? null,
   };
 }

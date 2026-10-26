@@ -5531,7 +5531,7 @@
                               "props": {
                                 "key": 0
                               },
-                              "children": ["—"]
+                              "children": ["−XCD 20.00"]
                             },
                             {
                               "type": "span",
@@ -5610,14 +5610,14 @@
                     "props": {
                       "className": "metric-value "
                     },
-                    "children": ["—"]
+                    "children": ["−XCD 200"]
                   },
                   {
                     "type": "div",
                     "props": {
                       "className": "metric-note"
                     },
-                    "children": ["detail.stats.count"]
+                    "children": ["core.fxUnconverted"]
                   }
                 ]
               },
@@ -5651,9 +5651,15 @@
                     "props": {
                       "className": "metric-value "
                     },
-                    "children": ["—"]
+                    "children": ["−XCD 20"]
                   },
-                  false
+                  {
+                    "type": "div",
+                    "props": {
+                      "className": "metric-note"
+                    },
+                    "children": ["core.fxUnconverted\ndetail.kpi.perDay"]
+                  }
                 ]
               }
             ]
@@ -5714,7 +5720,7 @@
                           "props": {
                             "key": 0
                           },
-                          "children": ["—"]
+                          "children": ["−XCD 20.00"]
                         },
                         {
                           "type": "span",
@@ -5793,14 +5799,14 @@
                 "props": {
                   "className": "metric-value "
                 },
-                "children": ["—"]
+                "children": ["−XCD 200"]
               },
               {
                 "type": "div",
                 "props": {
                   "className": "metric-note"
                 },
-                "children": ["detail.stats.count"]
+                "children": ["core.fxUnconverted"]
               }
             ]
           },
@@ -5834,9 +5840,15 @@
                 "props": {
                   "className": "metric-value "
                 },
-                "children": ["—"]
+                "children": ["−XCD 20"]
               },
-              false
+              {
+                "type": "div",
+                "props": {
+                  "className": "metric-note"
+                },
+                "children": ["core.fxUnconverted\ndetail.kpi.perDay"]
+              }
             ]
           }
         ]
@@ -5888,7 +5900,7 @@
                     "props": {
                       "key": 0
                     },
-                    "children": ["—"]
+                    "children": ["−XCD 20.00"]
                   },
                   {
                     "type": "span",
@@ -5948,7 +5960,7 @@
                 "props": {
                   "key": 0
                 },
-                "children": ["—"]
+                "children": ["−XCD 20.00"]
               },
               {
                 "type": "span",
@@ -5974,7 +5986,7 @@
             "props": {
               "key": 0
             },
-            "children": ["—"]
+            "children": ["−XCD 20.00"]
           },
           {
             "type": "span",
@@ -5991,7 +6003,7 @@
       "props": {
         "key": 0
       },
-      "children": ["—"]
+      "children": ["−XCD 20.00"]
     },
     {
       "type": "span",
@@ -6096,14 +6108,14 @@
           "props": {
             "className": "metric-value "
           },
-          "children": ["—"]
+          "children": ["−XCD 200"]
         },
         {
           "type": "div",
           "props": {
             "className": "metric-note"
           },
-          "children": ["detail.stats.count"]
+          "children": ["core.fxUnconverted"]
         }
       ]
     },
@@ -6131,14 +6143,14 @@
       "props": {
         "className": "metric-value "
       },
-      "children": ["—"]
+      "children": ["−XCD 200"]
     },
     {
       "type": "div",
       "props": {
         "className": "metric-note"
       },
-      "children": ["detail.stats.count"]
+      "children": ["core.fxUnconverted"]
     },
     {
       "type": "div",
@@ -6170,9 +6182,15 @@
           "props": {
             "className": "metric-value "
           },
-          "children": ["—"]
+          "children": ["−XCD 20"]
         },
-        false
+        {
+          "type": "div",
+          "props": {
+            "className": "metric-note"
+          },
+          "children": ["core.fxUnconverted\ndetail.kpi.perDay"]
+        }
       ]
     },
     {
@@ -6208,7 +6226,14 @@
       "props": {
         "className": "metric-value "
       },
-      "children": ["—"]
+      "children": ["−XCD 20"]
+    },
+    {
+      "type": "div",
+      "props": {
+        "className": "metric-note"
+      },
+      "children": ["core.fxUnconverted\ndetail.kpi.perDay"]
     }
   ],
   "missing-fx/CarFacts": [
@@ -6247,7 +6272,7 @@
                       {
                         "type": "b",
                         "props": {},
-                        "children": ["—"]
+                        "children": ["−XCD 240"]
                       }
                     ]
                   },
@@ -6281,7 +6306,7 @@
                       {
                         "type": "b",
                         "props": {},
-                        "children": ["—"]
+                        "children": ["+$60 + −XCD 240"]
                       }
                     ]
                   }
@@ -6321,7 +6346,7 @@
                   {
                     "type": "b",
                     "props": {},
-                    "children": ["—"]
+                    "children": ["−XCD 240"]
                   }
                 ]
               },
@@ -6355,7 +6380,7 @@
                   {
                     "type": "b",
                     "props": {},
-                    "children": ["—"]
+                    "children": ["+$60 + −XCD 240"]
                   }
                 ]
               }
@@ -6383,7 +6408,7 @@
               {
                 "type": "b",
                 "props": {},
-                "children": ["—"]
+                "children": ["−XCD 240"]
               }
             ]
           },
@@ -6417,7 +6442,7 @@
               {
                 "type": "b",
                 "props": {},
-                "children": ["—"]
+                "children": ["+$60 + −XCD 240"]
               }
             ]
           }
@@ -6436,7 +6461,7 @@
         {
           "type": "b",
           "props": {},
-          "children": ["—"]
+          "children": ["−XCD 240"]
         }
       ]
     },
@@ -6448,7 +6473,7 @@
     {
       "type": "b",
       "props": {},
-      "children": ["—"]
+      "children": ["−XCD 240"]
     },
     {
       "type": "div",
@@ -6492,7 +6517,7 @@
         {
           "type": "b",
           "props": {},
-          "children": ["—"]
+          "children": ["+$60 + −XCD 240"]
         }
       ]
     },
@@ -6504,7 +6529,7 @@
     {
       "type": "b",
       "props": {},
-      "children": ["—"]
+      "children": ["+$60 + −XCD 240"]
     }
   ],
   "missing-fx/MemberForm": [
@@ -8129,9 +8154,15 @@
           "props": {
             "className": "metric-value warn"
           },
-          "children": ["≈ $0"]
+          "children": ["≈ XCD 200"]
         },
-        false
+        {
+          "type": "div",
+          "props": {
+            "className": "metric-note"
+          },
+          "children": ["core.fxUnconverted"]
+        }
       ]
     },
     {
@@ -8158,7 +8189,14 @@
       "props": {
         "className": "metric-value warn"
       },
-      "children": ["≈ $0"]
+      "children": ["≈ XCD 200"]
+    },
+    {
+      "type": "div",
+      "props": {
+        "className": "metric-note"
+      },
+      "children": ["core.fxUnconverted"]
     }
   ],
   "proposal": [

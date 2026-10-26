@@ -1,6 +1,7 @@
+import { amountTotal, formatTotal, sumTotals } from '../../../../shared/fx-total.ts';
 import { ShareAvatars } from '../../components/ShareAvatars.tsx';
-import { addDays, diffDays, type MemberDue, nextCharge } from '../../../../shared/billing.ts';
-import { flow, cnDate, cnDateFull, money, relDays } from '../../../../shared/format.ts';
+import { addDays, diffDays, convert, type MemberDue, nextCharge } from '../../../../shared/billing.ts';
+import { cnDate, cnDateFull, money, relDays } from '../../../../shared/format.ts';
 import { t } from '../../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../../shared/types.ts';
 
@@ -43,7 +44,6 @@ export function CarTable({
   onOpen: (id: string) => void;
 }) {
   const base = state.settings.baseCurrency;
-  const fmt = (v: number) => flow(v, base, { compact: true });
   return (
     <div className="ltable-wrap">
       <div className="ltable lt-x car-lt" role="table">
@@ -69,7 +69,7 @@ export function CarTable({
           const free = carpoolRoster(s, today).vacancies;
           const next = on ? nextCharge(s, addDays(today, 1)) : undefined;
           const dues = duesOf(s).filter((d) => d.periodsOwed > 0);
-          const owed = owedOf(s);
+          void owedOf;
           const year = years.get(s.id) ?? carYear(state, s, today);
           const rule = carRule(state, s, today);
           return (
@@ -94,7 +94,11 @@ export function CarTable({
                   <StatusPill tone="stop">{t('family.pool.filter.ended')}</StatusPill>
                 ) : dues.length ? (
                   <StatusPill tone="owe">
-                    {Number.isFinite(owed) ? t('family.pool.owedAmount', { amount: money(owed, base, { compact: true }) }) : t('family.pool.owed')}
+                    {t('family.pool.owedAmount', {
+                      amount: formatTotal(sumTotals(dues.map((d) => amountTotal(d.owed, d.currency, convert(d.owed, d.currency, base, state.fx)))), base, {
+                        compact: true,
+                      }),
+                    })}
                   </StatusPill>
                 ) : s.share!.members.length ? (
                   <StatusPill tone="done">{t('family.pool.settled')}</StatusPill>
@@ -125,12 +129,14 @@ export function CarTable({
               </span>
               {/* 当年盈亏：今年的成本对比成员今年的收入，小字是收入；停止与买断的车同样有今年的账 */}
               <span className="lt-num">
-                <span className={Math.abs(year.net) < 0.5 ? undefined : year.net > 0 ? 'gain' : 'loss'}>{fmt(year.net)}</span>
-                <small>{t('family.pool.incomeShort', { amount: fmt(year.income) })}</small>
+                <span className={Math.abs(year.net) < 0.5 ? undefined : year.net > 0 ? 'gain' : 'loss'}>
+                  {formatTotal(year.partial.net, base, { direction: 1, compact: true })}
+                </span>
+                <small>{t('family.pool.incomeShort', { amount: formatTotal(year.partial.income, base, { direction: 1, compact: true }) })}</small>
               </span>
               {/* 累计盈亏：发起至今收回减付出，与代付的盈亏同一口径；与左边的当年盈亏成对 */}
               <span className={`lt-num ${Math.abs(book.net) < 0.5 ? '' : book.net < 0 ? 'gain' : 'loss'}`}>
-                {Math.abs(book.net) < 0.5 ? t('proxy.table.even') : fmt(-book.net)}
+                {Math.abs(book.net) < 0.5 ? t('proxy.table.even') : formatTotal(book.partial.net, base, { direction: -1, compact: true })}
               </span>
             </button>
           );

@@ -1,3 +1,5 @@
+import { amountTotal, chargesTotal, emptyTotal, sumTotals, type FxTotal } from '../../shared/fx-total.ts';
+import { partialOut } from './tool-views.ts';
 import {
   renewalDates,
   chargeMethodId,
@@ -22,7 +24,7 @@ import { chargeBaseOrNaN, toBaseOrNaN } from '../../shared/fx.ts';
 import { cancelSavings, cashVsAccrual, events, insights, movement, mrrSeries, prepaidValue, stopLosses, topUpPlan, yearReview } from '../../shared/metrics.ts';
 import { proxyLedger } from '../../shared/proxy.ts';
 import { paidThrough } from '../../shared/receivables.ts';
-import { normName, peopleLedger } from '../../shared/people.ts';
+import { normName, peopleLedger, personAmounts } from '../../shared/people.ts';
 import { t } from '../../shared/i18n.ts';
 import { searchAppStore } from '../appstore.ts';
 import { filteredSubs, LIST_FILTER, monthReportOut, scopeReportOut } from './report-tools.ts';
@@ -51,6 +53,7 @@ export const get_overview: Tool = {
       base_currency: st.settings.baseCurrency,
       currency_out: out,
       ...figures,
+      ...partialOut(totals({ ...st, settings: { ...st.settings, baseCurrency: out } }, today).partial.mrr),
       // 缺汇率时总数为 null：列出没有当前汇率的币种（包括换算目标）
       incomplete: gaps.out().incomplete,
       fx_missing: gaps.out().incomplete ? missingRates(st, [out, ...st.subscriptions.flatMap((s) => phaseSubs(s).map((v) => v.currency))]) : [],
@@ -150,7 +153,12 @@ export const list_subscriptions: Tool = {
     rows = rows.slice(0, Number(a.limit ?? 100));
     const gaps = fxGaps();
     for (const r of rows) for (const m of [r.price, r.monthly]) gaps.note(m.converted, m.currency);
-    return { count: rows.length, ...gaps.out(), items: rows };
+    return {
+      count: rows.length,
+      ...gaps.out(),
+      ...partialOut(sumTotals(rows.map((r) => amountTotal(r.monthly.amount ?? NaN, r.monthly.currency, r.monthly.converted ?? NaN)))),
+      items: rows,
+    };
   },
 };
 
@@ -184,6 +192,7 @@ export const get_subscription: Tool = {
       expires: renewalDates(s, today).serviceExpires ?? null,
       spent_total: {
         amount: fin(spent),
+        ...partialOut(chargesTotal(st, all, out ?? st.settings.baseCurrency)),
         ...gaps.out(),
         currency: out ?? st.settings.baseCurrency,
         charges: all.length,
@@ -204,6 +213,7 @@ export const get_subscription: Tool = {
       net_cost: (() => {
         const c = netCost(st, s, today, out ?? st.settings.baseCurrency);
         return {
+          ...partialOut(c.partial),
           currency: c.currency,
           service: fin(c.service),
           bought: fin(c.bought),
@@ -306,6 +316,7 @@ export const list_charges: Tool = {
       count: items.length,
       total: sum('converted'),
       my_total: sum('my'),
+      ...partialOut(chargesTotal(st, charges, out ?? st.settings.baseCurrency)),
       incomplete: missing.length > 0,
       fx_missing: missing,
       items,
@@ -336,11 +347,12 @@ export const spending_stats: Tool = {
     const scope = str(a.scope) ?? 'mine';
     const by = str(a.group_by) ?? 'category';
     const ids = a.filter ? new Set(filteredSubs(st, today, a.filter as Record<string, unknown>).map((s) => s.id)) : undefined;
-    const groups = new Map<string, { key: string; label: string; total: number; count: number; missing: boolean }>();
+    const groups = new Map<string, { key: string; label: string; total: number; count: number; missing: boolean; partial: FxTotal }>();
     const fxMissing = new Set<string>();
     let total = 0;
-    const add = (key: string, label: string, v: number, ccy: string) => {
-      const g = groups.get(key) ?? { key, label, total: 0, count: 0, missing: false };
+    const add = (key: string, label: string, v: number, ccy: string, original: number) => {
+      const g = groups.get(key) ?? { key, label, total: 0, count: 0, missing: false, partial: emptyTotal() };
+      g.partial = sumTotals([g.partial, amountTotal(original, ccy, v)]);
       if (Number.isFinite(v)) g.total += v;
       else {
         g.missing = true;
@@ -360,7 +372,13 @@ export const spending_stats: Tool = {
       for (const x of by === 'method' ? chargeSources(c) : [{ methodId: chargeMethodId(c), share: 1 }]) {
         const m = st.methods.find((y) => y.id === x.methodId);
         const [key, label] = groupOf(by, c, sub, m);
-        add(key, label, v * x.share, ccy);
+        add(
+          key,
+          label,
+          v * x.share,
+          ccy,
+          (c.settled && !c.projected ? c.settled.amount : c.amount) * (scope === 'mine' ? myShareFactor(c.sub, c.date) : 1) * x.share,
+        );
       }
       total += v;
     }
@@ -371,7 +389,7 @@ export const spending_stats: Tool = {
         const v = transferSign(r.transfer) * transferValue(st, r.transfer, out);
         const as = { date: r.date, currency: r.transfer.currency, sub: r.sub } as Charge;
         const [key, label] = by === 'method' ? ['transfer', t('mcp.label.transfer')] : groupOf(by, as, r.sub, undefined);
-        add(key, label, v, r.transfer.currency);
+        add(key, label, v, r.transfer.currency, transferSign(r.transfer) * r.transfer.amount);
         total += v;
         transferTotal += v;
       }
@@ -384,11 +402,13 @@ export const spending_stats: Tool = {
       currency: out,
       scope,
       total: ok ? round(total) : null,
+      ...partialOut(sumTotals(list.map((g) => g.partial))),
       ...(a.include_transfers === true ? { transfer_total: Number.isFinite(transferTotal) ? round(transferTotal) : null } : {}),
       incomplete: !ok,
       fx_missing: [...fxMissing].sort(),
-      groups: list.slice(0, Number(a.top ?? 30)).map(({ missing, ...g }) => ({
+      groups: list.slice(0, Number(a.top ?? 30)).map(({ missing, partial, ...g }) => ({
         ...g,
+        ...partialOut(partial),
         total: missing ? null : round(g.total),
         share_pct: missing || !ok ? null : total > 0 ? Math.round((g.total / total) * 1000) / 10 : 0,
       })),
@@ -410,11 +430,19 @@ export const get_trends: Tool = {
   async run(a, ctx) {
     const { st, today } = await state(ctx);
     const metric = str(a.metric) ?? 'mrr';
-    if (metric === 'mrr') return { currency: st.settings.baseCurrency, points: mrrSeries(st, today, Number(a.months_back ?? 12)).map((p) => roundAll(p)) };
+    if (metric === 'mrr')
+      return {
+        currency: st.settings.baseCurrency,
+        points: mrrSeries(st, today, Number(a.months_back ?? 12)).map((p) => ({ ...roundAll(p), ...partialOut(p.partial) })),
+      };
     if (metric === 'cash_vs_accrual')
       return {
         currency: st.settings.baseCurrency,
-        points: cashVsAccrual(st, today, Number(a.months_back ?? 12), Number(a.months_forward ?? 3)).map((p) => roundAll(p)),
+        points: cashVsAccrual(st, today, Number(a.months_back ?? 12), Number(a.months_forward ?? 3)).map((p) => ({
+          ...roundAll(p),
+          ...partialOut(p.partial.cash),
+          totals: { cash: partialOut(p.partial.cash), accrual: partialOut(p.partial.accrual) },
+        })),
       };
     const mv = movement(st, date(a.from, 'from', addMonths(today, -1)), date(a.to, 'to', today));
     return {
@@ -487,7 +515,14 @@ export const list_people: Tool = {
     const list = peopleLedger(st, today).filter((l) => (!q || normName(l.person.name).includes(q)) && (!a.owing_only || l.periodsOwed > 0));
     const rows = list.map((l) => personRow(st, l, out, today));
     const total = rows.reduce((x, r) => x + (r.owed ?? NaN), 0);
-    return { currency: out, count: rows.length, total_owed: fin(total), incomplete: !Number.isFinite(total), people: rows };
+    return {
+      currency: out,
+      count: rows.length,
+      total_owed: fin(total),
+      incomplete: !Number.isFinite(total),
+      ...partialOut(sumTotals(list.map((l) => personAmounts(st, l, today, out).owed))),
+      people: rows,
+    };
   },
 };
 
@@ -545,7 +580,20 @@ export const get_receivables: Tool = {
       .map((l) => ({ ...l, owed: l.items.reduce((a, i) => a + i.owed, 0), periodsOwed: l.items.reduce((a, i) => a + i.periodsOwed, 0) }))
       .map((l) => personRow(st, l, out, today))
       .sort((a, b) => (b.owed ?? Infinity) - (a.owed ?? Infinity) || 0);
-    return { currency: out, total_outstanding: fin(total), ...gaps.out(), by_person, share, proxy };
+    return {
+      currency: out,
+      total_outstanding: fin(total),
+      ...gaps.out(),
+      ...partialOut(
+        sumTotals([
+          ...share.map((x) => amountTotal(x.owed.amount ?? NaN, x.owed.currency, x.owed.converted ?? NaN)),
+          ...proxy.map((x) => amountTotal(x.charged.amount ?? NaN, x.charged.currency, x.charged.converted ?? NaN)),
+        ]),
+      ),
+      by_person,
+      share,
+      proxy,
+    };
   },
 };
 
@@ -579,6 +627,7 @@ export const get_insights: Tool = {
         stop_loss: Number.isFinite(r.stopLoss) ? round(r.stopLoss) : null,
         stop_loss_incomplete: !Number.isFinite(r.stopLoss),
         total: fin(r.total),
+        ...partialOut(r.partial.total),
         charges: r.charges,
         per_day: fin(r.perDay),
         currencies: r.currencies,
@@ -593,7 +642,8 @@ export const get_insights: Tool = {
       const p = prepaidValue(st, today);
       return {
         currency: base,
-        total: fin(p.total),
+        total: p.partial.incomplete ? null : fin(p.total),
+        ...partialOut(p.partial),
         unused_total: Number.isFinite(p.unusedTotal) ? round(p.unusedTotal) : null,
         unused_incomplete: p.unusedIncomplete,
         unused_items: p.unusedItems.map((i) => ({ name: i.sub.name, value: Number.isFinite(i.value) ? round(i.value) : null, until: i.until })),
@@ -607,6 +657,7 @@ export const get_insights: Tool = {
         currency: base,
         as_of: today,
         total: baseAmount(losses.total),
+        ...partialOut(losses.partial),
         incomplete: losses.incomplete,
         by_type: { cancel: baseAmount(losses.byKind.cancel), terminate: baseAmount(losses.byKind.terminate) },
         items: losses.items.map((i) => ({
@@ -634,8 +685,9 @@ export const get_insights: Tool = {
     const c = cancelSavings(st, today);
     return {
       currency: base,
-      total: fin(c.total),
-      incomplete: !Number.isFinite(c.total),
+      total: c.partial.incomplete ? null : fin(c.total),
+      ...partialOut(c.partial),
+      incomplete: c.partial.incomplete,
       items: c.items.map((i) => ({ name: i.sub.name, saved: fin(i.saved), since: i.since, monthly: fin(i.monthly) })),
     };
   },
