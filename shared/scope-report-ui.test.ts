@@ -2567,6 +2567,36 @@ test('所有入口打开同一个成员弹窗：欠款或明确收款时收款�
   assert.equal(m.receipts!.length, 2);
   assert.deepEqual(m.receipts!.at(-1)!.periods, ['2025-07-17']);
   assert.equal(closed, true);
+  // 不再有收款 / 免收切换；底部「免收」直接把勾的期记成免收，不记金额
+  saved = undefined;
+  const fresh = harness(
+    '../app/src/views/Members.tsx',
+    'ReceiptForm',
+    {},
+    {
+      ...carpool,
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      todayIn: () => today,
+      getState: () => ({ ...st, subscriptions: [sub] }),
+      run: (fn: () => Promise<unknown>) => fn(),
+      saveSub: async (next: Subscription) => {
+        saved = next;
+      },
+    },
+  ).render('ReceiptForm', { state: st, s: sub, member, onDone() {} });
+  assert.equal(
+    fresh.some((n) => n.type === 'Seg'),
+    false,
+  );
+  const waive = all(fresh.find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.props.className === 'btn danger-soft')!;
+  assert.deepEqual(waive.children, ['receivable.modeWaiver']);
+  await waive.props.onClick();
+  const w = saved!.share!.members[0];
+  assert.deepEqual(w.waivers!.at(-1)!.periods, ['2025-07-17']);
+  assert.equal(w.receipts!.length, 1, 'waiving records no money');
 });
 
 test('欠了好几期：默认勾最早一期，再勾两期就补前三期，其余照样待收；免收的期画成已放弃', async () => {

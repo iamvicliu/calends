@@ -11,7 +11,7 @@ import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
 import { ask, Sheet, tipProps, tipSet, TipTable } from '../components/overlays.tsx';
 import { Cell, Group } from '../components/ui.tsx';
-import { NumInput, Seg, useSubmit } from '../components/inputs.tsx';
+import { NumInput, useSubmit } from '../components/inputs.tsx';
 import { run } from '../toast.ts';
 
 /** 一期的起止：起始日带年份，同一年内的结束日不重复年份 */
@@ -64,7 +64,8 @@ export function ReceivableSheet({
   // 往后算到哪天：先算两年，点「更多」时按需往后延，没有尽头
   const [horizon, setHorizon] = useState(() => addMonths(today, 24));
   const periods = ledger(horizon);
-  const [mode, setMode] = useState<'receipt' | 'waiver'>(edit && !isReceipt(edit) ? 'waiver' : 'receipt');
+  // 改一笔时沿用它的类型；新记一笔默认是收款，底部「免收」把勾的期记成免收
+  const mode = edit && !isReceipt(edit) ? 'waiver' : 'receipt';
   // 修改旧记录时，期按现在的切法对上；对不上的单独列出
   const [keys, setKeys] = useState<string[]>(() =>
     edit
@@ -104,7 +105,8 @@ export function ReceivableSheet({
   // 指向已不存在的期（改过加入日、收费周期）的旧记录：列出来，取消勾选后才能保存
   const lost = keys.filter((k) => !periods.some((p) => p.key === k));
   const [saving, guard] = useSubmit();
-  const invalid = saving || !keys.length || lost.length > 0 || !date || (mode === 'receipt' && (!Number.isFinite(amount) || amount < 0));
+  const blocked = saving || !keys.length || lost.length > 0 || !date;
+  const invalid = blocked || (mode === 'receipt' && (!Number.isFinite(amount) || amount < 0));
   const toggle = (k: string) => setKeys((ks) => (ks.includes(k) ? ks.filter((x) => x !== k) : [...ks, k].sort()));
 
   // 失败时 run 提示错误，表单保留，可直接重试
@@ -115,13 +117,13 @@ export function ReceivableSheet({
         onDone();
       }, msg),
     );
-  const submit = () => {
-    if (invalid) return;
+  const submit = (kind: 'receipt' | 'waiver' = mode) => {
+    if (kind === 'receipt' ? invalid : blocked) return;
     const id = edit?.id ?? uid();
     const base = { id, date, periods: keys, ...(note.trim() ? { note: note.trim() } : {}) };
     return write(
-      () => (mode === 'receipt' ? putRecord(record, 'receipt', { ...base, amount, currency }, periods) : putRecord(record, 'waiver', base, periods)),
-      mode === 'receipt' ? t('receivable.toastReceived', { amount: flow(amount, currency) }) : t('receivable.toastWaived', { count: keys.length }),
+      () => (kind === 'receipt' ? putRecord(record, 'receipt', { ...base, amount, currency }, periods) : putRecord(record, 'waiver', base, periods)),
+      kind === 'receipt' ? t('receivable.toastReceived', { amount: flow(amount, currency) }) : t('receivable.toastWaived', { count: keys.length }),
     );
   };
 
@@ -145,11 +147,16 @@ export function ReceivableSheet({
               {t('common.delete')}
             </button>
           )}
+          {!edit && (
+            <button className="btn danger-soft" disabled={blocked} title={t('receivable.waiverFoot')} onClick={() => submit('waiver')}>
+              {t('receivable.modeWaiver')}
+            </button>
+          )}
           <span className="grow" />
           <button className="btn" onClick={onDone}>
             {t('common.cancel')}
           </button>
-          <button className="btn primary" disabled={invalid} onClick={submit}>
+          <button className="btn primary" disabled={invalid} onClick={() => submit()}>
             {edit ? t('common.save') : mode === 'receipt' ? t('receivable.record') : t('receivable.waive')}
           </button>
         </>
@@ -157,16 +164,6 @@ export function ReceivableSheet({
     >
       <div className="stack">
         {head}
-        <div className="cell">
-          <Seg
-            value={mode}
-            onChange={setMode}
-            options={[
-              ['receipt', t('receivable.modeReceipt')],
-              ['waiver', t('receivable.modeWaiver')],
-            ]}
-          />
-        </div>
         <Group title={t('receivable.periods')} foot={mode === 'waiver' ? t('receivable.waiverFoot') : keys.length > 1 ? t('receivable.splitFoot') : undefined}>
           {open.length === 0 && !lost.length && <div className="cell muted">{t('receivable.allSettled')}</div>}
           {lost.map((k) => (

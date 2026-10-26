@@ -4400,6 +4400,15 @@ button.h-price-row:focus-visible {
   font-size: var(--fs-1);
   color: var(--label-3);
 }
+/* 次要的「不收钱」操作（免收）：浅红底红字，放在主按钮左边 */
+.btn.danger-soft {
+  background: var(--red-3);
+  color: var(--red);
+  box-shadow: none;
+}
+.btn.danger-soft:hover {
+  background: color-mix(in srgb, var(--red-3) 80%, var(--red));
+}
 /* 危险操作的主按钮（确认删除、吊销等）：红底白字 */
 .btn.danger-solid {
   background: var(--red-9);
