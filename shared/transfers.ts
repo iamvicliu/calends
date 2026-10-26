@@ -1,3 +1,4 @@
+import { DAYS_PER_MONTH } from './billing.ts';
 // 转让收付：二手转入时付给原主的钱、转出时收到的钱。都是实际现金，不推算剩余服务价值。
 // 不是服务商扣款：不进 MRR、续费预测、余额消耗、退款与扣款笔数；只进生命周期净成本和年度、月度现金流。
 import { chargesBetween, CURRENCY_CODE, diffDays, servedTime, validDay } from './billing.ts';
@@ -5,7 +6,6 @@ import { chargeBaseOrNaN, convertOn } from './fx.ts';
 import { t } from './i18n.ts';
 import type { AppState, Subscription, Transfer } from './types.ts';
 
-const MONTH = 30.44;
 
 /** 按日期排好的转让记录（同一天保持存储顺序）；没有时为空 */
 export function transfersOf(s: Pick<Subscription, 'transfers'>): Transfer[] {
@@ -75,7 +75,7 @@ export function netCost(state: AppState, s: Subscription, today: string, to = st
   }
   const net = service + bought - sold;
   const held = holdingPeriod(s, today);
-  const perMonth = net / Math.max(1, held.days / MONTH);
+  const perMonth = net / Math.max(1, held.days / DAYS_PER_MONTH);
   return {
     currency: to,
     service,
@@ -85,7 +85,7 @@ export function netCost(state: AppState, s: Subscription, today: string, to = st
     net,
     ...held,
     perMonth,
-    perDay: perMonth / MONTH,
+    perDay: perMonth / DAYS_PER_MONTH,
     incomplete: !Number.isFinite(service) || !Number.isFinite(bought) || !Number.isFinite(sold),
   };
 }

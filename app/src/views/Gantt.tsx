@@ -1,3 +1,4 @@
+import { durationLabel } from '../../../shared/billing.ts';
 import { transferredStop } from '../../../shared/transfers.ts';
 import { stopDescription } from '../components/StopPanel.tsx';
 import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -53,7 +54,6 @@ const LANE = 21;
 /** 一个周期至少这么宽才按续费切开，太窄会密成一串圆点 */
 const CYCLE_MIN_PX = 28;
 const GAP_TUCK = 9;
-const span = (d: number) => (d >= 60 ? t('list.gantt.months', { count: Math.round(d / 30.4) }) : t('list.gantt.days', { count: d }));
 
 /**
  * 时间轴（甘特图）：一行一个订阅，一段一根条。
@@ -501,10 +501,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                             className="gt-gap"
                             // 两端各伸进相邻段的圆角下面，虚线和前后两段首尾相接
                             style={{ left: gl - GAP_TUCK, width: Math.max(0, x(g.to) - gl + GAP_TUCK * 2) }}
-                            title={t('list.gantt.gapTitle', { span: span(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}
+                            title={t('list.gantt.gapTitle', { span: durationLabel(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}
                           >
                             {gv.r - gv.l > 90 && (
-                              <em style={{ left: (gv.l + gv.r) / 2 - gl + GAP_TUCK }}>{t('list.gantt.gapShort', { span: span(diffDays(g.from, g.to)) })}</em>
+                              <em style={{ left: (gv.l + gv.r) / 2 - gl + GAP_TUCK }}>{t('list.gantt.gapShort', { span: durationLabel(diffDays(g.from, g.to)) })}</em>
                             )}
                           </span>
                         );

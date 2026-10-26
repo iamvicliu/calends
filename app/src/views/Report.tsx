@@ -1,3 +1,4 @@
+import { DAYS_PER_MONTH } from '../../../shared/billing.ts';
 import { paymentMethodGroups } from '../../../shared/payment-groups.ts';
 import { currentPhase } from '../../../shared/billing.ts';
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
@@ -73,7 +74,7 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
 /** 头部：负 MRR + 历史走势 */
 /** 从最早订阅所在月到今天的月数，至少 2 个月。放在组件外：Oxc 版 React Compiler 处理组件里的 Math.max 会内部报错并整组件放弃优化 */
 function monthsSince(first: string, today: string): number {
-  return Math.max(2, diffDays(first.slice(0, 8) + '01', today) / 30.4375 + 1);
+  return Math.max(2, diffDays(first.slice(0, 8) + '01', today) / DAYS_PER_MONTH + 1);
 }
 
 function Hero({ state, today }: { state: AppState; today: string }) {
@@ -109,7 +110,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
         </div>
         <MetricCards plain>
           <Metric label={t('report.hero.annual')} value={signed(-now * 12)} />
-          <Metric label={t('report.hero.perDay')} value={signed(-now / 30.4375, false)} />
+          <Metric label={t('report.hero.perDay')} value={signed(-now / DAYS_PER_MONTH, false)} />
           <Metric label={t('report.hero.active')} value={tot.activeCount} note={tot.incomplete ? t('core.fxIncomplete') : undefined} />
           {tot.recoverMrr > 1 && <Metric label={t('report.hero.recover')} value={signed(tot.recoverMrr)} valueClassName="gain" />}
         </MetricCards>

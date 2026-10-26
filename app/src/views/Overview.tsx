@@ -1,3 +1,4 @@
+import { DAYS_PER_MONTH } from '../../../shared/billing.ts';
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { base as appPath } from '../base.ts';
@@ -508,7 +509,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
               </div>
             }
           />
-          <Metric label={t('overview.stmt.perDay')} value={flow(-tot.mrr / 30.4375, base)} />
+          <Metric label={t('overview.stmt.perDay')} value={flow(-tot.mrr / DAYS_PER_MONTH, base)} />
           <Metric label={t('overview.stmt.active')} value={tot.activeCount} note={tot.incomplete ? t('core.fxIncomplete') : undefined} />
         </MetricCards>
       </div>

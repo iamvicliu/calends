@@ -1,3 +1,4 @@
+import { DAYS_PER_MONTH } from './billing.ts';
 import { addDays, addMonths, diffDays, parseDay } from './billing.ts';
 import { dateFormat } from './intl.ts';
 
@@ -70,7 +71,7 @@ export function ganttTicks(zoom: GanttZoom, start: string, end: string, width: n
     const weekday = new Date(parseDay(start)).getUTCDay();
     for (let d = addDays(start, (8 - weekday) % 7); d <= end; d = addDays(d, 7)) dates.push(d);
   } else {
-    const monthPx = k * 30.4;
+    const monthPx = k * DAYS_PER_MONTH;
     const every = [1, 2, 3, 6, 12].find((n) => n >= (zoom === '3y' ? 3 : 1) && monthPx * n >= 40) ?? 12;
     for (let d = `${start.slice(0, 7)}-01`; d <= end; d = addMonths(d, 1)) {
       if (zoom === '6m') {

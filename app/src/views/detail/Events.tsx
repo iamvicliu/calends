@@ -1,3 +1,4 @@
+import { durationLabel } from '../../../../shared/billing.ts';
 import { copyParts } from '../../components/copy.tsx';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -57,13 +58,11 @@ export function Events({ sub, state, today }: { sub: Subscription; state: AppSta
   vs.forEach((v, i) => {
     const until = coveredUntil(vs, i);
     if (i > 0 && isGap(until, v.start)) {
-      const days = diffDays(until!, v.start);
-      const months = Math.round(days / 30.4375);
       evs.push({
         date: until!,
         icon: Unlink,
         // 「断更 N 个月」本身就是标题，不再另起一行重复「断更」
-        title: months >= 1 ? t('editor.history.gapMonths', { count: months }) : t('editor.history.gapDays', { count: days }),
+        title: durationLabel(diffDays(until!, v.start), 'gap'),
         tone: 'warn',
       });
     }

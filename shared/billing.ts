@@ -1241,3 +1241,10 @@ export function fnv1a(text: string): number {
 export function uid(): string {
   return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 }
+
+/** History's rounded-month rule is shared by every gap-duration label. */
+export function durationLabel(days: number, kind: 'duration' | 'gap' = 'duration'): string {
+  const months = Math.round(days / DAYS_PER_MONTH);
+  const key = kind === 'gap' ? (months >= 1 ? 'editor.history.gapMonths' : 'editor.history.gapDays') : (months >= 1 ? 'list.gantt.months' : 'list.gantt.days');
+  return t(key, { count: months >= 1 ? months : days });
+}

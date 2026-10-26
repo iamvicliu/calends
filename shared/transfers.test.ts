@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { FALLBACK_FX, subError } from './billing.ts';
+import { DAYS_PER_MONTH, FALLBACK_FX, subError } from './billing.ts';
 import { stopSubscription } from './phases.ts';
 import { mrrOn, stopLosses, yearReview } from './metrics.ts';
 import { monthReport } from './scope-report.ts';
@@ -48,8 +48,8 @@ test('净成本 = 服务付款 + 转入 − 转出，月均、日均按持有期
   assert.equal(c.charges, 6);
   // 持有期从接手到转出那天（不含），不是到今天
   assert.deepEqual([c.from, c.until, c.days], ['2025-01-10', '2025-06-20', 161]);
-  near(c.perMonth, -1900 / (161 / 30.44));
-  near(c.perDay, c.perMonth / 30.44);
+  near(c.perMonth, -1900 / (161 / DAYS_PER_MONTH));
+  near(c.perDay, c.perMonth / DAYS_PER_MONTH);
   assert.equal(c.incomplete, false);
   // 没有转让时与原来的累计一致
   const plain = vps();

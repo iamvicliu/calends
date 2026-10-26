@@ -1,3 +1,4 @@
+import { DAYS_PER_MONTH, durationLabel } from '../../../shared/billing.ts';
 import { copyParts } from '../components/copy.tsx';
 import { chargesBetween, currentPhase, cycleLabel, diffDays, effectiveStatus, phaseSubs, priceAt, servedTime, isStopped } from '../../../shared/billing.ts';
 import { cnDate, cnDateFull, money } from '../../../shared/format.ts';
@@ -40,7 +41,7 @@ function story(state: AppState, sub: Subscription, today: string) {
   const p1 = priceAt(cur, today < cur.start ? cur.start : today);
   const same = first.currency === cur.currency && first.cycle.unit === cur.cycle.unit && first.cycle.every === cur.cycle.every && p0 > 0;
   const y = Math.floor(active / 365);
-  const mo = Math.floor((active % 365) / 30.44);
+  const mo = Math.floor((active % 365) / DAYS_PER_MONTH);
   return {
     base,
     charges,
@@ -59,7 +60,7 @@ function story(state: AppState, sub: Subscription, today: string) {
       : mo
         ? t('share.dur.m', { count: mo })
         : t('share.dur.d', { count: active }),
-    perMonth: active > 0 ? total / Math.max(1, active / 30.44) : 0,
+    perMonth: active > 0 ? total / Math.max(1, active / DAYS_PER_MONTH) : 0,
     perDay: active > 0 ? total / active : 0,
     change: same ? p1 / p0 - 1 : undefined,
     p0,
@@ -269,7 +270,7 @@ function STimeline({ sub, st, hide, m, today }: Ctx) {
         {items.map((it) =>
           it.gap ? (
             <div key={it.key} className="tlc-gap">
-              {t('share.gap', { dur: it.gap >= 60 ? t('share.dur.m', { count: Math.round(it.gap / 30.4) }) : t('share.dur.d', { count: it.gap }) })}
+              {t('share.gap', { dur: durationLabel(it.gap) })}
             </div>
           ) : (
             <div key={it.key} className={`tlc-item ${it.v!.planned ? 'planned' : ''}`}>

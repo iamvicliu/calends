@@ -1,3 +1,4 @@
+import { durationLabel } from '../../../shared/billing.ts';
 import { addDays, coveredUntil, cycleLabel, diffDays, isGap, phaseLanes, phaseSubs } from '../../../shared/billing.ts';
 import { cnDateFull, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
@@ -40,10 +41,9 @@ export function History({
     // 断更看前面各段最晚跑到哪天：并行的旧段还没到期就不算断
     const until = coveredUntil(vs, i);
     if (i > 0 && isGap(until, v.start)) {
-      const months = Math.round(diffDays(until!, v.start) / 30.4375);
       items.push(
         <li key={`gap${i}`} className="h-gap">
-          <span>{months >= 1 ? t('editor.history.gapMonths', { count: months }) : t('editor.history.gapDays', { count: diffDays(until!, v.start) })}</span>
+          <span>{durationLabel(diffDays(until!, v.start), 'gap')}</span>
         </li>,
       );
     }

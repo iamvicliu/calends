@@ -1,3 +1,4 @@
+import { DAYS_PER_MONTH } from '../../../shared/billing.ts';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { addMonths, diffDays } from '../../../shared/billing.ts';
@@ -135,7 +136,7 @@ export function ChargeBars({
   const cx = groups.map((g) => g.x);
 
   // 月份刻度：间隔按宽度挑，最多约每 90px 一个
-  const months = Math.max(1, Math.round(span / 30.44));
+  const months = Math.max(1, Math.round(span / DAYS_PER_MONTH));
   const every = [1, 2, 3, 6, 12, 24, 36].find((m) => (months / m) * 90 <= iw) ?? 48;
   const xt: Array<{ d: string; label: string }> = [];
   for (let d = addMonths(`${from.slice(0, 7)}-01`, 1); d <= to; d = addMonths(d, 1)) {

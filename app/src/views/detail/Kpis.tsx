@@ -1,3 +1,4 @@
+import { DAYS_PER_MONTH } from '../../../../shared/billing.ts';
 import { copyParts } from '../../components/copy.tsx';
 import { isStopped } from '../../../../shared/billing.ts';
 import { ArrowRight, TrendingDown, TrendingUp } from 'lucide-react';
@@ -51,7 +52,7 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
   const active = transferred ? cost.days : served.days;
   const gaps = served.gaps.length;
   // 按平均月长取整：11-24 到次年 10-24 是 11 个月，不能因为差几天算成 10 个月
-  const span = active < 30 ? 0 : Math.round(active / 30.4375);
+  const span = active < 30 ? 0 : Math.round(active / DAYS_PER_MONTH);
   const years = Math.floor(span / 12);
   const months = span % 12;
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
@@ -60,7 +61,7 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
   const young = !!sub.estimateFrom || active < 30 || (per.length < 2 && !transferred);
   const perMonth = young
     ? toBase(state, monthlyGross(currentPhase(sub, today), today, state.fx), currentPhase(sub, today).currency)
-    : total / Math.max(1, active / 30.44);
+    : total / Math.max(1, active / DAYS_PER_MONTH);
   const perTrend = !young && per.length > 1 && per[0] > 0 ? per[per.length - 1] / per[0] - 1 : undefined;
   const duration =
     active < 1
@@ -74,7 +75,7 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
           : t('detail.stats.days', { count: active });
   const amount = (v: number) => (Number.isFinite(v) ? flow(-v, base, { compact: true }) : '—');
   // 每月：买断按订了多久平摊，其余按实际（或刚开始时按标价预计）
-  const monthly = lifetime ? total / Math.max(1, active / 30.44) : perMonth;
+  const monthly = lifetime ? total / Math.max(1, active / DAYS_PER_MONTH) : perMonth;
 
   const next = ['ended', 'terminated', 'lifetime', 'paused'].includes(st) ? undefined : detailForecast(sub, today).charges[0];
   const nextValue = next ? chargeBaseOrNaN(state, next, base) : NaN;
@@ -134,7 +135,7 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
               : amount(monthly)
         }
         // 与其他格一样三行：折到每天多少；算不出来就不写这一行
-        note={!undated && Number.isFinite(monthly) ? t('detail.kpi.perDay', { amount: flow(-monthly / 30.44, base) }) : undefined}
+        note={!undated && Number.isFinite(monthly) ? t('detail.kpi.perDay', { amount: flow(-monthly / DAYS_PER_MONTH, base) }) : undefined}
         accessory={!lifetime && !undated && !transferred ? <Trend pct={perTrend} /> : undefined}
       />
     </MetricCards>
