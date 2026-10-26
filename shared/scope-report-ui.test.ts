@@ -2980,3 +2980,39 @@ test('selection cash keeps its chart without data disclosure; legacy cash retain
   nodes = r.render('ScopeReport', { ...props, report: { blocks: report.blocks } });
   assert.ok(nodes.some((n) => n.props.className === 'scope-chart-data'));
 });
+
+test('selection stop metric has no savings and uses a dash when nothing stopped', () => {
+  const r = harness('../app/src/components/ScopeLifecycleReport.tsx', 'ScopeLifecycleReport');
+  const sub: Subscription = {
+    id: 'stop',
+    name: 'Fictional Stop',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    status: 'active',
+  };
+  for (const stopped of [false, true]) {
+    const s = stopped ? { ...sub, status: 'cancelled' as const, end: today, stop: { kind: 'cancel' as const, date: today, paidThrough: '2026-10-31' } } : sub;
+    const state = { ...st, subscriptions: [s] };
+    const nodes = r.render('ScopeLifecycleReport', {
+      report: reports.scopeReport(state, [s], today),
+      state,
+      today,
+      id: 'report',
+      onOpen() {},
+      copying: false,
+      actions: null,
+      renderBlock() {
+        return null;
+      },
+    });
+    const metric = nodes.filter((n) => n.props.className === 'metric')[2];
+    const text = JSON.stringify(metric);
+    assert.ok(!text.includes('report.stops.saved'));
+    assert.ok(!all(metric).some((n) => n.props.className === 'metric-note'));
+    assert.ok(text.includes(stopped ? 'scope.lifecycle.times' : '—'));
+  }
+});

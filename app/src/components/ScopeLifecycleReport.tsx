@@ -63,12 +63,13 @@ export function ScopeLifecycleReport({
           />
           <Metric
             label={t(data.terminatedCount ? 'core.stop.terminate' : 'scope.lifecycle.stopped')}
-            value={count(data.terminatedCount || data.stoppedCount)}
+            value={data.terminatedCount || data.stoppedCount ? count(data.terminatedCount || data.stoppedCount) : '—'}
             note={
-              <span className={data.terminatedCount ? (data.terminationLoss.value > 0 || data.terminationLoss.incomplete ? 'red' : '') : 'green'}>
-                {t(data.terminatedCount ? 'report.stops.loss' : 'report.stops.saved')} /{' '}
-                {amount(data.terminatedCount ? data.terminationLoss : data.saved, data.terminatedCount ? -1 : 1)}
-              </span>
+              data.terminatedCount ? (
+                <span className={data.terminationLoss.value > 0 || data.terminationLoss.incomplete ? 'red' : ''}>
+                  {t('report.stops.loss')} / {amount(data.terminationLoss)}
+                </span>
+              ) : undefined
             }
           />
           <Metric label={t('scope.lifecycle.averageDuration')} value={durationLabel(data.averageDays)} />
