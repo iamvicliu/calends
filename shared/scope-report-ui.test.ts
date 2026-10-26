@@ -3032,3 +3032,67 @@ test('annual review new/ended metric keeps counts and its existing note without 
     }
   }
 });
+
+test('public stopped card omits the avoided-renewal total while retaining each old monthly price and stop month', async () => {
+  const { maskForPublic } = await import('./mask.ts');
+  const sub: Subscription = {
+    id: 'public-stopped',
+    name: 'Fictional stopped',
+    category: 'Tools',
+    tags: [],
+    price: 12,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    end: '2026-08-01',
+    status: 'ended',
+    account: 'private-fictional-account',
+  };
+  const state = maskForPublic({ ...st, subscriptions: [sub] });
+  const components = Object.fromEntries(
+    [
+      'Card',
+      'CardContent',
+      'CardHeader',
+      'CardTitle',
+      'CardDescription',
+      'CardAction',
+      'Separator',
+      'Tabs',
+      'TabsList',
+      'TabsTrigger',
+      'TabsContent',
+      'Num',
+      'AppIcon',
+      'Badge',
+      'IconPile',
+    ].map((name) => [name, name]),
+  );
+  const r = harness(
+    '../app/src/public/page.tsx',
+    'Ledger, derive',
+    {},
+    {
+      ...components,
+      readStored: () => null,
+      cn: (...v: string[]) => v.join(' '),
+      syncCategories: () => [],
+      periodRange: () => ['2026-10-01', '2026-10-31'],
+      todayIn: () => today,
+      appPath: (s: string) => s,
+      PROJECT_NAME: 'Calends',
+      PROJECT_URL: 'https://example.invalid',
+      __APP_VERSION__: 'test',
+    },
+  );
+  const d = r.call('derive', state, today);
+  assert.equal(d.ended.length, 1);
+  assert.equal(d.ended[0].monthly, metrics.cancelSavings(state, today).items[0].monthly);
+  assert.equal(d.ended[0].since, sub.end);
+  const nodes = r.render('Ledger', { state });
+  assert.ok(!JSON.stringify(nodes).includes('public.ended.saved'));
+  assert.ok(!JSON.stringify(nodes).includes(sub.account!));
+  assert.ok(nodes.some((n) => String(n.props.className).includes('line-through') && n.children.includes('public.perMonth')));
+  assert.ok(nodes.some((n) => n.children.includes(format.monthLabel(sub.end!.slice(0, 7)))));
+  assert.ok(!('endedMonthly' in d));
+});

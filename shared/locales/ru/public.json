@@ -34,8 +34,7 @@
     "projected": "{month}\nПрогноз"
   },
   "ended": {
-    "title": "Отменённые",
-    "saved": "На {amount} меньше в месяц после отмены"
+    "title": "Отменённые"
   },
   "perMonth": "{amount}/мес.",
   "lifetime": {

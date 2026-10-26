@@ -31,8 +31,7 @@
     "projected": "{month}\n예측"
   },
   "ended": {
-    "title": "해지됨",
-    "saved": "해지 후 매달 {amount} 절약"
+    "title": "해지됨"
   },
   "perMonth": "{amount}/월",
   "lifetime": {

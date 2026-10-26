@@ -31,8 +31,7 @@
     "projected": "{month}\nDự kiến"
   },
   "ended": {
-    "title": "Đã hủy",
-    "saved": "Mỗi tháng bớt {amount} kể từ khi hủy"
+    "title": "Đã hủy"
   },
   "perMonth": "{amount}/tháng",
   "lifetime": {

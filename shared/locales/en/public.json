@@ -32,8 +32,7 @@
     "projected": "{month}\nProjected"
   },
   "ended": {
-    "title": "Cancelled",
-    "saved": "{amount} less per month since cancelling"
+    "title": "Cancelled"
   },
   "perMonth": "{amount}/mo",
   "lifetime": {

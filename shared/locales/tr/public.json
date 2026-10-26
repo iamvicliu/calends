@@ -32,8 +32,7 @@
     "projected": "{month}\nTahmini"
   },
   "ended": {
-    "title": "İptal edilenler",
-    "saved": "İptalden beri ayda {amount} daha az"
+    "title": "İptal edilenler"
   },
   "perMonth": "{amount}/ay",
   "lifetime": {

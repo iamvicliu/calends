@@ -31,8 +31,7 @@
     "projected": "{month}\n予測"
   },
   "ended": {
-    "title": "解約済み",
-    "saved": "解約で毎月 {amount} 減少"
+    "title": "解約済み"
   },
   "perMonth": "{amount}/月",
   "lifetime": {
