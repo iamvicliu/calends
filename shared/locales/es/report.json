@@ -71,7 +71,6 @@
     "prepaidItem": "{name}\n{amount}\nhasta {until}",
     "prepaid": "Valor prepagado",
     "prepaidSub": "{count} pagadas, aún sin consumir",
-    "savedItem": "{name}\n{amount}\ndesde {since}",
     "saved": "Menos al mes por cancelar",
     "savedSub": "{count} canceladas",
     "next90": "Vence en los próximos 90 días",
@@ -138,7 +137,7 @@
     "loss": "Pérdida no reembolsada",
     "savedHint": "Estimación de renovaciones evitadas desde la cancelación hasta hoy",
     "lossHint": "Importe pagado por un servicio que terminó antes de tiempo y no se reembolsó",
-    "basis": "Todo el historial\nMi parte; ahorro al cambio actual y pérdida no reembolsada al cambio del día del cese.",
+    "basis": "Todo el historial\nMi parte; pérdida no reembolsada al cambio del día del cese.",
     "details": "Detalle de pérdidas no reembolsadas",
     "cancel": "Cancelación anticipada voluntaria"
   }

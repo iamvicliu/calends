@@ -70,7 +70,6 @@
     "prepaidItem": "{name}\n{amount}\n{until}まで",
     "prepaid": "前払いの残存価値",
     "prepaidSub": "{count}件が支払い済み・未消化",
-    "savedItem": "{name}\n{amount}\n{since}から",
     "saved": "解約で毎月減った額",
     "savedSub": "{count}件を解約",
     "next90": "今後90日間の請求",
@@ -135,7 +134,7 @@
     "loss": "未返金損失",
     "savedHint": "解約後から今日までに回避できた更新料の推計",
     "lossHint": "サービスの早期終了により返金されなかった料金",
-    "basis": "全履歴\n自分の負担分。節約額は現在の為替、未返金損失は停止日の為替で換算。",
+    "basis": "全履歴\n自分の負担分。未返金損失は停止日の為替で換算。",
     "details": "未返金損失の明細",
     "cancel": "自分で早期解約"
   }

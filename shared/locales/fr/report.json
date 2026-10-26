@@ -71,7 +71,6 @@
     "prepaidItem": "{name}\n{amount}\njusqu’au {until}",
     "prepaid": "Valeur prépayée",
     "prepaidSub": "{count} payés, pas encore consommés",
-    "savedItem": "{name}\n{amount}\ndepuis {since}",
     "saved": "En moins par mois grâce aux résiliations",
     "savedSub": "{count} résiliés",
     "next90": "À payer dans les 90 prochains jours",
@@ -138,7 +137,7 @@
     "loss": "Perte non remboursée",
     "savedHint": "Renouvellements évités estimés depuis la résiliation, jusqu’à aujourd’hui",
     "lossHint": "Frais payés pour un service arrêté avant terme et non remboursés",
-    "basis": "Tout l’historique\nMa part ; économies au taux actuel, perte non remboursée au taux du jour de l’arrêt.",
+    "basis": "Tout l’historique\nMa part ; perte non remboursée au taux du jour de l’arrêt.",
     "details": "Détail des pertes non remboursées",
     "cancel": "Résiliation anticipée volontaire"
   }

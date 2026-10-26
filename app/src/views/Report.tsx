@@ -12,7 +12,6 @@ import { flow, cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import {
-  cancelSavings,
   cashVsAccrual,
   events,
   insights,
@@ -399,10 +398,9 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   );
 }
 
-/** 退订后的续费节省与未退款损失，均截至今天、全部历史 */
+/** 未退款损失，截至今天、全部历史 */
 function StopsCard({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
-  const saved = useMemo(() => cancelSavings(state, today), [state, today]);
   const losses = useMemo(() => stopLosses(state, today), [state, today]);
   return (
     <div className="card stop-report copy-card" data-copy-card id="report-stops">
@@ -413,24 +411,8 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
         <CardTitle>{t('report.stops.title')}</CardTitle>
       </div>
       <p className="stop-basis">{copyParts(t('report.stops.basis'))}</p>
-      <MetricCards inline>
-        <Metric
-          {...tipProps(() =>
-            saved.items.map((i) => (
-              <div key={i.sub.id}>{copyParts(t('report.cash.savedItem', { name: i.sub.name, amount: formatTotal(i.partial, base), since: i.since }))}</div>
-            )),
-          )}
-          label={t('report.stops.saved')}
-          value={
-            <>
-              {saved.total > 0 ? '+' : ''}
-              <FxAmount plain total={saved.partial} ccy={base} compact />
-            </>
-          }
-          valueClassName="green"
-          note={totalNote(saved.partial) || t('report.stops.savedHint')}
-        />
-        {losses.items.length !== 1 && (
+      {losses.items.length !== 1 && (
+        <MetricCards inline>
           <Metric
             label={t('report.stops.loss')}
             value={<FxAmount total={losses.partial} ccy={base} direction={-1} compact />}
@@ -438,8 +420,8 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
             valueClassName={losses.total > 0 || !Number.isFinite(losses.total) ? 'loss' : ''}
             note={t('report.stops.lossHint')}
           />
-        )}
-      </MetricCards>
+        </MetricCards>
+      )}
       {losses.incomplete && <p className="stop-basis red">{totalNote(losses.partial)}</p>}
       {/* 没有未退款损失时，上面的指标已写 ¥0，不再放一个空的明细区块 */}
       {losses.items.length > 0 && (

@@ -68,7 +68,6 @@
     "prepaidItem": "{name}\n{amount}\n至 {until}",
     "prepaid": "预付余值",
     "prepaidSub": "{count} 项已付未用完",
-    "savedItem": "{name}\n{amount}\n自 {since}",
     "saved": "退订后每月少花",
     "savedSub": "{count} 个已退订",
     "next90": "未来 90 天要付",
@@ -129,7 +128,7 @@
     "loss": "未退款损失",
     "savedHint": "退订后截至今天，估算免去的续费",
     "lossHint": "服务提前终止、没有退回的费用",
-    "basis": "全部历史\n我的份额；省下按当前汇率，未退款损失按停止日汇率。",
+    "basis": "全部历史\n我的份额；未退款损失按停止日汇率。",
     "details": "未退款损失明细",
     "cancel": "主动提前退订"
   }

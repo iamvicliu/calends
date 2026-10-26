@@ -71,7 +71,6 @@
     "prepaidItem": "{name}\n{amount}\nbis {until}",
     "prepaid": "Vorausbezahlter Wert",
     "prepaidSub": "{count} bezahlt, nicht aufgebraucht",
-    "savedItem": "{name}\n{amount}\nseit {since}",
     "saved": "Monatlich weniger durch Kündigen",
     "savedSub": "{count} gekündigt",
     "next90": "Fällig in den nächsten 90 Tagen",
@@ -138,7 +137,7 @@
     "loss": "Nicht erstatteter Verlust",
     "savedHint": "Geschätzte vermiedene Verlängerungskosten seit der Kündigung bis heute",
     "lossHint": "Bezahlte Gebühren für vorzeitig beendete Leistungen, die nicht erstattet wurden",
-    "basis": "Gesamter Verlauf\nMein Anteil; Ersparnis zum aktuellen Kurs, nicht erstatteter Verlust zum Kurs am Beendigungstag.",
+    "basis": "Gesamter Verlauf\nMein Anteil; nicht erstatteter Verlust zum Kurs am Beendigungstag.",
     "details": "Nicht erstattete Verluste im Detail",
     "cancel": "Freiwillig vorzeitig gekündigt"
   }

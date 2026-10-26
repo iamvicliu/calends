@@ -70,7 +70,6 @@
     "prepaidItem": "{name}\n{amount}\nhingga {until}",
     "prepaid": "Nilai prabayar",
     "prepaidSub": "{count} sudah dibayar, belum habis",
-    "savedItem": "{name}\n{amount}\nsejak {since}",
     "saved": "Lebih hemat per bulan karena dibatalkan",
     "savedSub": "{count} dibatalkan",
     "next90": "Jatuh tempo dalam 90 hari ke depan",
@@ -135,7 +134,7 @@
     "loss": "Kerugian tanpa pengembalian dana",
     "savedHint": "Perkiraan biaya perpanjangan yang dihindari sejak pembatalan hingga hari ini",
     "lossHint": "Biaya yang dibayar untuk layanan yang berakhir lebih awal dan tidak dikembalikan",
-    "basis": "Seluruh riwayat\nBagian saya; penghematan memakai kurs saat ini, kerugian tanpa pengembalian dana memakai kurs tanggal penghentian.",
+    "basis": "Seluruh riwayat\nBagian saya; kerugian tanpa pengembalian dana memakai kurs tanggal penghentian.",
     "details": "Rincian kerugian tanpa pengembalian dana",
     "cancel": "Pembatalan dini sukarela"
   }
