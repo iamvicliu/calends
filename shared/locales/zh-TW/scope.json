@@ -70,5 +70,18 @@
   "totalSince": "{date} 起",
   "subsCount": "訂閱數",
   "average": "平均每個",
-  "topTotal": "累計花費前 {count} 名"
+  "topTotal": "累計花費前 {count} 名",
+  "lifecycle": {
+    "times": "{count} 次",
+    "allStopped": "全部已停止",
+    "noActive": "暫無進行中訂閱",
+    "stopped": "已停止",
+    "averageDuration": "平均持續",
+    "omitted": "依累計花費顯示前 12 個; 其餘 {count} 個訂閱",
+    "used": "已用 {span}",
+    "noUnused": "無未用",
+    "unused": "未用 {count} 天",
+    "noLoss": "無未退款損失",
+    "cashWindow": "截至本月的 12 個月，僅計今天前的花費，扣除退款。"
+  }
 }

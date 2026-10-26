@@ -14,6 +14,8 @@ const HOT = [
   'app/src/views/Carpool.tsx',
   'app/src/components/Timeline.tsx',
   'app/src/components/charts.tsx',
+  'app/src/components/Composition.tsx',
+  'app/src/components/ScopeLifecycleReport.tsx',
 ];
 
 test('hot views compile under React Compiler without bailouts', () => {

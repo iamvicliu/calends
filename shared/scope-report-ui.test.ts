@@ -73,6 +73,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
       createElement: (type: string | ((p: any) => unknown), props: Node['props'], ...children: unknown[]) =>
         typeof type === 'function' &&
         [
+          'ScopeLifecycleReport',
           'FxAmount',
           'MetricCards',
           'Metric',
@@ -179,6 +180,8 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     catColor: (cat: string) => `color-${cat}`,
     Toolbar: 'Toolbar',
     ScopeReport: 'ScopeReport',
+    Gantt: 'Gantt',
+    Composition: 'Composition',
     useCallback: (fn: unknown) => fn,
     Fragment: 'Fragment',
     Timeline: 'Timeline',
@@ -2859,4 +2862,116 @@ test('全缺汇率的代付待收显示原币且不加约等号，完整折算�
     h.render('OwedOrNet', { list: proxy.proxyRows(state, { ...sub, currency: 'USD' }, today), base: 'USD' }).map((n) => n.children),
   );
   assert.match(complete, /≈/);
+});
+
+test('selection lifecycle renders four metrics, every stop, detail actions and six-event disclosure; copying includes all events', () => {
+  const opened: Subscription[] = [];
+  const s: Subscription = {
+    id: 's',
+    name: 'Fictional Selection',
+    category: 'Tools',
+    tags: [],
+    price: 120,
+    currency: 'USD',
+    cycle: { unit: 'year', every: 1 },
+    start: '2026-01-01',
+    status: 'terminated',
+    end: today,
+    stop: { kind: 'terminate', date: today, paidThrough: today },
+  };
+  const state = { ...st, settings: { ...st.settings, baseCurrency: 'USD' }, subscriptions: [s] };
+  const report = reports.scopeReport(state, [s], today);
+  report.blocks.push({ type: 'events', rows: Array.from({ length: 9 }, (_, i) => ({ sub: s, date: `2026-10-${10 + i}`, delta: 0, kind: 'start' })) });
+  report.blocks = report.blocks.filter((b) => b.type !== 'events').concat(report.blocks.at(-1)!);
+  const visible: number[] = [];
+  const r = harness('../app/src/components/ScopeLifecycleReport.tsx', 'ScopeLifecycleReport');
+  const props = {
+    report,
+    state,
+    today,
+    id: 'report',
+    onOpen: (s: Subscription) => opened.push(s),
+    copying: false,
+    actions: null,
+    renderBlock: (b: reports.Block) => {
+      if (b.type === 'events') visible.push(b.rows.length);
+      return null;
+    },
+  };
+  let nodes = r.render('ScopeLifecycleReport', props);
+  assert.equal(nodes.find((n) => n.props.className?.startsWith('metric-cards'))!.props['data-count'], 4);
+  assert.equal(nodes.filter((n) => n.props.className === 'stop-row').length, 1);
+  assert.equal(visible.at(-1), 6);
+  const row = nodes.find((n) => n.props.className === 'stop-row')!;
+  row.props.onClick();
+  assert.equal(opened[0], s);
+  const gantt = nodes.find((n) => n.type === 'Gantt')!;
+  assert.equal(gantt.props.compact, true);
+  assert.ok(nodes.some((n) => n.children.includes('scope.lifecycle.noUnused')));
+  nodes.find((n) => n.props['aria-expanded'] === false)!.props.onClick();
+  nodes = r.render('ScopeLifecycleReport', props);
+  assert.equal(visible.at(-1), 9);
+  nodes.find((n) => n.props['aria-expanded'] === true)!.props.onClick();
+  r.render('ScopeLifecycleReport', { ...props, copying: true });
+  assert.equal(visible.at(-1), 9);
+  r.render('ScopeLifecycleReport', props);
+  assert.equal(visible.at(-1), 6);
+});
+
+test('selection composition keeps net refunds signed and never paints unavailable spending as zero', () => {
+  const r = harness('../app/src/components/Composition.tsx', 'Composition', {}, { squarify: () => [] });
+  const s: Subscription = {
+    id: 's',
+    name: 'Fictional Refund',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: today,
+    status: 'active',
+  };
+  const state = { ...st, subscriptions: [s], settings: { ...st.settings, baseCurrency: 'USD' } };
+  const spending = (value: fxTotals.FxTotal): reports.ScopeLifecycle['spending'] => [{ sub: s, category: s.category, region: 'US', total: value }];
+  const nodes = r.render('Composition', { state, today, onOpen() {}, spending: spending(fxTotals.amountTotal(-30, 'USD', -30)) });
+  assert.ok(nodes.some((n) => n.props.className === 'num green' && n.children.includes('+$30.00')));
+  const missing = r.render('Composition', { state, today, onOpen() {}, spending: spending(fxTotals.amountTotal(30, 'XCD', NaN)) });
+  const empty = missing.find((n) => n.props.className === 'empty')!;
+  assert.ok(JSON.stringify(empty.children).includes('XCD'));
+  assert.ok(!JSON.stringify(empty.children).includes('$0.00'));
+});
+
+test('cumulative composition opens the original subscription rather than a historical payment-source projection', () => {
+  const r = harness(
+    '../app/src/components/Composition.tsx',
+    'Composition',
+    {},
+    { squarify: (values: number[], x = 0, y = 0, w = 100, h = 100) => values.map((_, i) => ({ i, x, y, w: w / values.length, h })) },
+  );
+  const s: Subscription = {
+    id: 's',
+    name: 'Fictional Phase',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    methodId: 'current',
+    region: 'US',
+    cycle: { unit: 'month', every: 1 },
+    start: today,
+    status: 'active',
+  };
+  const state = { ...st, subscriptions: [s] };
+  let opened: Subscription | undefined;
+  const nodes = r.render('Composition', {
+    state,
+    today,
+    onOpen: (s: Subscription) => {
+      opened = s;
+    },
+    spending: [{ sub: s, methodId: 'historical', region: 'JP', category: 'Tools', total: fxTotals.amountTotal(20, 'USD', 20) }],
+  });
+  nodes.find((n) => n.props.className?.startsWith('tm-cell'))!.props.onClick();
+  assert.equal(opened, s);
+  assert.equal(opened!.methodId, 'current');
 });

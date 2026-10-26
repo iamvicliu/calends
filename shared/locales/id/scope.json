@@ -70,5 +70,18 @@
   "totalSince": "Sejak {date}",
   "subsCount": "Langganan",
   "average": "Rata-rata per langganan",
-  "topTotal": "{count} pengeluaran total tertinggi"
+  "topTotal": "{count} pengeluaran total tertinggi",
+  "lifecycle": {
+    "times": "{count} kali",
+    "allStopped": "Semua langganan berhenti",
+    "noActive": "Tidak ada langganan aktif",
+    "stopped": "Berhenti",
+    "averageDuration": "Durasi rata-rata",
+    "omitted": "12 pengeluaran total tertinggi; {count} lainnya",
+    "used": "Dipakai {span}",
+    "noUnused": "Tidak ada masa tak terpakai",
+    "unused": "{count} hari tak terpakai",
+    "noLoss": "Tidak ada kerugian tanpa pengembalian",
+    "cashWindow": "12 bulan hingga bulan ini; pengeluaran hingga hari ini dikurangi pengembalian dana."
+  }
 }

@@ -70,5 +70,18 @@
   "totalSince": "{date}から",
   "subsCount": "サブスク数",
   "average": "1件あたり平均",
-  "topTotal": "累計支出上位{count}件"
+  "topTotal": "累計支出上位{count}件",
+  "lifecycle": {
+    "times": "{count} 回",
+    "allStopped": "すべて停止済み",
+    "noActive": "利用中のサブスクはありません",
+    "stopped": "停止済み",
+    "averageDuration": "平均利用期間",
+    "omitted": "累計支出の上位12件; 他{count}件",
+    "used": "利用期間 {span}",
+    "noUnused": "未利用期間なし",
+    "unused": "未利用 {count}日",
+    "noLoss": "未返金の損失なし",
+    "cashWindow": "今月までの12か月。今日までの支出から返金を差し引きます。"
+  }
 }

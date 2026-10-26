@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 
 // Existing component harnesses compile each original view and its extracted parts together.
 const groups: Record<string, string[]> = {
+  'app/src/components/ScopeReport.tsx': ['app/src/components/ScopeReport.tsx', 'app/src/components/ScopeLifecycleReport.tsx'],
   'app/src/views/Detail.tsx': [
     'app/src/views/detail/shared.tsx',
     'app/src/views/detail/Kpis.tsx',

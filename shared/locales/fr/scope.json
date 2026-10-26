@@ -72,5 +72,18 @@
   "totalSince": "Depuis le {date}",
   "subsCount": "Abonnements",
   "average": "Moyenne par abonnement",
-  "topTotal": "Les {count} plus grosses dépenses totales"
+  "topTotal": "Les {count} plus grosses dépenses totales",
+  "lifecycle": {
+    "times": "{count} fois",
+    "allStopped": "Tous les abonnements sont arrêtés",
+    "noActive": "Aucun abonnement actif",
+    "stopped": "Arrêtés",
+    "averageDuration": "Durée moyenne",
+    "omitted": "Les 12 dépenses cumulées les plus élevées; {count} autres",
+    "used": "Utilisé : {span}",
+    "noUnused": "Aucune période inutilisée",
+    "unused": "{count} jours inutilisés",
+    "noLoss": "Aucune perte non remboursée",
+    "cashWindow": "12 mois jusqu’au mois actuel ; dépenses à ce jour, remboursements déduits."
+  }
 }

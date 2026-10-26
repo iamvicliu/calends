@@ -381,3 +381,20 @@
 .cal-mini-bars:not(.signed) .cal-mini-negative {
   display: none;
 }
+
+/* Selection-only layout: shared cards, type sizes and timeline capsules. */
+.scope-lifecycle .scope-headline-header {
+  margin-bottom: 8px;
+}
+.scope-timeline .gt {
+  --rh: 36px;
+}
+.scope-timeline .gt-label {
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: var(--fs-1);
+}
+.scope-lifecycle > .scope-spending .card-h {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}

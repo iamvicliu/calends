@@ -2,8 +2,11 @@ import { amountTotal, chargeTotal, convertedTotal, dueTotal, emptyTotal, scaleTo
 import { contributionTotal, mrrTotal } from './metrics.ts';
 import { memberCashFlows, memberFlowValue } from './carpool.ts';
 import { addDays, addMonths, chargesBetween, collectCurrencyOf, memberDues, myShareFactor, phaseSubs, totals, type Charge, chargeSources } from './billing.ts';
+import { diffDays, effectiveStatus, isStopped } from './billing.ts';
 import { chargeValue, toBaseOrNaN } from './fx.ts';
 import {
+  cancelSavings,
+  stopHistory,
   cashVsAccrual,
   contributionOn,
   events,
@@ -73,8 +76,26 @@ export type Block = (
     }
 ) & { partial?: Record<string, FxTotal> };
 
+export interface ScopeLifecycle {
+  spent: FxTotal;
+  averageDays: number;
+  activeCount: number;
+  stoppedCount: number;
+  terminatedCount: number;
+  loss: FxTotal;
+  terminationLoss: FxTotal;
+  saved: FxTotal;
+  stops: StopLoss[];
+  timeline: Subscription[];
+  omitted: number;
+  /** Net cash at my share, refunds included, apportioned to the historical charge phase/method. */
+  spending: Array<{ sub: Subscription; methodId?: string; region: string; category: string; total: FxTotal }>;
+}
+
 export interface ScopeReport {
   blocks: Block[];
+  /** Selection-only facts; calendar reports retain their existing block contract. */
+  lifecycle?: ScopeLifecycle;
 }
 
 export interface MonthCash {
@@ -264,8 +285,57 @@ function details(
   return blocks;
 }
 
-/** Fixed window: twelve cash months including this month, then three forecast months. */
+function selectionCash(state: AppState, today: string): CashAccrual[] {
+  return cashVsAccrual(state, today, 11, 0).map((row) => {
+    if (row.month !== today.slice(0, 7)) return row;
+    const paid = charges(state, `${row.month}-01`, today, today);
+    return { ...row, cash: sum(paid), partial: { ...row.partial, cash: rowTotal(paid) } };
+  });
+}
+
+/** Selection lifecycle, while retaining legacy block fields for external clients. */
 export function scopeReport(state: AppState, subs: readonly Subscription[], today: string): ScopeReport {
+  const scoped = { ...state, subscriptions: subs.filter((s) => !s.proxy) };
+  const first = scoped.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today);
+  const rows = charges(scoped, first, today, today);
+  const stops = stopHistory(scoped, today);
+  const spentBySub = scoped.subscriptions.map((sub) => ({ sub, total: rowTotal(rows.filter((r) => r.sub.id === sub.id)) }));
+  spentBySub.sort((a, b) => b.total.value - a.total.value || a.sub.id.localeCompare(b.sub.id));
+  const stoppedCount = scoped.subscriptions.filter((s) => isStopped(effectiveStatus(s, today))).length;
+  const lifecycle: ScopeLifecycle = {
+    spent: rowTotal(rows),
+    averageDays: scoped.subscriptions.length
+      ? scoped.subscriptions.reduce((n, s) => {
+          const last = phaseSubs(s)
+            .filter((p) => p.start <= today)
+            .at(-1);
+          const end = last?.stop?.date ?? last?.end ?? today;
+          return n + Math.max(0, diffDays(s.start, end < today ? end : today));
+        }, 0) / scoped.subscriptions.length
+      : 0,
+    activeCount: totals(scoped, today).activeCount,
+    stoppedCount,
+    terminatedCount: stops.filter((s) => s.kind === 'terminate').length,
+    loss: stopLosses(scoped, today).partial,
+    terminationLoss: sumTotals(stops.filter((s) => s.kind === 'terminate').map((s) => amountTotal(s.loss, s.currency, s.lossBase))),
+    saved: cancelSavings(scoped, today).partial,
+    stops,
+    timeline: spentBySub.slice(0, 12).map((s) => s.sub),
+    omitted: Math.max(0, scoped.subscriptions.length - 12),
+    spending: rows.flatMap((r) =>
+      chargeSources(r.original).map((source) => ({
+        sub: r.sub,
+        methodId: source.methodId,
+        region: r.original.sub.region ?? '',
+        category: r.original.sub.category,
+        total: scaleTotal(r.partial!, source.share),
+      })),
+    ),
+  };
+  return { ...legacyScopeReport(state, subs, today), lifecycle };
+}
+
+function legacyScopeReport(state: AppState, subs: readonly Subscription[], today: string): ScopeReport {
   const scoped = { ...state, subscriptions: subs.filter((s) => !s.proxy) };
   const yearStart = `${today.slice(0, 4)}-01-01`;
   const mrr = mrrOn(scoped, today);
@@ -289,7 +359,7 @@ export function scopeReport(state: AppState, subs: readonly Subscription[], toda
       change: { amount: mrrChangeSinceLastMonth(scoped, today) },
     },
   ];
-  const cash = cashVsAccrual(scoped, today, 11, 3);
+  const cash = selectionCash(scoped, today);
   if (cash.some((r) => r.cash !== 0)) blocks.push({ type: 'trend', mode: 'scope', rows: cash });
   const live = scoped.subscriptions
     .map((sub) => ({ sub, amount: contributionOn(scoped, sub, today), partial: contributionTotal(scoped, sub, today) }))
@@ -309,7 +379,17 @@ export function scopeReport(state: AppState, subs: readonly Subscription[], toda
     (r) => r.original.kind !== 'refund' && (r.amount > 0 || !!r.partial?.incomplete),
   );
   if (upcoming.length) blocks.push({ type: 'upcoming', rows: upcoming, total: sum(upcoming), partial: { total: rowTotal(upcoming) } });
-  blocks.push(...details(scoped, today, addMonths(today, -12), addDays(today, 30), undefined, yearStart, today));
+  blocks.push(
+    ...details(
+      scoped,
+      today,
+      scoped.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today),
+      today,
+      undefined,
+      yearStart,
+      today,
+    ),
+  );
   return { blocks };
 }
 
@@ -342,6 +422,8 @@ function totalReport(scoped: AppState, today: string, yearStart: string): ScopeR
       since: rows[0]?.date ?? first,
     },
   ];
+  const cash = selectionCash(scoped, today);
+  if (cash.some((r) => r.cash !== 0)) blocks.push({ type: 'trend', mode: 'scope', rows: cash });
   addComposition(
     blocks,
     composition(spent.map((r) => ({ key: r.sub.category, amount: r.amount, partial: r.partial }))),
@@ -353,7 +435,17 @@ function totalReport(scoped: AppState, today: string, yearStart: string): ScopeR
     true,
   );
   if (spent.length > 1) blocks.push({ type: 'top', mode: 'total', rows: spent.sort(byAmount).slice(0, 10) });
-  blocks.push(...details(scoped, today, addMonths(today, -12), addDays(today, 30), undefined, yearStart, today));
+  blocks.push(
+    ...details(
+      scoped,
+      today,
+      scoped.subscriptions.reduce((m, s) => (s.start < m ? s.start : m), today),
+      today,
+      undefined,
+      yearStart,
+      today,
+    ),
+  );
   return { blocks };
 }
 
