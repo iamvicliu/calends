@@ -265,7 +265,7 @@
   },
   "collect": {
     "next": "Penagihan berikutnya {date}",
-    "seatFee": "Kursi & biaya",
+    "editFee": "Ubah biaya",
     "until": "Berlaku sampai",
     "feeFrom": "Berlaku mulai",
     "feeHelp": "Awal cakupan menentukan tarif untuk seluruh periode. Pembayaran tersimpan tidak berubah.",

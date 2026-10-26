@@ -276,7 +276,7 @@
   },
   "collect": {
     "next": "Próximo cobro {date}",
-    "seatFee": "Plaza y cuota",
+    "editFee": "Editar cuota",
     "until": "Cubre hasta",
     "feeFrom": "Vigente desde",
     "feeHelp": "El inicio de la cobertura determina la tarifa de todo el período. Los pagos registrados no cambian.",

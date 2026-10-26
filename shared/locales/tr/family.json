@@ -273,7 +273,7 @@
   },
   "collect": {
     "next": "Sonraki tahsilat {date}",
-    "seatFee": "Koltuk ve ücret",
+    "editFee": "Ücreti düzenle",
     "until": "Kapsadığı son tarih",
     "feeFrom": "Geçerlilik tarihi",
     "feeHelp": "Kapsam başlangıcındaki tarife tüm dönem için geçerlidir. Kayıtlı ödemeler değişmez.",

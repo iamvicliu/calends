@@ -276,7 +276,7 @@
   },
   "collect": {
     "next": "Prochain encaissement {date}",
-    "seatFee": "Place et tarif",
+    "editFee": "Modifier le tarif",
     "until": "Couvre jusqu’au",
     "feeFrom": "À partir du",
     "feeHelp": "Le début de la couverture détermine le tarif pour toute la période. Les paiements enregistrés restent inchangés.",

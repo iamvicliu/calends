@@ -276,7 +276,7 @@
   },
   "collect": {
     "next": "Next collection {date}",
-    "seatFee": "Seat & fee",
+    "editFee": "Edit fee",
     "until": "Covers through",
     "feeFrom": "Effective from",
     "feeHelp": "The coverage start selects the rate for the whole period. Saved receipts stay unchanged.",

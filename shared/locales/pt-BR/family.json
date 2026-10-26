@@ -276,7 +276,7 @@
   },
   "collect": {
     "next": "Próxima cobrança {date}",
-    "seatFee": "Vaga e cobrança",
+    "editFee": "Editar cobrança",
     "until": "Cobre até",
     "feeFrom": "Vigente a partir de",
     "feeHelp": "O início da cobertura define a tarifa de todo o período. Os pagamentos registrados permanecem inalterados.",

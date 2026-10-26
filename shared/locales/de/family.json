@@ -276,7 +276,7 @@
   },
   "collect": {
     "next": "Nächste Einnahme {date}",
-    "seatFee": "Platz & Gebühr",
+    "editFee": "Gebühr bearbeiten",
     "until": "Gedeckt bis",
     "feeFrom": "Gültig ab",
     "feeHelp": "Der Beginn des abgedeckten Zeitraums bestimmt den Tarif für den gesamten Zeitraum. Gespeicherte Zahlungen bleiben unverändert.",

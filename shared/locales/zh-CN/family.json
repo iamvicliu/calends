@@ -249,7 +249,7 @@
   },
   "collect": {
     "next": "下次收款 {date}",
-    "seatFee": "座位与收费",
+    "editFee": "编辑收费信息",
     "until": "覆盖到",
     "feeFrom": "生效日期",
     "feeHelp": "整期按覆盖起点的收费计算，已记收款不变。",

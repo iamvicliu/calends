@@ -31,8 +31,13 @@ type Node = { type: string; props: Record<string, any>; children: unknown[] };
 const all = (n: unknown): Node[] =>
   Array.isArray(n) ? n.flatMap(all) : n && typeof n === 'object' && 'type' in n ? [n as Node, ...all((n as Node).children)] : [];
 const st: AppState = { subscriptions: [], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX };
-// 已有成员的座位与收费默认收起成只读几行，点任一行展开完整表单；要改这些字段的用例先展开
-const expandMember = (nodes: Node[]) => nodes.find((n) => n.type === 'Cell' && n.props.label === 'family.member.joined' && n.props.onClick)?.props.onClick();
+// 已有成员的收费在收款标题旁「编辑收费信息」点开；要改收费的用例先展开（座位直接可改）
+const expandMember = (nodes: Node[]) => {
+  nodes
+    .flatMap((n) => all(n.props.action))
+    .find((n) => n.type === 'button' && n.children.includes('family.collect.editFee') && n.props['aria-expanded'] === false)
+    ?.props.onClick();
+};
 const today = '2026-10-22';
 function harness(file: string, names: string, prefs: Record<string, string> = {}, extra: Record<string, unknown> = {}) {
   const source = readUiSource(new URL(file, import.meta.url))
@@ -3296,7 +3301,7 @@ test('点开已收的格子弹出这一笔的明细，可改可删；没收的�
   assert.deepEqual(nodes.find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!.props.preset, ['2026-09-01']);
 });
 
-test('成员弹窗：先是谁，再是收款（含已付至、记一笔预收），座位与收费收成只读几行、点开可改', () => {
+test('成员弹窗：先是谁，再是收款（含收费标准、已付至、记一笔预收，标题旁编辑收费信息），座位收成只读几行、点开可改', () => {
   const months = ['2026-08-01', '2026-09-01', '2026-10-01'];
   const member = {
     id: 'm',
@@ -3348,9 +3353,13 @@ test('成员弹窗：先是谁，再是收款（含已付至、记一笔预收�
   // 已付至在收款这一块里，不再单独一块，也不再重复「下次应收」
   assert.ok(all(collect).some((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil'));
   assert.equal(collect.props.foot, undefined);
-  // 座位与收费：低频，只读几行；点开才是完整表单
+  // 座位直接可改；收费标准跟在收款里，「编辑收费信息」点开收费表单
   const titles = groups.map((n) => n.props.title);
-  assert.deepEqual(titles, ['family.member.group', 'receivable.modeReceipt', 'family.collect.seatFee']);
+  assert.deepEqual(titles, ['family.member.group', 'receivable.modeReceipt', 'family.member.seatGroup']);
+  assert.ok(
+    all(collect).some((n) => n.type === 'Cell' && n.props.label === 'family.member.feeGroup'),
+    'fee standard shows with the receipts',
+  );
   expandMember(nodes);
   const open = render()
     .filter((n) => n.type === 'Group')

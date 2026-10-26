@@ -128,7 +128,8 @@ export function MemberForm({
 }) {
   const context = useMemberForm({ memberDialog, state, s, member, initialReceipt, onClose });
   // 已有成员：资料、座位、收费收在「编辑资料」里，默认收起；不分摊的成员没有收款可看，直接展开
-  const [seatFeeOpen, setSeatFeeOpen] = useState(() => !!member?.exempt);
+  // 收费：建成员时就定好，之后很少改，已有成员默认收起；不分摊的成员没有收款一块，收费直接展开
+  const [feeOpen, setFeeOpen] = useState(() => !!member?.exempt);
   const [cell, setCell] = useState<{ period: LedgerPeriod; anchor: HTMLElement } | null>(null);
   const {
     today,
@@ -247,8 +248,7 @@ export function MemberForm({
       </Group>
     </>
   );
-  // 座位、收费：建成员时就定好，之后很少改；已有成员默认收起，标题下一行摘要
-  const seatFeeGroups = (
+  const seatGroup = (
     <>
       {/* 二、座位：哪天上车、首期怎么算、哪天下车 */}
       <Group title={t('family.member.seatGroup')}>
@@ -288,12 +288,18 @@ export function MemberForm({
             )}
           </>
         )}
-        <Cell label={t('family.member.source')}>
-          <input value={f.source ?? ''} placeholder={t('family.member.sourcePh')} onChange={(e) => up({ source: val(e) || undefined })} />
-        </Cell>
+        {/* 来源这类说明属于人员（人员资料里的备注）；只给已经填过的旧数据留着，可改可清空 */}
+        {member?.source && (
+          <Cell label={t('family.member.source')}>
+            <input value={f.source ?? ''} placeholder={t('family.member.sourcePh')} onChange={(e) => up({ source: val(e) || undefined })} />
+          </Cell>
+        )}
         {!isNew && <MemberLeaveFields state={state} s={s} member={f} onChange={up} />}
       </Group>
-
+    </>
+  );
+  const feeGroup = (
+    <>
       {/* 三、收费：跟随车 / 自定义 / 不分摊；已有成员改了才问从哪天生效 */}
       <Group title={t('family.member.feeGroup')} foot={rateChanged ? t('family.collect.feeHelp') : undefined}>
         <div className="cell">
@@ -381,7 +387,8 @@ export function MemberForm({
         {isNew ? (
           <>
             {whoGroup}
-            {seatFeeGroups}
+            {seatGroup}
+            {feeGroup}
             {mode !== 'exempt' && <FirstReceiptFields context={context} />}
           </>
         ) : (
@@ -392,6 +399,11 @@ export function MemberForm({
             {mode !== 'exempt' && (
               <Group
                 title={t('receivable.modeReceipt')}
+                action={
+                  <button type="button" className="btn plain" aria-expanded={feeOpen} onClick={() => setFeeOpen(!feeOpen)}>
+                    {t('family.collect.editFee')}
+                  </button>
+                }
                 foot={
                   [
                     st.gone || !st.owe
@@ -415,6 +427,13 @@ export function MemberForm({
                       onPick={(p, anchor) => (p.receipt || p.waiver ? setCell({ period: p, anchor }) : !isSettled(p) && setReceipt({ preset: [p.key] }))}
                     />
                   </div>
+                )}
+                {!feeOpen && (
+                  <Cell label={t('family.member.feeGroup')}>
+                    {mode === 'custom'
+                      ? perBill('family.pool.perFee', fee.billEvery, { fee: money(fee.amount, fee.currency) })
+                      : perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
+                  </Cell>
                 )}
                 {/* 已付至：从第一期起连续结清到哪天；点「调整」改期初已付至 */}
                 {!once && (
@@ -446,38 +465,10 @@ export function MemberForm({
                 )}
               </Group>
             )}
-            {/* 三、座位与收费：建成员时定好，之后很少改；平时只读两行，点开才是完整表单 */}
-            {seatFeeOpen ? (
-              seatFeeGroups
-            ) : (
-              <Group
-                title={t('family.collect.seatFee')}
-                action={
-                  <button type="button" className="btn plain" onClick={() => setSeatFeeOpen(true)}>
-                    {t('detail.action.edit')}
-                  </button>
-                }
-              >
-                <Cell label={t('family.member.joined')} onClick={() => setSeatFeeOpen(true)}>
-                  {cnDateFull(joinedOn)}
-                </Cell>
-                {tenure && (
-                  <Cell label={t('family.member.tenure')} onClick={() => setSeatFeeOpen(true)}>
-                    {tenure}
-                  </Cell>
-                )}
-                {f.left && (
-                  <Cell label={t('family.member.left')} onClick={() => setSeatFeeOpen(true)}>
-                    {cnDateFull(f.left)}
-                  </Cell>
-                )}
-                <Cell label={t('family.member.feeGroup')} onClick={() => setSeatFeeOpen(true)}>
-                  {mode === 'custom'
-                    ? perBill('family.pool.perFee', fee.billEvery, { fee: money(fee.amount, fee.currency) })
-                    : perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
-                </Cell>
-              </Group>
-            )}
+            {/* 收费：标题旁「编辑收费信息」点开，紧跟在收款下面 */}
+            {feeOpen && feeGroup}
+            {/* 三、座位：加入日期、加入时长、退出日期，直接改 */}
+            {seatGroup}
           </>
         )}
       </div>

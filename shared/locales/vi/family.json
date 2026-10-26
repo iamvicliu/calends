@@ -265,7 +265,7 @@
   },
   "collect": {
     "next": "Lần thu tiếp theo {date}",
-    "seatFee": "Chỗ & phí",
+    "editFee": "Sửa phí",
     "until": "Áp dụng đến",
     "feeFrom": "Có hiệu lực từ",
     "feeHelp": "Mức phí tại ngày bắt đầu được áp dụng cho toàn kỳ. Các khoản thu đã lưu không thay đổi.",
