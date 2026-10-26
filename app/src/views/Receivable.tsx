@@ -275,7 +275,7 @@ export function PeriodStrip({
   }, []);
   if (!grid.rows.length) return null;
   return (
-    <div className="rv-strip" style={{ '--rv-columns': grid.columns } as CSSProperties} role="list">
+    <div className="rv-strip" style={{ '--rv-columns': grid.mode === 'months' ? grid.columns * 2 : grid.columns } as CSSProperties} role="list">
       {grid.rows.map((row) => (
         <div key={row.key}>
           {row.year != null && (
@@ -295,7 +295,7 @@ export function PeriodStrip({
                   className={`rv-cell ${p.from > today ? 'upcoming' : p.status} ${active === p.key ? 'active' : ''}`}
                   data-start={seg.start}
                   data-end={seg.end}
-                  style={{ gridColumn: `${seg.column + 1} / span ${seg.span}` }}
+                  style={{ gridColumn: seg.tracks ? `${seg.track! + 1} / span ${seg.tracks}` : `${seg.column + 1} / span ${seg.span}` }}
                   aria-label={`${periodRange(p)}, ${money(p.due, p.currency)} ${p.currency}, ${t(`receivable.status.${p.status}`)}`}
                   data-period={p.key}
                   {...tips}

@@ -162,16 +162,25 @@ test('14种语言的年、季度与应收提示文案齐全，汉字年份仅限
   }
 });
 
-test('月内重启的两段不能静默漏掉：回退为逐期网格', () => {
+test('月内重启的两段不能静默漏掉：同一个月里各占半格，后面的期不顺延', () => {
   const periods = schedule('2026-07-17', 1, 3);
   periods.splice(1, 0, { ...periods[0], key: '2026-07-20', from: '2026-07-20', until: '2026-08-16' });
   periods[0].until = '2026-07-19';
   const grid = periodGrid(periods, '2026-10-26', 'months');
-  assert.equal(grid.mode, 'periods');
-  assert.equal(grid.rows.flatMap((r) => r.segments).length, 4);
+  // 同在 7 月的两期各占半格，8、9 月照旧在自己的月份上，不顺延
+  assert.equal(grid.mode, 'months');
+  assert.deepEqual(
+    grid.rows.flatMap((r) => r.segments).map((seg) => [seg.period.from, seg.track, seg.tracks]),
+    [
+      ['2026-07-17', 12, 1],
+      ['2026-07-20', 13, 1],
+      ['2026-08-17', 14, 2],
+      ['2026-09-17', 16, 4],
+    ],
+  );
 });
 
-test('改过收费后同一个月切出两期：退回逐期排列时仍按年分行并标出年份', () => {
+test('改过收费后同一个月切出两期：仍按月排、标年份，短的一期占前半格', () => {
   const list = [
     { from: '2021-10-14', until: '2022-01-09' },
     { from: '2022-01-10', until: '2022-01-16' },
@@ -179,12 +188,20 @@ test('改过收费后同一个月切出两期：退回逐期排列时仍按年�
     { from: '2022-07-17', until: '2023-01-16' },
   ].map((p) => ({ ...p, key: p.from, due: 10, currency: 'USD', status: 'paid' as const }));
   const grid = periodGrid(list, '2023-01-01');
-  assert.equal(grid.mode, 'periods');
+  assert.equal(grid.mode, 'months');
   assert.deepEqual(
-    grid.rows.map((r) => [r.year, r.segments.length]),
+    grid.rows.map((r) => [r.year, r.segments.map((seg) => [seg.period.from, seg.track, seg.tracks])]),
     [
-      [2021, 1],
-      [2022, 3],
+      [2021, [['2021-10-14', 18, 6]]],
+      [
+        2022,
+        [
+          ['2022-01-10', 0, 1],
+          ['2022-01-17', 1, 11],
+          ['2022-07-17', 12, 12],
+        ],
+      ],
+      [2023, [['2022-07-17', 0, 2]]],
     ],
   );
 });

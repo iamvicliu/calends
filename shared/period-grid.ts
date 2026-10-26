@@ -9,6 +9,9 @@ export interface PeriodSegment {
   span: number;
   start: boolean;
   end: boolean;
+  /** 按月排时的半格位置（一年 24 个半格）：同一个月里切出两期时各占半个月，其余整月占两个半格 */
+  track?: number;
+  tracks?: number;
 }
 export interface PeriodGridRow {
   key: string;
@@ -25,7 +28,8 @@ export function periodGridMode(periods: LedgerPeriod[]): PeriodGridMode {
     const months = monthIndex(next) - monthIndex(from);
     return months > 0 && addMonths(from, months) === next;
   });
-  if (monthly && spans.every(([from, next]) => monthIndex(next) > monthIndex(from))) return 'months';
+  // 同一个月里切出两期（改过收费）也按月排，网格里顺延一格
+  if (monthly && spans.every(([from, next]) => monthIndex(next) >= monthIndex(from))) return 'months';
   if (spans.length && spans.every(([from, next]) => diffDays(from, next) === 7)) return 'weeks';
   return 'periods';
 }
@@ -41,8 +45,6 @@ export function visibleStripPeriods(periods: LedgerPeriod[], today: string): Led
 export function periodGrid(periods: LedgerPeriod[], today: string, mode = periodGridMode(periods)) {
   const all = [...periods].sort((a, b) => a.from.localeCompare(b.from));
   const visible = visibleStripPeriods(all, today);
-  // A restart can cut two periods inside one month: retain both as individual cells.
-  if (mode === 'months' && all.some((p, i) => all[i + 1] && monthIndex(all[i + 1].from) <= monthIndex(p.from))) mode = 'periods';
   const columns = mode === 'weeks' ? 13 : 12;
   const rows: PeriodGridRow[] = [];
   const rowFor = (key: string, year?: number, quarter?: number) => {
@@ -51,18 +53,32 @@ export function periodGrid(periods: LedgerPeriod[], today: string, mode = period
     return row;
   };
   if (mode === 'months') {
-    for (const p of visible) {
-      const index = all.indexOf(p);
-      const first = monthIndex(p.from);
+    // 以半个月为单位排：改过收费可能在同一个月里切出两期（如 1月10日–16日 和 1月17日起），
+    // 前一期占这个月的前半格、后一期占后半格，其余各期仍在自己的月份上，不会整体顺延
+    let cursor = -Infinity;
+    all.forEach((p, index) => {
+      const next = all[index + 1];
+      const start = Math.max(monthIndex(p.from) * 2, cursor);
       // Use the next start month, not the overlapping end month (e.g. Jul 17–Jan 16).
-      const last = all[index + 1] ? monthIndex(all[index + 1].from) - 1 : monthIndex(p.until);
-      for (let cell = first; cell <= last;) {
-        const year = Math.floor(cell / 12);
-        const end = Math.min(last, year * 12 + 11);
-        rowFor(String(year), year).segments.push({ period: p, column: cell % 12, span: end - cell + 1, start: cell === first, end: end === last });
-        cell = end + 1;
+      const stop = Math.max(start, next ? monthIndex(next.from) * 2 - 1 : monthIndex(p.until) * 2 + 1);
+      cursor = stop + 1;
+      if (!visible.includes(p)) return;
+      for (let track = start; track <= stop;) {
+        const year = Math.floor(track / 24);
+        const end = Math.min(stop, year * 24 + 23);
+        const column = Math.floor((track % 24) / 2);
+        rowFor(String(year), year).segments.push({
+          period: p,
+          column,
+          span: Math.floor((end % 24) / 2) - column + 1,
+          start: track === start,
+          end: end === stop,
+          track: track % 24,
+          tracks: end - track + 1,
+        });
+        track = end + 1;
       }
-    }
+    });
   } else if (mode === 'weeks' && visible.length) {
     // Thirteen consecutive weeks per row; no duplicated or dropped week at quarter/year edges.
     const first = visible[0].from;
