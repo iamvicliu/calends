@@ -1131,6 +1131,724 @@
           },
           "children": [
             {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": "Fragment",
+                  "props": {},
+                  "children": [
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.group"
+                      },
+                      "children": [
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": {
+                              "type": "span",
+                              "props": {
+                                "className": "row"
+                              },
+                              "children": [
+                                {
+                                  "type": "PersonAvatar",
+                                  "props": {
+                                    "p": {
+                                      "name": ""
+                                    },
+                                    "size": 28
+                                  },
+                                  "children": []
+                                },
+                                "family.member.name"
+                              ]
+                            }
+                          },
+                          "children": [
+                            {
+                              "type": "[handler]",
+                              "props": {
+                                "state": {
+                                  "subscriptions": [
+                                    {
+                                      "id": "frozen",
+                                      "name": "Fictional plan",
+                                      "category": "Tools",
+                                      "tags": [],
+                                      "price": 20,
+                                      "currency": "USD",
+                                      "start": "2026-01-01",
+                                      "cycle": {
+                                        "unit": "month",
+                                        "every": 1
+                                      },
+                                      "status": "active",
+                                      "share": {
+                                        "role": "owner",
+                                        "seats": 4,
+                                        "collectFrom": "2026-01-01",
+                                        "members": [
+                                          {
+                                            "id": "m",
+                                            "name": "Fictional member",
+                                            "share": 5,
+                                            "fee": 5,
+                                            "feeCurrency": "USD",
+                                            "joined": "2026-01-01"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "methods": [],
+                                  "settings": {
+                                    "baseCurrency": "USD",
+                                    "notifyEmail": "",
+                                    "remindDays": 3,
+                                    "notifyHour": 9,
+                                    "timezone": "UTC",
+                                    "publicView": false,
+                                    "monthlyDigest": true,
+                                    "displayName": ""
+                                  },
+                                  "fx": {
+                                    "base": "USD",
+                                    "fetchedAt": "2026-10-19",
+                                    "rates": {
+                                      "USD": 1,
+                                      "CNY": 7.12,
+                                      "HKD": 7.78,
+                                      "TWD": 32.1,
+                                      "JPY": 151.5,
+                                      "EUR": 0.92,
+                                      "GBP": 0.77,
+                                      "TRY": 41.9,
+                                      "NGN": 1530,
+                                      "PHP": 58.4,
+                                      "INR": 88.6,
+                                      "KRW": 1390,
+                                      "SGD": 1.3,
+                                      "MYR": 4.25,
+                                      "THB": 34.2,
+                                      "VND": 26300,
+                                      "IDR": 16400,
+                                      "AUD": 1.52,
+                                      "CAD": 1.39,
+                                      "BRL": 5.4,
+                                      "ARS": 1400,
+                                      "EGP": 48.5,
+                                      "PKR": 281,
+                                      "RUB": 81,
+                                      "UAH": 41.5,
+                                      "KZT": 535,
+                                      "CHF": 0.8
+                                    }
+                                  }
+                                },
+                                "name": "",
+                                "linked": false,
+                                "autoFocus": true,
+                                "onType": "[handler]",
+                                "onPick": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.contact"
+                          },
+                          "children": [
+                            {
+                              "type": "[handler]",
+                              "props": {
+                                "via": "Telegram",
+                                "onVia": "[handler]",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.accountHere"
+                          },
+                          "children": [
+                            {
+                              "type": "input",
+                              "props": {
+                                "autoCapitalize": "off",
+                                "value": "",
+                                "placeholder": "family.member.accountPhShort",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.seatGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.joined"
+                          },
+                          "children": [
+                            {
+                              "type": "DatePicker",
+                              "props": {
+                                "value": "2026-10-22",
+                                "clearable": true,
+                                "placeholder": "family.member.notSet",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Fragment",
+                          "props": {},
+                          "children": [
+                            {
+                              "type": "Cell",
+                              "props": {
+                                "label": "family.member.firstPeriod",
+                                "sub": "Oct 22 – Oct 31"
+                              },
+                              "children": [
+                                {
+                                  "type": "Picker",
+                                  "props": {
+                                    "value": "prorate",
+                                    "onChange": "[handler]",
+                                    "options": [
+                                      {
+                                        "value": "prorate",
+                                        "label": "family.member.firstMode.prorate"
+                                      },
+                                      {
+                                        "value": "full",
+                                        "label": "family.member.firstMode.full"
+                                      },
+                                      {
+                                        "value": "free",
+                                        "label": "family.member.firstMode.free"
+                                      }
+                                    ]
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Cell",
+                              "props": {
+                                "label": "family.member.firstAmount"
+                              },
+                              "children": [
+                                {
+                                  "type": "NumInput",
+                                  "props": {
+                                    "ccy": "USD",
+                                    "className": "num",
+                                    "placeholder": "1.61",
+                                    "onValue": "[handler]"
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.source"
+                          },
+                          "children": [
+                            {
+                              "type": "input",
+                              "props": {
+                                "value": "",
+                                "placeholder": "family.member.sourcePh",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        false
+                      ]
+                    },
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "div",
+                          "props": {
+                            "className": "cell"
+                          },
+                          "children": [
+                            {
+                              "type": "Seg",
+                              "props": {
+                                "value": "follow",
+                                "onChange": "[handler]",
+                                "options": [
+                                  ["follow", "family.rule.follow"],
+                                  ["custom", "family.rule.custom"],
+                                  ["exempt", "family.member.exempt"]
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.feeGroup"
+                          },
+                          "children": [
+                            {
+                              "type": "span",
+                              "props": {
+                                "className": "muted"
+                              },
+                              "children": ["family.pool.perFee.m1"]
+                            }
+                          ]
+                        },
+                        false,
+                        false,
+                        []
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.firstPay"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.firstPayToggle"
+                      },
+                      "children": [
+                        {
+                          "type": "Toggle",
+                          "props": {
+                            "checked": false,
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    false
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        false,
+        false
+      ]
+    },
+    {
+      "type": "div",
+      "props": {
+        "className": "stack"
+      },
+      "children": [
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.group"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": {
+                          "type": "span",
+                          "props": {
+                            "className": "row"
+                          },
+                          "children": [
+                            {
+                              "type": "PersonAvatar",
+                              "props": {
+                                "p": {
+                                  "name": ""
+                                },
+                                "size": 28
+                              },
+                              "children": []
+                            },
+                            "family.member.name"
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "[handler]",
+                          "props": {
+                            "state": {
+                              "subscriptions": [
+                                {
+                                  "id": "frozen",
+                                  "name": "Fictional plan",
+                                  "category": "Tools",
+                                  "tags": [],
+                                  "price": 20,
+                                  "currency": "USD",
+                                  "start": "2026-01-01",
+                                  "cycle": {
+                                    "unit": "month",
+                                    "every": 1
+                                  },
+                                  "status": "active",
+                                  "share": {
+                                    "role": "owner",
+                                    "seats": 4,
+                                    "collectFrom": "2026-01-01",
+                                    "members": [
+                                      {
+                                        "id": "m",
+                                        "name": "Fictional member",
+                                        "share": 5,
+                                        "fee": 5,
+                                        "feeCurrency": "USD",
+                                        "joined": "2026-01-01"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ],
+                              "methods": [],
+                              "settings": {
+                                "baseCurrency": "USD",
+                                "notifyEmail": "",
+                                "remindDays": 3,
+                                "notifyHour": 9,
+                                "timezone": "UTC",
+                                "publicView": false,
+                                "monthlyDigest": true,
+                                "displayName": ""
+                              },
+                              "fx": {
+                                "base": "USD",
+                                "fetchedAt": "2026-10-19",
+                                "rates": {
+                                  "USD": 1,
+                                  "CNY": 7.12,
+                                  "HKD": 7.78,
+                                  "TWD": 32.1,
+                                  "JPY": 151.5,
+                                  "EUR": 0.92,
+                                  "GBP": 0.77,
+                                  "TRY": 41.9,
+                                  "NGN": 1530,
+                                  "PHP": 58.4,
+                                  "INR": 88.6,
+                                  "KRW": 1390,
+                                  "SGD": 1.3,
+                                  "MYR": 4.25,
+                                  "THB": 34.2,
+                                  "VND": 26300,
+                                  "IDR": 16400,
+                                  "AUD": 1.52,
+                                  "CAD": 1.39,
+                                  "BRL": 5.4,
+                                  "ARS": 1400,
+                                  "EGP": 48.5,
+                                  "PKR": 281,
+                                  "RUB": 81,
+                                  "UAH": 41.5,
+                                  "KZT": 535,
+                                  "CHF": 0.8
+                                }
+                              }
+                            },
+                            "name": "",
+                            "linked": false,
+                            "autoFocus": true,
+                            "onType": "[handler]",
+                            "onPick": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.contact"
+                      },
+                      "children": [
+                        {
+                          "type": "[handler]",
+                          "props": {
+                            "via": "Telegram",
+                            "onVia": "[handler]",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.accountHere"
+                      },
+                      "children": [
+                        {
+                          "type": "input",
+                          "props": {
+                            "autoCapitalize": "off",
+                            "value": "",
+                            "placeholder": "family.member.accountPhShort",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.seatGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.joined"
+                      },
+                      "children": [
+                        {
+                          "type": "DatePicker",
+                          "props": {
+                            "value": "2026-10-22",
+                            "clearable": true,
+                            "placeholder": "family.member.notSet",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Fragment",
+                      "props": {},
+                      "children": [
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.firstPeriod",
+                            "sub": "Oct 22 – Oct 31"
+                          },
+                          "children": [
+                            {
+                              "type": "Picker",
+                              "props": {
+                                "value": "prorate",
+                                "onChange": "[handler]",
+                                "options": [
+                                  {
+                                    "value": "prorate",
+                                    "label": "family.member.firstMode.prorate"
+                                  },
+                                  {
+                                    "value": "full",
+                                    "label": "family.member.firstMode.full"
+                                  },
+                                  {
+                                    "value": "free",
+                                    "label": "family.member.firstMode.free"
+                                  }
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.firstAmount"
+                          },
+                          "children": [
+                            {
+                              "type": "NumInput",
+                              "props": {
+                                "ccy": "USD",
+                                "className": "num",
+                                "placeholder": "1.61",
+                                "onValue": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.source"
+                      },
+                      "children": [
+                        {
+                          "type": "input",
+                          "props": {
+                            "value": "",
+                            "placeholder": "family.member.sourcePh",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    false
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.feeGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "cell"
+                      },
+                      "children": [
+                        {
+                          "type": "Seg",
+                          "props": {
+                            "value": "follow",
+                            "onChange": "[handler]",
+                            "options": [
+                              ["follow", "family.rule.follow"],
+                              ["custom", "family.rule.custom"],
+                              ["exempt", "family.member.exempt"]
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "muted"
+                          },
+                          "children": ["family.pool.perFee.m1"]
+                        }
+                      ]
+                    },
+                    false,
+                    false,
+                    []
+                  ]
+                }
+              ]
+            },
+            {
+              "type": {
+                "render": "[handler]"
+              },
+              "props": {
+                "title": "family.member.firstPay"
+              },
+              "children": [
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstPayToggle"
+                  },
+                  "children": [
+                    {
+                      "type": "Toggle",
+                      "props": {
+                        "checked": false,
+                        "onChange": "[handler]"
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                false
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
               "type": {
                 "render": "[handler]"
               },
@@ -1438,45 +2156,41 @@
                 false,
                 []
               ]
-            },
-            {
-              "type": {
-                "render": "[handler]"
-              },
-              "props": {
-                "title": "family.member.firstPay"
-              },
-              "children": [
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstPayToggle"
-                  },
-                  "children": [
-                    {
-                      "type": "Toggle",
-                      "props": {
-                        "checked": false,
-                        "onChange": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                false
-              ]
             }
           ]
         },
-        false,
-        false
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.firstPay"
+          },
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.firstPayToggle"
+              },
+              "children": [
+                {
+                  "type": "Toggle",
+                  "props": {
+                    "checked": false,
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false
+          ]
+        }
       ]
     },
     {
-      "type": "div",
-      "props": {
-        "className": "stack"
-      },
+      "type": "Fragment",
+      "props": {},
       "children": [
         {
           "type": {
@@ -1785,33 +2499,6 @@
             false,
             false,
             []
-          ]
-        },
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.firstPay"
-          },
-          "children": [
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.firstPayToggle"
-              },
-              "children": [
-                {
-                  "type": "Toggle",
-                  "props": {
-                    "checked": false,
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            false
           ]
         }
       ]
@@ -3860,6 +4547,724 @@
           },
           "children": [
             {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": "Fragment",
+                  "props": {},
+                  "children": [
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.group"
+                      },
+                      "children": [
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": {
+                              "type": "span",
+                              "props": {
+                                "className": "row"
+                              },
+                              "children": [
+                                {
+                                  "type": "PersonAvatar",
+                                  "props": {
+                                    "p": {
+                                      "name": ""
+                                    },
+                                    "size": 28
+                                  },
+                                  "children": []
+                                },
+                                "family.member.name"
+                              ]
+                            }
+                          },
+                          "children": [
+                            {
+                              "type": "[handler]",
+                              "props": {
+                                "state": {
+                                  "subscriptions": [
+                                    {
+                                      "id": "frozen",
+                                      "name": "Fictional plan",
+                                      "category": "Tools",
+                                      "tags": [],
+                                      "price": 0,
+                                      "currency": "USD",
+                                      "start": "2026-01-01",
+                                      "cycle": {
+                                        "unit": "month",
+                                        "every": 1
+                                      },
+                                      "status": "active",
+                                      "share": {
+                                        "role": "owner",
+                                        "seats": 4,
+                                        "collectFrom": "2026-01-01",
+                                        "members": [
+                                          {
+                                            "id": "m",
+                                            "name": "Fictional member",
+                                            "share": 5,
+                                            "fee": 5,
+                                            "feeCurrency": "USD",
+                                            "joined": "2026-01-01"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "methods": [],
+                                  "settings": {
+                                    "baseCurrency": "USD",
+                                    "notifyEmail": "",
+                                    "remindDays": 3,
+                                    "notifyHour": 9,
+                                    "timezone": "UTC",
+                                    "publicView": false,
+                                    "monthlyDigest": true,
+                                    "displayName": ""
+                                  },
+                                  "fx": {
+                                    "base": "USD",
+                                    "fetchedAt": "2026-10-19",
+                                    "rates": {
+                                      "USD": 1,
+                                      "CNY": 7.12,
+                                      "HKD": 7.78,
+                                      "TWD": 32.1,
+                                      "JPY": 151.5,
+                                      "EUR": 0.92,
+                                      "GBP": 0.77,
+                                      "TRY": 41.9,
+                                      "NGN": 1530,
+                                      "PHP": 58.4,
+                                      "INR": 88.6,
+                                      "KRW": 1390,
+                                      "SGD": 1.3,
+                                      "MYR": 4.25,
+                                      "THB": 34.2,
+                                      "VND": 26300,
+                                      "IDR": 16400,
+                                      "AUD": 1.52,
+                                      "CAD": 1.39,
+                                      "BRL": 5.4,
+                                      "ARS": 1400,
+                                      "EGP": 48.5,
+                                      "PKR": 281,
+                                      "RUB": 81,
+                                      "UAH": 41.5,
+                                      "KZT": 535,
+                                      "CHF": 0.8
+                                    }
+                                  }
+                                },
+                                "name": "",
+                                "linked": false,
+                                "autoFocus": true,
+                                "onType": "[handler]",
+                                "onPick": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.contact"
+                          },
+                          "children": [
+                            {
+                              "type": "[handler]",
+                              "props": {
+                                "via": "Telegram",
+                                "onVia": "[handler]",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.accountHere"
+                          },
+                          "children": [
+                            {
+                              "type": "input",
+                              "props": {
+                                "autoCapitalize": "off",
+                                "value": "",
+                                "placeholder": "family.member.accountPhShort",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.seatGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.joined"
+                          },
+                          "children": [
+                            {
+                              "type": "DatePicker",
+                              "props": {
+                                "value": "2026-10-22",
+                                "clearable": true,
+                                "placeholder": "family.member.notSet",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Fragment",
+                          "props": {},
+                          "children": [
+                            {
+                              "type": "Cell",
+                              "props": {
+                                "label": "family.member.firstPeriod",
+                                "sub": "Oct 22 – Oct 31"
+                              },
+                              "children": [
+                                {
+                                  "type": "Picker",
+                                  "props": {
+                                    "value": "prorate",
+                                    "onChange": "[handler]",
+                                    "options": [
+                                      {
+                                        "value": "prorate",
+                                        "label": "family.member.firstMode.prorate"
+                                      },
+                                      {
+                                        "value": "full",
+                                        "label": "family.member.firstMode.full"
+                                      },
+                                      {
+                                        "value": "free",
+                                        "label": "family.member.firstMode.free"
+                                      }
+                                    ]
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Cell",
+                              "props": {
+                                "label": "family.member.firstAmount"
+                              },
+                              "children": [
+                                {
+                                  "type": "NumInput",
+                                  "props": {
+                                    "ccy": "USD",
+                                    "className": "num",
+                                    "placeholder": "1.61",
+                                    "onValue": "[handler]"
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.source"
+                          },
+                          "children": [
+                            {
+                              "type": "input",
+                              "props": {
+                                "value": "",
+                                "placeholder": "family.member.sourcePh",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        false
+                      ]
+                    },
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "div",
+                          "props": {
+                            "className": "cell"
+                          },
+                          "children": [
+                            {
+                              "type": "Seg",
+                              "props": {
+                                "value": "follow",
+                                "onChange": "[handler]",
+                                "options": [
+                                  ["follow", "family.rule.follow"],
+                                  ["custom", "family.rule.custom"],
+                                  ["exempt", "family.member.exempt"]
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.feeGroup"
+                          },
+                          "children": [
+                            {
+                              "type": "span",
+                              "props": {
+                                "className": "muted"
+                              },
+                              "children": ["family.pool.perFee.m1"]
+                            }
+                          ]
+                        },
+                        false,
+                        false,
+                        []
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.firstPay"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.firstPayToggle"
+                      },
+                      "children": [
+                        {
+                          "type": "Toggle",
+                          "props": {
+                            "checked": false,
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    false
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        false,
+        false
+      ]
+    },
+    {
+      "type": "div",
+      "props": {
+        "className": "stack"
+      },
+      "children": [
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.group"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": {
+                          "type": "span",
+                          "props": {
+                            "className": "row"
+                          },
+                          "children": [
+                            {
+                              "type": "PersonAvatar",
+                              "props": {
+                                "p": {
+                                  "name": ""
+                                },
+                                "size": 28
+                              },
+                              "children": []
+                            },
+                            "family.member.name"
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "[handler]",
+                          "props": {
+                            "state": {
+                              "subscriptions": [
+                                {
+                                  "id": "frozen",
+                                  "name": "Fictional plan",
+                                  "category": "Tools",
+                                  "tags": [],
+                                  "price": 0,
+                                  "currency": "USD",
+                                  "start": "2026-01-01",
+                                  "cycle": {
+                                    "unit": "month",
+                                    "every": 1
+                                  },
+                                  "status": "active",
+                                  "share": {
+                                    "role": "owner",
+                                    "seats": 4,
+                                    "collectFrom": "2026-01-01",
+                                    "members": [
+                                      {
+                                        "id": "m",
+                                        "name": "Fictional member",
+                                        "share": 5,
+                                        "fee": 5,
+                                        "feeCurrency": "USD",
+                                        "joined": "2026-01-01"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ],
+                              "methods": [],
+                              "settings": {
+                                "baseCurrency": "USD",
+                                "notifyEmail": "",
+                                "remindDays": 3,
+                                "notifyHour": 9,
+                                "timezone": "UTC",
+                                "publicView": false,
+                                "monthlyDigest": true,
+                                "displayName": ""
+                              },
+                              "fx": {
+                                "base": "USD",
+                                "fetchedAt": "2026-10-19",
+                                "rates": {
+                                  "USD": 1,
+                                  "CNY": 7.12,
+                                  "HKD": 7.78,
+                                  "TWD": 32.1,
+                                  "JPY": 151.5,
+                                  "EUR": 0.92,
+                                  "GBP": 0.77,
+                                  "TRY": 41.9,
+                                  "NGN": 1530,
+                                  "PHP": 58.4,
+                                  "INR": 88.6,
+                                  "KRW": 1390,
+                                  "SGD": 1.3,
+                                  "MYR": 4.25,
+                                  "THB": 34.2,
+                                  "VND": 26300,
+                                  "IDR": 16400,
+                                  "AUD": 1.52,
+                                  "CAD": 1.39,
+                                  "BRL": 5.4,
+                                  "ARS": 1400,
+                                  "EGP": 48.5,
+                                  "PKR": 281,
+                                  "RUB": 81,
+                                  "UAH": 41.5,
+                                  "KZT": 535,
+                                  "CHF": 0.8
+                                }
+                              }
+                            },
+                            "name": "",
+                            "linked": false,
+                            "autoFocus": true,
+                            "onType": "[handler]",
+                            "onPick": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.contact"
+                      },
+                      "children": [
+                        {
+                          "type": "[handler]",
+                          "props": {
+                            "via": "Telegram",
+                            "onVia": "[handler]",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.accountHere"
+                      },
+                      "children": [
+                        {
+                          "type": "input",
+                          "props": {
+                            "autoCapitalize": "off",
+                            "value": "",
+                            "placeholder": "family.member.accountPhShort",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.seatGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.joined"
+                      },
+                      "children": [
+                        {
+                          "type": "DatePicker",
+                          "props": {
+                            "value": "2026-10-22",
+                            "clearable": true,
+                            "placeholder": "family.member.notSet",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Fragment",
+                      "props": {},
+                      "children": [
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.firstPeriod",
+                            "sub": "Oct 22 – Oct 31"
+                          },
+                          "children": [
+                            {
+                              "type": "Picker",
+                              "props": {
+                                "value": "prorate",
+                                "onChange": "[handler]",
+                                "options": [
+                                  {
+                                    "value": "prorate",
+                                    "label": "family.member.firstMode.prorate"
+                                  },
+                                  {
+                                    "value": "full",
+                                    "label": "family.member.firstMode.full"
+                                  },
+                                  {
+                                    "value": "free",
+                                    "label": "family.member.firstMode.free"
+                                  }
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.firstAmount"
+                          },
+                          "children": [
+                            {
+                              "type": "NumInput",
+                              "props": {
+                                "ccy": "USD",
+                                "className": "num",
+                                "placeholder": "1.61",
+                                "onValue": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.source"
+                      },
+                      "children": [
+                        {
+                          "type": "input",
+                          "props": {
+                            "value": "",
+                            "placeholder": "family.member.sourcePh",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    false
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.feeGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "cell"
+                      },
+                      "children": [
+                        {
+                          "type": "Seg",
+                          "props": {
+                            "value": "follow",
+                            "onChange": "[handler]",
+                            "options": [
+                              ["follow", "family.rule.follow"],
+                              ["custom", "family.rule.custom"],
+                              ["exempt", "family.member.exempt"]
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "muted"
+                          },
+                          "children": ["family.pool.perFee.m1"]
+                        }
+                      ]
+                    },
+                    false,
+                    false,
+                    []
+                  ]
+                }
+              ]
+            },
+            {
+              "type": {
+                "render": "[handler]"
+              },
+              "props": {
+                "title": "family.member.firstPay"
+              },
+              "children": [
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstPayToggle"
+                  },
+                  "children": [
+                    {
+                      "type": "Toggle",
+                      "props": {
+                        "checked": false,
+                        "onChange": "[handler]"
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                false
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
               "type": {
                 "render": "[handler]"
               },
@@ -4167,45 +5572,41 @@
                 false,
                 []
               ]
-            },
-            {
-              "type": {
-                "render": "[handler]"
-              },
-              "props": {
-                "title": "family.member.firstPay"
-              },
-              "children": [
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstPayToggle"
-                  },
-                  "children": [
-                    {
-                      "type": "Toggle",
-                      "props": {
-                        "checked": false,
-                        "onChange": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                false
-              ]
             }
           ]
         },
-        false,
-        false
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.firstPay"
+          },
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.firstPayToggle"
+              },
+              "children": [
+                {
+                  "type": "Toggle",
+                  "props": {
+                    "checked": false,
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false
+          ]
+        }
       ]
     },
     {
-      "type": "div",
-      "props": {
-        "className": "stack"
-      },
+      "type": "Fragment",
+      "props": {},
       "children": [
         {
           "type": {
@@ -4514,33 +5915,6 @@
             false,
             false,
             []
-          ]
-        },
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.firstPay"
-          },
-          "children": [
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.firstPayToggle"
-              },
-              "children": [
-                {
-                  "type": "Toggle",
-                  "props": {
-                    "checked": false,
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            false
           ]
         }
       ]
@@ -6579,6 +7953,724 @@
           },
           "children": [
             {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": "Fragment",
+                  "props": {},
+                  "children": [
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.group"
+                      },
+                      "children": [
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": {
+                              "type": "span",
+                              "props": {
+                                "className": "row"
+                              },
+                              "children": [
+                                {
+                                  "type": "PersonAvatar",
+                                  "props": {
+                                    "p": {
+                                      "name": ""
+                                    },
+                                    "size": 28
+                                  },
+                                  "children": []
+                                },
+                                "family.member.name"
+                              ]
+                            }
+                          },
+                          "children": [
+                            {
+                              "type": "[handler]",
+                              "props": {
+                                "state": {
+                                  "subscriptions": [
+                                    {
+                                      "id": "frozen",
+                                      "name": "Fictional plan",
+                                      "category": "Tools",
+                                      "tags": [],
+                                      "price": 20,
+                                      "currency": "XCD",
+                                      "start": "2026-01-01",
+                                      "cycle": {
+                                        "unit": "month",
+                                        "every": 1
+                                      },
+                                      "status": "active",
+                                      "share": {
+                                        "role": "owner",
+                                        "seats": 4,
+                                        "collectFrom": "2026-01-01",
+                                        "members": [
+                                          {
+                                            "id": "m",
+                                            "name": "Fictional member",
+                                            "share": 5,
+                                            "fee": 5,
+                                            "feeCurrency": "USD",
+                                            "joined": "2026-01-01"
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "methods": [],
+                                  "settings": {
+                                    "baseCurrency": "USD",
+                                    "notifyEmail": "",
+                                    "remindDays": 3,
+                                    "notifyHour": 9,
+                                    "timezone": "UTC",
+                                    "publicView": false,
+                                    "monthlyDigest": true,
+                                    "displayName": ""
+                                  },
+                                  "fx": {
+                                    "base": "USD",
+                                    "fetchedAt": "2026-10-19",
+                                    "rates": {
+                                      "USD": 1,
+                                      "CNY": 7.12,
+                                      "HKD": 7.78,
+                                      "TWD": 32.1,
+                                      "JPY": 151.5,
+                                      "EUR": 0.92,
+                                      "GBP": 0.77,
+                                      "TRY": 41.9,
+                                      "NGN": 1530,
+                                      "PHP": 58.4,
+                                      "INR": 88.6,
+                                      "KRW": 1390,
+                                      "SGD": 1.3,
+                                      "MYR": 4.25,
+                                      "THB": 34.2,
+                                      "VND": 26300,
+                                      "IDR": 16400,
+                                      "AUD": 1.52,
+                                      "CAD": 1.39,
+                                      "BRL": 5.4,
+                                      "ARS": 1400,
+                                      "EGP": 48.5,
+                                      "PKR": 281,
+                                      "RUB": 81,
+                                      "UAH": 41.5,
+                                      "KZT": 535,
+                                      "CHF": 0.8
+                                    }
+                                  }
+                                },
+                                "name": "",
+                                "linked": false,
+                                "autoFocus": true,
+                                "onType": "[handler]",
+                                "onPick": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.contact"
+                          },
+                          "children": [
+                            {
+                              "type": "[handler]",
+                              "props": {
+                                "via": "Telegram",
+                                "onVia": "[handler]",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.accountHere"
+                          },
+                          "children": [
+                            {
+                              "type": "input",
+                              "props": {
+                                "autoCapitalize": "off",
+                                "value": "",
+                                "placeholder": "family.member.accountPhShort",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.seatGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.joined"
+                          },
+                          "children": [
+                            {
+                              "type": "DatePicker",
+                              "props": {
+                                "value": "2026-10-22",
+                                "clearable": true,
+                                "placeholder": "family.member.notSet",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Fragment",
+                          "props": {},
+                          "children": [
+                            {
+                              "type": "Cell",
+                              "props": {
+                                "label": "family.member.firstPeriod",
+                                "sub": "Oct 22 – Oct 31"
+                              },
+                              "children": [
+                                {
+                                  "type": "Picker",
+                                  "props": {
+                                    "value": "prorate",
+                                    "onChange": "[handler]",
+                                    "options": [
+                                      {
+                                        "value": "prorate",
+                                        "label": "family.member.firstMode.prorate"
+                                      },
+                                      {
+                                        "value": "full",
+                                        "label": "family.member.firstMode.full"
+                                      },
+                                      {
+                                        "value": "free",
+                                        "label": "family.member.firstMode.free"
+                                      }
+                                    ]
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "type": "Cell",
+                              "props": {
+                                "label": "family.member.firstAmount"
+                              },
+                              "children": [
+                                {
+                                  "type": "NumInput",
+                                  "props": {
+                                    "ccy": "USD",
+                                    "className": "num",
+                                    "placeholder": "1.61",
+                                    "onValue": "[handler]"
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.source"
+                          },
+                          "children": [
+                            {
+                              "type": "input",
+                              "props": {
+                                "value": "",
+                                "placeholder": "family.member.sourcePh",
+                                "onChange": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        false
+                      ]
+                    },
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "div",
+                          "props": {
+                            "className": "cell"
+                          },
+                          "children": [
+                            {
+                              "type": "Seg",
+                              "props": {
+                                "value": "follow",
+                                "onChange": "[handler]",
+                                "options": [
+                                  ["follow", "family.rule.follow"],
+                                  ["custom", "family.rule.custom"],
+                                  ["exempt", "family.member.exempt"]
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.feeGroup"
+                          },
+                          "children": [
+                            {
+                              "type": "span",
+                              "props": {
+                                "className": "muted"
+                              },
+                              "children": ["family.pool.perFee.m1"]
+                            }
+                          ]
+                        },
+                        false,
+                        false,
+                        []
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.firstPay"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.firstPayToggle"
+                      },
+                      "children": [
+                        {
+                          "type": "Toggle",
+                          "props": {
+                            "checked": false,
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    false
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        false,
+        false
+      ]
+    },
+    {
+      "type": "div",
+      "props": {
+        "className": "stack"
+      },
+      "children": [
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.group"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": {
+                          "type": "span",
+                          "props": {
+                            "className": "row"
+                          },
+                          "children": [
+                            {
+                              "type": "PersonAvatar",
+                              "props": {
+                                "p": {
+                                  "name": ""
+                                },
+                                "size": 28
+                              },
+                              "children": []
+                            },
+                            "family.member.name"
+                          ]
+                        }
+                      },
+                      "children": [
+                        {
+                          "type": "[handler]",
+                          "props": {
+                            "state": {
+                              "subscriptions": [
+                                {
+                                  "id": "frozen",
+                                  "name": "Fictional plan",
+                                  "category": "Tools",
+                                  "tags": [],
+                                  "price": 20,
+                                  "currency": "XCD",
+                                  "start": "2026-01-01",
+                                  "cycle": {
+                                    "unit": "month",
+                                    "every": 1
+                                  },
+                                  "status": "active",
+                                  "share": {
+                                    "role": "owner",
+                                    "seats": 4,
+                                    "collectFrom": "2026-01-01",
+                                    "members": [
+                                      {
+                                        "id": "m",
+                                        "name": "Fictional member",
+                                        "share": 5,
+                                        "fee": 5,
+                                        "feeCurrency": "USD",
+                                        "joined": "2026-01-01"
+                                      }
+                                    ]
+                                  }
+                                }
+                              ],
+                              "methods": [],
+                              "settings": {
+                                "baseCurrency": "USD",
+                                "notifyEmail": "",
+                                "remindDays": 3,
+                                "notifyHour": 9,
+                                "timezone": "UTC",
+                                "publicView": false,
+                                "monthlyDigest": true,
+                                "displayName": ""
+                              },
+                              "fx": {
+                                "base": "USD",
+                                "fetchedAt": "2026-10-19",
+                                "rates": {
+                                  "USD": 1,
+                                  "CNY": 7.12,
+                                  "HKD": 7.78,
+                                  "TWD": 32.1,
+                                  "JPY": 151.5,
+                                  "EUR": 0.92,
+                                  "GBP": 0.77,
+                                  "TRY": 41.9,
+                                  "NGN": 1530,
+                                  "PHP": 58.4,
+                                  "INR": 88.6,
+                                  "KRW": 1390,
+                                  "SGD": 1.3,
+                                  "MYR": 4.25,
+                                  "THB": 34.2,
+                                  "VND": 26300,
+                                  "IDR": 16400,
+                                  "AUD": 1.52,
+                                  "CAD": 1.39,
+                                  "BRL": 5.4,
+                                  "ARS": 1400,
+                                  "EGP": 48.5,
+                                  "PKR": 281,
+                                  "RUB": 81,
+                                  "UAH": 41.5,
+                                  "KZT": 535,
+                                  "CHF": 0.8
+                                }
+                              }
+                            },
+                            "name": "",
+                            "linked": false,
+                            "autoFocus": true,
+                            "onType": "[handler]",
+                            "onPick": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.contact"
+                      },
+                      "children": [
+                        {
+                          "type": "[handler]",
+                          "props": {
+                            "via": "Telegram",
+                            "onVia": "[handler]",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.accountHere"
+                      },
+                      "children": [
+                        {
+                          "type": "input",
+                          "props": {
+                            "autoCapitalize": "off",
+                            "value": "",
+                            "placeholder": "family.member.accountPhShort",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.seatGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.joined"
+                      },
+                      "children": [
+                        {
+                          "type": "DatePicker",
+                          "props": {
+                            "value": "2026-10-22",
+                            "clearable": true,
+                            "placeholder": "family.member.notSet",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Fragment",
+                      "props": {},
+                      "children": [
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.firstPeriod",
+                            "sub": "Oct 22 – Oct 31"
+                          },
+                          "children": [
+                            {
+                              "type": "Picker",
+                              "props": {
+                                "value": "prorate",
+                                "onChange": "[handler]",
+                                "options": [
+                                  {
+                                    "value": "prorate",
+                                    "label": "family.member.firstMode.prorate"
+                                  },
+                                  {
+                                    "value": "full",
+                                    "label": "family.member.firstMode.full"
+                                  },
+                                  {
+                                    "value": "free",
+                                    "label": "family.member.firstMode.free"
+                                  }
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.firstAmount"
+                          },
+                          "children": [
+                            {
+                              "type": "NumInput",
+                              "props": {
+                                "ccy": "USD",
+                                "className": "num",
+                                "placeholder": "1.61",
+                                "onValue": "[handler]"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.source"
+                      },
+                      "children": [
+                        {
+                          "type": "input",
+                          "props": {
+                            "value": "",
+                            "placeholder": "family.member.sourcePh",
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    false
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.feeGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "cell"
+                      },
+                      "children": [
+                        {
+                          "type": "Seg",
+                          "props": {
+                            "value": "follow",
+                            "onChange": "[handler]",
+                            "options": [
+                              ["follow", "family.rule.follow"],
+                              ["custom", "family.rule.custom"],
+                              ["exempt", "family.member.exempt"]
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "muted"
+                          },
+                          "children": ["family.pool.perFee.m1"]
+                        }
+                      ]
+                    },
+                    false,
+                    false,
+                    []
+                  ]
+                }
+              ]
+            },
+            {
+              "type": {
+                "render": "[handler]"
+              },
+              "props": {
+                "title": "family.member.firstPay"
+              },
+              "children": [
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstPayToggle"
+                  },
+                  "children": [
+                    {
+                      "type": "Toggle",
+                      "props": {
+                        "checked": false,
+                        "onChange": "[handler]"
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                false
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
               "type": {
                 "render": "[handler]"
               },
@@ -6886,45 +8978,41 @@
                 false,
                 []
               ]
-            },
-            {
-              "type": {
-                "render": "[handler]"
-              },
-              "props": {
-                "title": "family.member.firstPay"
-              },
-              "children": [
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstPayToggle"
-                  },
-                  "children": [
-                    {
-                      "type": "Toggle",
-                      "props": {
-                        "checked": false,
-                        "onChange": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                false
-              ]
             }
           ]
         },
-        false,
-        false
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.firstPay"
+          },
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.firstPayToggle"
+              },
+              "children": [
+                {
+                  "type": "Toggle",
+                  "props": {
+                    "checked": false,
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false
+          ]
+        }
       ]
     },
     {
-      "type": "div",
-      "props": {
-        "className": "stack"
-      },
+      "type": "Fragment",
+      "props": {},
       "children": [
         {
           "type": {
@@ -7233,33 +9321,6 @@
             false,
             false,
             []
-          ]
-        },
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.firstPay"
-          },
-          "children": [
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.firstPayToggle"
-              },
-              "children": [
-                {
-                  "type": "Toggle",
-                  "props": {
-                    "checked": false,
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            false
           ]
         }
       ]

@@ -210,10 +210,15 @@ test('person car row explicitly opens member editing even when collection is ove
     });
     return MemberSheet({ ...dialog.props, collect, editId });
   };
-  assert.equal(render(false).type, 'MemberForm');
-  assert.equal(render(undefined).type, 'ReceiptForm');
-  assert.equal(render(true).type, 'ReceiptForm');
-  assert.equal(render(false, 'existing-receipt').type, 'ReceiptForm');
+  // 一律打开同一个成员弹窗；是否叠上收款表单由 initialReceipt 决定
+  const open = (collect, editId) => {
+    const node = render(collect, editId);
+    return [node.type, JSON.stringify(node.props.initialReceipt ?? null)];
+  };
+  assert.deepEqual(open(false), ['MemberForm', 'null']);
+  assert.deepEqual(open(undefined), ['MemberForm', '{}']);
+  assert.deepEqual(open(true), ['MemberForm', '{}']);
+  assert.deepEqual(open(false, 'existing-receipt'), ['MemberForm', '{"edit":"existing-receipt"}']);
 });
 
 test('linked-member and proxy profile entry uses the same current person detail; read-only has no Edit action', () => {

@@ -43,7 +43,6 @@ export function ReceivableSheet({
   today,
   save,
   onDone,
-  extraFoot,
   defaultCurrency,
 }: {
   state: AppState;
@@ -59,7 +58,6 @@ export function ReceivableSheet({
   today: string;
   save: (next: Receivable) => Promise<void>;
   onDone: () => void;
-  extraFoot?: ReactNode;
   /** 收款默认币种；缺省同应收 */
   defaultCurrency?: string;
 }) {
@@ -134,7 +132,7 @@ export function ReceivableSheet({
       onClose={onDone}
       foot={
         <>
-          {edit ? (
+          {edit && (
             <button
               className="btn plain"
               style={{ color: 'var(--red)' }}
@@ -146,8 +144,6 @@ export function ReceivableSheet({
             >
               {t('common.delete')}
             </button>
-          ) : (
-            extraFoot
           )}
           <span className="grow" />
           <button className="btn" onClick={onDone}>

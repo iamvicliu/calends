@@ -39,12 +39,15 @@ export function useMemberForm({
   state,
   s,
   member,
+  initialReceipt,
   onClose,
 }: {
   memberDialog: typeof import('../Members.tsx').MemberSheet;
   state: AppState;
   s: Subscription;
   member?: ShareMember;
+  /** 打开时就叠上的收款表单：欠款时记一笔，从某笔收款进来时改那一笔 */
+  initialReceipt?: { edit?: string; preset?: string[] } | null;
   onClose: () => void;
 }) {
   const today = todayIn(state.settings.timezone);
@@ -130,12 +133,10 @@ export function useMemberForm({
   const records = [...(member?.receipts ?? []), ...(member?.waivers ?? [])].sort((a, b) => b.date.localeCompare(a.date));
   const received = member ? memberCashFlows(member).reduce((a, p) => a + memberFlowValue(state, p, collectCcy), 0) : 0;
   const st = memberStatus(state, { ...s, share: { ...s.share!, members: s.share!.members.map((x) => (x.id === next.id ? next : x)) } }, next, today);
-  const [receipt, setReceipt] = useState<{ edit?: string; preset?: string[] } | null>(null);
+  const [receipt, setReceipt] = useState<{ edit?: string; preset?: string[] } | null>(initialReceipt ?? null);
   const [adjustPaid, setAdjustPaid] = useState(false);
   // 已付至按没退出算：退出后还有已付的天数时照样显示到那期期末，算退款要看
   const paidUntil = next.left ? paidThrough(memberLedgerAhead(state, s, { ...next, left: undefined }, today).periods) : paidThrough(ledger.periods);
-  // 本期：今天所在的那一期
-  const currentPeriod = ledger.periods.find((p) => p.from <= today && p.until >= today);
 
   // 同一笔收款复制给其他成员：大家每期交的一样，不用一个个重填。对方这几期都还空着才能复制
   const others = (s.share?.members ?? []).filter((x) => x.id !== f.id);
@@ -266,7 +267,6 @@ export function useMemberForm({
     adjustPaid,
     setAdjustPaid,
     paidUntil,
-    currentPeriod,
     others,
     copying,
     setCopying,

@@ -31,6 +31,12 @@ type Node = { type: string; props: Record<string, any>; children: unknown[] };
 const all = (n: unknown): Node[] =>
   Array.isArray(n) ? n.flatMap(all) : n && typeof n === 'object' && 'type' in n ? [n as Node, ...all((n as Node).children)] : [];
 const st: AppState = { subscriptions: [], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX };
+// 已有成员的资料、座位、收费收在「编辑资料」里，默认收起；要改这些字段的用例先展开
+const expandMember = (nodes: Node[]) =>
+  nodes
+    .flatMap((n) => all(n.props.title))
+    .find((n) => n.type === 'button' && n.props['aria-expanded'] === false && n.children.includes('family.collect.editMember'))
+    ?.props.onClick();
 const today = '2026-10-22';
 function harness(file: string, names: string, prefs: Record<string, string> = {}, extra: Record<string, unknown> = {}) {
   const source = readUiSource(new URL(file, import.meta.url))
@@ -552,6 +558,7 @@ test('member with a receipt and no paid-through date never claims no receipts an
     },
   );
   const render = () => r.render('MemberForm', { state: { ...st, subscriptions: [sub] }, s: sub, member, onClose() {} });
+  expandMember(render());
   // 已付到默认只读，点「调整」才出现这一期开始
   render()
     .find((n) => n.type === 'button' && n.children.includes('family.collect.adjustPaid'))!
@@ -1846,6 +1853,7 @@ test('成员先改收费再改生效日只留下一个调整，今天标准与�
     },
   );
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  expandMember(render());
   render()
     .find((n) => n.type === 'Seg' && n.props.value === 'follow')!
     .props.onChange('custom');
@@ -2053,6 +2061,7 @@ test('成员表单：已付至点「调整」直接改日期；改自定义收�
     },
   );
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  expandMember(render());
   const save = async () =>
     all(render().find((n) => n.type === 'Sheet')!.props.foot)
       .find((n) => n.type === 'button' && n.children.includes('family.member.save'))!
@@ -2257,6 +2266,7 @@ test('成员表单设置下车退款保留原始已付至，金额无效不能�
     },
   );
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  expandMember(render());
   const leaveFields = () => render().find((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields')!;
   const save = () => all(render().find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('family.member.save'))!;
   leaveFields().props.onChange({ left: '2026-01-16', leaveRefund: { date: '2026-01-20', amount: 12, currency: 'USD' } });
@@ -2480,7 +2490,7 @@ test('代付结清后第三格显示盈亏而不是「已结清」，未结清�
   assert.doesNotMatch(text(owed), /family\.strip\.profit/);
 });
 
-test('所有入口打开同一个成员入口：欠款先到收款表单，其余是成员表单；记下这笔推进已付至', async () => {
+test('所有入口打开同一个成员弹窗：欠款或明确收款时收款表单自动叠在上面，其余只开弹窗；记下这笔推进已付至', async () => {
   const opening = (...periods: string[]) => [{ id: 'o', date: '2025-01-17', amount: 0, currency: 'CNY', periods, opening: true }];
   // 收了第一期，之后都欠着
   const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', receipts: opening('2025-01-17') };
@@ -2530,13 +2540,14 @@ test('所有入口打开同一个成员入口：欠款先到收款表单，其�
       onClose() {},
       ...props,
     });
-    return (node.type as Function).name;
+    return [(node.type as Function).name, JSON.stringify(node.props.initialReceipt ?? null)];
   };
 
-  assert.equal(route({ member }), 'ReceiptForm');
-  assert.equal(route({ member: settled }), 'MemberForm');
-  assert.equal(route({ member: settled, collect: true }), 'ReceiptForm');
-  assert.equal(route({}), 'MemberForm');
+  // 同一个弹窗；欠款（或明确要收款）时打开就叠上收款表单，已结清的只开弹窗
+  assert.deepEqual(route({ member }), ['MemberForm', '{}']);
+  assert.deepEqual(route({ member: settled }), ['MemberForm', 'null']);
+  assert.deepEqual(route({ member: settled, collect: true }), ['MemberForm', '{}']);
+  assert.deepEqual(route({}), ['MemberForm', 'null']);
   const nodes = r.render('ReceiptForm', { state: st, s: sub, member, onDone: () => (closed = true) });
   const record = all(nodes.find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('receivable.record'))!;
   assert.ok(nodes.some((n) => n.type === 'NumInput' && n.props.value === 44));
@@ -2639,7 +2650,6 @@ test('phase2 rendered ledger sections and assistant summaries retain their froze
     NumInput: 'NumInput',
     MoneyInput: 'MoneyInput',
     NameLink: 'NameLink',
-    MemberPeriod: 'MemberPeriod',
     PersonNameField: 'PersonNameField',
     PersonProfileSheet: 'PersonProfileSheet',
     ReceiptForm: 'ReceiptForm',
@@ -3197,6 +3207,7 @@ test('收款记录默认收起、展开可逆、重新打开收起；零笔没�
     );
   const r = make();
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  expandMember(render());
   const toggle = (nodes: Node[]) => nodes.flatMap((n) => all(n.props.title)).find((n) => n.type === 'button' && n.props['aria-controls'])!;
   let nodes = render();
   assert.equal(toggle(nodes).props['aria-expanded'], false);
@@ -3220,6 +3231,69 @@ test('收款记录默认收起、展开可逆、重新打开收起；零笔没�
     onClose() {},
   });
   assert.equal(refund.find((n) => n.type === 'div' && n.props.id)?.props.hidden, false, 'a refund without receipt history remains visible');
+});
+
+test('成员弹窗：收款在最上面，已结清的成员也能直接记一笔预收；资料默认收起，不分摊的成员直接展开', () => {
+  const months = ['2026-08-01', '2026-09-01', '2026-10-01'];
+  const member = {
+    id: 'm',
+    name: 'Fictional',
+    share: 10,
+    fee: 10,
+    feeCurrency: 'USD',
+    billEvery: 1,
+    joined: '2026-08-01',
+    receipts: [{ id: 'r', date: '2026-08-01', amount: 30, currency: 'USD', periods: months }],
+  };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Fictional',
+    category: 'Test',
+    tags: [],
+    price: 20,
+    currency: 'USD',
+    start: '2026-08-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 3, collectFrom: '2026-08-01', members: [member] },
+  };
+  const make = () =>
+    harness(
+      '../app/src/views/Members.tsx',
+      'MemberForm',
+      {},
+      {
+        Sheet: 'Sheet',
+        DatePicker: 'DatePicker',
+        Toggle: 'Toggle',
+        CurrencySelect: 'CurrencySelect',
+        NumInput: 'NumInput',
+        Picker: 'Picker',
+        todayIn: () => today,
+      },
+    );
+  const r = make();
+  const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  const nodes = render();
+  const groups = nodes.filter((n) => n.type === 'Group');
+  // 第一块就是收款：已结清，下面直接有「记一笔」
+  const collect = groups[0];
+  assert.equal(collect.props.title, 'receivable.modeReceipt');
+  const add = all(collect).find((n) => n.type === 'button' && n.children.includes('family.quick.backCollect'))!;
+  assert.ok(add, 'settled members can record from the top section');
+  // 资料、座位、收费默认收起
+  assert.equal(
+    nodes.some((n) => n.type === 'Group' && n.props.title === 'family.member.seatGroup'),
+    false,
+  );
+  // 记一笔：叠上收款表单，不预设期，收款表单默认勾最早没结清的一期，也就是下一期（预收）
+  add.props.onClick();
+  const receipt = render().find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!;
+  assert.ok(receipt);
+  assert.equal(receipt.props.preset, undefined);
+  // 不分摊的成员没有收款可看，资料直接展开
+  const exempt = make().render('MemberForm', { state: st, s: sub, member: { ...member, exempt: true }, onClose() {} });
+  assert.ok(exempt.some((n) => n.type === 'Group' && n.props.title === 'family.member.seatGroup'));
 });
 
 test('跨年各段悬停一起高亮，点击仍返回同一期；触屏按下和键盘聚焦能预览', () => {

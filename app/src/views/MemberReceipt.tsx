@@ -34,7 +34,6 @@ export function ReceiptForm({
   editId,
   preset,
   onDone,
-  onMember,
   onOpenSub,
 }: {
   state: AppState;
@@ -43,7 +42,6 @@ export function ReceiptForm({
   editId?: string;
   preset?: string[];
   onDone: () => void;
-  onMember?: () => void;
   onOpenSub?: () => void;
 }) {
   const today = todayIn(state.settings.timezone);
@@ -93,13 +91,6 @@ export function ReceiptForm({
       preset={preset}
       save={(r) => saveReceivable(s, m.id, r)}
       onDone={onDone}
-      extraFoot={
-        onMember && (
-          <button className="btn plain" onClick={onMember}>
-            {t('family.collect.editMember')}
-          </button>
-        )
-      }
     />
   );
 }

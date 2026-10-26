@@ -69,7 +69,7 @@ export function FirstReceiptFields({ context }: { context: ReturnType<typeof use
 }
 
 export function ReceiptHistory({ context }: { context: ReturnType<typeof useMemberForm> }) {
-  const { member, collectCcy, mode, ledger, records, received, setReceipt, others, copying, setCopying, startCopy, removeRecordById } = context;
+  const { member, collectCcy, ledger, records, received, setReceipt, others, copying, setCopying, startCopy, removeRecordById } = context;
   const [expanded, setExpanded] = useState(false);
   const historyId = useId();
   return (
@@ -140,11 +140,6 @@ export function ReceiptHistory({ context }: { context: ReturnType<typeof useMemb
           </Cell>
         )}
       </div>
-      {mode !== 'exempt' && (
-        <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt({})}>
-          <Icon name="plus" /> {t('family.quick.backCollect')}
-        </button>
-      )}
     </Group>
   );
 }
