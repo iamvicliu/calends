@@ -181,8 +181,8 @@
     "included": "Devirler dahil",
     "kind": {
       "label": "Tür",
-      "buy": "Devralındı",
-      "sell": "Devredildi"
+      "buy": "Satın alındı",
+      "sell": "Satıldı"
     },
     "hint": {
       "buy": "Devralırken önceki sahibine ödenen para (prim dahil). Gerçekte ödenen tutarı girin.",

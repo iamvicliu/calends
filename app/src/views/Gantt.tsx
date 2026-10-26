@@ -9,6 +9,7 @@ import {
   coveredUntil,
   diffDays,
   effectiveStatus,
+  isStopped,
   stopSummary,
   phaseLanes,
   phaseSubs,
@@ -224,7 +225,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
 
   const earliest = rows.reduce((m, r) => (r.first < m ? r.first : m), today);
   const latest = rows.length ? rows.reduce((m, r) => (r.last > m ? r.last : m), rows[0].last) : today;
-  const { start: baseStart, end: baseEnd } = ganttWindow(zoom, today, earliest, latest);
+  // 灰色已付未用段可以延伸到未来，不代表这批订阅仍在进行。买断只是一个购买点。
+  const ongoing = rows.some((r) => r.segs.some((g) => g.v.cycle.unit !== 'lifetime' && !isStopped(effectiveStatus(g.v, today))));
+  const showToday = zoom !== 'all' || ongoing;
+  const { start: baseStart, end: baseEnd } = ganttWindow(zoom, today, earliest, latest, ongoing);
   const offset = zoom === 'all' ? 0 : Math.round(pan);
   const start = addDays(baseStart, offset);
   const end = addDays(baseEnd, offset);
@@ -539,10 +543,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       const top = 8 + r.lanes[gi] * LANE;
 
                       const stopped = stopSummary(g.v, today);
-                      // 转出时剩余服务随转让收回，不画已付未用
+                      // 卖出时剩余服务随转让收回，不画已付未用
                       const unused = !state.readonly && !!stopped && stopped.wastedDays > 0 && !transferredStop(g.v);
                       const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
-                      const unusedWidth = unused ? Math.max(0, x(wastedUntil) - x(stopped!.date)) : 0;
+                      const unusedWidth = unused ? Math.max(BAR, x(wastedUntil) - x(stopped!.date)) : 0;
                       const unusedSeen = unused ? visible(x(stopped!.date), unusedWidth) : { l: 0, r: 0 };
                       // 按实际字体量文字宽度，加左右各 9px 内边距；服务方停用时，停用日右侧被标志盖住的半个圆不计入文字空间。
                       // 完整金额放不下时退到取整金额（精确值在悬停提示里），仍放不下才不显示
@@ -706,7 +710,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           <div className="gt-grid gt-now">
             <div className="gt-label" />
             <div className="gt-track">
-              <div className="gt-pan">{today >= rStart && today <= rEnd && <b className="gt-today" style={{ left: x(today) }} />}</div>
+              <div className="gt-pan">{showToday && today >= rStart && today <= rEnd && <b className="gt-today" style={{ left: x(today) }} />}</div>
             </div>
           </div>
         </div>

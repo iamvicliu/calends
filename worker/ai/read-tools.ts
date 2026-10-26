@@ -211,7 +211,7 @@ export const get_subscription: Tool = {
         from: s.estimateFrom ?? s.start,
         history_complete: !s.estimateFrom,
       },
-      // 转让收付（二手转入付给原主、转出收到的实际现金）；index 为同一天内的序号，供 record_transfer replace/delete
+      // 转让收付（二手买入付给原主、卖出收到的实际现金）；index 为同一天内的序号，供 record_transfer replace/delete
       transfers: transfersOf(s).map((tr) => ({
         kind: tr.kind,
         date: tr.date,
@@ -221,7 +221,7 @@ export const get_subscription: Tool = {
         base_amount: fin(transferValue(st, tr, out ?? st.settings.baseCurrency)),
         note: tr.note ?? null,
       })),
-      // 生命周期净成本 = 服务付款 + 转入 − 转出；持有期从最早转入（早于开始时）到最后一次转出
+      // 生命周期净成本 = 服务付款 + 买入 − 卖出；持有期从最早买入（早于开始时）到最后一次卖出
       net_cost: (() => {
         const c = netCost(st, s, today, out ?? st.settings.baseCurrency);
         return {
@@ -243,7 +243,7 @@ export const get_subscription: Tool = {
         start: v.start,
         end: v.end ?? null,
         stop: stopSummary(v, today) ?? null,
-        // 转出时剩余服务随转让收回：该阶段不计已付未用损失
+        // 卖出时剩余服务随转让收回：该阶段不计已付未用损失
         transferred_on: transferredStop(v)?.date ?? null,
         price: v.price,
         currency: v.currency,

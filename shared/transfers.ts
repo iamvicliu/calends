@@ -1,6 +1,6 @@
 import { amountTotal, chargesTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
 import { DAYS_PER_MONTH } from './billing.ts';
-// 转让收付：二手转入时付给原主的钱、转出时收到的钱。都是实际现金，不推算剩余服务价值。
+// 转让收付：二手买入时付给原主的钱、卖出时收到的钱。都是实际现金，不推算剩余服务价值。
 // 不是服务商扣款：不进 MRR、续费预测、余额消耗、退款与扣款笔数；只进生命周期净成本和年度、月度现金流。
 import { chargesBetween, CURRENCY_CODE, diffDays, servedTime, validDay } from './billing.ts';
 import { chargeBaseOrNaN, convertOn } from './fx.ts';
@@ -15,7 +15,7 @@ export function transfersOf(s: Pick<Subscription, 'transfers'>): Transfer[] {
     .map((x) => x.tr);
 }
 
-/** 现金方向：转入付出去为正（成本），转出收回来为负 */
+/** 现金方向：买入付出去为正（成本），卖出收回来为负 */
 export const transferSign = (tr: Pick<Transfer, 'kind'>) => (tr.kind === 'buy' ? 1 : -1);
 
 /** 转让当天汇率折成 to；历史缺失时回落当前汇率，仍缺则为 NaN，不当成 0 */
@@ -23,15 +23,15 @@ export function transferValue(state: AppState, tr: Transfer, to = state.settings
   return convertOn(tr.amount, tr.currency, to, tr.date, state.fxHistory, state.fx);
 }
 
-/** 最后一笔转出的日期：那天起不再是我的（之后若又转入，则视为仍在持有） */
+/** 最后一笔卖出的日期：那天起不再是我的（之后若又买入，则视为仍在持有） */
 export function soldOn(s: Pick<Subscription, 'transfers'>): string | undefined {
   const last = transfersOf(s).at(-1);
   return last?.kind === 'sell' ? last.date : undefined;
 }
 
 /**
- * 持有期：起点取最早一笔转入（早于订阅开始时），终点取最后一笔转出（不含当天），否则到今天。
- * 天数沿用实际在订天数（不算断档），转入早于开始的那段另加。
+ * 持有期：起点取最早一笔买入（早于订阅开始时），终点取最后一笔卖出（不含当天），否则到今天。
+ * 天数沿用实际在订天数（不算断档），买入早于开始的那段另加。
  */
 export function holdingPeriod(s: Subscription, today: string): { from: string; until: string; days: number } {
   const buy = transfersOf(s).find((tr) => tr.kind === 'buy');
@@ -49,7 +49,7 @@ export interface NetCost {
   service: number;
   /** 至今的服务扣款笔数：不含退款与失败 */
   charges: number;
-  /** 转入付出的钱、转出收回的钱（正数）；缺汇率时为 NaN */
+  /** 买入付出的钱、卖出收回的钱（正数）；缺汇率时为 NaN */
   bought: number;
   sold: number;
   net: number;
@@ -62,7 +62,7 @@ export interface NetCost {
   incomplete: boolean;
 }
 
-/** 生命周期净成本 = 服务付款 + 转入 − 转出；月均、日均按持有期摊（今天之后的转让不计） */
+/** 生命周期净成本 = 服务付款 + 买入 − 卖出；月均、日均按持有期摊（今天之后的转让不计） */
 export function netCost(state: AppState, s: Subscription, today: string, to = state.settings.baseCurrency): NetCost {
   const history = chargesBetween(s, s.start, today, today).filter((c) => c.kind !== 'failed');
   const service = history.reduce((a, c) => a + chargeBaseOrNaN(state, c, to), 0);
@@ -98,8 +98,8 @@ export function netCost(state: AppState, s: Subscription, today: string, to = st
 }
 
 /**
- * 停止阶段的剩余服务是否已随转出收回：转出发生在该阶段开始到已付截止日之间。
- * 这时没有「已付未用」损失，钱已经算在转出里。
+ * 停止阶段的剩余服务是否已随卖出收回：卖出发生在该阶段开始到已付截止日之间。
+ * 这时没有「已付未用」损失，钱已经算在卖出里。
  */
 export function transferredStop(phase: Subscription): Transfer | undefined {
   if (!phase.stop) return undefined;
@@ -109,7 +109,7 @@ export function transferredStop(phase: Subscription): Transfer | undefined {
 export interface TransferRow {
   sub: Subscription;
   date: string;
-  /** 本位币，转入为正、转出为负；缺汇率为 NaN */
+  /** 本位币，买入为正、卖出为负；缺汇率为 NaN */
   amount: number;
   transfer: Transfer;
 }

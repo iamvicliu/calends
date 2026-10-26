@@ -175,8 +175,8 @@
     "included": "Termasuk pengalihan",
     "kind": {
       "label": "Jenis",
-      "buy": "Diambil alih",
-      "sell": "Dialihkan"
+      "buy": "Dibeli",
+      "sell": "Dijual"
     },
     "hint": {
       "buy": "Uang yang dibayar ke pemilik sebelumnya saat mengambil alih (termasuk premi). Masukkan jumlah yang benar-benar dibayar.",

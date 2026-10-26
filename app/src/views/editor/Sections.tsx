@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react';
 import type { EditorStatus } from './useEditorFields.ts';
 import { MemberSheet } from '../Members.tsx';
 import { isDataIcon } from '../../../../shared/icon.ts';
@@ -448,14 +449,14 @@ export function MoreFields({ context }: { context: ReturnType<typeof useEditorFi
             </Group>
           </>
         )}
-        {/* 转让收付：二手转入、转出的实际现金；完成时随整张表单保存。代付是别人的订阅，没有转让 */}
+        {/* 转让收付：二手买入、卖出的实际现金；完成时随整张表单保存。代付是别人的订阅，没有转让 */}
         {!f.proxy && (
           <Group
             title={t('detail.transfer.title')}
             foot={t('detail.transfer.foot')}
             action={
               <button type="button" className="btn plain" onClick={() => setTransfer({})}>
-                {t('detail.transfer.add')}
+                <Plus size={14} /> {t('detail.transfer.add')}
               </button>
             }
           >

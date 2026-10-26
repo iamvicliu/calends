@@ -33,7 +33,13 @@ export function ganttLabelBounds(
 
 /** 今天留在中偏右；短范围仍保留足够的未来空间。全部从最早一笔的月初开始。 */
 /** 「全部」刚好装下当前这一批：从最早开始的那个月起；都已结束时到最后那个月末，还有进行中的只到今天 */
-export function ganttWindow(zoom: GanttZoom, today: string, earliest = today, latest?: string): { start: string; end: string } {
+export function ganttWindow(
+  zoom: GanttZoom,
+  today: string,
+  earliest = today,
+  latest?: string,
+  ongoing = latest == null || latest > today,
+): { start: string; end: string } {
   switch (zoom) {
     case '3m':
       return { start: addMonths(today, -2), end: addMonths(today, 1) };
@@ -47,7 +53,7 @@ export function ganttWindow(zoom: GanttZoom, today: string, earliest = today, la
       const start = `${earliest.slice(0, 7)}-01`;
       if (!latest) return { start, end: addMonths(today, 6) };
       // 都已结束：停在最后那个月；还有进行中的：只到今天，留约 2% 余量让今天线不压在边上，未来部分看固定范围
-      if (latest <= today) return { start, end: addMonths(`${latest.slice(0, 7)}-01`, 1) };
+      if (!ongoing) return { start, end: addMonths(`${latest.slice(0, 7)}-01`, 1) };
       return { start, end: addDays(today, Math.max(7, Math.round(diffDays(start, today) * 0.02))) };
     }
   }

@@ -595,3 +595,14 @@ test('短窗口只合并价格所需切点，同价仍只标一次且保留其�
     assert.ok(parts.every((part) => part.props.style.width >= 22));
   }
 });
+
+test('all-history scope distinguishes ended service from future unused paid coverage', () => {
+  assert.deepEqual(Reflect.apply(gantt.ganttWindow, null, ['all', '2026-10-19', '2026-10-05', '2026-11-04', false]), {
+    start: '2026-10-01',
+    end: '2026-12-01',
+  });
+  assert.deepEqual(Reflect.apply(gantt.ganttWindow, null, ['all', '2026-10-19', '2026-01-01', '2026-10-10', true]), {
+    start: '2026-01-01',
+    end: '2026-10-26',
+  });
+});

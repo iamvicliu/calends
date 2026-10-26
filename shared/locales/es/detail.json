@@ -190,7 +190,7 @@
     "included": "Incl. traspasos",
     "kind": {
       "label": "Tipo",
-      "buy": "Adquirido",
+      "buy": "Comprado",
       "sell": "Vendido"
     },
     "hint": {

@@ -1,4 +1,5 @@
 import * as fxTotals from './fx-total.ts';
+import { editorMoreKeys, editorMoreOpen } from '../app/src/views/editor/more.ts';
 import { readUiSource } from '../scripts/ui-test-source.ts';
 import { metricComponents, fxAmountComponent } from '../scripts/ui-test-components.ts';
 import * as transfers from './transfers.ts';
@@ -500,6 +501,8 @@ function editorRuntime(original: Subscription) {
       categories: () => [],
       presetCat: (name: string) => name,
       isDomainCat: () => false,
+      editorMoreKeys,
+      editorMoreOpen,
       saveSub: async (value: Subscription) => saved.push(value),
       mergeEdits: (_old: Subscription, next: Subscription) => next,
       getState: () => state,
@@ -645,4 +648,57 @@ test('编辑状态跟随既有历程操作：停用后新增阶段续订不会�
   assert.equal(r.saved[0].phases!.length, 2);
   assert.equal(r.saved[0].phases![0].stop!.kind, 'terminate');
   assert.equal(r.saved[0].phases![0].payments!.filter((p) => p.kind === 'refund').length, 1);
+});
+
+test('all-history timeline omits today for stopped-only scopes even in the current month or with future unused service', () => {
+  const stop = runtime('../app/src/components/StopPanel.tsx', { toast() {} }).exports;
+  const r = runtime('../app/src/views/Gantt.tsx', {
+    usePref: (key: string, initial: unknown) => [key === 'gantt-zoom' ? 'all' : initial, () => {}],
+    useWidth: () => [() => {}, 600],
+    perLabel: () => 'mo',
+    stopDescription: stop.stopDescription,
+  });
+  const render = (subs: Subscription[]) =>
+    all(
+      r.render('Gantt', {
+        rows: subs,
+        state: { subscriptions: subs, methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX },
+        today,
+        onOpen() {},
+      }),
+    );
+  const countToday = (nodes: Element[]) => nodes.filter((e) => e.props.className === 'gt-today').length;
+  const stopped = phases.stopSubscription(sub, today, 'terminate', '2026-10-10');
+  assert.equal(countToday(render([stopped])), 0);
+  const fullyRefunded = phases.stopSubscription(sub, today, 'terminate', '2026-10-10', undefined, { amount: 31 });
+  assert.equal(countToday(render([fullyRefunded])), 0);
+  assert.equal(countToday(render([stopped, { ...sub, id: 'fictional-active' }])), 1);
+});
+
+test('narrow unused service keeps a full 22px display segment behind the termination mark', () => {
+  const stop = runtime('../app/src/components/StopPanel.tsx', { toast() {} }).exports;
+  const r = runtime('../app/src/views/Gantt.tsx', {
+    usePref: (_key: string, initial: unknown) => [initial, () => {}],
+    useWidth: () => [() => {}, 180],
+    perLabel: () => 'week',
+    stopDescription: stop.stopDescription,
+  });
+  const short = phases.stopSubscription({ ...sub, cycle: { unit: 'week', every: 1 }, price: 7 }, today, 'terminate', '2026-10-06');
+  const nodes = all(
+    r.render('Gantt', {
+      rows: [short],
+      state: { subscriptions: [short], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX },
+      today,
+      onOpen() {},
+    }),
+  );
+  const unused = nodes.find((e) => e.props.className === 'gt-unused')!;
+  const mark = nodes.find((e) => e.props.className === 'gt-stop')!;
+  assert.ok(unused);
+  assert.ok(unused.props.style.width >= 22);
+  assert.equal(unused.props.style.left, mark.props.style.left + 11);
+  assert.equal(
+    all(unused).some((e) => e.props.className === 'gt-unused-amount'),
+    false,
+  );
 });

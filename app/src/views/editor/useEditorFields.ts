@@ -1,4 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
+import { editorMoreKeys, editorMoreOpen } from './more.ts';
 
 import { currencyDecimals } from '../../../../shared/format.ts';
 import { t } from '../../../../shared/i18n.ts';
@@ -71,19 +72,10 @@ export function useEditorFields({
   // 「更多选项」里有内容时默认展开，并在标题上列出已设置的项
   // 买断是一次性的：没有续费、状态、到期、提醒、优惠期这些概念，表单里不显示
   const lt = f.cycle.unit === 'lifetime';
-  const extras = [
-    !lt && f.intro && t('editor.more.intro'),
-    !lt && f.bonus && t('editor.more.bonus'),
-    !lt && f.remindDays != null && t('editor.more.remind'),
-    !lt && (f.chargeLeadDays || f.cancelLeadDays) && t('core.renewal.title'),
-    (f.url?.trim() || f.manageUrl?.trim() || f.icon?.trim() || (isDomainCat(f.category) && f.showOnPublic)) && t('editor.more.links'),
-    f.tags.length > 0 && t('editor.more.tags'),
-    f.notes?.trim() && t('editor.more.notes'),
-    !f.proxy && !!f.transfers?.length && t('detail.transfer.title'),
-  ].filter(Boolean) as string[];
+  const extras = editorMoreKeys(f, isDomainCat(f.category)).map((key) => t(key));
   const [transfer, setTransfer] = useState<{ index?: number } | null>(null);
   // 不保存展开偏好；每次打开（包括恢复/清空表单）都按实际内容决定。
-  const [more, setMore] = useState(() => extras.length > 0);
+  const [more, setMore] = useState(() => editorMoreOpen(f, isNew, isDomainCat(f.category)));
   // 分类表的顺序；表单里的分类万一不在表里（刚被删掉），也留着它
   const catOptions = [...new Set([...categories().map((c) => c.name), f.category].filter(Boolean))];
   const [newCat, setNewCat] = useState(false);

@@ -1,4 +1,5 @@
 import * as fxTotals from './fx-total.ts';
+import { shouldGroupYears } from '../app/src/components/year-ledger.ts';
 import { readUiSource } from '../scripts/ui-test-source.ts';
 import * as phase2Icons from 'lucide-react';
 import { metricComponents, fxAmountComponent } from '../scripts/ui-test-components.ts';
@@ -90,6 +91,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
           ? type({ ...props, children })
           : { type, props: props ?? {}, children },
     },
+    shouldGroupYears,
     canUseSingleKey,
     ...billing,
     ...listScope,
@@ -2291,7 +2293,9 @@ test('退款行显示负现金流和退款标签，全额退款后仍保留累�
     { Sheet: 'Sheet', NameLink: 'NameLink', perBill: () => '', createPortal: () => null },
   );
   const render = () => r.render('CarSheet', { state: st, s, today, book: carpool.carLedger(st, s, today), onClose() {}, onMember() {}, onOpenSub() {} });
-  // 只有一年的记录平铺，不用先展开；行与订阅详情的扣款记录同一套（ld-row dt-row）
+  // 同年多条先展开；退款行仍与订阅详情共用同一套。
+  const receiptsHead = render().find((n) => String(n.props.className ?? '').includes('ld-toggle'))!;
+  (receiptsHead.props.onClick as () => void)();
   const refund = render().find(
     (n) => String(n.props.className ?? '').startsWith('ld-row dt-row') && all(n.children).some((x) => x.children.includes('family.sheet.refund')),
   )!;
@@ -2378,7 +2382,7 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
   cellNodes[0].props.onClick();
   assert.equal(opened, 2);
   nodes = r.render('CarSheet', { ...props, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {} });
-  // 已下车成员的历史收款仍留在收款表里（与订阅详情同一套按年表格，只有一年时平铺）
+  // 已下车成员的历史收款仍留在收款表里（与订阅详情同一套按年表格，每年最多一条时平铺）
   assert.ok(nodes.some((n) => String(n.props.className ?? '').startsWith('ld-row dt-row') && all(n.children).some((x) => x.children.includes('Departed'))));
   const empty = { ...s, share: { ...s.share!, members: [] } };
   const emptyNodes = r.render('MemberTable', { ...props, s: empty });
@@ -2430,7 +2434,7 @@ test('收款表点某一笔直接进入这笔收款的编辑，而不是成员�
     onMember: () => calls.push(['member']),
     onPayment: (m: unknown, p: unknown) => calls.push(['payment', m, p]),
   };
-  // 跨年时先点表头全部展开；只有一年的记录本来就平铺
+  // 聚合时先点表头全部展开；每年最多一条时直接平铺
   r.render('CarSheet', props)
     .find((n) => n.props.className === 'ld-row ld-th ld-toggle table-head')
     ?.props.onClick();

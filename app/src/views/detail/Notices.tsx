@@ -36,7 +36,7 @@ export function Outcome({ sub, state, today }: { sub: Subscription; state: AppSt
       {stopped.map((phase) => {
         const sm = stopSummary(phase, today)!;
         const loss = losses.find((item) => item.phase.start === phase.start);
-        // 转出时剩余服务随转让收回：不写已付未用损失，改写转出日
+        // 卖出时剩余服务随转让收回：不写已付未用损失，改写卖出日
         const sold = transferredStop(phase);
         if (sold) sm.unusedValue = 0;
         return (
