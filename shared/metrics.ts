@@ -354,10 +354,9 @@ export interface StopLoss {
   wastedDays: number;
 }
 
-/** 已付未用且未退回的损失；退款截至 today，范围按停止日（含两端）筛选。 */
-export function stopLosses(state: AppState, today: string, range?: { from?: string; to?: string }) {
+/** Complete explicit stop history, including fully refunded stops and stops without unused service. */
+export function stopHistory(state: AppState, today: string, range?: { from?: string; to?: string }) {
   const items: StopLoss[] = [];
-  const byKind = { cancel: 0, terminate: 0 };
   for (const sub of state.subscriptions) {
     if (sub.proxy) continue;
     phaseSubs(sub).forEach((phase, phaseIndex) => {
@@ -367,10 +366,8 @@ export function stopLosses(state: AppState, today: string, range?: { from?: stri
       const summary = stopSummary(phase, today)!;
       const factor = myShareFactor(phase, summary.date);
       const loss = summary.unusedValue * factor;
-      if (loss <= 0) return;
       const rate = convertOn(1, phase.currency, state.settings.baseCurrency, summary.date, state.fxHistory, state.fx);
-      const lossBase = loss * rate;
-      if (lossBase <= 0.005) return;
+      const lossBase = loss === 0 ? 0 : loss * rate;
       const paid = summary.paid * factor;
       const refunded = summary.refunded * factor;
       items.push({
@@ -392,10 +389,17 @@ export function stopLosses(state: AppState, today: string, range?: { from?: stri
         refundStatus: summary.refundStatus,
         wastedDays: summary.wastedDays,
       });
-      byKind[summary.kind] += lossBase;
     });
   }
   items.sort((a, b) => b.date.localeCompare(a.date) || b.lossBase - a.lossBase);
+  return items;
+}
+
+/** Positive, unrefunded unused value only. Existing report/overview callers keep this contract. */
+export function stopLosses(state: AppState, today: string, range?: { from?: string; to?: string }) {
+  const items = stopHistory(state, today, range).filter((i) => i.loss > 0 && !(i.lossBase <= 0.005));
+  const byKind = { cancel: 0, terminate: 0 };
+  for (const i of items) byKind[i.kind] += i.lossBase;
   return {
     partial: sumTotals(items.map((i) => amountTotal(i.loss, i.currency, i.lossBase))),
     total: items.reduce((sum, i) => sum + i.lossBase, 0),

@@ -1,0 +1,123 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { test } from 'node:test';
+import { scopeFixtures, SCOPE_TODAY as today } from '../scripts/scope-report-fixtures.ts';
+import { chargesBetween, myShareFactor, diffDays } from './billing.ts';
+import { chargeTotal, scaleTotal, sumTotals } from './fx-total.ts';
+import { stopHistory, stopLosses } from './metrics.ts';
+import { monthReport, scopeReport } from './scope-report.ts';
+import { scopeReportOut } from '../worker/ai/report-tools.ts';
+
+const data = scopeFixtures();
+test('seven fictional Kiro subscriptions retain all six provider stops including full refunds and zero unused days', () => {
+  const st = data.kiro;
+  const report = scopeReport(st, st.subscriptions, today);
+  const r = report.lifecycle!;
+  assert.equal(r.terminatedCount, 6);
+  assert.equal(r.stops.length, 6);
+  assert.equal(r.stops.filter((r) => r.refundStatus === 'full').length, 2);
+  assert.equal(r.stops.filter((r) => r.paidThrough === r.date).length, 1);
+  assert.equal(stopLosses(st, today).items.length, 3, 'loss-only API retains its historical contract');
+  assert.deepEqual(
+    r.stops.map((s) => s.date),
+    r.stops
+      .map((s) => s.date)
+      .sort()
+      .reverse(),
+  );
+  const expected = st.subscriptions.flatMap((s) =>
+    chargesBetween(s, s.start, today, today)
+      .filter((c) => c.kind !== 'failed')
+      .map((c) => scaleTotal(chargeTotal(st, c), myShareFactor(c.sub, c.date))),
+  );
+  assert.deepEqual(r.spent, sumTotals(expected));
+  assert.equal(r.spent.value, 490);
+  assert.equal(r.activeCount, 1);
+  const duration = st.subscriptions.reduce((n, s) => n + diffDays(s.start, s.stop?.date ?? today), 0) / 7;
+  assert.equal(r.averageDays, duration);
+  assert.equal(
+    r.spending.reduce((n, r) => n + r.total.value, 0),
+    r.spent.value,
+  );
+  assert.equal(report.blocks.find((b) => b.type === 'trend')?.mode, 'scope');
+});
+
+test('all stopped, no provider stops, a single subscription and empty selection retain finite lifecycle facts', () => {
+  assert.equal(scopeReport(data.stopped, data.stopped.subscriptions, today).lifecycle!.activeCount, 0);
+  const ordinary = scopeReport(data.ordinary, data.ordinary.subscriptions, today).lifecycle!;
+  assert.equal(ordinary.terminatedCount, 0);
+  assert.equal(ordinary.stoppedCount, 1);
+  assert.ok(ordinary.saved.value > 0);
+  assert.equal(scopeReport(data.single, data.single.subscriptions, today).lifecycle!.averageDays, 46);
+  assert.equal(scopeReport(data.single, [], today).lifecycle!.averageDays, 0);
+});
+
+test('lifetime spending retains my share, negative refunds and missing currency originals', () => {
+  const st = structuredClone(data.missing);
+  const s = st.subscriptions[1];
+  s.share = { role: 'owner', seats: 2, members: [{ id: 'm', name: 'Fictional Member', share: 60 }] };
+  const r = scopeReport(st, st.subscriptions, today).lifecycle!;
+  assert.equal(r.spent.incomplete, true);
+  assert.equal(r.spent.value, 120);
+  assert.equal(r.spent.unconverted.XCD, 60);
+  const one = structuredClone(data.single);
+  one.subscriptions[0].payments = [{ date: '2026-10-20', amount: -60, kind: 'refund' }];
+  assert.equal(scopeReport(one, one.subscriptions, today).lifecycle!.spent.value, -40);
+});
+
+test('timeline caps at the twelve highest cumulative costs and current-month cash excludes future charges', () => {
+  const st = structuredClone(data.single);
+  st.subscriptions = Array.from({ length: 14 }, (_, i) => ({ ...st.subscriptions[0], id: `${i}`, price: i + 1, start: '2026-10-01' }));
+  const r = scopeReport(st, st.subscriptions, today).lifecycle!;
+  assert.equal(r.timeline.length, 12);
+  assert.equal(r.omitted, 2);
+  assert.deepEqual(
+    r.timeline.map((s) => s.price),
+    [14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3],
+  );
+  const future = { ...st.subscriptions[0], start: '2026-10-30' };
+  const report = scopeReport({ ...st, subscriptions: [future] }, [future], today);
+  assert.equal(report.lifecycle!.spent.value, 0);
+  const trend = report.blocks.find((b) => b.type === 'trend');
+  assert.equal(trend, undefined);
+});
+
+test('stop history retains separate historical phase stops without leaking proxy records', () => {
+  const st = structuredClone(data.kiro);
+  const [a, b] = st.subscriptions;
+  const combined = {
+    ...b,
+    start: a.start,
+    phases: [a, b].map((s) => ({
+      start: s.start,
+      end: s.end,
+      price: s.price,
+      currency: s.currency,
+      cycle: s.cycle,
+      status: s.status,
+      stop: s.stop,
+      payments: s.payments,
+    })),
+  };
+  st.subscriptions = [combined, { ...a, id: 'proxy', proxy: { forName: 'Fictional Person' } }];
+  assert.equal(stopHistory(st, today).length, 2);
+  assert.equal(scopeReport(st, st.subscriptions, today).lifecycle!.terminatedCount, 2);
+});
+
+test('MCP preserves legacy headline fields and adds lifetime, duration and all stop details', () => {
+  const out = scopeReportOut(data.kiro, today, undefined);
+  assert.equal(out.lifecycle!.terminated_count, 6);
+  assert.equal(out.lifecycle!.cumulative_spending.total, 490);
+  assert.equal(out.lifecycle!.stops.length, 6);
+  const head = out.blocks.find((b) => b.type === 'headline')!;
+  for (const key of ['mrr', 'annual', 'active_count', 'paid_this_year', 'stop_loss_this_year', 'mrr_change_since_last_month']) assert.ok(key in head);
+  const missing = scopeReportOut(data.missing, today, undefined);
+  assert.equal(missing.lifecycle!.cumulative_spending.total, null);
+  assert.equal(missing.lifecycle!.cumulative_spending.known_total, 120);
+  assert.equal(missing.lifecycle!.cumulative_spending.incomplete, true);
+});
+
+test('calendar month output stays frozen across historical, current, future and missing-FX fixtures', () => {
+  const output = Object.values(data).flatMap((s) => ['2025-02', '2026-10', '2026-12'].map((m) => monthReport(s, m, today)));
+  assert.equal(createHash('sha256').update(JSON.stringify(output)).digest('hex'), 'beeec7cadbc99c5314ae3edb7e761002a91f5639e515b3789016e4e02ae33204');
+});

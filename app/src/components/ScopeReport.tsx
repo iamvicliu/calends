@@ -1,3 +1,4 @@
+import { ScopeLifecycleReport } from './ScopeLifecycleReport.tsx';
 import { formatTotal, scaleTotal, totalNote, totalsNote, type FxTotal } from '../../../shared/fx-total.ts';
 import { CopyImageButton } from './CopyImageButton.tsx';
 import { copyParts } from './copy.tsx';
@@ -242,11 +243,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         if (block.mode === 'scope')
           return (
             <>
-              {heading('cash', 'cashWindow')}
+              {heading('cash', report.lifecycle ? 'lifecycle.cashWindow' : 'cashWindow')}
               <BarLine
                 bars={block.rows.map((r) => r.partial.cash.value)}
                 line={[]}
-                future={block.rows.map((r) => r.projected)}
+                future={report.lifecycle ? [] : block.rows.map((r) => r.projected)}
                 labels={block.rows.map((r) => monthLabel(r.month, { year: false }))}
                 tip={(i) => (
                   <>
@@ -517,6 +518,32 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
     if (i + 1 < blocks.length && !FULL.has(blocks[i + 1].type)) i++;
     else alone.add(i);
   }
+  if (report.lifecycle)
+    return (
+      <section ref={root} className="scope-report" aria-labelledby={`${id}-title`}>
+        <h2 id={`${id}-title`} className="scope-header">
+          {expanded ? (
+            <span className="scope-title">{title}</span>
+          ) : (
+            <button type="button" className="scope-trigger" aria-expanded={false} aria-controls={id} onClick={onToggle}>
+              {title} / {t('scope.expand')}
+            </button>
+          )}
+        </h2>
+        {expanded && (
+          <ScopeLifecycleReport
+            report={report}
+            state={state}
+            today={today}
+            onOpen={onOpen}
+            id={id}
+            copying={copying}
+            actions={headlineHeading('scope.totalSpent', 'scope.totalBasis')}
+            renderBlock={render}
+          />
+        )}
+      </section>
+    );
   return (
     <section ref={root} className={`scope-report ${animate && copyState === 'idle' ? 'scope-animate' : ''}`} aria-labelledby={`${id}-title`}>
       <h2 id={`${id}-title`} className="scope-header">

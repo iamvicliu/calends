@@ -1,6 +1,6 @@
 import { partialOut } from './tool-views.ts';
-import { emptyTotal } from '../../shared/fx-total.ts';
-import { addDays, addMonths, chargesBetween, phaseSubs } from '../../shared/billing.ts';
+import { type FxTotal, emptyTotal } from '../../shared/fx-total.ts';
+import { addDays, addMonths, chargesBetween, diffDays, phaseSubs } from '../../shared/billing.ts';
 import { chargeFxMissing, convertOn } from '../../shared/fx.ts';
 import { t } from '../../shared/i18n.ts';
 import { LIST_STATUSES, listScope, listWords, type ListScope, type ListStatus } from '../../shared/list-scope.ts';
@@ -315,6 +315,12 @@ export function scopeReportOut(st: AppState, today: string, f: Record<string, un
   const report = scopeReport(st, subs, today);
   const head = report.blocks.find((b) => b.type === 'headline');
   const partial = head?.partial?.mrr ?? head?.partial?.total ?? emptyTotal();
+  const lifecycleTotal = (total: FxTotal) => ({
+    total: total.incomplete ? null : num(total.value),
+    incomplete: total.incomplete,
+    fx_missing: Object.keys(total.unconverted).sort(),
+    ...partialOut(total),
+  });
   const bad = g.currencies.size > 0;
   const missing: Missing = { headline: bad, previous: bad, yearly: bad, trend: bad, composition: bad, subs: g.subs };
   return {
@@ -323,10 +329,48 @@ export function scopeReportOut(st: AppState, today: string, f: Record<string, un
     totals: partialOut(partial),
     currency: st.settings.baseCurrency,
     basis:
-      'Same as the web list selection report: headline MRR/annual at current FX, paid this year and stop losses at my share; trend = 12 cash months including this month plus 3 forecast months (cash vs accrual); upcoming = next 30 days. Transfers are not part of this report. When nothing has recurring cost, the headline switches to lifetime totals (mode=total).',
+      'Selection lifecycle supplies all-history net cash at my share, average duration and complete recorded stops. Legacy headline blocks retain MRR/annual at current FX, paid this year and stop losses at my share; trend = 12 cash months through this month, paid through today (cash vs accrual); upcoming = next 30 days. Transfers are not part of this report. When nothing has recurring cost, the headline switches to lifetime totals (mode=total).',
+    lifecycle: report.lifecycle
+      ? {
+          cumulative_spending: lifecycleTotal(report.lifecycle.spent),
+          average_duration_days: num(report.lifecycle.averageDays),
+          active_count: report.lifecycle.activeCount,
+          stopped_count: report.lifecycle.stoppedCount,
+          terminated_count: report.lifecycle.terminatedCount,
+          unrefunded_loss: lifecycleTotal(report.lifecycle.loss),
+          termination_loss: lifecycleTotal(report.lifecycle.terminationLoss),
+          saved: lifecycleTotal(report.lifecycle.saved),
+          stops: report.lifecycle.stops.map((r) => ({
+            ...ref(r.sub),
+            phase_start: r.phase.start,
+            kind: r.kind,
+            date: r.date,
+            used_days: Math.max(0, diffDays(r.phase.start, r.date)),
+            unused_days: Math.max(0, diffDays(r.date, r.paidThrough)),
+            wasted_days: r.wastedDays,
+            paid_through: r.paidThrough,
+            loss: num(r.loss),
+            loss_base: num(r.lossBase),
+            refunded: num(r.refunded),
+            refunded_base: num(r.refundedBase),
+            currency: r.currency,
+            fx_missing: r.fxMissing,
+            refund_status: r.refundStatus,
+          })),
+          timeline: report.lifecycle.timeline.map(ref),
+          timeline_omitted: report.lifecycle.omitted,
+          spending: report.lifecycle.spending.map((r) => ({
+            ...ref(r.sub),
+            method_id: r.methodId ?? null,
+            region: r.region,
+            category: r.category,
+            ...lifecycleTotal(r.total),
+          })),
+        }
+      : undefined,
     count: subs.length,
     subscriptions: subs.map((s) => ({ id: s.id, name: s.name })),
-    ...gapsOut(g, addMonths(today, -12), addDays(today, 30)),
+    ...gapsOut(g, '0001-01-01', addDays(today, 30)),
     blocks: subs.length ? report.blocks.map((b) => blockOut(st, b, missing)) : [],
   };
 }

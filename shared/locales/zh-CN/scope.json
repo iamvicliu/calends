@@ -70,5 +70,18 @@
   "totalSince": "{date} 起",
   "subsCount": "订阅数",
   "average": "平均每个",
-  "topTotal": "累计花费前 {count}"
+  "topTotal": "累计花费前 {count}",
+  "lifecycle": {
+    "times": "{count} 次",
+    "allStopped": "全部已停止",
+    "noActive": "暂无进行中订阅",
+    "stopped": "已停止",
+    "averageDuration": "平均持续",
+    "omitted": "按累计花费展示前 12 个; 其余 {count} 个订阅",
+    "used": "已用 {span}",
+    "noUnused": "无未用",
+    "unused": "未用 {count} 天",
+    "noLoss": "无未退款损失",
+    "cashWindow": "截至本月的 12 个月，仅计今天前的花费，扣除退款。"
+  }
 }

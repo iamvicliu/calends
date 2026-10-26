@@ -1,3 +1,4 @@
+import { useSnapshotRender } from '../snapshot-render.tsx';
 import { durationLabel } from '../../../shared/billing.ts';
 import { transferredStop } from '../../../shared/transfers.ts';
 import { stopDescription } from '../components/StopPanel.tsx';
@@ -91,9 +92,24 @@ function amountWidth(text: string): number {
 const NARROW = '(max-width: 700px)';
 const PORTRAIT = '(max-width: 700px) and (orientation: portrait)';
 
-export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription[]; state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+export function Gantt({
+  rows: subs,
+  state,
+  today,
+  onOpen,
+  compact = false,
+}: {
+  rows: Subscription[];
+  state: AppState;
+  today: string;
+  onOpen: (s: Subscription) => void;
+  compact?: boolean;
+}) {
+  const captureRef = useRef<HTMLDivElement>(null);
+  useSnapshotRender(captureRef, () => compact ? <Gantt rows={subs} state={state} today={today} onOpen={onOpen} compact /> : null);
   // 缩放与着色方式存在服务端，多台设备一致
-  const [zoom, setZoomRaw] = usePref<GanttZoom>('gantt-zoom', '1y', isGanttZoom);
+  const [savedZoom, setZoomRaw] = usePref<GanttZoom>('gantt-zoom', '1y', isGanttZoom);
+  const zoom = compact ? 'all' : savedZoom;
   // 左右平移：pan 是已提交的偏移（天），松手或停下后对齐到月份锚点。
   // 手势进行中不重渲染：live 是尚未提交的像素位移，只写到 --gt-shift 上整体平移（两侧各多画一屏作缓冲）
   const [pan, setPan] = useState(0);
@@ -107,7 +123,8 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     setZoomRaw(z);
     setPan(0);
   };
-  const [colorBy, setColorBy] = usePref<ColorBy>('gantt-color', 'method', isColorBy);
+  const [savedColorBy, setColorBy] = usePref<ColorBy>('gantt-color', 'method', isColorBy);
+  const colorBy = compact ? 'method' : savedColorBy;
   // 名称列宽度可拖动调整；手机与桌面各记一份，桌面上调宽的值不会挤占手机上的时间轴
   const narrow = useMedia(NARROW);
   const portrait = useMedia(PORTRAIT);
@@ -126,8 +143,12 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
     (v): v is string => /^\d+$/.test(v) && Number.isSafeInteger(Number(v)),
   );
   const [liveW, setLiveW] = useState<number | null>(null);
-  const labelW = portrait ? minW : Math.min(maxW, Math.max(minW, liveW ?? (savedW ? Number(savedW) : bounds.default)));
-  const iconOnly = portrait || labelW <= minW;
+  const labelW = compact
+    ? Math.min(maxW, bounds.default, 156)
+    : portrait
+      ? minW
+      : Math.min(maxW, Math.max(minW, liveW ?? (savedW ? Number(savedW) : bounds.default)));
+  const iconOnly = !compact && (portrait || labelW <= minW);
   const resizeFrom = useRef<{ x: number; w: number } | null>(null);
   const onResizeDown = (e: React.PointerEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -227,8 +248,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   const latest = rows.length ? rows.reduce((m, r) => (r.last > m ? r.last : m), rows[0].last) : today;
   // 灰色已付未用段可以延伸到未来，不代表这批订阅仍在进行。买断只是一个购买点。
   const ongoing = rows.some((r) => r.segs.some((g) => g.v.cycle.unit !== 'lifetime' && !isStopped(effectiveStatus(g.v, today))));
-  const showToday = zoom !== 'all' || ongoing;
-  const { start: baseStart, end: baseEnd } = ganttWindow(zoom, today, earliest, latest, ongoing);
+  const showToday = !compact && (zoom !== 'all' || ongoing);
+  const { start: baseStart, end: baseEnd } = compact
+    ? { start: earliest, end: today > earliest ? today : addDays(today, 1) }
+    : ganttWindow(zoom, today, earliest, latest, ongoing);
   const offset = zoom === 'all' ? 0 : Math.round(pan);
   const start = addDays(baseStart, offset);
   const end = addDays(baseEnd, offset);
@@ -410,43 +433,45 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   const ticks = ganttTicks(zoom, rStart, rEnd, w + 2 * buffer * k, intlLocale()).map((tk) => ({ ...tk, labelX: tk.labelX - buffer * k }));
 
   return (
-    <div className="gantt">
-      <div className="gt-bar">
-        <Seg
-          small
-          value={zoom}
-          onChange={setZoom}
-          options={[
-            ['3m', t('list.gantt.zoom3m')],
-            ['6m', t('list.gantt.zoom6m')],
-            ['1y', t('list.gantt.zoom1y')],
-            ['3y', t('list.gantt.zoom3y')],
-            ['all', t('list.all')],
-          ]}
-        />
-        {pannable && (
-          <div className="gt-nav">
-            <IconButton type="button" onClick={() => step(-1)} aria-label={t('list.gantt.earlier')}>
-              <Icon name="left" />
-            </IconButton>
-            <button type="button" className={`gt-range ${offset === 0 ? '' : 'moved'}`} onClick={() => setPan(0)} title={t('list.gantt.backToNow')}>
-              {rangeLabel}
-            </button>
-            <IconButton type="button" onClick={() => step(1)} aria-label={t('list.gantt.later')}>
-              <Icon name="right" />
-            </IconButton>
-          </div>
-        )}
-        <Seg
-          small
-          value={colorBy}
-          onChange={setColorBy}
-          options={[
-            ['method', t('list.gantt.byMethod')],
-            ['region', t('list.gantt.byRegion')],
-          ]}
-        />
-      </div>
+    <div className={`gantt ${compact ? 'scope-timeline' : ''}`} ref={compact ? captureRef : undefined}>
+      {!compact && (
+        <div className="gt-bar">
+          <Seg
+            small
+            value={zoom}
+            onChange={setZoom}
+            options={[
+              ['3m', t('list.gantt.zoom3m')],
+              ['6m', t('list.gantt.zoom6m')],
+              ['1y', t('list.gantt.zoom1y')],
+              ['3y', t('list.gantt.zoom3y')],
+              ['all', t('list.all')],
+            ]}
+          />
+          {pannable && (
+            <div className="gt-nav">
+              <IconButton type="button" onClick={() => step(-1)} aria-label={t('list.gantt.earlier')}>
+                <Icon name="left" />
+              </IconButton>
+              <button type="button" className={`gt-range ${offset === 0 ? '' : 'moved'}`} onClick={() => setPan(0)} title={t('list.gantt.backToNow')}>
+                {rangeLabel}
+              </button>
+              <IconButton type="button" onClick={() => step(1)} aria-label={t('list.gantt.later')}>
+                <Icon name="right" />
+              </IconButton>
+            </div>
+          )}
+          <Seg
+            small
+            value={colorBy}
+            onChange={setColorBy}
+            options={[
+              ['method', t('list.gantt.byMethod')],
+              ['region', t('list.gantt.byRegion')],
+            ]}
+          />
+        </div>
+      )}
       <div
         ref={gtEl}
         className={`gt ${pannable ? 'pannable' : ''} ${liveW != null ? 'resizing' : ''}`}
@@ -456,7 +481,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        {!portrait && (
+        {!compact && !portrait && (
           <div
             className="gt-resize"
             role="separator"
@@ -503,12 +528,24 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                 key={r.s.id}
                 data-id={r.s.id}
                 className="gt-row"
+                role={compact ? 'button' : undefined}
+                tabIndex={compact ? 0 : undefined}
+                onKeyDown={
+                  compact
+                    ? (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onOpen(r.s);
+                        }
+                      }
+                    : undefined
+                }
                 style={{ '--lanes': Math.max(...r.lanes) + 1 } as Record<string, number>}
                 onClick={() => !dragged.current && onOpen(r.s)}
               >
                 <div className="gt-label" title={r.s.name}>
                   <span className="gt-icon" role="img" title={r.s.name} aria-label={r.s.name}>
-                    <SubIcon sub={r.s} size={20} />
+                    <SubIcon sub={r.s} size={20} proxied={compact} />
                   </span>
                   {!iconOnly && <span className="gt-name">{r.s.name}</span>}
                 </div>
@@ -546,7 +583,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       // 卖出时剩余服务随转让收回，不画已付未用
                       const unused = !state.readonly && !!stopped && stopped.wastedDays > 0 && !transferredStop(g.v);
                       const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
-                      const unusedWidth = unused ? Math.max(BAR, x(wastedUntil) - x(stopped!.date)) : 0;
+                      const unusedWidth = unused ? Math.max(compact ? 0 : BAR, x(compact && wastedUntil > today ? today : wastedUntil) - x(stopped!.date)) : 0;
                       const unusedSeen = unused ? visible(x(stopped!.date), unusedWidth) : { l: 0, r: 0 };
                       // 按实际字体量文字宽度，加左右各 9px 内边距；服务方停用时，停用日右侧被标志盖住的半个圆不计入文字空间。
                       // 完整金额放不下时退到取整金额（精确值在悬停提示里），仍放不下才不显示

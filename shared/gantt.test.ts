@@ -210,6 +210,7 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
     Seg: 'Seg',
     SubIcon: 'SubIcon',
     useWidth: () => [null, width],
+    useSnapshotRender: () => {},
     perLabel: () => 'mo',
     stopDescription: () => '',
     clearTimeout: (id: number) => timers.delete(id),

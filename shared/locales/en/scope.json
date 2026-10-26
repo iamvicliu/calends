@@ -71,5 +71,21 @@
   "totalSince": "Since {date}",
   "subsCount": "Subscriptions",
   "average": "Average each",
-  "topTotal": "Top {count} by total spent"
+  "topTotal": "Top {count} by total spent",
+  "lifecycle": {
+    "times": {
+      "one": "{count} time",
+      "other": "{count} times"
+    },
+    "allStopped": "All subscriptions have stopped",
+    "noActive": "No active subscriptions",
+    "stopped": "Stopped",
+    "averageDuration": "Average duration",
+    "omitted": "Top 12 by lifetime spending; {count} more subscriptions",
+    "used": "Used {span}",
+    "noUnused": "No unused service",
+    "unused": "{count} unused days",
+    "noLoss": "No unrefunded loss",
+    "cashWindow": "12 months through this month; cash paid through today, net of refunds."
+  }
 }

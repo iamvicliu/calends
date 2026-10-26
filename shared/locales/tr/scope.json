@@ -71,5 +71,18 @@
   "totalSince": "{date} itibarıyla",
   "subsCount": "Abonelik",
   "average": "Abonelik başına ortalama",
-  "topTotal": "En yüksek {count} toplam harcama"
+  "topTotal": "En yüksek {count} toplam harcama",
+  "lifecycle": {
+    "times": "{count} kez",
+    "allStopped": "Tüm abonelikler durdu",
+    "noActive": "Etkin abonelik yok",
+    "stopped": "Durdurulan",
+    "averageDuration": "Ortalama süre",
+    "omitted": "Toplam harcamaya göre ilk 12; {count} abonelik daha",
+    "used": "Kullanılan {span}",
+    "noUnused": "Kullanılmamış süre yok",
+    "unused": "{count} kullanılmamış gün",
+    "noLoss": "İade edilmemiş kayıp yok",
+    "cashWindow": "Bu ay dahil 12 ay; bugüne kadarki harcamalar, iadeler düşülmüş."
+  }
 }

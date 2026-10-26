@@ -317,15 +317,15 @@ test('movement context keeps rebased monthly costs and dates across price, phase
   assert.ok(rows.every((r) => Math.abs(r.to - r.from - r.delta) < 1e-10));
 });
 
-test('scope has a fixed 15-month cash series, while upcoming is tomorrow through day 30', () => {
+test('scope has a fixed 12-month cash series, while upcoming is tomorrow through day 30', () => {
   const st = state([sub('Today', { start: today }), sub('Day30', { start: '2026-11-21' })]);
   const report = scopeReport(st, st.subscriptions, today);
   const trend = get(report, 'trend')!;
   if (trend.mode !== 'scope') assert.fail('scope trend');
-  assert.equal(trend.rows.length, 15);
+  assert.equal(trend.rows.length, 12);
   assert.equal(trend.rows[0].month, '2025-11');
-  assert.equal(trend.rows.at(-1)!.month, '2027-01');
-  assert.equal(trend.rows.filter((r) => r.projected).length, 3);
+  assert.equal(trend.rows.at(-1)!.month, '2026-10');
+  assert.equal(trend.rows.filter((r) => r.projected).length, 0);
   assert.deepEqual(
     get(report, 'upcoming')!.rows.map((r) => r.date),
     ['2026-11-21'],

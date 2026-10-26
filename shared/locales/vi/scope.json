@@ -70,5 +70,18 @@
   "totalSince": "Từ {date}",
   "subsCount": "Số gói",
   "average": "Trung bình mỗi gói",
-  "topTotal": "{count} khoản chi tổng cao nhất"
+  "topTotal": "{count} khoản chi tổng cao nhất",
+  "lifecycle": {
+    "times": "{count} lần",
+    "allStopped": "Tất cả đăng ký đã dừng",
+    "noActive": "Không có đăng ký đang hoạt động",
+    "stopped": "Đã dừng",
+    "averageDuration": "Thời gian trung bình",
+    "omitted": "12 đăng ký chi nhiều nhất; còn {count} đăng ký",
+    "used": "Đã dùng {span}",
+    "noUnused": "Không có thời gian chưa dùng",
+    "unused": "Chưa dùng {count} ngày",
+    "noLoss": "Không có tổn thất chưa hoàn tiền",
+    "cashWindow": "12 tháng đến tháng này; chi đến hôm nay, trừ hoàn tiền."
+  }
 }
