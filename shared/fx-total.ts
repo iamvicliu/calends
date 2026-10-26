@@ -48,6 +48,8 @@ export const totalDifference = (a: FxTotal, b: FxTotal): number => (a.incomplete
 
 export interface TotalFormat {
   compact?: boolean;
+  /** Only converted totals carry an approximation marker; native fallbacks do not. */
+  approx?: boolean;
   /** Cash direction: -1 = expense, +1 = income; omitted = unsigned money. */
   direction?: 1 | -1;
   /** Narrow primary value; the caller owns a single note for the card. */
@@ -78,7 +80,8 @@ export function formatTotal(total: FxTotal, currency: string, opts: TotalFormat 
   const base = opts.direction
     ? flow(total.value * opts.direction, currency, { compact: opts.compact })
     : money(total.value, currency, { compact: opts.compact });
-  return !opts.main && total.incomplete && original ? `${base} + ${original}` : base;
+  const text = !opts.main && total.incomplete && original ? `${base} + ${original}` : base;
+  return opts.approx ? `≈ ${text}` : text;
 }
 
 /** One existing note slot can describe distinct measures without adding currencies across unlike periods. */

@@ -64,7 +64,7 @@ export function OwedOrNet({ list, base, exact = false }: { list: Row[]; base: st
     return (
       <Metric
         label={t('proxy.owedPeriods', { count: open.length })}
-        value={`≈ ${formatTotal(partial.owed, base, { compact: !exact, main: true })}`}
+        value={formatTotal(partial.owed, base, { compact: !exact, main: true, approx: true })}
         note={totalNote(partial.owed) || (exact ? t('proxy.page.owedRate') : undefined)}
         valueClassName="warn"
       />

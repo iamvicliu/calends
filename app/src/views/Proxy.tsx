@@ -236,7 +236,7 @@ export function ProxyTable({
                 ) : (
                   <StatusPill tone={tone}>
                     {tone === 'owe'
-                      ? t('family.pool.owedAmount', { amount: `≈ ${formatTotal(proxyTotals(list).partial.owed, base, { compact: true })}` })
+                      ? t('family.pool.owedAmount', { amount: formatTotal(proxyTotals(list).partial.owed, base, { compact: true, approx: true }) })
                       : label}
                   </StatusPill>
                 )}

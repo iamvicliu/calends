@@ -2832,3 +2832,27 @@ test('incomplete proxy net keeps known receipt and native debit without assignin
   assert.ok(JSON.stringify(nodes).includes('core.fxUnconverted'));
   assert.equal(proxy.proxyTotals(list).partial.diff.unconverted.XCD, -27);
 });
+
+test('全缺汇率的代付待收显示原币且不加约等号，完整折算仍保留估算标记', () => {
+  const h = harness('../app/src/views/Proxy.tsx', 'OwedOrNet');
+  const sub: Subscription = {
+    id: 'fx-owed',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 27,
+    currency: 'XCD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-10-01',
+    status: 'active',
+    proxy: { forName: 'Fictional' },
+  };
+  const state = { ...st, settings: { ...st.settings, baseCurrency: 'USD' }, subscriptions: [sub] };
+  const missing = JSON.stringify(h.render('OwedOrNet', { list: proxy.proxyRows(state, sub, today), base: 'USD' }).map((n) => n.children));
+  assert.match(missing, /XCD/);
+  assert.doesNotMatch(missing, /≈/);
+  const complete = JSON.stringify(
+    h.render('OwedOrNet', { list: proxy.proxyRows(state, { ...sub, currency: 'USD' }, today), base: 'USD' }).map((n) => n.children),
+  );
+  assert.match(complete, /≈/);
+});

@@ -8154,7 +8154,7 @@
           "props": {
             "className": "metric-value warn"
           },
-          "children": ["≈ XCD 200"]
+          "children": ["XCD 200"]
         },
         {
           "type": "div",
@@ -8189,7 +8189,7 @@
       "props": {
         "className": "metric-value warn"
       },
-      "children": ["≈ XCD 200"]
+      "children": ["XCD 200"]
     },
     {
       "type": "div",

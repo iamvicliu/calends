@@ -62,6 +62,8 @@ test('complete, partially missing and all-missing aggregates retain known totals
 test('all missing uses originals, averages require one currency, and a known cancellation stays a known zero', () => {
   const a = convertedTotal(state([]), 27, 'XCD');
   assert.equal(formatTotal(a, 'USD'), 'XCD 27.00');
+  assert.equal(formatTotal(a, 'USD', { approx: true }), 'XCD 27.00');
+  assert.equal(formatTotal(amountTotal(10, 'USD', 10), 'USD', { approx: true }), '≈ $10.00');
   assert.equal(formatTotal(scaleTotal(a, 1 / 3), 'USD', { average: true }), 'XCD 9.00');
   const multi = sumTotals([a, amountTotal(10, 'ZZZ', NaN)]);
   assert.equal(formatTotal(multi, 'USD', { average: true }), '—');
