@@ -62,7 +62,6 @@
     "busiest": "Mes de mayor gasto",
     "month": "{month}",
     "newEnded": "Nuevas / finalizadas",
-    "saved": "Ahorrado {amount}",
     "ended": "Finalizadas: {count}",
     "noneEnded": "Ninguna finalizada",
     "currencies": "Monedas utilizadas",

@@ -59,7 +59,6 @@
     "busiest": "지출이 가장 많은 달",
     "month": "{month}",
     "newEnded": "신규 / 종료",
-    "saved": "{amount} 절약",
     "ended": "{count}개 종료",
     "noneEnded": "종료된 구독 없음",
     "currencies": "사용한 통화",

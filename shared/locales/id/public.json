@@ -31,8 +31,7 @@
     "projected": "{month}\nPerkiraan"
   },
   "ended": {
-    "title": "Dibatalkan",
-    "saved": "{amount} lebih hemat per bulan sejak berhenti"
+    "title": "Dibatalkan"
   },
   "perMonth": "{amount}/bln",
   "lifetime": {

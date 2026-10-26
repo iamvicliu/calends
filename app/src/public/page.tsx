@@ -262,9 +262,6 @@ function Ledger({ state }: { state: AppState }) {
               <Card className={cn(roomy, 'h-full')}>
                 <CardHeader>
                   <CardTitle>{t('public.ended.title')}</CardTitle>
-                  <CardDescription>
-                    {rich('public.ended.saved', {}, { amount: <span className="font-medium text-foreground tnum">{fmt(d.endedMonthly * k)}</span> })}
-                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="-my-1.5">
@@ -408,7 +405,6 @@ function derive(state: AppState, today: string) {
     fx: { [base]: fxFor(base), USD: fxFor('USD') } as Record<Ccy, ReturnType<typeof fxFor>>,
     // 退订：按退订时间新的在前；只给「原来每月多少」这种不随时间膨胀的数，不算「退订至今省了多少」
     ended: state.subscriptions.filter((s) => isStopped(effectiveStatus(s, today))).map((sub) => ({ sub, since: sub.stop?.date ?? sub.end ?? sub.start, monthly: savings.items.find((x) => x.sub.id === sub.id)?.monthly ?? toBaseOrNaN(state, monthlyGross(currentPhase(sub, sub.end ?? today), sub.end ?? today), sub.currency) * myShareFactor(sub, sub.end ?? today) })).sort((a, b) => b.since.localeCompare(a.since)),
-    endedMonthly: savings.items.reduce((a, x) => a + x.monthly, 0),
     lifetime: state.subscriptions.filter((s) => s.cycle.unit === 'lifetime'),
   };
 }

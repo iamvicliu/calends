@@ -32,8 +32,7 @@
     "projected": "{month}\nPrognose"
   },
   "ended": {
-    "title": "Gekündigt",
-    "saved": "{amount} weniger pro Monat seit der Kündigung"
+    "title": "Gekündigt"
   },
   "perMonth": "{amount}/Mon.",
   "lifetime": {

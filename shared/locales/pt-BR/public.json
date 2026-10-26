@@ -32,8 +32,7 @@
     "projected": "{month}\nPrevisto"
   },
   "ended": {
-    "title": "Canceladas",
-    "saved": "{amount} a menos por mês desde o cancelamento"
+    "title": "Canceladas"
   },
   "perMonth": "{amount}/mês",
   "lifetime": {

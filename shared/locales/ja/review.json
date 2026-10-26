@@ -59,7 +59,6 @@
     "busiest": "支出が最も多い月",
     "month": "{month}",
     "newEnded": "新規 / 終了",
-    "saved": "{amount}節約",
     "ended": "{count}件終了",
     "noneEnded": "終了した契約なし",
     "currencies": "使用通貨",

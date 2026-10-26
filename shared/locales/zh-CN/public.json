@@ -29,8 +29,7 @@
     "projected": "{month}\n预计"
   },
   "ended": {
-    "title": "已退订",
-    "saved": "退订后每月少花 {amount}"
+    "title": "已退订"
   },
   "perMonth": "{amount}/月",
   "lifetime": {

@@ -32,8 +32,7 @@
     "projected": "{month}\nPrévu"
   },
   "ended": {
-    "title": "Résiliés",
-    "saved": "{amount} de moins par mois depuis la résiliation"
+    "title": "Résiliés"
   },
   "perMonth": "{amount}/mois",
   "lifetime": {

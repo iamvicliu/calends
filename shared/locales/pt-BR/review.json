@@ -62,7 +62,6 @@
     "busiest": "Mês com maior gasto",
     "month": "{month}",
     "newEnded": "Novas / encerradas",
-    "saved": "{amount} economizados",
     "ended": "Encerradas: {count}",
     "noneEnded": "Nenhuma encerrada",
     "currencies": "Moedas utilizadas",
