@@ -1238,3 +1238,10 @@ test('table headers share one light header style without filled bands', () => {
   }
   assert.deepEqual(failures, []);
 });
+
+test('叠在成员弹窗上的收款表单在成员弹窗挂上之后才打开，不能同一刻挂载（否则层级反了、被遮住且点不动）', () => {
+  const source = readFileSync(new URL('views/member/useMemberForm.ts', root), 'utf8');
+  assert.match(source, /useState<\{ edit\?: string; preset\?: string\[\] \} \| null>\(null\)/);
+  assert.doesNotMatch(source, /useState<[^>]*>\(initialReceipt/);
+  assert.match(source, /useEffect\(\(\) => \{[\s\S]*?if \(initialReceipt\) setReceipt\(initialReceipt\)/);
+});

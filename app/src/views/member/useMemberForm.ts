@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { todayIn, uid, memberBillMonths, memberCollection, collectionAnchor, collectCurrencyOf } from '../../../../shared/billing.ts';
 import { cnDateFull } from '../../../../shared/format.ts';
 import type { AppState, Receipt, ShareMember, Subscription } from '../../../../shared/types.ts';
@@ -132,7 +132,14 @@ export function useMemberForm({
   const records = [...(member?.receipts ?? []), ...(member?.waivers ?? [])].sort((a, b) => b.date.localeCompare(a.date));
   const received = member ? memberCashFlows(member).reduce((a, p) => a + memberFlowValue(state, p, collectCcy), 0) : 0;
   const st = memberStatus(state, { ...s, share: { ...s.share!, members: s.share!.members.map((x) => (x.id === next.id ? next : x)) } }, next, today);
-  const [receipt, setReceipt] = useState<{ edit?: string; preset?: string[] } | null>(initialReceipt ?? null);
+  const [receipt, setReceipt] = useState<{ edit?: string; preset?: string[] } | null>(null);
+  // 打开时就要叠的收款表单等成员弹窗挂上之后再开：两层同一刻挂载时收款表单会排在成员弹窗下面、被遮住且点不动
+  const [stacked, setStacked] = useState(false);
+  useEffect(() => {
+    if (stacked) return;
+    setStacked(true);
+    if (initialReceipt) setReceipt(initialReceipt);
+  }, [stacked, initialReceipt]);
   // 已付至按没退出算：退出后还有已付的天数时照样显示到那期期末，算退款要看
   const paidUntil = memberPaidThrough(s, next, today, collectCcy);
 
