@@ -347,12 +347,9 @@ export function List({
                           {t('list.badge.parallel')}
                         </span>
                       )}
-                      {st === 'upcoming' && !up && <span className="badge blue">{t('list.status.upcoming')}</span>}
-                      <StatusBadges st={st} />
-                      <StopBadge sub={s} today={today} />
-                      {s.share?.role === 'owner' && <span className="badge blue">{t('list.badge.share')}</span>}
-                      {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
-                      {s.proxy && <ProxyBadge state={state} s={s} today={today} />}
+                      <SubBadges state={state} s={s} today={today}>
+                        <StopBadge sub={s} today={today} />
+                      </SubBadges>
                     </span>
                   </div>
                   <div className="sc-name">
@@ -444,15 +441,7 @@ export function List({
                               state.methods.find((x) => x.id === cur.methodId),
                             )}
                           />
-                          {st === 'upcoming' && <span className="badge blue">{t('list.status.upcoming')}</span>}
-                          <StatusBadges st={st} />
-                          {s.share?.role === 'owner' && s.share.members.length > 0 && <span className="badge blue">{t('list.badge.share')}</span>}
-                          {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
-                          {s.proxy && (
-                            <span className="badge" title={t('list.badge.proxyFor', { name: s.proxy.forName || t('list.badge.someone') })}>
-                              {t('list.badge.proxy')}
-                            </span>
-                          )}
+                          <SubBadges state={state} s={s} today={today} />
                         </span>
                         {/* 退款情况单独一行，窄屏不挤掉名称 */}
                         {!state.readonly && stopLabel(cur, today) && (
@@ -731,7 +720,7 @@ function CardGlow({ sub }: { sub: Subscription }) {
   return <div className="sc-glow" style={{ '--glow': tint ?? catColor(sub.category) } as Record<string, string>} />;
 }
 
-/** 卡片与列表视图共用的状态徽章（试用、即将到期、暂停、已结束、被停用）；未开始、合租、代付的徽章两处规则不同，各自保留 */
+/** 卡片与列表视图共用的状态徽章（试用、即将到期、暂停、已结束、被停用）；未开始、合租、代付由 SubBadges 统一判定 */
 function StatusBadges({ st }: { st: string }) {
   return (
     <>
@@ -742,4 +731,18 @@ function StatusBadges({ st }: { st: string }) {
       {st === 'terminated' && <span className="badge red">{t('list.status.terminated')}</span>}
     </>
   );
+}
+
+/** Both list layouts use the same relationship and upcoming-state rules. */
+function SubBadges({ state, s, today, children }: { state: AppState; s: Subscription; today: string; children?: React.ReactNode }) {
+  const st = effectiveStatus(s, today);
+  const up = upcomingPhase(s, today);
+  return <>
+    {st === 'upcoming' && !up && <span className="badge blue">{t('list.status.upcoming')}</span>}
+    <StatusBadges st={st} />
+    {children}
+    {s.share?.role === 'owner' && s.share.members.length > 0 && <span className="badge blue">{t('list.badge.share')}</span>}
+    {s.share?.role === 'member' && <span className="badge blue">{t('list.badge.joined')}</span>}
+    {s.proxy && <ProxyBadge state={state} s={s} today={today} />}
+  </>;
 }

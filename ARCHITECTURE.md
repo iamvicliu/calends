@@ -77,6 +77,8 @@ Ledger changes advance a monotonic `kv.rev` through database triggers in [0007_s
 
 Browser text search uses [search.ts](app/src/search.ts) and [use-search.ts](app/src/use-search.ts) across searchable pickers (including people and currencies), category icon groups, the command palette and subscription list. Literal names, symbols and codes remain case-insensitive substring matches. Only `zh-CN`, `zh-TW` and `zh-HK` lazily load the MIT-licensed `pinyin-pro` dictionary; simplified and traditional candidates gain full-pinyin, initial and mixed-syllable matching (`ü` also accepts `v`). Candidate indexes are cached with a bounded lifetime in browser memory and prepared independently of queries. A completed lazy load refreshes current results; a load failure retains literal search. This changes no stored state or API.
 
+Card and row subscription lists share `SubBadges`: owner sharing needs at least one recorded member, joined sharing uses the member role, upcoming status is shown only without a separate upcoming-phase badge, and proxy status comes from `ProxyBadge` (pending receivables).
+
 Subscription filters in `List.tsx` default to all statuses, the current category route (or all categories), all payment methods and an empty search; Clear restores those values.
 
 Monthly/day averages and timeline durations use `DAYS_PER_MONTH = 30.4375`. `durationLabel()` applies the history rule consistently: round days to months, display months once that rounds to at least one, otherwise days.
