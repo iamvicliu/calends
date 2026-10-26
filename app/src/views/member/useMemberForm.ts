@@ -142,7 +142,9 @@ export function useMemberForm({
   const [targets, setTargets] = useState<string[]>([]);
   const copyable = (o: ShareMember, r: Receipt) => {
     const l = memberLedgerAhead(state, s, o, today);
-    return r.periods.every((k) => l.periods.some((p) => p.key === resolveKey(l.periods, k) && !isSettled(p)));
+    // 对方每期都要还空着，而且这几期不能落进对方的同一期（对方按季收、这笔按月抵扣时会撞上）
+    const keys = r.periods.map((k) => resolveKey(l.periods, k));
+    return new Set(keys).size === keys.length && keys.every((k) => l.periods.some((p) => p.key === k && !isSettled(p)));
   };
   const startCopy = (r: Receipt) => {
     setTargets(others.filter((o) => copyable(o, r)).map((o) => o.id));
