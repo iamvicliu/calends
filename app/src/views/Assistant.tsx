@@ -632,9 +632,11 @@ export function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKin
         <b>{t(`assistant.error.${error.kind}`)}</b>
         <small>{error.message}</small>
         <div className="as-error-acts">
-          {onRetry && <button className="btn" onClick={onRetry}>
-            <RotateCcw size={14} /> {t('assistant.retry')}
-          </button>}
+          {onRetry && (
+            <button className="btn" onClick={onRetry}>
+              <RotateCcw size={14} /> {t('assistant.retry')}
+            </button>
+          )}
           {fixable && (
             <button className="btn plain" onClick={onSetup}>
               {t('assistant.settings')}

@@ -213,7 +213,7 @@ test('16. 14 种语言的代付空状态指向编辑器真实分组及代付选�
   assert.ok(locale('zh-CN', 'proxy').page.emptyBody.includes('谁在用'));
 });
 
-test('9/17. 所有语言说明全额实付和日历客户端边界；ICS 仍声明建议周期与相对闹钟', () => {
+test('9/17. 所有语言区分报告全额实付与年度我的份额，并说明日历客户端边界；ICS 仍声明建议周期与相对闹钟', () => {
   const clientTerms: Record<string, string> = {
     en: 'client',
     'zh-CN': '客户端',
@@ -233,7 +233,9 @@ test('9/17. 所有语言说明全额实付和日历客户端边界；ICS 仍声�
   for (const { code } of LOCALES) {
     const report = locale(code, 'report').cash.fullPaidHint;
     const review = locale(code, 'review').spendBasis;
-    assert.ok(report && report === review, code);
+    assert.ok(report && review && report !== review, code);
+    if (code === 'en') assert.ok(review.includes('my share'));
+    if (code === 'zh-CN') assert.ok(review.includes('我的份额'));
     const intro = locale(code, 'app').ics.intro;
     assert.ok(intro.includes('6'), code);
     assert.ok(intro.includes(clientTerms[code]), code);

@@ -85,6 +85,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     ...gantt,
     ...metrics,
     ...fx,
+    getState: () => ({ methods: [], settings: DEFAULT_SETTINGS }),
     ...carpool,
     perBill: (key: string) => key,
     toBase: fx.toBaseAt,

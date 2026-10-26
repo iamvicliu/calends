@@ -294,7 +294,12 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 sub={undefined}
                 onClick={() => onOpen(s)}
               >
-                {copyParts(t('family.pool.payTo', { name: s.share?.ownerName ?? t('family.pool.ownerDefault'), amount: flow(-currentPhase(s, today).price, currentPhase(s, today).currency) }))}
+                {copyParts(
+                  t('family.pool.payTo', {
+                    name: s.share?.ownerName ?? t('family.pool.ownerDefault'),
+                    amount: flow(-currentPhase(s, today).price, currentPhase(s, today).currency),
+                  }),
+                )}
               </Cell>
             ))}
           </Group>

@@ -53,7 +53,6 @@ export function PeriodBar({ sub, today }: { sub: Subscription; today: string }) 
               {t('core.renewal.cancelBy')} {cnDateAuto(cancelBy, today)}
             </span>
           )}
-
         </p>
       )}
     </div>

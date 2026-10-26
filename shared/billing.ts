@@ -1245,6 +1245,6 @@ export function uid(): string {
 /** History's rounded-month rule is shared by every gap-duration label. */
 export function durationLabel(days: number, kind: 'duration' | 'gap' = 'duration'): string {
   const months = Math.round(days / DAYS_PER_MONTH);
-  const key = kind === 'gap' ? (months >= 1 ? 'editor.history.gapMonths' : 'editor.history.gapDays') : (months >= 1 ? 'list.gantt.months' : 'list.gantt.days');
+  const key = kind === 'gap' ? (months >= 1 ? 'editor.history.gapMonths' : 'editor.history.gapDays') : months >= 1 ? 'list.gantt.months' : 'list.gantt.days';
   return t(key, { count: months >= 1 ? months : days });
 }

@@ -330,7 +330,8 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
   h = html(long);
   assert.equal(years(h), 7);
   assert.equal(count(h), 0);
-  assert.match(text(h), /detail\.charges\.title:82/);
+  assert.match(text(h), /detail\.charges\.title/);
+  assert.doesNotMatch(text(h), /detail\.charges\.title:82/);
   const textOf = (node: React.ReactNode): string =>
     typeof node === 'string' || typeof node === 'number'
       ? String(node)

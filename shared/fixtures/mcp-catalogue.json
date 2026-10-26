@@ -283,12 +283,7 @@
         "properties": {
           "action": {
             "type": "string",
-            "enum": [
-              "create",
-              "update",
-              "delete",
-              "reorder"
-            ]
+            "enum": ["create", "update", "delete", "reorder"]
           },
           "category": {
             "type": "string"
@@ -300,16 +295,10 @@
                 "type": "string"
               },
               "icon": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "color": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               }
             },
             "required": [],
@@ -329,9 +318,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "action"
-        ],
+        "required": ["action"],
         "additionalProperties": false
       },
       "annotations": {
@@ -350,11 +337,7 @@
         "properties": {
           "action": {
             "type": "string",
-            "enum": [
-              "create",
-              "update",
-              "delete"
-            ]
+            "enum": ["create", "update", "delete"]
           },
           "id": {
             "type": "string"
@@ -370,10 +353,7 @@
           },
           "mime": {
             "type": "string",
-            "enum": [
-              "image/png",
-              "image/webp"
-            ]
+            "enum": ["image/png", "image/webp"]
           },
           "migrate_to": {
             "type": "string"
@@ -385,38 +365,17 @@
                 "type": "string"
               },
               "contactVia": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "contact": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "note": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "color": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "enum": [
-                  "blue",
-                  "green",
-                  "orange",
-                  "pink",
-                  "purple",
-                  "teal",
-                  "indigo",
-                  "red"
-                ]
+                "type": ["string", "null"],
+                "enum": ["blue", "green", "orange", "pink", "purple", "teal", "indigo", "red"]
               }
             },
             "required": [],
@@ -427,9 +386,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "action"
-        ],
+        "required": ["action"],
         "additionalProperties": false
       },
       "annotations": {
@@ -470,16 +427,10 @@
                 "type": "string"
               },
               "collectCurrency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "defaultMethodId": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "signedAmounts": {
                 "type": "boolean"
@@ -501,10 +452,7 @@
                 "type": "boolean"
               },
               "publicHidden": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "items": {
                   "type": "string"
                 }
@@ -516,16 +464,10 @@
                 "type": "string"
               },
               "avatar": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "publicTitle": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "sidebarUpcoming": {
                 "type": "boolean"
@@ -535,55 +477,28 @@
                 "minimum": 0
               },
               "hiddenNav": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "items": {
                   "type": "string"
                 }
               },
               "navOrder": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "items": {
                   "type": "string"
                 }
               },
               "startPage": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "enum": [
-                  "overview",
-                  "list",
-                  "calendar",
-                  "report",
-                  "wallet",
-                  "family",
-                  "behalf",
-                  "assistant",
-                  "connect",
-                  "",
-                  null
-                ],
+                "type": ["string", "null"],
+                "enum": ["overview", "list", "calendar", "report", "wallet", "family", "behalf", "assistant", "connect", "", null],
                 "description": "Startup route: use list for Subscriptions, report for Reports, family for Shared plans, behalf for Paid for others. Empty/null resets to Overview."
               },
               "weekStart": {
                 "type": "integer",
-                "enum": [
-                  0,
-                  1
-                ]
+                "enum": [0, 1]
               },
               "language": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               }
             },
             "required": [],
@@ -601,10 +516,7 @@
                   "type": "boolean"
                 }
               },
-              "required": [
-                "id",
-                "enabled"
-              ],
+              "required": ["id", "enabled"],
               "additionalProperties": false
             }
           },
@@ -612,154 +524,79 @@
             "type": "object",
             "properties": {
               "list-view": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "list-sort": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "list-dir": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "list-ccy": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "gantt-zoom": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "gantt-color": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "gantt-label-w": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "gantt-label-w-m": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "theme": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "sidebar-collapsed": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "car-open": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "share-style": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "sub-share-style": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "list-status": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "list-report": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "car-filter": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "car-sort": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "car-dir": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "proxy-filter": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "cal-mode": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "cal-report-mode": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "car-view": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "proxy-view": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "proxy-sort": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "proxy-dir": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               }
             },
             "required": [],
@@ -792,46 +629,29 @@
           },
           "action": {
             "type": "string",
-            "enum": [
-              "save",
-              "remove"
-            ]
+            "enum": ["save", "remove"]
           },
           "person": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "for_name": {
             "type": "string"
           },
           "contact_via": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "contact": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "dry_run": {
             "type": "boolean",
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription"
-        ],
+        "required": ["subscription"],
         "additionalProperties": false
       },
       "annotations": {
@@ -893,30 +713,13 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "active",
-              "trial",
-              "paused",
-              "ending",
-              "ended",
-              "terminated",
-              "upcoming",
-              "lifetime",
-              "live",
-              "all"
-            ],
+            "enum": ["active", "trial", "paused", "ending", "ended", "terminated", "upcoming", "lifetime", "live", "all"],
             "default": "live",
             "description": "live = active+trial+ending+paused."
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "mine",
-              "share_owner",
-              "share_member",
-              "proxy",
-              "all"
-            ],
+            "enum": ["mine", "share_owner", "share_member", "proxy", "all"],
             "default": "all"
           },
           "category": {
@@ -932,12 +735,7 @@
           },
           "sort": {
             "type": "string",
-            "enum": [
-              "next_charge",
-              "monthly_cost",
-              "name",
-              "start"
-            ],
+            "enum": ["next_charge", "monthly_cost", "name", "start"],
             "default": "next_charge"
           },
           "limit": {
@@ -983,9 +781,7 @@
             "description": "Convert amounts into this currency (ISO code). Defaults to the ledger base currency."
           }
         },
-        "required": [
-          "subscription"
-        ],
+        "required": ["subscription"],
         "additionalProperties": false
       },
       "annotations": {
@@ -1004,17 +800,7 @@
         "properties": {
           "period": {
             "type": "string",
-            "enum": [
-              "today",
-              "next_3_days",
-              "next_7_days",
-              "next_30_days",
-              "this_month",
-              "next_month",
-              "last_30_days",
-              "this_year",
-              "custom"
-            ],
+            "enum": ["today", "next_3_days", "next_7_days", "next_30_days", "this_month", "next_month", "last_30_days", "this_year", "custom"],
             "description": "Time window. custom requires from/to.",
             "default": "next_30_days"
           },
@@ -1032,11 +818,7 @@
           },
           "scope": {
             "type": "string",
-            "enum": [
-              "mine",
-              "gross",
-              "proxy"
-            ],
+            "enum": ["mine", "gross", "proxy"],
             "default": "mine"
           },
           "subscription": {
@@ -1075,17 +857,7 @@
         "properties": {
           "period": {
             "type": "string",
-            "enum": [
-              "today",
-              "next_3_days",
-              "next_7_days",
-              "next_30_days",
-              "this_month",
-              "next_month",
-              "last_30_days",
-              "this_year",
-              "custom"
-            ],
+            "enum": ["today", "next_3_days", "next_7_days", "next_30_days", "this_month", "next_month", "last_30_days", "this_year", "custom"],
             "description": "Time window. custom requires from/to.",
             "default": "this_year"
           },
@@ -1103,25 +875,12 @@
           },
           "group_by": {
             "type": "string",
-            "enum": [
-              "month",
-              "year",
-              "category",
-              "method",
-              "currency",
-              "region",
-              "subscription",
-              "none"
-            ],
+            "enum": ["month", "year", "category", "method", "currency", "region", "subscription", "none"],
             "default": "category"
           },
           "scope": {
             "type": "string",
-            "enum": [
-              "mine",
-              "gross",
-              "proxy"
-            ],
+            "enum": ["mine", "gross", "proxy"],
             "default": "mine"
           },
           "include_projected": {
@@ -1141,16 +900,7 @@
             "properties": {
               "status": {
                 "type": "string",
-                "enum": [
-                  "all",
-                  "live",
-                  "upcoming",
-                  "trial",
-                  "paused",
-                  "lifetime",
-                  "ended",
-                  "terminated"
-                ],
+                "enum": ["all", "live", "upcoming", "trial", "paused", "lifetime", "ended", "terminated"],
                 "default": "all",
                 "description": "List status facet: live = active + ending (trial and paused are separate), as in the web list."
               },
@@ -1211,11 +961,7 @@
         "properties": {
           "metric": {
             "type": "string",
-            "enum": [
-              "mrr",
-              "cash_vs_accrual",
-              "movement"
-            ],
+            "enum": ["mrr", "cash_vs_accrual", "movement"],
             "default": "mrr"
           },
           "months_back": {
@@ -1311,11 +1057,7 @@
         "properties": {
           "kind": {
             "type": "string",
-            "enum": [
-              "share",
-              "proxy",
-              "all"
-            ],
+            "enum": ["share", "proxy", "all"],
             "default": "all"
           },
           "currency_out": {
@@ -1342,15 +1084,7 @@
         "properties": {
           "section": {
             "type": "string",
-            "enum": [
-              "insights",
-              "year_review",
-              "prepaid",
-              "cancel_savings",
-              "stop_losses",
-              "month_report",
-              "scope_report"
-            ],
+            "enum": ["insights", "year_review", "prepaid", "cancel_savings", "stop_losses", "month_report", "scope_report"],
             "default": "insights"
           },
           "year": {
@@ -1368,16 +1102,7 @@
             "properties": {
               "status": {
                 "type": "string",
-                "enum": [
-                  "all",
-                  "live",
-                  "upcoming",
-                  "trial",
-                  "paused",
-                  "lifetime",
-                  "ended",
-                  "terminated"
-                ],
+                "enum": ["all", "live", "upcoming", "trial", "paused", "lifetime", "ended", "terminated"],
                 "default": "all",
                 "description": "List status facet: live = active + ending (trial and paused are separate), as in the web list."
               },
@@ -1474,9 +1199,7 @@
             "description": "Two-letter store region, e.g. us, tr, cn. Defaults to us."
           }
         },
-        "required": [
-          "query"
-        ],
+        "required": ["query"],
         "additionalProperties": false
       },
       "annotations": {
@@ -1509,13 +1232,7 @@
             "properties": {
               "unit": {
                 "type": "string",
-                "enum": [
-                  "day",
-                  "week",
-                  "month",
-                  "year",
-                  "lifetime"
-                ]
+                "enum": ["day", "week", "month", "year", "lifetime"]
               },
               "every": {
                 "type": "integer",
@@ -1523,9 +1240,7 @@
                 "default": 1
               }
             },
-            "required": [
-              "unit"
-            ],
+            "required": ["unit"],
             "description": "Billing cycle, e.g. {\"unit\":\"month\",\"every\":1}; lifetime = one-time purchase."
           },
           "start": {
@@ -1544,17 +1259,11 @@
             "description": "If category is unknown, explicitly create it. Ambiguous references always fail."
           },
           "category_icon": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "New category only: Lucide icon name or emoji; same validation as save_category set.icon."
           },
           "category_color": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "New category only: palette code or #rrggbb; same validation as save_category set.color."
           },
           "tags": {
@@ -1564,10 +1273,7 @@
             }
           },
           "method": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "Payment method id or name. Omitted uses the default payment method; null means no payment method."
           },
           "region": {
@@ -1590,12 +1296,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "active",
-              "trial",
-              "cancelled",
-              "terminated"
-            ],
+            "enum": ["active", "trial", "cancelled", "terminated"],
             "default": "active",
             "description": "cancelled / terminated: already stopped. cancelled + end: did not renew after end (last service day). terminated + end: the provider disabled it on end. Without end the stop date is unknown."
           },
@@ -1634,10 +1335,7 @@
                 "description": "YYYY-MM-DD"
               }
             },
-            "required": [
-              "price",
-              "until"
-            ],
+            "required": ["price", "until"],
             "description": "Intro price until a date."
           },
           "payments": {
@@ -1659,19 +1357,11 @@
                 },
                 "kind": {
                   "type": "string",
-                  "enum": [
-                    "charge",
-                    "refund",
-                    "adjust",
-                    "failed"
-                  ],
+                  "enum": ["charge", "refund", "adjust", "failed"],
                   "default": "charge"
                 },
                 "method": {
-                  "type": [
-                    "string",
-                    "null"
-                  ],
+                  "type": ["string", "null"],
                   "description": "Payment method id or name used for this one charge; omitted or null uses the subscription method."
                 },
                 "settled": {
@@ -1685,17 +1375,11 @@
                       "type": "string"
                     }
                   },
-                  "required": [
-                    "amount",
-                    "currency"
-                  ],
+                  "required": ["amount", "currency"],
                   "additionalProperties": false
                 },
                 "funding": {
-                  "type": [
-                    "array",
-                    "null"
-                  ],
+                  "type": ["array", "null"],
                   "description": "Split one order across several sources, e.g. [{\"method\":\"PayPal\",\"amount\":168.05},{\"method\":\"Balance\",\"amount\":10.75}] for 178.80. Amounts in the subscription currency, positive, at least two different methods, summing to amount. Replaces method for this charge.",
                   "items": {
                     "type": "object",
@@ -1709,10 +1393,7 @@
                         "minimum": 0
                       }
                     },
-                    "required": [
-                      "method",
-                      "amount"
-                    ],
+                    "required": ["method", "amount"],
                     "additionalProperties": false
                   }
                 },
@@ -1720,10 +1401,7 @@
                   "type": "string"
                 }
               },
-              "required": [
-                "date",
-                "amount"
-              ],
+              "required": ["date", "amount"],
               "additionalProperties": false
             }
           },
@@ -1740,12 +1418,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "name",
-          "price",
-          "currency",
-          "cycle"
-        ],
+        "required": ["name", "price", "currency", "cycle"],
         "additionalProperties": false
       },
       "annotations": {
@@ -1766,34 +1439,22 @@
             "type": "object",
             "properties": {
               "chargeLeadDays": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
+                "type": ["integer", "null"],
                 "minimum": 0,
                 "maximum": 3660
               },
               "cancelLeadDays": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
+                "type": ["integer", "null"],
                 "minimum": 0,
                 "maximum": 3660
               },
               "renewalOffsetDays": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
+                "type": ["integer", "null"],
                 "minimum": 0,
                 "maximum": 3660
               },
               "renewalHistory": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "items": {
                   "type": "object",
                   "properties": {
@@ -1810,11 +1471,7 @@
                       "minimum": 0
                     }
                   },
-                  "required": [
-                    "from",
-                    "chargeLeadDays",
-                    "cancelLeadDays"
-                  ],
+                  "required": ["from", "chargeLeadDays", "cancelLeadDays"],
                   "additionalProperties": true
                 }
               },
@@ -1823,18 +1480,12 @@
                 "format": "date"
               },
               "end": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date",
                 "description": "Last service day, inclusive. Omit when continuing into the next phase or still held."
               },
               "billingStart": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date",
                 "description": "Original recurring billing anchor when the service start was corrected."
               },
@@ -1850,51 +1501,28 @@
                 "properties": {
                   "unit": {
                     "type": "string",
-                    "enum": [
-                      "day",
-                      "week",
-                      "month",
-                      "year",
-                      "lifetime"
-                    ]
+                    "enum": ["day", "week", "month", "year", "lifetime"]
                   },
                   "every": {
-                    "type": [
-                      "integer",
-                      "null"
-                    ],
+                    "type": ["integer", "null"],
                     "description": "Positive interval for recurring plans: month/3 = quarterly. Use lifetime/1 for a one-time purchase."
                   }
                 },
-                "required": [
-                  "unit"
-                ],
+                "required": ["unit"],
                 "additionalProperties": true
               },
               "methodId": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "region": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "stop": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": ["object", "null"],
                 "properties": {
                   "kind": {
                     "type": "string",
-                    "enum": [
-                      "cancel",
-                      "terminate"
-                    ]
+                    "enum": ["cancel", "terminate"]
                   },
                   "date": {
                     "type": "string",
@@ -1907,25 +1535,15 @@
                     "description": "Original last paid service day, inclusive, before early cancellation or provider termination."
                   },
                   "reason": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "description": "Only provider termination (kind=terminate) can have a reason."
                   }
                 },
-                "required": [
-                  "kind",
-                  "date",
-                  "paidThrough"
-                ],
+                "required": ["kind", "date", "paidThrough"],
                 "additionalProperties": true
               },
               "priceHistory": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "items": {
                   "type": "object",
                   "properties": {
@@ -1938,18 +1556,12 @@
                       "minimum": 0
                     }
                   },
-                  "required": [
-                    "from",
-                    "amount"
-                  ],
+                  "required": ["from", "amount"],
                   "additionalProperties": true
                 }
               },
               "intro": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": ["object", "null"],
                 "properties": {
                   "price": {
                     "type": "number",
@@ -1960,17 +1572,11 @@
                     "format": "date"
                   }
                 },
-                "required": [
-                  "price",
-                  "until"
-                ],
+                "required": ["price", "until"],
                 "additionalProperties": true
               },
               "bonus": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": ["object", "null"],
                 "properties": {
                   "from": {
                     "type": "string",
@@ -1981,18 +1587,12 @@
                     "format": "date"
                   }
                 },
-                "required": [
-                  "from",
-                  "until"
-                ],
+                "required": ["from", "until"],
                 "additionalProperties": true,
                 "description": "Free interval [from, until); until is the first paid day. The advertised gift list price is not a payment."
               },
               "payments": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "items": {
                   "type": "object",
                   "properties": {
@@ -2006,42 +1606,22 @@
                       "description": "Original order amount: charge/adjust positive, refund negative, free gift zero. Split funding still represents ONE order."
                     },
                     "currency": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
+                      "type": ["string", "null"]
                     },
                     "kind": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
-                      "enum": [
-                        "refund",
-                        "adjust",
-                        "failed",
-                        null
-                      ],
+                      "type": ["string", "null"],
+                      "enum": ["refund", "adjust", "failed", null],
                       "description": "Omit for an ordinary successful charge. failed is not spending."
                     },
                     "note": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
+                      "type": ["string", "null"]
                     },
                     "methodId": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
+                      "type": ["string", "null"],
                       "description": "Existing method id. Omit when funding splits the order."
                     },
                     "settled": {
-                      "type": [
-                        "object",
-                        "null"
-                      ],
+                      "type": ["object", "null"],
                       "properties": {
                         "amount": {
                           "type": "number"
@@ -2050,17 +1630,11 @@
                           "type": "string"
                         }
                       },
-                      "required": [
-                        "amount",
-                        "currency"
-                      ],
+                      "required": ["amount", "currency"],
                       "additionalProperties": true
                     },
                     "funding": {
-                      "type": [
-                        "array",
-                        "null"
-                      ],
+                      "type": ["array", "null"],
                       "items": {
                         "type": "object",
                         "properties": {
@@ -2071,122 +1645,71 @@
                             "type": "number"
                           }
                         },
-                        "required": [
-                          "methodId",
-                          "amount"
-                        ],
+                        "required": ["methodId", "amount"],
                         "additionalProperties": true
                       }
                     }
                   },
-                  "required": [
-                    "date",
-                    "amount"
-                  ],
+                  "required": ["date", "amount"],
                   "additionalProperties": true
                 },
                 "description": "For SINGLE-phase records only. When phases exist, put actual payments in phases[i].payments; top-level payments are not billed."
               },
               "nextDue": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date",
                 "description": "Next renewal/billing anchor AFTER recorded payments; may be later than end when sold before the prepaid year expired."
               },
               "planned": {
-                "type": [
-                  "boolean",
-                  "null"
-                ]
+                "type": ["boolean", "null"]
               },
               "id": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "name": {
                 "type": "string"
               },
               "icon": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "url": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "manageUrl": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "category": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "tags": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "items": {
                   "type": "string"
                 }
               },
               "status": {
                 "type": "string",
-                "enum": [
-                  "active",
-                  "trial",
-                  "paused",
-                  "cancelled",
-                  "terminated"
-                ]
+                "enum": ["active", "trial", "paused", "cancelled", "terminated"]
               },
               "estimateFrom": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date"
               },
               "trialEnd": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date",
                 "description": "First paid day after the free trial."
               },
               "pausedAt": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date"
               },
               "share": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": ["object", "null"],
                 "properties": {
                   "role": {
                     "type": "string",
-                    "enum": [
-                      "owner",
-                      "member"
-                    ]
+                    "enum": ["owner", "member"]
                   },
                   "seats": {
                     "type": "number",
@@ -2201,10 +1724,7 @@
                           "type": "string"
                         },
                         "personId": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "name": {
                           "type": "string"
@@ -2213,78 +1733,39 @@
                           "type": "number"
                         },
                         "contactVia": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "contact": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "tg": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "source": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "account": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "exempt": {
-                          "type": [
-                            "boolean",
-                            "null"
-                          ]
+                          "type": ["boolean", "null"]
                         },
                         "custom": {
-                          "type": [
-                            "boolean",
-                            "null"
-                          ]
+                          "type": ["boolean", "null"]
                         },
                         "fee": {
-                          "type": [
-                            "number",
-                            "null"
-                          ],
+                          "type": ["number", "null"],
                           "minimum": 0
                         },
                         "feeCurrency": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "billEvery": {
-                          "type": [
-                            "integer",
-                            "null"
-                          ],
-                          "enum": [
-                            1,
-                            3,
-                            6,
-                            12,
-                            null
-                          ]
+                          "type": ["integer", "null"],
+                          "enum": [1, 3, 6, 12, null]
                         },
                         "feeHistory": {
-                          "type": [
-                            "array",
-                            "null"
-                          ],
+                          "type": ["array", "null"],
                           "items": {
                             "type": "object",
                             "properties": {
@@ -2304,55 +1785,30 @@
                                 "minimum": 0
                               },
                               "share": {
-                                "type": [
-                                  "number",
-                                  "null"
-                                ]
+                                "type": ["number", "null"]
                               }
                             },
-                            "required": [
-                              "from",
-                              "fee",
-                              "currency",
-                              "billEvery"
-                            ],
+                            "required": ["from", "fee", "currency", "billEvery"],
                             "additionalProperties": true
                           }
                         },
                         "firstPeriod": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "enum": [
-                            "prorate",
-                            "full",
-                            "free",
-                            null
-                          ]
+                          "type": ["string", "null"],
+                          "enum": ["prorate", "full", "free", null]
                         },
                         "firstAmount": {
-                          "type": [
-                            "number",
-                            "null"
-                          ],
+                          "type": ["number", "null"],
                           "minimum": 0
                         },
                         "restarts": {
-                          "type": [
-                            "array",
-                            "null"
-                          ],
+                          "type": ["array", "null"],
                           "items": {
                             "type": "string",
                             "format": "date"
                           }
                         },
                         "receipts": {
-                          "type": [
-                            "array",
-                            "null"
-                          ],
+                          "type": ["array", "null"],
                           "items": {
                             "type": "object",
                             "properties": {
@@ -2364,17 +1820,11 @@
                                 "format": "date"
                               },
                               "amount": {
-                                "type": [
-                                  "number",
-                                  "null"
-                                ],
+                                "type": ["number", "null"],
                                 "minimum": 0
                               },
                               "currency": {
-                                "type": [
-                                  "string",
-                                  "null"
-                                ]
+                                "type": ["string", "null"]
                               },
                               "periods": {
                                 "type": "array",
@@ -2384,31 +1834,18 @@
                                 }
                               },
                               "note": {
-                                "type": [
-                                  "string",
-                                  "null"
-                                ]
+                                "type": ["string", "null"]
                               },
                               "opening": {
-                                "type": [
-                                  "boolean",
-                                  "null"
-                                ]
+                                "type": ["boolean", "null"]
                               }
                             },
-                            "required": [
-                              "id",
-                              "date",
-                              "periods"
-                            ],
+                            "required": ["id", "date", "periods"],
                             "additionalProperties": true
                           }
                         },
                         "waivers": {
-                          "type": [
-                            "array",
-                            "null"
-                          ],
+                          "type": ["array", "null"],
                           "items": {
                             "type": "object",
                             "properties": {
@@ -2427,45 +1864,26 @@
                                 }
                               },
                               "note": {
-                                "type": [
-                                  "string",
-                                  "null"
-                                ]
+                                "type": ["string", "null"]
                               }
                             },
-                            "required": [
-                              "id",
-                              "date",
-                              "periods"
-                            ],
+                            "required": ["id", "date", "periods"],
                             "additionalProperties": true
                           }
                         },
                         "note": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "joined": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
+                          "type": ["string", "null"],
                           "format": "date"
                         },
                         "left": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
+                          "type": ["string", "null"],
                           "format": "date"
                         },
                         "leaveRefund": {
-                          "type": [
-                            "object",
-                            "null"
-                          ],
+                          "type": ["object", "null"],
                           "properties": {
                             "date": {
                               "type": "string",
@@ -2479,53 +1897,30 @@
                               "type": "string"
                             },
                             "note": {
-                              "type": [
-                                "string",
-                                "null"
-                              ]
+                              "type": ["string", "null"]
                             }
                           },
-                          "required": [
-                            "date",
-                            "amount",
-                            "currency"
-                          ],
+                          "required": ["date", "amount", "currency"],
                           "additionalProperties": true
                         }
                       },
-                      "required": [
-                        "id",
-                        "name",
-                        "share"
-                      ],
+                      "required": ["id", "name", "share"],
                       "additionalProperties": true
                     }
                   },
                   "ownerName": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
+                    "type": ["string", "null"]
                   },
                   "since": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "format": "date"
                   },
                   "collectFrom": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
+                    "type": ["string", "null"],
                     "format": "date"
                   },
                   "rule": {
-                    "type": [
-                      "object",
-                      "null"
-                    ],
+                    "type": ["object", "null"],
                     "properties": {
                       "billEvery": {
                         "type": "number",
@@ -2539,59 +1934,33 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "billEvery",
-                      "fee",
-                      "currency"
-                    ],
+                    "required": ["billEvery", "fee", "currency"],
                     "additionalProperties": true
                   }
                 },
-                "required": [
-                  "role",
-                  "seats",
-                  "members"
-                ],
+                "required": ["role", "seats", "members"],
                 "additionalProperties": true
               },
               "proxy": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": ["object", "null"],
                 "properties": {
                   "personId": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
+                    "type": ["string", "null"]
                   },
                   "forName": {
                     "type": "string"
                   },
                   "contactVia": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
+                    "type": ["string", "null"]
                   },
                   "contact": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
+                    "type": ["string", "null"]
                   },
                   "note": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
+                    "type": ["string", "null"]
                   },
                   "receipts": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
+                    "type": ["array", "null"],
                     "items": {
                       "type": "object",
                       "properties": {
@@ -2603,17 +1972,11 @@
                           "format": "date"
                         },
                         "amount": {
-                          "type": [
-                            "number",
-                            "null"
-                          ],
+                          "type": ["number", "null"],
                           "minimum": 0
                         },
                         "currency": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "periods": {
                           "type": "array",
@@ -2623,31 +1986,18 @@
                           }
                         },
                         "note": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "opening": {
-                          "type": [
-                            "boolean",
-                            "null"
-                          ]
+                          "type": ["boolean", "null"]
                         }
                       },
-                      "required": [
-                        "id",
-                        "date",
-                        "periods"
-                      ],
+                      "required": ["id", "date", "periods"],
                       "additionalProperties": true
                     }
                   },
                   "waivers": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
+                    "type": ["array", "null"],
                     "items": {
                       "type": "object",
                       "properties": {
@@ -2666,25 +2016,15 @@
                           }
                         },
                         "note": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         }
                       },
-                      "required": [
-                        "id",
-                        "date",
-                        "periods"
-                      ],
+                      "required": ["id", "date", "periods"],
                       "additionalProperties": true
                     }
                   },
                   "charged": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
+                    "type": ["array", "null"],
                     "items": {
                       "type": "object",
                       "properties": {
@@ -2693,88 +2033,54 @@
                           "format": "date"
                         },
                         "amount": {
-                          "type": [
-                            "number",
-                            "null"
-                          ],
+                          "type": ["number", "null"],
                           "minimum": 0
                         },
                         "currency": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         },
                         "note": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
+                          "type": ["string", "null"]
                         }
                       },
-                      "required": [
-                        "charge"
-                      ],
+                      "required": ["charge"],
                       "additionalProperties": true
                     }
                   }
                 },
-                "required": [
-                  "forName"
-                ],
+                "required": ["forName"],
                 "additionalProperties": true
               },
               "remindDays": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
+                "type": ["integer", "null"],
                 "minimum": -1
               },
               "expires": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date"
               },
               "phases": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "items": {
                   "type": "object",
                   "properties": {
                     "chargeLeadDays": {
-                      "type": [
-                        "integer",
-                        "null"
-                      ],
+                      "type": ["integer", "null"],
                       "minimum": 0,
                       "maximum": 3660
                     },
                     "cancelLeadDays": {
-                      "type": [
-                        "integer",
-                        "null"
-                      ],
+                      "type": ["integer", "null"],
                       "minimum": 0,
                       "maximum": 3660
                     },
                     "renewalOffsetDays": {
-                      "type": [
-                        "integer",
-                        "null"
-                      ],
+                      "type": ["integer", "null"],
                       "minimum": 0,
                       "maximum": 3660
                     },
                     "renewalHistory": {
-                      "type": [
-                        "array",
-                        "null"
-                      ],
+                      "type": ["array", "null"],
                       "items": {
                         "type": "object",
                         "properties": {
@@ -2791,11 +2097,7 @@
                             "minimum": 0
                           }
                         },
-                        "required": [
-                          "from",
-                          "chargeLeadDays",
-                          "cancelLeadDays"
-                        ],
+                        "required": ["from", "chargeLeadDays", "cancelLeadDays"],
                         "additionalProperties": true
                       }
                     },
@@ -2805,18 +2107,12 @@
                       "description": "First service day of this phase, NOT an early payment date."
                     },
                     "end": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
+                      "type": ["string", "null"],
                       "format": "date",
                       "description": "Last service day, inclusive. Omit when continuing into the next phase or still held."
                     },
                     "billingStart": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
+                      "type": ["string", "null"],
                       "format": "date",
                       "description": "Original recurring billing anchor when the service start was corrected."
                     },
@@ -2832,51 +2128,28 @@
                       "properties": {
                         "unit": {
                           "type": "string",
-                          "enum": [
-                            "day",
-                            "week",
-                            "month",
-                            "year",
-                            "lifetime"
-                          ]
+                          "enum": ["day", "week", "month", "year", "lifetime"]
                         },
                         "every": {
-                          "type": [
-                            "integer",
-                            "null"
-                          ],
+                          "type": ["integer", "null"],
                           "description": "Positive interval for recurring plans: month/3 = quarterly. Use lifetime/1 for a one-time purchase."
                         }
                       },
-                      "required": [
-                        "unit"
-                      ],
+                      "required": ["unit"],
                       "additionalProperties": true
                     },
                     "methodId": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
+                      "type": ["string", "null"]
                     },
                     "region": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
+                      "type": ["string", "null"]
                     },
                     "stop": {
-                      "type": [
-                        "object",
-                        "null"
-                      ],
+                      "type": ["object", "null"],
                       "properties": {
                         "kind": {
                           "type": "string",
-                          "enum": [
-                            "cancel",
-                            "terminate"
-                          ]
+                          "enum": ["cancel", "terminate"]
                         },
                         "date": {
                           "type": "string",
@@ -2889,25 +2162,15 @@
                           "description": "Original last paid service day, inclusive, before early cancellation or provider termination."
                         },
                         "reason": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
+                          "type": ["string", "null"],
                           "description": "Only provider termination (kind=terminate) can have a reason."
                         }
                       },
-                      "required": [
-                        "kind",
-                        "date",
-                        "paidThrough"
-                      ],
+                      "required": ["kind", "date", "paidThrough"],
                       "additionalProperties": true
                     },
                     "priceHistory": {
-                      "type": [
-                        "array",
-                        "null"
-                      ],
+                      "type": ["array", "null"],
                       "items": {
                         "type": "object",
                         "properties": {
@@ -2920,18 +2183,12 @@
                             "minimum": 0
                           }
                         },
-                        "required": [
-                          "from",
-                          "amount"
-                        ],
+                        "required": ["from", "amount"],
                         "additionalProperties": true
                       }
                     },
                     "intro": {
-                      "type": [
-                        "object",
-                        "null"
-                      ],
+                      "type": ["object", "null"],
                       "properties": {
                         "price": {
                           "type": "number",
@@ -2942,17 +2199,11 @@
                           "format": "date"
                         }
                       },
-                      "required": [
-                        "price",
-                        "until"
-                      ],
+                      "required": ["price", "until"],
                       "additionalProperties": true
                     },
                     "bonus": {
-                      "type": [
-                        "object",
-                        "null"
-                      ],
+                      "type": ["object", "null"],
                       "properties": {
                         "from": {
                           "type": "string",
@@ -2963,18 +2214,12 @@
                           "format": "date"
                         }
                       },
-                      "required": [
-                        "from",
-                        "until"
-                      ],
+                      "required": ["from", "until"],
                       "additionalProperties": true,
                       "description": "Free interval [from, until); until is the first paid day. The advertised gift list price is not a payment."
                     },
                     "payments": {
-                      "type": [
-                        "array",
-                        "null"
-                      ],
+                      "type": ["array", "null"],
                       "items": {
                         "type": "object",
                         "properties": {
@@ -2988,42 +2233,22 @@
                             "description": "Original order amount: charge/adjust positive, refund negative, free gift zero. Split funding still represents ONE order."
                           },
                           "currency": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
+                            "type": ["string", "null"]
                           },
                           "kind": {
-                            "type": [
-                              "string",
-                              "null"
-                            ],
-                            "enum": [
-                              "refund",
-                              "adjust",
-                              "failed",
-                              null
-                            ],
+                            "type": ["string", "null"],
+                            "enum": ["refund", "adjust", "failed", null],
                             "description": "Omit for an ordinary successful charge. failed is not spending."
                           },
                           "note": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
+                            "type": ["string", "null"]
                           },
                           "methodId": {
-                            "type": [
-                              "string",
-                              "null"
-                            ],
+                            "type": ["string", "null"],
                             "description": "Existing method id. Omit when funding splits the order."
                           },
                           "settled": {
-                            "type": [
-                              "object",
-                              "null"
-                            ],
+                            "type": ["object", "null"],
                             "properties": {
                               "amount": {
                                 "type": "number"
@@ -3032,17 +2257,11 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "amount",
-                              "currency"
-                            ],
+                            "required": ["amount", "currency"],
                             "additionalProperties": true
                           },
                           "funding": {
-                            "type": [
-                              "array",
-                              "null"
-                            ],
+                            "type": ["array", "null"],
                             "items": {
                               "type": "object",
                               "properties": {
@@ -3053,73 +2272,44 @@
                                   "type": "number"
                                 }
                               },
-                              "required": [
-                                "methodId",
-                                "amount"
-                              ],
+                              "required": ["methodId", "amount"],
                               "additionalProperties": true
                             }
                           }
                         },
-                        "required": [
-                          "date",
-                          "amount"
-                        ],
+                        "required": ["date", "amount"],
                         "additionalProperties": true
                       },
                       "description": "Actual payments owned by THIS phase, including early payments before start. Explicit charges override same-day estimates."
                     },
                     "nextDue": {
-                      "type": [
-                        "string",
-                        "null"
-                      ],
+                      "type": ["string", "null"],
                       "format": "date",
                       "description": "Next renewal/billing anchor AFTER recorded payments; may be later than end when sold before the prepaid year expired."
                     },
                     "note": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
+                      "type": ["string", "null"]
                     },
                     "planned": {
-                      "type": [
-                        "boolean",
-                        "null"
-                      ]
+                      "type": ["boolean", "null"]
                     }
                   },
-                  "required": [
-                    "start",
-                    "price",
-                    "currency",
-                    "cycle"
-                  ],
+                  "required": ["start", "price", "currency", "cycle"],
                   "additionalProperties": true
                 },
                 "description": "Plan/service history. Keep top-level price/currency/cycle/methodId mirrored from the last phase. Put payments inside their owning phases."
               },
               "showOnPublic": {
-                "type": [
-                  "boolean",
-                  "null"
-                ]
+                "type": ["boolean", "null"]
               },
               "transfers": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "items": {
                   "type": "object",
                   "properties": {
                     "kind": {
                       "type": "string",
-                      "enum": [
-                        "buy",
-                        "sell"
-                      ]
+                      "enum": ["buy", "sell"]
                     },
                     "date": {
                       "type": "string",
@@ -3133,54 +2323,27 @@
                       "type": "string"
                     },
                     "note": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
+                      "type": ["string", "null"]
                     }
                   },
-                  "required": [
-                    "kind",
-                    "date",
-                    "amount",
-                    "currency"
-                  ],
+                  "required": ["kind", "date", "amount", "currency"],
                   "additionalProperties": true
                 }
               },
               "account": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "notes": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "createdAt": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "updatedAt": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               }
             },
-            "required": [
-              "name",
-              "price",
-              "currency",
-              "cycle",
-              "start",
-              "status"
-            ],
+            "required": ["name", "price", "currency", "cycle", "start", "status"],
             "additionalProperties": true,
             "description": "Complete editable record, same as get_subscription.record. Optional nulls are removed. Known last service day goes in end; omit end and stop when unknown. Omit stop unless early-stop details are known. Example: a free gift followed by an early-paid year, sold before expiry.",
             "examples": [
@@ -3249,17 +2412,11 @@
             "description": "If category is unknown, explicitly create it. Ambiguous references always fail."
           },
           "category_icon": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "New category only: Lucide icon name or emoji; same validation as save_category set.icon."
           },
           "category_color": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "New category only: palette code or #rrggbb; same validation as save_category set.color."
           },
           "dry_run": {
@@ -3267,9 +2424,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription"
-        ],
+        "required": ["subscription"],
         "additionalProperties": false
       },
       "annotations": {
@@ -3294,10 +2449,7 @@
             "type": "object",
             "properties": {
               "icon": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "description": "Icon: an http(s) image URL (e.g. artwork from search_app_store), a site path such as /ai/claude.svg, or one emoji / short symbol (up to 4 characters). Invalid values are rejected. null clears it."
               },
               "show_on_public": {
@@ -3310,10 +2462,7 @@
                 "description": "Service start (single-phase only). Keeps the billing anchor unless shift_billing=true."
               },
               "intro": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": ["object", "null"],
                 "properties": {
                   "price": {
                     "type": "number",
@@ -3326,17 +2475,11 @@
                     "description": "YYYY-MM-DD"
                   }
                 },
-                "required": [
-                  "price",
-                  "until"
-                ],
+                "required": ["price", "until"],
                 "additionalProperties": false
               },
               "bonus": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": ["object", "null"],
                 "properties": {
                   "from": {
                     "format": "date",
@@ -3351,10 +2494,7 @@
                     "description": "YYYY-MM-DD"
                   }
                 },
-                "required": [
-                  "from",
-                  "until"
-                ],
+                "required": ["from", "until"],
                 "additionalProperties": false
               },
               "name": {
@@ -3384,47 +2524,29 @@
                 "description": "Login account (email / phone / username)."
               },
               "method": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "description": "Payment method id or name."
               },
               "region": {
                 "type": "string"
               },
               "remind_days": {
-                "type": [
-                  "integer",
-                  "null"
-                ],
+                "type": ["integer", "null"],
                 "minimum": -1,
                 "description": "-1 disables; null restores the global setting."
               },
               "end": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "description": "YYYY-MM-DD, or null to clear (will renew again)."
               },
               "next_due": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "trial_end": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "expires": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "chargeLeadDays": {
                 "type": "integer",
@@ -3446,17 +2568,11 @@
             "description": "If category is unknown, explicitly create it. Ambiguous references always fail."
           },
           "category_icon": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "New category only: Lucide icon name or emoji; same validation as save_category set.icon."
           },
           "category_color": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "New category only: palette code or #rrggbb; same validation as save_category set.color."
           },
           "shift_billing": {
@@ -3469,10 +2585,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription",
-          "set"
-        ],
+        "required": ["subscription", "set"],
         "additionalProperties": false
       },
       "annotations": {
@@ -3495,11 +2608,7 @@
           },
           "action": {
             "type": "string",
-            "enum": [
-              "add",
-              "edit",
-              "remove"
-            ],
+            "enum": ["add", "edit", "remove"],
             "description": "Default add (upsert by date). edit/remove target an existing point using phase and original_from. The initial point cannot be removed."
           },
           "phase": {
@@ -3529,9 +2638,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription"
-        ],
+        "required": ["subscription"],
         "additionalProperties": false
       },
       "annotations": {
@@ -3554,15 +2661,7 @@
           },
           "action": {
             "type": "string",
-            "enum": [
-              "switch",
-              "resume",
-              "earlier",
-              "confirm",
-              "drop",
-              "edit",
-              "remove"
-            ]
+            "enum": ["switch", "resume", "earlier", "confirm", "drop", "edit", "remove"]
           },
           "at": {
             "format": "date",
@@ -3580,10 +2679,7 @@
                 "description": "New phase start; keeps the billing anchor unless shift_billing=true."
               },
               "end": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date"
               },
               "price": {
@@ -3598,13 +2694,7 @@
                 "properties": {
                   "unit": {
                     "type": "string",
-                    "enum": [
-                      "day",
-                      "week",
-                      "month",
-                      "year",
-                      "lifetime"
-                    ]
+                    "enum": ["day", "week", "month", "year", "lifetime"]
                   },
                   "every": {
                     "type": "integer",
@@ -3612,44 +2702,27 @@
                     "default": 1
                   }
                 },
-                "required": [
-                  "unit"
-                ],
+                "required": ["unit"],
                 "description": "Billing cycle, e.g. {\"unit\":\"month\",\"every\":1}; lifetime = one-time purchase."
               },
               "method": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "region": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "note": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "nextDue": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date"
               },
               "planned": {
                 "type": "boolean"
               },
               "priceHistory": {
-                "type": [
-                  "array",
-                  "null"
-                ],
+                "type": ["array", "null"],
                 "description": "Full replacement, retaining the initial effective date; use change_price action=edit to move that initial date. Latest amount becomes phase price.",
                 "items": {
                   "type": "object",
@@ -3665,18 +2738,12 @@
                       "minimum": 0
                     }
                   },
-                  "required": [
-                    "from",
-                    "amount"
-                  ],
+                  "required": ["from", "amount"],
                   "additionalProperties": false
                 }
               },
               "intro": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": ["object", "null"],
                 "properties": {
                   "price": {
                     "type": "number",
@@ -3689,17 +2756,11 @@
                     "description": "YYYY-MM-DD"
                   }
                 },
-                "required": [
-                  "price",
-                  "until"
-                ],
+                "required": ["price", "until"],
                 "additionalProperties": false
               },
               "bonus": {
-                "type": [
-                  "object",
-                  "null"
-                ],
+                "type": ["object", "null"],
                 "properties": {
                   "from": {
                     "format": "date",
@@ -3714,10 +2775,7 @@
                     "description": "YYYY-MM-DD"
                   }
                 },
-                "required": [
-                  "from",
-                  "until"
-                ],
+                "required": ["from", "until"],
                 "additionalProperties": false
               }
             },
@@ -3738,13 +2796,7 @@
                 "properties": {
                   "unit": {
                     "type": "string",
-                    "enum": [
-                      "day",
-                      "week",
-                      "month",
-                      "year",
-                      "lifetime"
-                    ]
+                    "enum": ["day", "week", "month", "year", "lifetime"]
                   },
                   "every": {
                     "type": "integer",
@@ -3752,16 +2804,11 @@
                     "default": 1
                   }
                 },
-                "required": [
-                  "unit"
-                ],
+                "required": ["unit"],
                 "description": "Billing cycle, e.g. {\"unit\":\"month\",\"every\":1}; lifetime = one-time purchase."
               },
               "method": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "region": {
                 "type": "string"
@@ -3773,11 +2820,7 @@
                 "type": "boolean"
               }
             },
-            "required": [
-              "price",
-              "currency",
-              "cycle"
-            ],
+            "required": ["price", "currency", "cycle"],
             "additionalProperties": false
           },
           "keep_previous_until": {
@@ -3802,11 +2845,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription",
-          "action",
-          "at"
-        ],
+        "required": ["subscription", "action", "at"],
         "additionalProperties": false
       },
       "annotations": {
@@ -3829,29 +2868,17 @@
           },
           "action": {
             "type": "string",
-            "enum": [
-              "pause",
-              "cancel",
-              "terminate",
-              "reactivate",
-              "trial"
-            ]
+            "enum": ["pause", "cancel", "terminate", "reactivate", "trial"]
           },
           "at": {
             "format": "date",
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "description": "Non-immediate cancel: last service day. Immediate cancel / terminate: actual stop day. Required for cancel / terminate when the subscription started or has charges before today; null = stopped on an unknown date. pause / trial default to today."
           },
           "trial_end": {
             "format": "date",
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "description": "trial only: first paid charge date; null clears, omitted preserves the existing value."
           },
@@ -3865,10 +2892,7 @@
             "description": "Optional provider termination reason; terminate only."
           },
           "refund": {
-            "type": [
-              "object",
-              "null"
-            ],
+            "type": ["object", "null"],
             "properties": {
               "amount": {
                 "type": "number",
@@ -3895,16 +2919,11 @@
                     "type": "string"
                   }
                 },
-                "required": [
-                  "amount",
-                  "currency"
-                ],
+                "required": ["amount", "currency"],
                 "additionalProperties": false
               }
             },
-            "required": [
-              "amount"
-            ],
+            "required": ["amount"],
             "additionalProperties": false,
             "description": "Immediate cancel / terminate only. With edit=true it replaces the latest stop refund; null removes it; omitted keeps it."
           },
@@ -3918,10 +2937,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription",
-          "action"
-        ],
+        "required": ["subscription", "action"],
         "additionalProperties": false
       },
       "annotations": {
@@ -3952,10 +2968,7 @@
                 "minimum": 0
               }
             },
-            "required": [
-              "date",
-              "index"
-            ],
+            "required": ["date", "index"],
             "additionalProperties": false
           },
           "subscription": {
@@ -3978,12 +2991,7 @@
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "charge",
-              "refund",
-              "adjust",
-              "failed"
-            ],
+            "enum": ["charge", "refund", "adjust", "failed"],
             "default": "charge"
           },
           "settled": {
@@ -3996,24 +3004,15 @@
                 "type": "string"
               }
             },
-            "required": [
-              "amount",
-              "currency"
-            ],
+            "required": ["amount", "currency"],
             "additionalProperties": false
           },
           "method": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "Payment method id or name for this single charge; null clears it."
           },
           "funding": {
-            "type": [
-              "array",
-              "null"
-            ],
+            "type": ["array", "null"],
             "description": "Split one order across several sources, e.g. [{\"method\":\"PayPal\",\"amount\":168.05},{\"method\":\"Balance\",\"amount\":10.75}] for 178.80. Amounts in the subscription currency, positive, at least two different methods, summing to amount. Replaces method for this charge.",
             "items": {
               "type": "object",
@@ -4027,10 +3026,7 @@
                   "minimum": 0
                 }
               },
-              "required": [
-                "method",
-                "amount"
-              ],
+              "required": ["method", "amount"],
               "additionalProperties": false
             }
           },
@@ -4052,10 +3048,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription",
-          "amount"
-        ],
+        "required": ["subscription", "amount"],
         "additionalProperties": false
       },
       "annotations": {
@@ -4097,10 +3090,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription",
-          "date"
-        ],
+        "required": ["subscription", "date"],
         "additionalProperties": false
       },
       "annotations": {
@@ -4123,10 +3113,7 @@
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "buy",
-              "sell"
-            ]
+            "enum": ["buy", "sell"]
           },
           "date": {
             "format": "date",
@@ -4159,10 +3146,7 @@
                 "minimum": 0
               }
             },
-            "required": [
-              "date",
-              "index"
-            ],
+            "required": ["date", "index"],
             "additionalProperties": false
           },
           "delete": {
@@ -4179,10 +3163,7 @@
                 "minimum": 0
               }
             },
-            "required": [
-              "date",
-              "index"
-            ],
+            "required": ["date", "index"],
             "additionalProperties": false
           },
           "dry_run": {
@@ -4190,9 +3171,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription"
-        ],
+        "required": ["subscription"],
         "additionalProperties": false
       },
       "annotations": {
@@ -4240,9 +3219,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription"
-        ],
+        "required": ["subscription"],
         "additionalProperties": false
       },
       "annotations": {
@@ -4265,11 +3242,7 @@
           },
           "role": {
             "type": "string",
-            "enum": [
-              "owner",
-              "member",
-              "none"
-            ]
+            "enum": ["owner", "member", "none"]
           },
           "seats": {
             "type": "integer",
@@ -4277,26 +3250,17 @@
             "description": "Total seats including me."
           },
           "owner_name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "since": {
             "format": "date",
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "description": "YYYY-MM-DD"
           },
           "collect_from": {
             "format": "date",
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "description": "Optional shared collection anchor. Members align to this date + k × bill_every months, preserving month-end alignment. Omit to preserve the existing anchor or infer from since, recorded coverage / paid-until, then subscription start."
           },
@@ -4315,12 +3279,7 @@
               },
               "bill_every": {
                 "type": "integer",
-                "enum": [
-                  1,
-                  3,
-                  6,
-                  12
-                ]
+                "enum": [1, 3, 6, 12]
               }
             },
             "additionalProperties": false
@@ -4336,10 +3295,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription",
-          "role"
-        ],
+        "required": ["subscription", "role"],
         "additionalProperties": false
       },
       "annotations": {
@@ -4361,10 +3317,7 @@
             "description": "Subscription id, or its name (fuzzy match; ambiguous names return candidates)."
           },
           "person": {
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "description": "Link an existing roster person by id/name; copies their name/contact. Omitted: an unlinked member is matched by name (+ contact) like the web form, else a roster person is created (preview created_person). null keeps the member unlinked."
           },
           "member": {
@@ -4393,12 +3346,7 @@
           },
           "bill_every": {
             "type": "integer",
-            "enum": [
-              1,
-              3,
-              6,
-              12
-            ]
+            "enum": [1, 3, 6, 12]
           },
           "follow_rule": {
             "type": "boolean",
@@ -4406,18 +3354,11 @@
           },
           "first_period": {
             "type": "string",
-            "enum": [
-              "prorate",
-              "full",
-              "free"
-            ],
+            "enum": ["prorate", "full", "free"],
             "description": "Partial first period only: prorate (default, actual inclusive days / full aligned period days, rounded to cents), full (regular fee), or free (zero; skipped for the next collection). Later periods charge the regular fee."
           },
           "first_amount": {
-            "type": [
-              "number",
-              "null"
-            ],
+            "type": ["number", "null"],
             "minimum": 0,
             "description": "Custom first-period fee; null resets to calculated amount."
           },
@@ -4426,36 +3367,24 @@
           },
           "paid_until": {
             "format": "date",
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "description": "YYYY-MM-DD"
           },
           "joined": {
             "format": "date",
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "description": "Join date, inclusive; defaults to today for a new member. A mid-period join covers this day through the shared aligned period end."
           },
           "left": {
             "format": "date",
-            "type": [
-              "string",
-              "null"
-            ],
+            "type": ["string", "null"],
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "description": "Left the plan on this date (keeps history). null also clears leave_refund."
           },
           "leave_refund": {
-            "type": [
-              "object",
-              "null"
-            ],
+            "type": ["object", "null"],
             "description": "Actual refund on leaving, positive amount. Requires left; null clears it. Omit to preserve. Date cannot precede joining.",
             "properties": {
               "amount": {
@@ -4475,9 +3404,7 @@
                 "type": "string"
               }
             },
-            "required": [
-              "amount"
-            ],
+            "required": ["amount"],
             "additionalProperties": false
           },
           "source": {
@@ -4502,9 +3429,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription"
-        ],
+        "required": ["subscription"],
         "additionalProperties": false
       },
       "annotations": {
@@ -4534,10 +3459,7 @@
             "description": "Preview before/after and references without saving."
           }
         },
-        "required": [
-          "subscription",
-          "member"
-        ],
+        "required": ["subscription", "member"],
         "additionalProperties": false
       },
       "annotations": {
@@ -4556,13 +3478,7 @@
         "properties": {
           "action": {
             "type": "string",
-            "enum": [
-              "record",
-              "waive",
-              "update",
-              "delete",
-              "charged"
-            ]
+            "enum": ["record", "waive", "update", "delete", "charged"]
           },
           "subscription": {
             "type": "string",
@@ -4574,10 +3490,7 @@
           },
           "kind": {
             "type": "string",
-            "enum": [
-              "share",
-              "proxy"
-            ],
+            "enum": ["share", "proxy"],
             "description": "Inferred when person or member is given; defaults to proxy for a proxy subscription."
           },
           "member": {
@@ -4621,10 +3534,7 @@
             "description": "When the money arrived (or the waiver was agreed); defaults to today."
           },
           "note": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "charge": {
             "format": "date",
@@ -4633,17 +3543,11 @@
             "description": "charged: which proxy charge date."
           },
           "charged_amount": {
-            "type": [
-              "number",
-              "null"
-            ],
+            "type": ["number", "null"],
             "minimum": 0
           },
           "charged_currency": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": ["string", "null"]
           },
           "dry_run": {
             "type": "boolean",
@@ -4669,11 +3573,7 @@
         "properties": {
           "action": {
             "type": "string",
-            "enum": [
-              "create",
-              "update",
-              "delete"
-            ]
+            "enum": ["create", "update", "delete"]
           },
           "id": {
             "type": "string",
@@ -4693,106 +3593,48 @@
               },
               "kind": {
                 "type": "string",
-                "enum": [
-                  "debit",
-                  "credit",
-                  "alipay",
-                  "wechat",
-                  "paypal",
-                  "appstore",
-                  "googleplay",
-                  "giftcard",
-                  "prepaid",
-                  "phone",
-                  "crypto",
-                  "other"
-                ]
+                "enum": ["debit", "credit", "alipay", "wechat", "paypal", "appstore", "googleplay", "giftcard", "prepaid", "phone", "crypto", "other"]
               },
               "currency": {
                 "type": "string"
               },
               "balance": {
-                "type": [
-                  "number",
-                  "null"
-                ]
+                "type": ["number", "null"]
               },
               "balanceAsOf": {
-                "type": [
-                  "string",
-                  "null"
-                ],
+                "type": ["string", "null"],
                 "format": "date"
               },
               "last4": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "color": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "region": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "notes": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "brand": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "logo": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "bank": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "phone": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "url": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "network": {
-                "type": [
-                  "string",
-                  "null"
-                ],
-                "enum": [
-                  "visa",
-                  "mastercard",
-                  "unionpay",
-                  "jcb",
-                  "american-express",
-                  "discover",
-                  "diners",
-                  "maestro"
-                ]
+                "type": ["string", "null"],
+                "enum": ["visa", "mastercard", "unionpay", "jcb", "american-express", "discover", "diners", "maestro"]
               },
               "logoWide": {
                 "type": "boolean"
@@ -4802,17 +3644,11 @@
                 "minimum": 0
               },
               "lowRunwayDays": {
-                "type": [
-                  "number",
-                  "null"
-                ],
+                "type": ["number", "null"],
                 "minimum": 0
               },
               "cashback": {
-                "type": [
-                  "number",
-                  "null"
-                ],
+                "type": ["number", "null"],
                 "minimum": 0
               }
             },
@@ -4840,29 +3676,17 @@
                 "minimum": 0
               },
               "cost": {
-                "type": [
-                  "number",
-                  "null"
-                ],
+                "type": ["number", "null"],
                 "minimum": 0
               },
               "costCurrency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "note": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "cost_currency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               }
             },
             "required": [],
@@ -4871,11 +3695,7 @@
           },
           "top_up_action": {
             "type": "string",
-            "enum": [
-              "add",
-              "update",
-              "delete"
-            ]
+            "enum": ["add", "update", "delete"]
           },
           "top_up_index": {
             "type": "integer",
@@ -4893,23 +3713,14 @@
                 "minimum": 0
               },
               "cost": {
-                "type": [
-                  "number",
-                  "null"
-                ],
+                "type": ["number", "null"],
                 "minimum": 0
               },
               "costCurrency": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               },
               "note": {
-                "type": [
-                  "string",
-                  "null"
-                ]
+                "type": ["string", "null"]
               }
             },
             "required": [],

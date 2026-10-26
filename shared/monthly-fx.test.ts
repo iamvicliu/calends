@@ -5,8 +5,25 @@ import { contributionOn, mrrOn, mrrSeries } from './metrics.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 test('missing monthly FX propagates through per-subscription, totals and historical MRR', () => {
-  const s: Subscription = { id: 'xcd', name: 'Fictional XCD', tags: [], category: 'Test', price: 27, currency: 'XCD', start: '2026-01-01', cycle: { unit: 'month', every: 1 }, status: 'active' };
-  const st: AppState = { subscriptions: [s], methods: [], settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' }, fx: { base: 'CNY', rates: { CNY: 1 } }, fxHistory: {}, prefs: {} };
+  const s: Subscription = {
+    id: 'xcd',
+    name: 'Fictional XCD',
+    tags: [],
+    category: 'Test',
+    price: 27,
+    currency: 'XCD',
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+  };
+  const st: AppState = {
+    subscriptions: [s],
+    methods: [],
+    settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' },
+    fx: { base: 'USD', rates: { USD: 1, CNY: 1 }, fetchedAt: '2026-10-25T00:00:00Z' },
+    fxHistory: {},
+    prefs: {},
+  };
   const day = '2026-10-25';
   assert.ok(Number.isNaN(monthlyMine(st, s, day)));
   assert.ok(Number.isNaN(contributionOn(st, s, day)));
@@ -19,4 +36,25 @@ test('missing monthly FX propagates through per-subscription, totals and histori
   st.fx.rates.XCD = 2;
   assert.ok(Number.isFinite(totals(st, day).mrr));
   assert.equal(totals(st, day).incomplete, false);
+});
+
+test('proxy missing FX cannot make personal MRR incomplete', () => {
+  const st = {
+    subscriptions: [
+      {
+        id: 'p',
+        name: 'Fictional proxy',
+        start: '2026-01-01',
+        price: 27,
+        currency: 'XCD',
+        cycle: { unit: 'month', every: 1 },
+        status: 'active',
+        proxy: { forName: 'Fictional person' },
+      },
+    ],
+    methods: [],
+    settings: DEFAULT_SETTINGS,
+    fx: { base: 'USD', rates: { USD: 1 }, fetchedAt: '' },
+  } as AppState;
+  assert.equal(mrrOn(st, '2026-10-25'), 0);
 });

@@ -6,7 +6,6 @@ import { chargeBaseOrNaN, convertOn } from './fx.ts';
 import { t } from './i18n.ts';
 import type { AppState, Subscription, Transfer } from './types.ts';
 
-
 /** 按日期排好的转让记录（同一天保持存储顺序）；没有时为空 */
 export function transfersOf(s: Pick<Subscription, 'transfers'>): Transfer[] {
   return (s.transfers ?? [])

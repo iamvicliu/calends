@@ -481,9 +481,15 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
     const k = keyOf(x.s);
     groups.set(k, [...(groups.get(k) ?? []), x]);
   }
-  const entries = (dim === 'pay'
-    ? paymentMethodGroups(state.methods, live.map((x) => ({ methodId: currentPhase(x.s, today).methodId, value: x.v, item: x })), t('report.comp.unassigned')).map((g) => ({ k: g.id, name: g.name, xs: g.items, v: g.sum }))
-    : [...groups.entries()].map(([k, xs]) => ({ k, name: k, xs, v: xs.reduce((a, x) => a + x.v, 0) })))
+  const entries = (
+    dim === 'pay'
+      ? paymentMethodGroups(
+          state.methods,
+          live.map((x) => ({ methodId: currentPhase(x.s, today).methodId, value: x.v, item: x })),
+          t('report.comp.unassigned'),
+        ).map((g) => ({ k: g.id, name: g.name, xs: g.items, v: g.sum }))
+      : [...groups.entries()].map(([k, xs]) => ({ k, name: k, xs, v: xs.reduce((a, x) => a + x.v, 0) }))
+  )
     .map((e) => ({ ...e, xs: e.xs.sort((a, b) => b.v - a.v) }))
     .sort((a, b) => b.v - a.v);
   const color = (k: string, i: number) => {

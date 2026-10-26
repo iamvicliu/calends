@@ -7,7 +7,9 @@ export function paymentMethodGroups<T>(methods: PaymentMethod[], rows: Array<{ m
     const id = row.methodId ?? '';
     const method = methods.find((m) => m.id === id);
     const name = method
-      ? method.last4 && methods.some((m) => m.id !== id && m.name === method.name) ? `${method.name} · ${method.last4}` : method.name
+      ? method.last4 && methods.some((m) => m.id !== id && m.name === method.name)
+        ? `${method.name} · ${method.last4}`
+        : method.name
       : unassigned;
     const group = groups.get(id) ?? { id, name, sum: 0, items: [] };
     group.sum += row.value;

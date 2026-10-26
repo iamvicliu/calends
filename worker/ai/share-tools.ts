@@ -409,7 +409,10 @@ export const record_receivable: Tool = {
       member: { type: 'string', description: 'share: member id or name.' },
       periods: { type: 'array', items: DATE, maxItems: 240, description: 'Period keys (share: period start; proxy: charge date).' },
       count: { type: 'integer', minimum: 1, maximum: 240, description: 'Without periods: cover the N earliest unsettled periods.' },
-      id: { type: 'string', description: 'update/delete: receipt or waiver id. For record/waive: optional stable new record id, pinned when confirming a draft.' },
+      id: {
+        type: 'string',
+        description: 'update/delete: receipt or waiver id. For record/waive: optional stable new record id, pinned when confirming a draft.',
+      },
       amount: { type: 'number', minimum: 0, description: 'Actual amount received; defaults to the total due of the covered periods.' },
       currency: { type: 'string', description: 'Receipt currency; defaults to the currency of the covered periods.' },
       date: { ...DATE, description: 'When the money arrived (or the waiver was agreed); defaults to today.' },

@@ -229,10 +229,10 @@ test('8. 钱包按 settled、代付 chargedCurrency 实扣，失败不扣、退�
   assert.equal(runwayFor(switched.methods[0], switched, '2026-01-11')!.current, 40);
 });
 
-test('9. 年度回顾和未来 90 天保留全额实付，个人 MRR 与现金/权责扣成员份额', () => {
+test('9. 年度回顾、个人 MRR 与现金按我的份额，未来 90 天保留全额实付', () => {
   const s = sub({ share: { role: 'owner', seats: 2, members: [{ id: 'm', name: 'M', share: 20, joined: '2026-01-01' }] } });
   const st = state([s]);
-  assert.equal(yearReview(st, '2026-02-01').total, 120);
+  assert.equal(yearReview(st, '2026-02-01').total, 80);
   const today = '2026-02-01';
   const cs = chargesBetween(s, addDays(today, 1), addDays(today, 90), today);
   assert.equal(

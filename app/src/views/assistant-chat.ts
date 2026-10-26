@@ -46,7 +46,14 @@ export type ChatTurn =
       /** 发送时历史的长度：重试、重新生成时截回这里 */ at: number;
       /** 存到服务端时图片不保存，只记张数 */ imgs?: number;
     }
-  | { id: string; role: 'assistant'; parts: Part[]; status: 'streaming' | 'done' | 'error' | 'stopped'; outcome?: AssistantOutcome; error?: { kind: ErrorKind; message: string } };
+  | {
+      id: string;
+      role: 'assistant';
+      parts: Part[];
+      status: 'streaming' | 'done' | 'error' | 'stopped';
+      outcome?: AssistantOutcome;
+      error?: { kind: ErrorKind; message: string };
+    };
 
 export interface Saved {
   /** 对话 id：服务端按它存；「新对话」换一个新的 */

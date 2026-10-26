@@ -504,7 +504,9 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                             title={t('list.gantt.gapTitle', { span: durationLabel(diffDays(g.from, g.to)), from: cnDate(g.from), to: cnDate(g.to) })}
                           >
                             {gv.r - gv.l > 90 && (
-                              <em style={{ left: (gv.l + gv.r) / 2 - gl + GAP_TUCK }}>{t('list.gantt.gapShort', { span: durationLabel(diffDays(g.from, g.to)) })}</em>
+                              <em style={{ left: (gv.l + gv.r) / 2 - gl + GAP_TUCK }}>
+                                {t('list.gantt.gapShort', { span: durationLabel(diffDays(g.from, g.to)) })}
+                              </em>
                             )}
                           </span>
                         );

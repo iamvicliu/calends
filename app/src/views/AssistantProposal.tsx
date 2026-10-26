@@ -353,4 +353,3 @@ export function Proposal(props: {
     </div>
   );
 }
-

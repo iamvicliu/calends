@@ -36,7 +36,7 @@ interface Ctx {
   mrr: number;
   saved: string;
   /** 这一年按支付方式分的花费 */
-  byMethod: Array<{ name: string; sum: number }>;
+  byMethod: Array<{ id: string; name: string; sum: number }>;
   today: string;
 }
 
@@ -56,9 +56,15 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
   const byMethod = useMemo(() => {
     const from = `${year}-01-01`;
     const to = `${year}-12-31` < today ? `${year}-12-31` : today;
-    return paymentMethodGroups(state.methods, allCharges(state, from, to, today).flatMap((c) =>
-      chargeSources(c).map((x) => ({ methodId: x.methodId, value: chargeBaseOrNaN(state, c) * myShareFactor(c.sub, c.date) * x.share, item: c }))), t('review.unassigned'))
-      .map(({ id, name, sum }) => ({ id, name, sum })).sort((a, b) => sortValue(b.sum) - sortValue(a.sum));
+    return paymentMethodGroups(
+      state.methods,
+      allCharges(state, from, to, today).flatMap((c) =>
+        chargeSources(c).map((x) => ({ methodId: x.methodId, value: chargeBaseOrNaN(state, c) * myShareFactor(c.sub, c.date) * x.share, item: c })),
+      ),
+      t('review.unassigned'),
+    )
+      .map(({ id, name, sum }) => ({ id, name, sum }))
+      .sort((a, b) => sortValue(b.sum) - sortValue(a.sum));
   }, [state, today, year]);
   return (
     <ShareSheet
@@ -141,7 +147,7 @@ function Receipt({ r, year, whose, ongoing, m, hide, pct, byMethod, today }: Ctx
       <ReviewLoss r={r} hide={hide} m={m} />
       <div className="rp-rule">{'-'.repeat(60)}</div>
       {byMethod.slice(0, 5).map((x) => (
-        <Line key={x.name} l={x.name} r={amt(x.sum)} />
+        <Line key={x.id} l={x.name} r={amt(x.sum)} />
       ))}
       <div className="rp-rule">{'='.repeat(60)}</div>
       <div className="rp-bars">

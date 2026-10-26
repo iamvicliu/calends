@@ -19,7 +19,11 @@ export interface StopForm {
 }
 
 /** Existing refunds remain ordinary payment records; the fields edit the latest stop refund. */
-export function stopForm(sub: Subscription, today: string, state: Pick<AppState, 'methods' | 'settings'> = { methods: [], settings: DEFAULT_SETTINGS }): StopForm {
+export function stopForm(
+  sub: Subscription,
+  today: string,
+  state: Pick<AppState, 'methods' | 'settings'> = { methods: [], settings: DEFAULT_SETTINGS },
+): StopForm {
   const cur = currentPhase(sub, sub.stop?.date ?? today);
   const paid = nonrenewalDate(cur, today);
   const payment = cur.stop ? cur.payments?.filter((p) => p.kind === 'refund' && p.date >= cur.stop!.date).at(-1) : undefined;

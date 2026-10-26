@@ -21,5 +21,8 @@ test('compiled new payment initializes settlement without an edit record', () =>
     },
     (s) => s,
   );
-  assert.throws(() => PaymentSheet({ sub: { price: 10, currency: 'USD', start: '2026-10-01' }, today: '2026-10-25', onClose() {} }), (e) => e === initialized);
+  assert.throws(
+    () => PaymentSheet({ sub: { price: 10, currency: 'USD', start: '2026-10-01' }, today: '2026-10-25', onClose() {} }),
+    (e) => e === initialized,
+  );
 });

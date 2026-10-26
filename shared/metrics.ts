@@ -32,6 +32,7 @@ const MONTH = DAYS_PER_MONTH;
 
 /** day 当天这个订阅贡献的月成本（本位币，我承担的部分）；不在计费状态则为 0 */
 export function contributionOn(state: AppState, s: Subscription, day: string, fxDate?: string): number {
+  if (s.proxy) return 0;
   // 多阶段：当天在跑的各段相加（换区后新旧两段并行时两边都在付钱）
   if (s.phases?.length) return activePhases(s, day).reduce((a, v) => a + contributionOn(state, v, day, fxDate), 0);
   if (s.cycle.unit === 'lifetime') return 0;
