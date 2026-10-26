@@ -2681,3 +2681,101 @@ test('phase2 rendered ledger sections and assistant summaries retain their froze
   if (process.env.CALENDS_UPDATE_FROZEN_VIEWS === '1') writeFileSync(path, JSON.stringify(normalized, null, 2) + '\n');
   assert.deepEqual(normalized, JSON.parse(readFileSync(path, 'utf8')));
 });
+
+test('detail accounts and phone numbers start masked, can be revealed, and copy the full stored value', async () => {
+  for (const [category, account] of [
+    ['Tools', 'fictional@example.invalid'],
+    ['phone', '+65 8123 4567'],
+  ]) {
+    const copied: string[] = [];
+    const state = { ...st, subscriptions: [] };
+    const sub: Subscription = {
+      id: 'private',
+      name: 'Fictional account',
+      category,
+      tags: [],
+      account,
+      price: 10,
+      currency: 'USD',
+      cycle: { unit: 'month', every: 1 },
+      start: '2026-01-01',
+      status: 'active',
+    };
+    const h = harness(
+      '../app/src/views/Detail.tsx',
+      'Summary',
+      {},
+      {
+        presetCat: () => 'phone',
+        detailHistoryEnd,
+        copyText: async (value: string) => {
+          copied.push(value);
+        },
+        Eye: 'Eye',
+        EyeOff: 'EyeOff',
+      },
+    );
+    let nodes = h.render('Summary', { sub, state, today });
+    const value = () => nodes.find((n) => Object.hasOwn(n.props, 'data-private-account'))!;
+    const toggle = () => nodes.find((n) => Object.hasOwn(n.props, 'aria-pressed'))!;
+    assert.equal(value().props.className, 'car-private');
+    assert.equal(toggle().props['aria-label'], 'family.sheet.showPersonal');
+    await nodes.find((n) => n.props.className === 'dt-copy')!.props.onClick();
+    assert.deepEqual(copied, [account]);
+    toggle().props.onClick();
+    nodes = h.render('Summary', { sub, state, today });
+    assert.equal(value().props.className, undefined);
+    assert.equal(toggle().props['aria-label'], 'family.sheet.hidePersonal');
+    toggle().props.onClick();
+    nodes = h.render('Summary', { sub, state, today });
+    assert.equal(value().props.className, 'car-private');
+  }
+});
+
+test('detail PNG masks only a clone and removes it after success or failure while the visible account stays revealed', async () => {
+  for (const failed of [false, true]) {
+    const classes = new Set<string>();
+    let appended = false,
+      removed = false;
+    const value = { classList: { add: (name: string) => classes.add(name) }, setAttribute() {} };
+    const clone = {
+      style: {},
+      querySelectorAll: () => [value],
+      remove: () => {
+        removed = true;
+      },
+    };
+    const source = {
+      offsetWidth: 700,
+      offsetHeight: 1200,
+      closest: () => ({}),
+      cloneNode: () => clone,
+      parentElement: {
+        appendChild: (node: unknown) => {
+          assert.equal(node, clone);
+          appended = true;
+        },
+      },
+    };
+    const image = { fictional: true };
+    const h = harness(
+      '../app/src/views/Detail.tsx',
+      'detailImage',
+      {},
+      {
+        getComputedStyle: () => ({ borderRadius: '16px' }),
+        snapshot: async (node: unknown) => {
+          assert.equal(node, clone);
+          assert.equal(appended, true);
+          assert.equal(classes.has('car-private'), true);
+          if (failed) throw Error('fictional PNG failure');
+          return image;
+        },
+      },
+    );
+    if (failed) await assert.rejects(h.call('detailImage', source), /fictional PNG failure/);
+    else assert.equal(await h.call('detailImage', source), image);
+    assert.equal(removed, true);
+    assert.ok(!('classList' in source), 'masking never mutates the visible source');
+  }
+});
