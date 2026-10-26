@@ -8981,10 +8981,17 @@ img.mm-flag {
   gap: 4px;
   line-height: 1.4;
 }
-.tm-head b,
 .gt-seg em {
   display: block;
   gap: 4px;
+}
+/* 占比图分组标题：沿用 icon-text 的弹性布局，图标与文字垂直居中并留同样间距；名称过长时省略 */
+.tm-head b.icon-text {
+  display: flex;
+}
+.tm-head b > span {
+  margin-left: 0;
+  opacity: 1;
 }
 .tm-head b > span,
 .gt-seg em > span {
