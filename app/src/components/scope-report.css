@@ -389,6 +389,8 @@
 }
 .scope-timeline .gt {
   --rh: 36px;
+  box-shadow: none;
+  border-radius: 0;
 }
 .scope-timeline .gt-label {
   padding-left: 8px;
