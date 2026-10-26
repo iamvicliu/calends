@@ -42,7 +42,9 @@ export function PaymentSheet({
   // 换区后新旧两段并行的日子：要选这笔记在哪一段（缺省为最晚开始的那段，修改时为原记录所在的段）
   const lanes = sub.phases?.length ? (kind === 'refund' ? phaseSubs(sub).filter((v) => v.start <= date) : activePhases(sub, date)) : [];
   const [lane, setLane] = useState(edit?.phase);
-  const phase = (lanes.length > 1 && lanes.find((v) => v.start === lane)) || currentPhase(sub, date);
+  // 修改已有付款时以它实际所在的段为准：提前付款的日期可能落在上一段，按日期找会拿错段的支付方式、币种
+  const stored = edit?.phase ? phaseSubs(sub).find((v) => v.start === edit.phase) : undefined;
+  const phase = (lanes.length > 1 && lanes.find((v) => v.start === lane)) || stored || currentPhase(sub, date);
   const pick = lanes.length > 1 ? phase.start : edit?.phase;
   const ccy = phase.currency;
   const [amount, setAmount] = useState(edit ? String(Math.abs(edit.pay.amount)) : String(phase.price));
