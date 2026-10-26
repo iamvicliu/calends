@@ -8495,7 +8495,7 @@ a.car-toggle {
 .ld-receipts .ld-row > span {
   overflow-wrap: anywhere;
 }
-/* 按年分组时，组内的行是从属的明细：矮一些（32px）、不画分隔线；表头与分组行是标准行高。只有一年时平铺，行高同表头 */
+/* 按年分组时，组内的行是从属的明细：矮一些（32px）、不画分隔线；表头与分组行是标准行高。每年最多一条时平铺，行高同表头 */
 .ld-receipts.ld-grouped .ld-row:not(.ld-year):not(.ld-th):not(.ld-tf) {
   min-height: 32px;
   padding-top: 4px;

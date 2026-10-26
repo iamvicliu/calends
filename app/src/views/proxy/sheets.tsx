@@ -141,7 +141,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               </button>
             }
           >
-            {/* 与订阅详情、合租详情同一套表格（YearLedger）：只有一年就平铺，跨年按年分组带小计；没有合计行，总数在上方指标卡 */}
+            {/* 与订阅详情、合租详情同一套表格（YearLedger）：每年最多一条时平铺，任一年多条则统一按年分组带小计；没有合计行，总数在上方指标卡 */}
             {all.length ? (
               <YearLedger
                 items={all}

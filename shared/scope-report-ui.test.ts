@@ -2358,7 +2358,7 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
   cellNodes[0].props.onClick();
   assert.equal(opened, 2);
   nodes = r.render('CarSheet', { ...props, book: carpool.carLedger(state, s, today), onClose() {}, onOpenSub() {} });
-  // 已下车成员的历史收款仍留在收款表里（与订阅详情同一套按年表格，只有一年时平铺）
+  // 已下车成员的历史收款仍留在收款表里（与订阅详情同一套按年表格，每年最多一条时平铺）
   assert.ok(nodes.some((n) => String(n.props.className ?? '').startsWith('ld-row dt-row') && all(n.children).some((x) => x.children.includes('Departed'))));
   const empty = { ...s, share: { ...s.share!, members: [] } };
   const emptyNodes = r.render('MemberTable', { ...props, s: empty });
@@ -2410,7 +2410,7 @@ test('收款表点某一笔直接进入这笔收款的编辑，而不是成员�
     onMember: () => calls.push(['member']),
     onPayment: (m: unknown, p: unknown) => calls.push(['payment', m, p]),
   };
-  // 跨年时先点表头全部展开；只有一年的记录本来就平铺
+  // 聚合时先点表头全部展开；每年最多一条时直接平铺
   r.render('CarSheet', props)
     .find((n) => n.props.className === 'ld-row ld-th ld-toggle table-head')
     ?.props.onClick();
