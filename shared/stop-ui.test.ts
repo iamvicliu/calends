@@ -1,3 +1,4 @@
+import { editorMoreKeys, editorMoreOpen } from '../app/src/views/editor/more.ts';
 import { readUiSource } from '../scripts/ui-test-source.ts';
 import { metricComponents } from '../scripts/ui-test-components.ts';
 import * as transfers from './transfers.ts';
@@ -484,6 +485,8 @@ function editorRuntime(original: Subscription) {
       categories: () => [],
       presetCat: (name: string) => name,
       isDomainCat: () => false,
+      editorMoreKeys,
+      editorMoreOpen,
       saveSub: async (value: Subscription) => saved.push(value),
       mergeEdits: (_old: Subscription, next: Subscription) => next,
       getState: () => state,
