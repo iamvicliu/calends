@@ -30,7 +30,7 @@ import {
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
 import { MetricCards, Metric, IconButton, CardTitle, Toolbar } from '../components/ui.tsx';
-import { Amount, Seg, useWidth } from '../components/inputs.tsx';
+import { Seg, useWidth } from '../components/inputs.tsx';
 import { CatIcon, MethodMark, SubIcon } from '../components/marks.tsx';
 import { Icon } from '../components/icons.tsx';
 import { tipProps } from '../components/overlays.tsx';
@@ -667,20 +667,20 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
             <div className="muted" style={{ fontSize: 'var(--fs-1)' }}>
               {copyParts(
                 t('report.topup.summary', {
-                  balance: money(p.current, p.method.currency, { compact: true }),
+                  balance: formatTotal(p.partial.current, p.method.currency, { compact: true }),
                   monthly: formatTotal(p.partial.monthly, p.method.currency, { direction: -1, compact: true }),
                 }),
               )}
             </div>
             {p.incomplete ? (
-              <div className="topup-why soft">{totalNote(p.partial.due)}</div>
+              <div className="topup-why soft">{totalNote(p.partial.need)}</div>
             ) : p.need > 0 ? (
               <>
                 <div className="topup-why">
                   {t('report.topup.why', {
                     span,
                     due: flow(-p.due, p.method.currency, { compact: true }),
-                    balance: money(p.current, p.method.currency, { compact: true }),
+                    balance: formatTotal(p.partial.current, p.method.currency, { compact: true }),
                     need: money(p.need, p.method.currency, { compact: true }),
                   })}
                   {p.deadline && p.minNeed > 0 && p.minNeed < p.need - 0.01 && (
@@ -713,13 +713,13 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
               </div>
             )}
           </div>
-          {p.need > 0 && (
+          {(p.need > 0 || p.incomplete) && (
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontWeight: 700 }}>
-                <Amount plain value={p.need} ccy={p.method.currency} compact />
+                <FxAmount plain total={p.partial.need} ccy={p.method.currency} compact />
               </div>
               <div className="muted" style={{ fontSize: 'var(--fs-1)' }}>
-                ≈ {money(toBase(state, p.need, p.method.currency), base, { compact: true })}
+                {!p.incomplete && <>≈ {money(toBase(state, p.need, p.method.currency), base, { compact: true })}</>}
               </div>
               {p.deadline && (
                 <div className={diffDays(today, p.deadline) <= 7 ? 'red' : 'muted'} style={{ fontSize: 'var(--fs-1)', fontWeight: 600 }}>

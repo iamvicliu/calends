@@ -2779,3 +2779,56 @@ test('detail PNG masks only a clone and removes it after success or failure whil
     assert.ok(!('classList' in source), 'masking never mutates the visible source');
   }
 });
+
+test('a complete original history with missing FX still uses actual monthly and daily averages', () => {
+  const sub: Subscription = {
+    id: 'native-average',
+    name: 'Fictional native average',
+    category: 'Tools',
+    tags: [],
+    price: 27,
+    currency: 'XCD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2025-11-25',
+    status: 'active',
+  };
+  const date = '2026-10-25';
+  const state = { ...st, subscriptions: [sub] };
+  const h = harness(
+    '../app/src/views/Detail.tsx',
+    'Kpis',
+    {},
+    {
+      detailForecast,
+      detailHistoryEnd,
+      toBase: (s: AppState, v: number, c: string) => fx.toBaseOrNaN(s, v, c),
+    },
+  );
+  const nodes = h.render('Kpis', { sub, state, today: date, history: billing.chargesBetween(sub, sub.start, date, date) });
+  const text = JSON.stringify(nodes);
+  assert.ok(text.includes('detail.stats.perMonth'));
+  assert.ok(!text.includes('detail.kpi.expectedMonthly'));
+  assert.ok(text.includes('XCD'));
+});
+
+test('incomplete proxy net keeps known receipt and native debit without assigning a profit or loss color', () => {
+  const sub: Subscription = {
+    id: 'native-proxy-net',
+    name: 'Fictional incomplete net',
+    category: 'Tools',
+    tags: [],
+    price: 27,
+    currency: 'XCD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-10-01',
+    status: 'active',
+    proxy: { forName: 'Fictional', receipts: [{ id: 'r', date: '2026-10-01', amount: 8, currency: 'USD', periods: ['2026-10-01'] }] },
+  };
+  const state = { ...st, subscriptions: [sub] };
+  const list = proxy.proxyRows(state, sub, today);
+  const h = harness('../app/src/views/Proxy.tsx', 'OwedOrNet');
+  const nodes = h.render('OwedOrNet', { list, base: 'USD' });
+  assert.ok(!nodes.some((n) => n.props.className === 'metric-value loss' || n.props.className === 'metric-value done'));
+  assert.ok(JSON.stringify(nodes).includes('core.fxUnconverted'));
+  assert.equal(proxy.proxyTotals(list).partial.diff.unconverted.XCD, -27);
+});

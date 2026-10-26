@@ -1,4 +1,4 @@
-import { convertedTotal, emptyTotal, sumTotals } from './fx-total.ts';
+import { dueTotal, convertedTotal, emptyTotal, sumTotals } from './fx-total.ts';
 import { memberCashFlows, memberFlowValue } from './carpool.ts';
 // 人：合租成员与代付对象的统一名册。
 // 成员、代付上存 personId 指向名册；原来的称呼、联系方式保留为镜像副本，老数据和只认副本的地方（提醒邮件、导出）照常工作。
@@ -337,7 +337,7 @@ export function personAmounts(state: AppState, ledger: Pick<PersonLedger, 'items
     const m = i.member!;
     const due = memberDues(i.sub, today, collectCurrencyOf(state.settings), state).find((d) => d.member.id === m.id);
     return {
-      owed: due && !m.exempt ? convertedTotal(state, due.owed, due.currency, undefined, to) : emptyTotal(),
+      owed: due && !m.exempt ? dueTotal(state, due, undefined, to) : emptyTotal(),
       received: sumTotals(memberCashFlows(m).map((p) => convertedTotal(state, p.amount, p.currency, p.date, to))),
     };
   });

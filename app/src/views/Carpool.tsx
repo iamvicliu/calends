@@ -1,4 +1,4 @@
-import { amountTotal, formatTotal, sumTotals, totalNote } from '../../../shared/fx-total.ts';
+import { dueTotal, formatTotal, sumTotals, totalNote } from '../../../shared/fx-total.ts';
 import { FxAmount } from '../components/FxAmount.tsx';
 import { currentPhase } from '../../../shared/billing.ts';
 import { copyParts } from '../components/copy.tsx';
@@ -108,7 +108,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const seated = owned.reduce((a, s) => a + carpoolRoster(s, today).active.length, 0);
   const openSeats = owned.reduce((a, s) => a + carpoolRoster(s, today).vacancies, 0);
   const owedAll = all.flatMap(duesOf).filter((d) => d.periodsOwed > 0);
-  const owedPartial = sumTotals(owedAll.map((d) => amountTotal(d.owed, d.currency, toBase(state, d.owed, d.currency))));
+  const owedPartial = sumTotals(owedAll.map((d) => dueTotal(state, d, toBase(state, d.owed, d.currency))));
   const [convert, setConvert] = useState<Subscription | null>(null);
   const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; editId?: string } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）

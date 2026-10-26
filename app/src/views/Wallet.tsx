@@ -127,7 +127,7 @@ function projFoot(r: Runway, m: PaymentMethod): string | undefined {
 /** 卡面右下角的小字：设了余额的说还够扣几期，没设的显示卡号尾号 */
 function cardHint(m: PaymentMethod, r: Runway | undefined): string {
   if (r) {
-    if (r.incomplete) return totalNote(r.partial.topUp12m);
+    if (r.incomplete) return totalNote(r.partial.current.incomplete ? r.partial.current : r.partial.topUp12m);
     if (r.monthlyDrain <= 0) return t('wallet.card.noCharges');
     if (!r.shortfall) return t('wallet.card.enough');
     return r.coveredCharges ? t('wallet.card.periodsLeft', { count: r.coveredCharges }) : t('wallet.card.low');

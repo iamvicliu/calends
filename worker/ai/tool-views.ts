@@ -1,4 +1,4 @@
-import { amountTotal, chargesTotal, type FxTotal } from '../../shared/fx-total.ts';
+import { amountTotal, chargesTotal, dueTotal, type FxTotal } from '../../shared/fx-total.ts';
 import { personSummary } from '../../shared/avatar.ts';
 import {
   renewalDates,
@@ -16,6 +16,7 @@ import {
   memberUnpaidFrom,
   memberLedger,
   monthlyGross,
+  monthlyPriceTotal,
   myShareFactor,
   nextCharge,
   priceAt,
@@ -128,7 +129,7 @@ export function collectionSummary(st: AppState, s: Subscription, m: ShareMember,
     next_collection_date: next.from,
     overdue_days: due && due.periodsOwed > 0 && next.from < today ? diffDays(next.from, today) : 0,
     is_first_period: next.from <= first.until,
-    pending_amount: money(st, due?.owed ?? 0, due?.currency ?? next.currency),
+    pending_amount: { ...money(st, due?.owed ?? 0, due?.currency ?? next.currency), ...(due ? partialOut(dueTotal(st, due)) : {}) },
   };
 }
 
@@ -158,7 +159,7 @@ export function row(st: AppState, s: Subscription, today: string, out?: string) 
     kind: kindOf(s),
     price: money(st, next && (!cur.end || next < cur.end) ? priceAt(s, next) : cur.price, cur.currency, undefined, out),
     cycle: cycleLabel(cur.cycle),
-    monthly: money(st, monthly, cur.currency, undefined, out),
+    monthly: { ...money(st, monthly, cur.currency, undefined, out), ...partialOut(monthlyPriceTotal(st, s, today, out ?? st.settings.baseCurrency)) },
     my_share_factor: round(myShareFactor(cur, today)),
     next_charge: next ?? null,
     service_expires: renewalDates(s, today).serviceExpires ?? null,

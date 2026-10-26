@@ -82,7 +82,7 @@ export function OwedOrNet({ list, base, exact = false }: { list: Row[]; base: st
           ? t('proxy.page.perPeriod', { amount: formatTotal(scaleTotal(partial.diff, 1 / list.length), base, { direction: 1, average: true }) })
           : undefined)
       }
-      valueClassName={even ? '' : net > 0 ? 'done' : 'loss'}
+      valueClassName={partial.diff.incomplete || even ? '' : net > 0 ? 'done' : 'loss'}
     />
   );
 }

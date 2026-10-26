@@ -5637,7 +5637,7 @@
                       {
                         "type": "small",
                         "props": {},
-                        "children": ["detail.kpi.expectedMonthly"]
+                        "children": ["detail.stats.perMonth"]
                       },
                       {
                         "type": "[handler]",
@@ -5651,7 +5651,7 @@
                     "props": {
                       "className": "metric-value "
                     },
-                    "children": ["−XCD 20"]
+                    "children": ["−XCD 20.71"]
                   },
                   {
                     "type": "div",
@@ -5826,7 +5826,7 @@
                   {
                     "type": "small",
                     "props": {},
-                    "children": ["detail.kpi.expectedMonthly"]
+                    "children": ["detail.stats.perMonth"]
                   },
                   {
                     "type": "[handler]",
@@ -5840,7 +5840,7 @@
                 "props": {
                   "className": "metric-value "
                 },
-                "children": ["−XCD 20"]
+                "children": ["−XCD 20.71"]
               },
               {
                 "type": "div",
@@ -6168,7 +6168,7 @@
             {
               "type": "small",
               "props": {},
-              "children": ["detail.kpi.expectedMonthly"]
+              "children": ["detail.stats.perMonth"]
             },
             {
               "type": "[handler]",
@@ -6182,7 +6182,7 @@
           "props": {
             "className": "metric-value "
           },
-          "children": ["−XCD 20"]
+          "children": ["−XCD 20.71"]
         },
         {
           "type": "div",
@@ -6202,7 +6202,7 @@
         {
           "type": "small",
           "props": {},
-          "children": ["detail.kpi.expectedMonthly"]
+          "children": ["detail.stats.perMonth"]
         },
         {
           "type": "[handler]",
@@ -6214,7 +6214,7 @@
     {
       "type": "small",
       "props": {},
-      "children": ["detail.kpi.expectedMonthly"]
+      "children": ["detail.stats.perMonth"]
     },
     {
       "type": "[handler]",
@@ -6226,7 +6226,7 @@
       "props": {
         "className": "metric-value "
       },
-      "children": ["−XCD 20"]
+      "children": ["−XCD 20.71"]
     },
     {
       "type": "div",

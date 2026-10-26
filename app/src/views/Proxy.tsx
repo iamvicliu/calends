@@ -270,7 +270,7 @@ export function ProxyTable({
                   <small>—</small>
                 )}
               </span>
-              <span className={`lt-num ${Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'gain' : 'loss'}`}>
+              <span className={`lt-num ${proxyTotals(list).partial.diff.incomplete || Math.abs(diff) < 0.5 ? '' : diff > 0 ? 'gain' : 'loss'}`}>
                 {!done.length ? (
                   <small>—</small>
                 ) : Math.abs(diff) < 0.5 ? (
@@ -348,7 +348,7 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
           <Metric
             label={t('family.strip.profit')}
             value={Math.abs(sum.diff) < 0.5 ? t('proxy.table.even') : <FxAmount total={sum.partial.diff} ccy={base} direction={1} />}
-            valueStyle={{ color: Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}
+            valueStyle={{ color: sum.partial.diff.incomplete || Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}
             note={
               // 持平时平均每期是 ±0，改写口径说明，不出现 −¥0.00
               sum.partial.diff.incomplete

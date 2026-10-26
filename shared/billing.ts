@@ -1,4 +1,4 @@
-import { amountTotal, chargeTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
+import { amountTotal, convertedTotal, chargeTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
 import {
   LIFETIME_BILL_MONTHS,
   type AppState,
@@ -932,6 +932,13 @@ export function monthlyGross(s: Subscription, day?: string, fx: FxTable = FALLBA
   return (p * DAYS_PER_MONTH) / days;
 }
 
+/** monthlyGross's plan-price basis, retaining each concurrent phase's native currency. */
+export function monthlyPriceTotal(state: AppState, s: Subscription, day: string, to = state.settings.baseCurrency): FxTotal {
+  if (!s.phases?.length) return convertedTotal(state, monthlyGross(s, day), s.currency, undefined, to);
+  const cur = currentPhase(s, day);
+  return sumTotals([cur, ...activePhases(s, day).filter((v) => v.start !== cur.start)].map((v) => monthlyPriceTotal(state, v, day, to)));
+}
+
 /** 计入每月成本的阶段：day 当天在跑的各段（并行时都算），都不在跑时取最近的一段 */
 function billedPhases(s: Subscription, day: string): Subscription[] {
   const vs = activePhases(s, day);
@@ -1118,6 +1125,8 @@ export interface MemberDue {
   owed: number;
   currency: string;
   periodsOwed: number;
+  /** Native unpaid amounts when a fee-currency change cannot be consolidated. */
+  originals?: Record<string, number>;
 }
 
 export { LIFETIME_BILL_MONTHS };
@@ -1254,9 +1263,11 @@ export function memberDues(s: Subscription, today: string, collectCurrency: stri
     const until = m.left && m.left <= stop ? addDays(m.left, -1) : stop;
     let owed = 0;
     let periodsOwed = 0;
+    const originals: Record<string, number> = {};
     if (!m.exempt) {
       // 欠着的期：已经开始、没收也没免的；中间收过的期不算，可以不连续
       for (const period of memberLedger(s, m, until, collectCurrency).periods.filter((p) => p.status === 'due')) {
+        originals[period.currency] = (originals[period.currency] ?? 0) + period.due;
         if (period.due !== 0 && period.currency !== currency && !fxState) throw new Error('FX state required for member fee currency changes');
         owed +=
           period.due === 0 || period.currency === currency
@@ -1265,7 +1276,7 @@ export function memberDues(s: Subscription, today: string, collectCurrency: stri
         periodsOwed++;
       }
     }
-    return { sub: s, member: m, dueFor, owed: Math.round(owed * 100) / 100, currency, periodsOwed };
+    return { sub: s, member: m, dueFor, owed: Math.round(owed * 100) / 100, currency, periodsOwed, ...(!Number.isFinite(owed) ? { originals } : {}) };
   });
 }
 

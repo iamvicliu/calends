@@ -93,3 +93,16 @@ export function totalsNote(rows: Array<[string, FxTotal | undefined]>): string {
   });
   return parts.length ? t('core.fxUnconverted', { amount: parts.join('\n') }) : '';
 }
+
+/** A fee-currency change can make the intermediate owed amount unavailable; retain each unpaid period's native amount. */
+export function dueTotal(
+  state: AppState,
+  due: { owed: number; currency: string; originals?: Record<string, number> },
+  converted?: number,
+  to = state.settings.baseCurrency,
+  date?: string,
+): FxTotal {
+  return due.originals
+    ? sumTotals(Object.entries(due.originals).map(([c, v]) => convertedTotal(state, v, c, date, to)))
+    : amountTotal(due.owed, due.currency, converted ?? toBaseOrNaN(state, due.owed, due.currency, date, to));
+}

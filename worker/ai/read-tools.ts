@@ -1,4 +1,4 @@
-import { amountTotal, chargesTotal, emptyTotal, sumTotals, type FxTotal } from '../../shared/fx-total.ts';
+import { amountTotal, chargesTotal, dueTotal, emptyTotal, sumTotals, type FxTotal } from '../../shared/fx-total.ts';
 import { partialOut } from './tool-views.ts';
 import {
   renewalDates,
@@ -13,6 +13,7 @@ import {
   memberDues,
   collectionAnchor,
   memberLedger,
+  monthlyPriceTotal,
   myShareFactor,
   phaseSubs,
   runwayFor,
@@ -156,7 +157,18 @@ export const list_subscriptions: Tool = {
     return {
       count: rows.length,
       ...gaps.out(),
-      ...partialOut(sumTotals(rows.map((r) => amountTotal(r.monthly.amount ?? NaN, r.monthly.currency, r.monthly.converted ?? NaN)))),
+      ...partialOut(
+        sumTotals(
+          rows.map((r) =>
+            monthlyPriceTotal(
+              st,
+              st.subscriptions.find((s) => s.id === r.id)!,
+              today,
+              out ?? st.settings.baseCurrency,
+            ),
+          ),
+        ),
+      ),
       items: rows,
     };
   },
@@ -263,7 +275,11 @@ export const get_subscription: Tool = {
             })),
             dues: memberDues(s, today, collectCcy(st), st)
               .filter((d) => d.periodsOwed > 0)
-              .map((d) => ({ member: d.member.name, periods_owed: d.periodsOwed, owed: money(st, d.owed, d.currency, undefined, out) })),
+              .map((d) => ({
+                member: d.member.name,
+                periods_owed: d.periodsOwed,
+                owed: { ...money(st, d.owed, d.currency, undefined, out), ...partialOut(dueTotal(st, d, undefined, out)) },
+              })),
           }
         : null,
       proxy: px
@@ -433,21 +449,32 @@ export const get_trends: Tool = {
     if (metric === 'mrr')
       return {
         currency: st.settings.baseCurrency,
-        points: mrrSeries(st, today, Number(a.months_back ?? 12)).map((p) => ({ ...roundAll(p), ...partialOut(p.partial) })),
+        points: mrrSeries(st, today, Number(a.months_back ?? 12)).map(({ partial, ...p }) => ({
+          ...roundAll(p),
+          ...partialOut(partial),
+          incomplete: partial.incomplete,
+          fx_missing: Object.keys(partial.unconverted),
+        })),
       };
     if (metric === 'cash_vs_accrual')
       return {
         currency: st.settings.baseCurrency,
-        points: cashVsAccrual(st, today, Number(a.months_back ?? 12), Number(a.months_forward ?? 3)).map((p) => ({
+        points: cashVsAccrual(st, today, Number(a.months_back ?? 12), Number(a.months_forward ?? 3)).map(({ partial, ...p }) => ({
           ...roundAll(p),
-          ...partialOut(p.partial.cash),
-          totals: { cash: partialOut(p.partial.cash), accrual: partialOut(p.partial.accrual) },
+          cash: partial.cash.incomplete ? null : fin(p.cash),
+          accrual: partial.accrual.incomplete ? null : fin(p.accrual),
+          ...partialOut(partial.cash),
+          incomplete: partial.cash.incomplete || partial.accrual.incomplete,
+          fx_missing: [...new Set([...Object.keys(partial.cash.unconverted), ...Object.keys(partial.accrual.unconverted)])],
+          totals: { cash: partialOut(partial.cash), accrual: partialOut(partial.accrual) },
         })),
       };
     const mv = movement(st, date(a.from, 'from', addMonths(today, -1)), date(a.to, 'to', today));
     return {
       currency: st.settings.baseCurrency,
-      ...roundAll({ ...mv, items: undefined }),
+      ...roundAll({ ...mv, items: undefined, partial: undefined }),
+      ...partialOut(mv.partial.to),
+      totals: { from: partialOut(mv.partial.from), to: partialOut(mv.partial.to) },
       items: mv.items.map((i) => ({ name: i.sub.name, kind: i.kind, delta: fin(i.delta) })),
     };
   },
@@ -484,6 +511,8 @@ export const list_payment_methods: Tool = {
             .map((s) => s.name),
           runway: r
             ? {
+                ...partialOut(r.partial.monthlyDrain),
+                totals: { current: partialOut(r.partial.current), monthly_drain: partialOut(r.partial.monthlyDrain), topup: partialOut(r.partial.topUp12m) },
                 monthly_drain: fin(r.monthlyDrain),
                 // 余额估算或月耗用到了折算不了的扣款：数字为 null，不当成 0
                 incomplete: !Number.isFinite(r.current) || !Number.isFinite(r.monthlyDrain) || ('incomplete' in r && !!r.incomplete),
@@ -492,7 +521,10 @@ export const list_payment_methods: Tool = {
                 shortfall: r.shortfall ? { date: r.shortfall.date, name: r.shortfall.sub.name, amount: fin(r.shortfall.amount) } : null,
               }
             : null,
-          topup: p && (p.need > 0 || !Number.isFinite(p.need)) ? { need: fin(p.need), min_need: fin(p.minNeed), deadline: p.deadline ?? null } : null,
+          topup:
+            p && (p.need > 0 || !Number.isFinite(p.need))
+              ? { ...partialOut(p.partial.need), need: fin(p.need), min_need: fin(p.minNeed), deadline: p.deadline ?? null }
+              : null,
         };
       }),
     };
@@ -549,7 +581,7 @@ export const get_receivables: Tool = {
                 contact: d.member.contact ?? null,
                 periods_owed: d.periodsOwed,
                 first_unpaid: d.dueFor,
-                owed: money(st, d.owed, d.currency, undefined, out),
+                owed: { ...money(st, d.owed, d.currency, undefined, out), ...partialOut(dueTotal(st, d, undefined, out)) },
               })),
           );
     const proxy =
@@ -571,8 +603,12 @@ export const get_receivables: Tool = {
             );
     const gaps = fxGaps();
     const total =
-      share.reduce((t, x) => t + (gaps.note(x.owed.converted, x.owed.currency) ?? NaN), 0) +
-      proxy.reduce((t, x) => t + (gaps.note(x.charged.converted, x.charged.currency) ?? NaN), 0);
+      share.reduce((t, x) => {
+        const currencies = Object.keys(x.owed.unconverted);
+        if (x.owed.converted == null && currencies.length) currencies.forEach((c) => gaps.note(null, c));
+        else gaps.note(x.owed.converted, x.owed.currency);
+        return t + (x.owed.converted ?? NaN);
+      }, 0) + proxy.reduce((t, x) => t + (gaps.note(x.charged.converted, x.charged.currency) ?? NaN), 0);
     // 按人汇总：只列现在欠钱的人，金额与下面的明细同源（memberDues / 代付逐期对账）
     const by_person = peopleLedger(st, today)
       .map((l) => ({ ...l, items: l.items.filter((i) => i.periodsOwed > 0 && (kind === 'all' || i.kind === kind)) }))
@@ -586,7 +622,10 @@ export const get_receivables: Tool = {
       ...gaps.out(),
       ...partialOut(
         sumTotals([
-          ...share.map((x) => amountTotal(x.owed.amount ?? NaN, x.owed.currency, x.owed.converted ?? NaN)),
+          ...share.flatMap((x) => [
+            amountTotal(x.owed.known_total, out, x.owed.known_total),
+            ...Object.entries(x.owed.unconverted).map(([ccy, value]) => amountTotal(value, ccy, NaN)),
+          ]),
           ...proxy.map((x) => amountTotal(x.charged.amount ?? NaN, x.charged.currency, x.charged.converted ?? NaN)),
         ]),
       ),
@@ -631,9 +670,11 @@ export const get_insights: Tool = {
         charges: r.charges,
         per_day: fin(r.perDay),
         currencies: r.currencies,
-        top: r.items.slice(0, 10).map((x) => ({ name: x.sub.name, total: fin(x.sum) })),
+        top: r.items.slice(0, 10).map((x) => ({ name: x.sub.name, total: fin(x.sum), ...partialOut(r.partial.bySub[x.sub.id]) })),
         longest: r.longest ? { name: r.longest.sub.name, days: r.longest.days } : null,
-        busiest_month: r.busiestMonth ? { month: r.busiestMonth.month, total: fin(r.busiestMonth.sum) } : null,
+        busiest_month: r.busiestMonth
+          ? { month: r.busiestMonth.month, total: fin(r.busiestMonth.sum), ...partialOut(r.partial.byMonth[r.busiestMonth.month]) }
+          : null,
         new: r.newSubs.map((s) => s.name),
         ended: r.ended.map((s) => s.name),
       };
@@ -647,7 +688,7 @@ export const get_insights: Tool = {
         unused_total: Number.isFinite(p.unusedTotal) ? round(p.unusedTotal) : null,
         unused_incomplete: p.unusedIncomplete,
         unused_items: p.unusedItems.map((i) => ({ name: i.sub.name, value: Number.isFinite(i.value) ? round(i.value) : null, until: i.until })),
-        items: p.items.map((i) => ({ name: i.sub.name, value: fin(i.value), until: i.until })),
+        items: p.items.map((i) => ({ name: i.sub.name, value: i.partial.incomplete ? null : fin(i.value), until: i.until, ...partialOut(i.partial) })),
       };
     }
     if (sec === 'stop_losses') {
@@ -688,7 +729,13 @@ export const get_insights: Tool = {
       total: c.partial.incomplete ? null : fin(c.total),
       ...partialOut(c.partial),
       incomplete: c.partial.incomplete,
-      items: c.items.map((i) => ({ name: i.sub.name, saved: fin(i.saved), since: i.since, monthly: fin(i.monthly) })),
+      items: c.items.map((i) => ({
+        name: i.sub.name,
+        saved: i.partial.incomplete ? null : fin(i.saved),
+        since: i.since,
+        monthly: i.partial.incomplete ? null : fin(i.monthly),
+        ...partialOut(i.partial),
+      })),
     };
   },
 };

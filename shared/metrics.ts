@@ -543,13 +543,15 @@ export function topUpPlan(state: AppState, today: string, months = 6): TopUp[] {
     }
     const byCard = ['appstore', 'googleplay', 'giftcard', 'phone'].includes(m.kind);
     const denoms = DENOMS[m.currency] ?? [Math.pow(10, Math.max(1, Math.round(Math.log10(Math.max(10, need)))))];
+    const duePartial = sumTotals(r.forecast.filter((c) => c.date <= horizon).map((c) => c.partial));
+    const needPartial = sumTotals([duePartial, scaleTotal(r.partial.current, -1)]);
     out.push({
       incomplete: r.incomplete,
       partial: {
         current: r.partial.current,
         monthly: r.partial.monthlyDrain,
-        due: sumTotals(r.forecast.filter((c) => c.date <= horizon).map((c) => c.partial)),
-        need: sumTotals([sumTotals(r.forecast.filter((c) => c.date <= horizon).map((c) => c.partial)), scaleTotal(r.partial.current, -1)]),
+        due: duePartial,
+        need: { ...needPartial, value: Math.max(0, needPartial.value), known: duePartial.known },
       },
       method: m,
       current: r.current,

@@ -1,4 +1,4 @@
-import { chargesTotal, convertedTotal, formatTotal, sumTotals, totalNote } from '../../../../shared/fx-total.ts';
+import { chargesTotal, convertedTotal, dueTotal, formatTotal, sumTotals, totalNote } from '../../../../shared/fx-total.ts';
 import { currentPhase } from '../../../../shared/billing.ts';
 import { CopyImageButton } from '../../components/CopyImageButton.tsx';
 import { DetailHead, DetailSheet, Panel } from '../../components/DetailKit.tsx';
@@ -64,7 +64,7 @@ export function CarSheet({
   const roster = carpoolRoster(s, today);
   const dues = memberDues(s, today, collectCurrencyOf(state.settings), state).filter((d) => d.periodsOwed > 0);
   const owe = dues.length;
-  const owePartial = sumTotals(dues.map((d) => convertedTotal(state, d.owed, d.currency)));
+  const owePartial = sumTotals(dues.map((d) => dueTotal(state, d)));
   const oweSum = owePartial.incomplete ? NaN : owePartial.value;
   const hasPending = oweSum > 0 || !Number.isFinite(oweSum);
   const rule = carRule(state, s, today);

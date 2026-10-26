@@ -1,4 +1,4 @@
-import { amountTotal, chargeTotal, convertedTotal, emptyTotal, scaleTotal, sumTotals, totalRatio, type FxTotal } from './fx-total.ts';
+import { amountTotal, chargeTotal, convertedTotal, dueTotal, emptyTotal, scaleTotal, sumTotals, totalRatio, type FxTotal } from './fx-total.ts';
 import { contributionTotal, mrrTotal } from './metrics.ts';
 import { memberCashFlows, memberFlowValue } from './carpool.ts';
 import { addDays, addMonths, chargesBetween, collectCurrencyOf, memberDues, myShareFactor, phaseSubs, totals, type Charge, chargeSources } from './billing.ts';
@@ -216,12 +216,12 @@ function details(
         .filter((p) => p.date >= sharingFrom && p.date <= sharingTo && p.date <= today)
         .reduce((a, p) => a + memberFlowValue(state, p), 0);
       // Only still-unpaid periods originating in this window, not older arrears.
-      const before = new Map(memberDues(sub, addDays(sharingFrom, -1), collectCurrencyOf(state.settings), state).map((d) => [d.member.id, d.owed]));
+      const before = new Map(memberDues(sub, addDays(sharingFrom, -1), collectCurrencyOf(state.settings), state).map((d) => [d.member.id, d]));
       const owed = memberDues(sub, sharingTo, collectCurrencyOf(state.settings), state).reduce(
         (a, d) =>
           a +
-          (Number.isFinite(d.owed) && Number.isFinite(before.get(d.member.id) ?? 0)
-            ? toBaseOrNaN(state, Math.max(0, d.owed - (before.get(d.member.id) ?? 0)), d.currency, sharingTo > today ? undefined : sharingTo)
+          (Number.isFinite(d.owed) && Number.isFinite(before.get(d.member.id)?.owed ?? 0)
+            ? toBaseOrNaN(state, Math.max(0, d.owed - (before.get(d.member.id)?.owed ?? 0)), d.currency, sharingTo > today ? undefined : sharingTo)
             : NaN),
         0,
       );
@@ -233,9 +233,21 @@ function details(
             .map((p) => convertedTotal(state, p.amount, p.currency, p.date)),
         ),
         owed: sumTotals(
-          memberDues(sub, sharingTo, collectCurrencyOf(state.settings), state).map((d) =>
-            convertedTotal(state, Math.max(0, d.owed - (before.get(d.member.id) ?? 0)), d.currency, sharingTo > today ? undefined : sharingTo),
-          ),
+          memberDues(sub, sharingTo, collectCurrencyOf(state.settings), state).map((d) => {
+            const prior = before.get(d.member.id);
+            const date = sharingTo > today ? undefined : sharingTo;
+            if (Number.isFinite(d.owed) && (!prior || Number.isFinite(prior.owed)))
+              return convertedTotal(state, Math.max(0, d.owed - (prior?.owed ?? 0)), d.currency, date);
+            const change = sumTotals([
+              dueTotal(state, d, undefined, state.settings.baseCurrency, date),
+              scaleTotal(prior ? dueTotal(state, prior, undefined, state.settings.baseCurrency, date) : emptyTotal(), -1),
+            ]);
+            return {
+              ...change,
+              value: Math.max(0, change.value),
+              unconverted: Object.fromEntries(Object.entries(change.unconverted).map(([ccy, value]) => [ccy, Math.max(0, value)])),
+            };
+          }),
         ),
       };
       return { sub, received, owed, partial };

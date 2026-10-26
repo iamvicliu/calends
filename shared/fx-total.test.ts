@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   amountTotal,
   chargesTotal,
+  dueTotal,
   convertedTotal,
   formatTotal,
   formatUnconverted,
@@ -13,8 +14,8 @@ import {
   totalsNote,
   totalRatio,
 } from './fx-total.ts';
-import { FALLBACK_FX, totals, runwayFor } from './billing.ts';
-import { contributionTotal, cashVsAccrual, mrrTotal, yearReview } from './metrics.ts';
+import { FALLBACK_FX, totals, runwayFor, memberDues, monthlyPriceTotal } from './billing.ts';
+import { contributionTotal, cashVsAccrual, mrrTotal, yearReview, topUpPlan } from './metrics.ts';
 import { netCost } from './transfers.ts';
 import { monthReport, scopeReport } from './scope-report.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
@@ -102,6 +103,9 @@ test('parallel phases keep each currency; reports and year review preserve missi
   ];
   const st = state([s]);
   assert.deepEqual(contributionTotal(st, s, today).unconverted, { XCD: 27 });
+  const price = monthlyPriceTotal(st, { ...s, phases: s.phases.map((p, i) => (i === 0 ? { ...p, end: '2026-11-01' } : p)) }, today);
+  assert.equal(price.value, 10);
+  assert.deepEqual(price.unconverted, { XCD: 27 });
   const report = monthReport(st, '2026-10', today);
   const h = report.blocks.find((b) => b.type === 'headline');
   assert.ok(h && h.mode === 'month');
@@ -138,4 +142,58 @@ test('one note retains different periods and deduplicates repeated derived measu
   assert.match(note, /Paid this year: XCD 270.00/);
   assert.ok(!note.includes('Annual duplicate'));
   assert.ok(!note.includes('Known'));
+});
+
+test('unpaid periods retain native currencies when the fee changes into a currency without FX', () => {
+  const s = sub('fee-history');
+  s.start = '2026-08-01';
+  s.share = {
+    role: 'owner',
+    seats: 4,
+    since: s.start,
+    members: [
+      {
+        id: 'm',
+        name: 'Fictional',
+        joined: s.start,
+        share: 5,
+        fee: 7,
+        feeCurrency: 'XCD',
+        billEvery: 1,
+        feeHistory: [
+          { from: '2026-08-01', fee: 5, currency: 'USD', billEvery: 1, share: 5 },
+          { from: '2026-09-01', fee: 7, currency: 'XCD', billEvery: 1, share: 5 },
+        ],
+      },
+    ],
+  };
+  const st = state([s]);
+  const due = memberDues(s, today, 'USD', st)[0];
+  assert.ok(Number.isNaN(due.owed));
+  const total = dueTotal(st, due);
+  assert.equal(total.value, 5);
+  assert.equal(total.incomplete, true);
+  assert.deepEqual(total.unconverted, { XCD: 14 });
+  const sharing = monthReport(st, '2026-10', today).blocks.find((b) => b.type === 'sharing');
+  assert.ok(sharing);
+  assert.equal(sharing.partial!.owed.unconverted.XCD, 7);
+});
+
+test('top-up plans retain unknown native debits and clamp only the known funding requirement', () => {
+  const unknown = { ...sub('unknown', 'XCD', 27), methodId: 'm', start: '2026-10-26' };
+  const known = { ...sub('known', 'USD', 150), methodId: 'm', start: '2026-10-26' };
+  const method = { id: 'm', name: 'Fictional balance', kind: 'giftcard' as const, currency: 'USD', balance: 100, balanceAsOf: today };
+  for (const [subs, knownPart] of [
+    [[unknown], false],
+    [[unknown, known], true],
+  ] as const) {
+    const st = { ...state([...subs]), methods: [method] };
+    const p = topUpPlan(st, today, 3)[0];
+    assert.equal(p.incomplete, true);
+    assert.ok(Number.isNaN(p.need));
+    assert.equal(p.partial.need.known, knownPart);
+    assert.ok(p.partial.need.value >= 0);
+    assert.ok(p.partial.need.unconverted.XCD > 0);
+    if (!knownPart) assert.ok(!formatTotal(p.partial.need, 'USD').includes('$0'));
+  }
 });

@@ -59,7 +59,7 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   // 订了不到一个月（或只有一笔）时，「实际每月」没有意义：改用标价折算的预计每月
   // An incomplete imported history cannot establish an average over the original service lifetime.
-  const young = !!sub.estimateFrom || active < 30 || (per.length < 2 && !transferred);
+  const young = !!sub.estimateFrom || active < 30 || (regular(history).length < 2 && !transferred);
   const perMonth = young
     ? toBase(state, monthlyGross(currentPhase(sub, today), today, state.fx), currentPhase(sub, today).currency)
     : total / Math.max(1, active / DAYS_PER_MONTH);

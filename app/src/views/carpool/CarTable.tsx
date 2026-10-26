@@ -1,4 +1,4 @@
-import { amountTotal, formatTotal, sumTotals } from '../../../../shared/fx-total.ts';
+import { dueTotal, formatTotal, sumTotals } from '../../../../shared/fx-total.ts';
 import { ShareAvatars } from '../../components/ShareAvatars.tsx';
 import { addDays, diffDays, convert, type MemberDue, nextCharge } from '../../../../shared/billing.ts';
 import { cnDate, cnDateFull, money, relDays } from '../../../../shared/format.ts';
@@ -95,7 +95,7 @@ export function CarTable({
                 ) : dues.length ? (
                   <StatusPill tone="owe">
                     {t('family.pool.owedAmount', {
-                      amount: formatTotal(sumTotals(dues.map((d) => amountTotal(d.owed, d.currency, convert(d.owed, d.currency, base, state.fx)))), base, {
+                      amount: formatTotal(sumTotals(dues.map((d) => dueTotal(state, d, convert(d.owed, d.currency, base, state.fx)))), base, {
                         compact: true,
                       }),
                     })}
@@ -129,13 +129,13 @@ export function CarTable({
               </span>
               {/* 当年盈亏：今年的成本对比成员今年的收入，小字是收入；停止与买断的车同样有今年的账 */}
               <span className="lt-num">
-                <span className={Math.abs(year.net) < 0.5 ? undefined : year.net > 0 ? 'gain' : 'loss'}>
+                <span className={year.partial.net.incomplete || Math.abs(year.net) < 0.5 ? undefined : year.net > 0 ? 'gain' : 'loss'}>
                   {formatTotal(year.partial.net, base, { direction: 1, compact: true })}
                 </span>
                 <small>{t('family.pool.incomeShort', { amount: formatTotal(year.partial.income, base, { direction: 1, compact: true }) })}</small>
               </span>
               {/* 累计盈亏：发起至今收回减付出，与代付的盈亏同一口径；与左边的当年盈亏成对 */}
-              <span className={`lt-num ${Math.abs(book.net) < 0.5 ? '' : book.net < 0 ? 'gain' : 'loss'}`}>
+              <span className={`lt-num ${book.partial.net.incomplete || Math.abs(book.net) < 0.5 ? '' : book.net < 0 ? 'gain' : 'loss'}`}>
                 {Math.abs(book.net) < 0.5 ? t('proxy.table.even') : formatTotal(book.partial.net, base, { direction: -1, compact: true })}
               </span>
             </button>

@@ -105,11 +105,11 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             />
             <OwedOrNet list={list} base={base} exact />
             {/* 还有待收时，已收各期的汇差单列；全部结清后第三格就是盈亏，不再重复 */}
-            {open.length > 0 && Math.abs(diff) >= 0.5 && (
+            {open.length > 0 && (Math.abs(diff) >= 0.5 || partial.diff.incomplete) && (
               <Metric
                 label={t('family.strip.profit')}
                 value={formatTotal(partial.diff, base, { direction: 1, main: true })}
-                valueClassName={diff > 0 ? 'done' : 'loss'}
+                valueClassName={partial.diff.incomplete ? undefined : diff > 0 ? 'done' : 'loss'}
                 note={
                   totalNote(partial.diff) ||
                   t('proxy.page.perPeriod', { amount: formatTotal(scaleTotal(partial.diff, 1 / done.length), base, { direction: 1, average: true }) })
@@ -172,7 +172,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                         ? t('proxy.table.even')
                         : formatTotal(proxyTotals(settled).partial.diff, base, { direction: 1 })
                       : '—',
-                    baseClass: !settled.length || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
+                    baseClass: !settled.length || !Number.isFinite(d) || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
                   };
                 }}
                 row={(r) => {
@@ -189,7 +189,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                     extra: flow(-r.chargedBase, base),
                     orig: r.receivedBase == null ? <em className="todo">{t('proxy.table.record')}</em> : <ReceivedCell r={r} base={base} brief />,
                     base: d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base),
-                    baseClass: d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
+                    baseClass: d == null || !Number.isFinite(d) || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
                   };
                 }}
                 rowKey={(r) => r.date}
@@ -370,10 +370,12 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
           foot={
             diff == null || row.status === 'waived'
               ? undefined
-              : t(Math.abs(diff) < 0.5 ? 'proxy.entry.receivedEven' : diff > 0 ? 'proxy.entry.receivedMore' : 'proxy.entry.receivedLess', {
-                  amount: flow(row.receivedBase!, base),
-                  diff: money(Math.abs(diff), base),
-                })
+              : !Number.isFinite(diff)
+                ? t('core.fxIncomplete')
+                : t(Math.abs(diff) < 0.5 ? 'proxy.entry.receivedEven' : diff > 0 ? 'proxy.entry.receivedMore' : 'proxy.entry.receivedLess', {
+                    amount: flow(row.receivedBase!, base),
+                    diff: money(Math.abs(diff), base),
+                  })
           }
         >
           {rec ? (
