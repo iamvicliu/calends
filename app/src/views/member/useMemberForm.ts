@@ -22,6 +22,7 @@ import {
   updateMemberLeave,
   memberCashFlows,
   memberFlowValue,
+  waiveExemptSpan,
 } from '../../../../shared/carpool.ts';
 
 import { t } from '../../../../shared/i18n.ts';
@@ -176,7 +177,7 @@ export function useMemberForm({
         const base: ShareMember = { ...next, name: f.name.trim(), account: f.account?.trim() || undefined, personId: link.id };
         // 收款、免收以账本里最新的为准（期间可能在收款表单里记过），只叠加首笔收款
         const opened = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
-        const out: ShareMember =
+        const added: ShareMember =
           isNew && firstPay
             ? {
                 ...opened,
@@ -188,6 +189,8 @@ export function useMemberForm({
                 ),
               }
             : opened;
+        // 取消不分摊：生效日之前没结清的期记成免收，不补收不分摊那段时间
+        const out = !isNew && member?.exempt && !added.exempt ? waiveExemptSpan(current, added, feeFrom, today, collectCcy) : added;
         await saveSub({
           ...current,
           share: {

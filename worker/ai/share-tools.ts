@@ -15,6 +15,7 @@ import type { Receipt, ShareMember, Subscription } from '../../shared/types.ts';
 import {
   applyCarRule,
   moveCollectFrom,
+  waiveExemptSpan,
   suggestedLeaveRefund,
   updateMemberLeave,
   carLedger,
@@ -341,6 +342,8 @@ export const save_share_member: Tool = {
       const r = memberFee(st, s, m, from);
       m = { ...m, custom: sameRule({ fee: r.amount, currency: r.currency, billEvery: memberBillMonths(s, m, from) }, rule) ? undefined : true };
     }
+    // 取消不分摊：fee_from（缺省今天）之前没结清的期记成免收，与网页成员表单同一个 waiveExemptSpan
+    if (old?.exempt && !m.exempt) m = waiveExemptSpan(s, m, date(a.fee_from, 'fee_from', today), today, collectCcy(st));
     // 每期份额（订阅币种）由收费标准换算；不分摊的为 0
     m.share = m.exempt ? 0 : m.fee != null ? shareFromFee(st, s, m.fee, m.feeCurrency ?? ccy, memberBillMonths(s, m, today)) : m.share;
     // 期初已付至：这天及之前的期算开始记账前就收清了

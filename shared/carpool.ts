@@ -20,11 +20,12 @@ import {
   memberSince,
   memberPeriods,
   isStopped,
+  uid,
 } from './billing.ts';
 import { chargeBaseOrNaN, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { yearCost } from './metrics.ts';
 import { currencyDecimals } from './format.ts';
-import { isSettled, type Period } from './receivables.ts';
+import { isSettled, putRecord, type Period } from './receivables.ts';
 import type { AppState, CarRule, MemberFeePoint, ShareMember, Subscription } from './types.ts';
 
 /** 成员实际交来、退回的钱：期初结清没有金额，不算；退款作为负数。不改变各期是否结清 */
@@ -299,6 +300,18 @@ export function followsCar(state: AppState, s: Subscription, m: ShareMember, tod
   if (s.share?.rule) return true;
   const r = memberRate(s, m, today, collectCurrencyOf(state.settings));
   return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, carRule(state, s, today));
+}
+
+/**
+ * 取消「不分摊」：不分摊那段时间的期本来不该收。「不分摊」没有生效日，取消时把 from 之前还没结清的期记一笔免收，
+ * 免得一取消就把不分摊期间全算成欠款；已经收过、免过的期不动
+ */
+export function waiveExemptSpan(s: Subscription, m: ShareMember, from: string, today: string, collectCurrency: string): ShareMember {
+  const keys = memberLedger(s, m, today, collectCurrency, from)
+    .periods.filter((p) => p.from < from && !isSettled(p) && p.due > 0)
+    .map((p) => p.key);
+  if (!keys.length) return m;
+  return { ...m, ...putRecord(m, 'waiver', { id: uid(), date: today, periods: keys }, memberPeriods(s, m, from, collectCurrency)) };
 }
 
 /**

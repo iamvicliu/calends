@@ -462,3 +462,41 @@ test('首期内退出：按截短后的应收收过就不建议退款、也不�
   const full = base(31);
   assert.equal(suggestedLeaveRefund(state, full, full.share.members[0]).amount, 21);
 });
+
+test('取消不分摊：生效日前没结清的期记成免收，不补收不分摊期间；之后照常应收', async () => {
+  const { waiveExemptSpan } = await import('./carpool.ts');
+  const months = ['2026-01-01', '2026-02-01'];
+  const s: Subscription = {
+    id: 's',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 30,
+    currency: 'CNY',
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 3, collectFrom: '2026-01-01', members: [] },
+  };
+  const m = {
+    id: 'm',
+    name: 'M',
+    fee: 10,
+    feeCurrency: 'CNY',
+    billEvery: 1,
+    joined: '2026-01-01',
+    receipts: months.map((p, i) => ({ id: `r${i}`, date: p, amount: 10, currency: 'CNY', periods: [p] })),
+  };
+  s.share!.members = [m];
+  const back = waiveExemptSpan(s, m, '2026-05-01', '2026-05-10', 'CNY');
+  assert.deepEqual(
+    back.waivers?.map((w) => w.periods),
+    [['2026-03-01', '2026-04-01']],
+  );
+  const after = { ...s, share: { ...s.share!, members: [back] } };
+  const due = memberDues(after, '2026-05-10', 'CNY')[0];
+  assert.equal(due.owed, 10);
+  assert.equal(due.periodsOwed, 1);
+  // 没有要免的期时原样返回
+  assert.equal(waiveExemptSpan(s, m, '2026-03-01', '2026-03-10', 'CNY'), m);
+});
