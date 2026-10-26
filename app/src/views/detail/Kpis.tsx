@@ -126,7 +126,9 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
           value={sub.estimateFrom && !history.length && !transferred ? '—' : cumulative}
           note={
             cost.incomplete
-              ? totalNote(cost.partial)
+              ? cost.partial.known
+                ? totalNote(cost.partial)
+                : t('detail.stats.count', { count: history.length })
               : sub.estimateFrom
                 ? t('settings.import.history')
                 : transferred
@@ -148,7 +150,12 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
         note={
           !undated
             ? monthlyPartial.incomplete
-              ? `${totalNote(monthlyPartial)}\n${t('detail.kpi.perDay', { amount: formatTotal(scaleTotal(monthlyPartial, 1 / DAYS_PER_MONTH), base, { direction: -1, average: true }) })}`
+              ? [
+                  monthlyPartial.known || Object.keys(monthlyPartial.unconverted).length > 1 ? totalNote(monthlyPartial) : '',
+                  t('detail.kpi.perDay', { amount: formatTotal(scaleTotal(monthlyPartial, 1 / DAYS_PER_MONTH), base, { direction: -1, average: true }) }),
+                ]
+                  .filter(Boolean)
+                  .join('\n')
               : Number.isFinite(monthly)
                 ? t('detail.kpi.perDay', { amount: flow(-monthly / DAYS_PER_MONTH, base) })
                 : undefined

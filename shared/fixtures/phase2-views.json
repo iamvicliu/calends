@@ -5617,7 +5617,7 @@
                     "props": {
                       "className": "metric-note"
                     },
-                    "children": ["core.fxUnconverted"]
+                    "children": ["detail.stats.count"]
                   }
                 ]
               },
@@ -5658,7 +5658,7 @@
                     "props": {
                       "className": "metric-note"
                     },
-                    "children": ["core.fxUnconverted\ndetail.kpi.perDay"]
+                    "children": ["detail.kpi.perDay"]
                   }
                 ]
               }
@@ -5806,7 +5806,7 @@
                 "props": {
                   "className": "metric-note"
                 },
-                "children": ["core.fxUnconverted"]
+                "children": ["detail.stats.count"]
               }
             ]
           },
@@ -5847,7 +5847,7 @@
                 "props": {
                   "className": "metric-note"
                 },
-                "children": ["core.fxUnconverted\ndetail.kpi.perDay"]
+                "children": ["detail.kpi.perDay"]
               }
             ]
           }
@@ -6115,7 +6115,7 @@
           "props": {
             "className": "metric-note"
           },
-          "children": ["core.fxUnconverted"]
+          "children": ["detail.stats.count"]
         }
       ]
     },
@@ -6150,7 +6150,7 @@
       "props": {
         "className": "metric-note"
       },
-      "children": ["core.fxUnconverted"]
+      "children": ["detail.stats.count"]
     },
     {
       "type": "div",
@@ -6189,7 +6189,7 @@
           "props": {
             "className": "metric-note"
           },
-          "children": ["core.fxUnconverted\ndetail.kpi.perDay"]
+          "children": ["detail.kpi.perDay"]
         }
       ]
     },
@@ -6233,7 +6233,7 @@
       "props": {
         "className": "metric-note"
       },
-      "children": ["core.fxUnconverted\ndetail.kpi.perDay"]
+      "children": ["detail.kpi.perDay"]
     }
   ],
   "missing-fx/CarFacts": [

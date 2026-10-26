@@ -17,7 +17,7 @@ import {
   type Charge,
 } from '../../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money, weekdayOf } from '../../../../shared/format.ts';
-import { chargeValue, convertOn, rateOn } from '../../../../shared/fx.ts';
+import { chargeBaseOrNaN, chargeValue, convertOn, rateOn } from '../../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../../shared/types.ts';
 import { Seg } from '../../components/inputs.tsx';
 import { t } from '../../../../shared/i18n.ts';
@@ -70,7 +70,10 @@ export function Timeline({ sub, state, today, history }: { sub: Subscription; st
   // 单位：记账货币，或（所有扣款同一种外币时）原币；原币下卡上另币种结算的那笔没有原币实扣，按标价画
   const ccys = [...new Set([...reg, ...future].map((c) => c.currency))];
   const origCcy = ccys.length === 1 && ccys[0] !== base ? ccys[0] : undefined;
-  const [unit, setUnit] = useState<'base' | 'orig'>('base');
+  // 过去的扣款全都换算不了本位币时默认按原币画，否则本位币下全是 0 高的柱子，像没花钱
+  const [unit, setUnit] = useState<'base' | 'orig'>(() =>
+    origCcy && reg.length && reg.every((c) => !Number.isFinite(chargeBaseOrNaN(state, c, base))) ? 'orig' : 'base',
+  );
   // 图表在柱子太密时按月、季、年汇总，图例里写明一根柱代表多久的合计
   const [bucket, setBucket] = useState(0);
   const ccy = unit === 'orig' && origCcy ? origCcy : base;
