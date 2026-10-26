@@ -3,10 +3,10 @@ import { paymentMethodGroups } from '../../../shared/payment-groups.ts';
 import { copyParts } from '../components/copy.tsx';
 import { useMemo, useState } from 'react';
 import { totals, chargeSources, myShareFactor } from '../../../shared/billing.ts';
-import { money, monthLabel } from '../../../shared/format.ts';
+import { monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeBaseOrNaN } from '../../../shared/fx.ts';
-import { cancelSavings, yearReview, type YearReview } from '../../../shared/metrics.ts';
+import { yearReview, type YearReview } from '../../../shared/metrics.ts';
 import type { AppState } from '../../../shared/types.ts';
 import { packCircles } from '../components/charts.tsx';
 import { ShareSheet } from '../components/ShareSheet.tsx';
@@ -36,7 +36,6 @@ interface Ctx {
   pct: (v: number) => string;
   mrr: number;
   mrrPartial?: FxTotal;
-  saved: string;
   /** 这一年按支付方式分的花费 */
   byMethod: Array<{ id: string; name: string; sum: number; partial: FxTotal }>;
   today: string;
@@ -50,9 +49,6 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
   const [year, setYear] = useState(years[0]);
   const r = useMemo(() => yearReview(state, today, year), [state, today, year]);
   const tot = totals(state, today);
-  const savings = cancelSavings(state, today).items.filter((x) => x.since.startsWith(year));
-  const saved = savings.reduce((a, x) => a + x.saved, 0);
-  const savedPartial = sumTotals(savings.map((x) => x.partial));
   const pct = (v: number) =>
     !r.partial.total.incomplete && Number.isFinite(v) && Number.isFinite(r.total) ? `${r.total > 0 ? Math.round((v / r.total) * 100) : 0}%` : '—';
   const base = state.settings.baseCurrency;
@@ -101,7 +97,6 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
           pct,
           mrr: tot.mrr,
           mrrPartial: tot.partial.mrr,
-          saved: savedPartial.incomplete ? formatTotal(savedPartial, base, { compact: true }) : saved ? money(saved, base, { compact: true }) : '',
           byMethod,
           today,
         };
@@ -232,7 +227,7 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
 }
 
 /** 卡片：原来的深色年度回顾卡 */
-function Card({ r, year, whose, ongoing, m, mrr, mrrPartial, saved, hide, pct }: Ctx) {
+function Card({ r, year, whose, ongoing, m, mrr, mrrPartial, hide, pct }: Ctx) {
   const top = Math.max(1, ...r.top.map((x) => r.partial.bySub[x.sub.id].value));
   return (
     <div className="review">
@@ -296,13 +291,7 @@ function Card({ r, year, whose, ongoing, m, mrr, mrrPartial, saved, hide, pct }:
               {r.newSubs.length} / {r.ended.length}
             </>
           }
-          note={
-            saved && !hide
-              ? t('review.card.saved', { amount: saved })
-              : r.ended.length
-                ? t('review.card.ended', { count: r.ended.length })
-                : t('review.card.noneEnded')
-          }
+          note={r.ended.length ? t('review.card.ended', { count: r.ended.length }) : t('review.card.noneEnded')}
         />
         <Metric
           label={t('review.card.currencies')}

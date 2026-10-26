@@ -53,7 +53,6 @@
     "busiest": "支出最多的月份",
     "month": "{n} 月",
     "newEnded": "新增 / 結束",
-    "saved": "退訂已省 {amount}",
     "ended": "已結束 {count} 個",
     "noneEnded": "無已結束訂閱",
     "currencies": "付款幣別",

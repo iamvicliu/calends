@@ -62,7 +62,6 @@
     "busiest": "Mois le plus coûteux",
     "month": "{month}",
     "newEnded": "Ajoutés / terminés",
-    "saved": "{amount} économisés",
     "ended": "Terminés : {count}",
     "noneEnded": "Aucun terminé",
     "currencies": "Devises utilisées",

@@ -62,7 +62,6 @@
     "busiest": "Highest-spending month",
     "month": "{month}",
     "newEnded": "Added / ended",
-    "saved": "Saved {amount}",
     "ended": "{count} ended",
     "noneEnded": "None ended",
     "currencies": "Currencies used",

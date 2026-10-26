@@ -3007,3 +3007,28 @@ test('stopped subscription cards and list rows keep the existing end-date fallba
     assert.equal(opened, sub);
   }
 });
+
+test('annual review new/ended metric keeps counts and its existing note without hypothetical savings', () => {
+  const sub: Subscription = {
+    id: 'stopped',
+    name: 'Fictional stopped',
+    category: 'Tools',
+    tags: [],
+    price: 12,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    end: '2026-08-01',
+    status: 'ended',
+  };
+  for (const subscriptions of [[], [sub]]) {
+    const r = metrics.yearReview({ ...st, subscriptions }, today, '2026');
+    for (const hide of [false, true]) {
+      const view = harness('../app/src/views/Review.tsx', 'Card', {}, { location: { host: 'fictional.invalid' } });
+      const nodes = view.render('Card', { r, year: '2026', whose: 'Fictional', ongoing: true, m: String, mrr: 0, saved: '$999', hide, pct: () => '0%' });
+      assert.ok(!JSON.stringify(nodes).includes('review.card.saved'));
+      assert.ok(nodes.some((n) => n.children.includes(subscriptions.length ? 'review.card.ended' : 'review.card.noneEnded')));
+      assert.ok(nodes.some((n) => n.children.includes('review.card.newEnded')));
+    }
+  }
+});
