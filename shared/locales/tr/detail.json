@@ -72,10 +72,7 @@
   "charges": {
     "recentN": "Yalnızca son {count}",
     "addShort": "Ekle",
-    "title": {
-      "one": "Ödemeler\n{count}",
-      "other": "Ödemeler\n{count}"
-    },
+    "title": "Ödemeler",
     "kind": {
       "refund": "İade",
       "adjust": "Düzeltme",

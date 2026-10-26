@@ -72,7 +72,7 @@
   "charges": {
     "recentN": "只看最近 {count} 筆",
     "addShort": "記一筆",
-    "title": "扣款記錄\n{count} 筆",
+    "title": "扣款記錄",
     "kind": {
       "refund": "退款",
       "adjust": "補差",

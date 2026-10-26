@@ -75,10 +75,7 @@
       "other": "Latest {count} only"
     },
     "addShort": "Add",
-    "title": {
-      "one": "Charges\n{count}",
-      "other": "Charges\n{count}"
-    },
+    "title": "Charges",
     "kind": {
       "refund": "Refund",
       "adjust": "Adjustment",

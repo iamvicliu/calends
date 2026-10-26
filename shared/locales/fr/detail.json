@@ -75,10 +75,7 @@
       "other": "Seulement les {count} derniers"
     },
     "addShort": "Ajouter",
-    "title": {
-      "one": "Prélèvements\n{count}",
-      "other": "Prélèvements\n{count}"
-    },
+    "title": "Prélèvements",
     "kind": {
       "refund": "Remboursement",
       "adjust": "Ajustement",

@@ -72,9 +72,7 @@
   "charges": {
     "recentN": "最新 {count} 件のみ",
     "addShort": "記録",
-    "title": {
-      "other": "請求\n{count}"
-    },
+    "title": "請求",
     "kind": {
       "refund": "返金",
       "adjust": "調整",

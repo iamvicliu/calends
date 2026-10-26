@@ -45,7 +45,7 @@ export function PeriodBar({ sub, today }: { sub: Subscription; today: string }) 
         <span>{cnDateAuto(from, today)}</span>
         <span>{cnDateAuto(addDays(end, -1), today)}</span>
       </p>
-      {(cancelBy || charge) && (
+      {cancelBy && (
         <p className="dt-period-keys">
           {cancelBy && (
             <span className="cb">
@@ -53,12 +53,7 @@ export function PeriodBar({ sub, today }: { sub: Subscription; today: string }) 
               {t('core.renewal.cancelBy')} {cnDateAuto(cancelBy, today)}
             </span>
           )}
-          {charge && (
-            <span className="ch">
-              <i />
-              {t('detail.ev.next')} {cnDateAuto(charge, today)}
-            </span>
-          )}
+
         </p>
       )}
     </div>

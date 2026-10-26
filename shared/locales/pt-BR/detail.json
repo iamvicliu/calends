@@ -75,10 +75,7 @@
       "other": "Só as últimas {count}"
     },
     "addShort": "Registrar",
-    "title": {
-      "one": "Cobranças\n{count}",
-      "other": "Cobranças\n{count}"
-    },
+    "title": "Cobranças",
     "kind": {
       "refund": "Reembolso",
       "adjust": "Ajuste",

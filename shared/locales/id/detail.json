@@ -72,9 +72,7 @@
   "charges": {
     "recentN": "Hanya {count} terakhir",
     "addShort": "Catat",
-    "title": {
-      "other": "Tagihan\n{count}"
-    },
+    "title": "Tagihan",
     "kind": {
       "refund": "Refund",
       "adjust": "Penyesuaian",

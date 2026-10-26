@@ -72,9 +72,7 @@
   "charges": {
     "recentN": "Chỉ {count} lần gần nhất",
     "addShort": "Ghi",
-    "title": {
-      "other": "Khoản phí\n{count}"
-    },
+    "title": "Khoản phí",
     "kind": {
       "refund": "Hoàn tiền",
       "adjust": "Điều chỉnh",

@@ -20,7 +20,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react';
-import { coveredUntil, cycleLabel, diffDays, isGap, memberAboard, phaseSubs, servedTime, upcomingPhase } from '../../../../shared/billing.ts';
+import { coveredUntil, cycleLabel, diffDays, isGap, phaseSubs, servedTime, upcomingPhase } from '../../../../shared/billing.ts';
 import { cnDateFull, money } from '../../../../shared/format.ts';
 import { transfersOf } from '../../../../shared/transfers.ts';
 import type { AppState, Subscription } from '../../../../shared/types.ts';
@@ -98,10 +98,7 @@ export function Events({ sub, state, today }: { sub: Subscription; state: AppSta
       date: sub.share.since,
       icon: Users,
       title: t('detail.ev.shareStart'),
-      sub:
-        sub.share.role === 'owner'
-          ? t('detail.share.owner', { count: sub.share.members.filter((m) => memberAboard(m, today)).length + 1, seats: sub.share.seats })
-          : t('detail.share.member'),
+      sub: t(`editor.share.${sub.share.role}`),
       tone: 'ok',
     });
   const up = upcomingPhase(sub, today);

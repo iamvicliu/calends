@@ -75,10 +75,7 @@
       "other": "Nur die letzten {count}"
     },
     "addShort": "Erfassen",
-    "title": {
-      "one": "Abbuchung\n{count}",
-      "other": "Abbuchungen\n{count}"
-    },
+    "title": "Abbuchungen",
     "kind": {
       "refund": "Erstattung",
       "adjust": "Korrektur",

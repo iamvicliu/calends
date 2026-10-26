@@ -75,10 +75,7 @@
       "other": "Solo los últimos {count}"
     },
     "addShort": "Añadir",
-    "title": {
-      "one": "Cobros\n{count}",
-      "other": "Cobros\n{count}"
-    },
+    "title": "Cobros",
     "kind": {
       "refund": "Reembolso",
       "adjust": "Ajuste",

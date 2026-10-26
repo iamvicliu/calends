@@ -72,9 +72,7 @@
   "charges": {
     "recentN": "최근 {count}건만",
     "addShort": "기록",
-    "title": {
-      "other": "결제\n{count}"
-    },
+    "title": "결제",
     "kind": {
       "refund": "환불",
       "adjust": "조정",

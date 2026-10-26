@@ -96,7 +96,7 @@ export function Charges({
     <Panel
       // 还没有记录时只是一条带「记一笔」的细条，不进列表网格被拉高
       className="dt-charges"
-      title={t('detail.charges.title', { count: history.length })}
+      title={t('detail.charges.title')}
       // 记一笔放在标题右侧，不额外占一行
       aside={
         onAdd && (

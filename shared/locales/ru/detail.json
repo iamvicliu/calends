@@ -72,12 +72,7 @@
   "charges": {
     "recentN": "Только последние {count}",
     "addShort": "Добавить",
-    "title": {
-      "one": "Списания\n{count}",
-      "few": "Списания\n{count}",
-      "many": "Списания\n{count}",
-      "other": "Списания\n{count}"
-    },
+    "title": "Списания",
     "kind": {
       "refund": "Возврат",
       "adjust": "Корректировка",
