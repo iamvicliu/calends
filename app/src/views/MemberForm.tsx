@@ -9,7 +9,7 @@ import type { AppState, Person, ShareMember, Subscription } from '../../../share
 import { isSettled, type LedgerPeriod } from '../../../shared/receivables.ts';
 import { PeriodStrip } from './Receivable.tsx';
 import { DatePicker } from '../components/DatePicker.tsx';
-import { IconButton, Cell, Group } from '../components/ui.tsx';
+import { Cell, Group } from '../components/ui.tsx';
 import { ask, Sheet } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
 import { NumInput, Seg } from '../components/inputs.tsx';
@@ -17,6 +17,7 @@ import { getState, saveSub } from '../store.ts';
 import { run } from '../toast.ts';
 
 import { PersonProfileSheet } from './PersonProfile.tsx';
+import { PersonPicker } from './person-fields.tsx';
 import { suggestedLeaveRefund, updateMemberLeave } from '../../../shared/carpool.ts';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { t } from '../../../shared/i18n.ts';
@@ -28,34 +29,23 @@ import { ReceiptForm } from './MemberReceipt.tsx';
 
 /**
  * 成员的称呼：没关联人员时是输入框，打字时下面联想名册里的人，选中即关联；不选就按输入的称呼新建。
- * 已关联时显示成头像加名字的胶囊，× 解除关联、可以重新输入或换人
+ * 已关联后这一行换成「人员」选择胶囊（PersonPicker），点开换人或选「新建人员」重新输入
  */
 export function PersonNameField({
   state,
   name,
-  linked,
   autoFocus,
   onType,
   onPick,
 }: {
   state: AppState;
   name: string;
-  linked: boolean;
   autoFocus?: boolean;
   onType: (name: string) => void;
   onPick: (p: Person | undefined) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [hi, setHi] = useState(0);
-  if (linked)
-    return (
-      <span className="pn-chip">
-        <b className="text-ellipsis">{name}</b>
-        <IconButton aria-label={t('family.member.unlinkPerson')} title={t('family.member.unlinkPerson')} onClick={() => onPick(undefined)}>
-          <Icon name="x" size={12} />
-        </IconButton>
-      </span>
-    );
   const q = name.trim().toLowerCase();
   const people = (state.people ?? [])
     .filter((p) => !q || p.name.toLowerCase().includes(q) || contactText(p).toLowerCase().includes(q))
@@ -192,6 +182,26 @@ export function MemberForm({
           .filter(Boolean)
           .join(' ')
       : undefined;
+  const pickPerson = (p: Person | undefined) => {
+    if (!p) return up({ personId: undefined, name: '', contactVia: undefined, contact: undefined, tg: undefined });
+    // 这个人在别的车上只用过一个账号时一起带出来，可以再改
+    const used = [
+      ...new Set(
+        state.subscriptions
+          .flatMap((x) => x.share?.members ?? [])
+          .filter((m) => m.personId === p.id && m.account)
+          .map((m) => m.account!),
+      ),
+    ];
+    up({
+      personId: p.id,
+      name: p.name,
+      contactVia: p.contactVia,
+      contact: p.contact,
+      tg: undefined,
+      ...(!f.account && used.length === 1 ? { account: used[0] } : {}),
+    });
+  };
   // 是谁：新增和已有成员都放最前面
   const whoGroup = (
     <>
@@ -206,43 +216,23 @@ export function MemberForm({
           ) : undefined
         }
       >
-        {/* 称呼与人员合在一个输入框：打字时联想已有的人，选中就带出联系方式（和唯一用过的账号）；不选就是新建 */}
-        <Cell
-          label={
-            <span className="row">
-              <PersonAvatar p={personFor(state, f.personId, f.name)} size={28} />
-              {t('family.member.name')}
-            </span>
-          }
-        >
-          <PersonNameField
-            state={state}
-            name={f.name}
-            linked={linked}
-            autoFocus={isNew}
-            onType={(name) => up({ name })}
-            onPick={(p) => {
-              if (!p) return up({ personId: undefined, name: '', contactVia: undefined, contact: undefined, tg: undefined });
-              // 这个人在别的车上只用过一个账号时一起带出来，可以再改
-              const used = [
-                ...new Set(
-                  state.subscriptions
-                    .flatMap((x) => x.share?.members ?? [])
-                    .filter((m) => m.personId === p.id && m.account)
-                    .map((m) => m.account!),
-                ),
-              ];
-              up({
-                personId: p.id,
-                name: p.name,
-                contactVia: p.contactVia,
-                contact: p.contact,
-                tg: undefined,
-                ...(!f.account && used.length === 1 ? { account: used[0] } : {}),
-              });
-            }}
-          />
-        </Cell>
+        {/* 已关联：左边「人员」，右边胶囊点开换人；没关联：输入称呼，打字时联想已有的人，选中就关联（带出联系方式和唯一用过的账号），不选就是新建 */}
+        {linked ? (
+          <Cell label={t('people.field.person')}>
+            <PersonPicker state={state} value={f.personId} onPick={pickPerson} />
+          </Cell>
+        ) : (
+          <Cell
+            label={
+              <span className="row">
+                <PersonAvatar p={personFor(state, f.personId, f.name)} size={28} />
+                {t('family.member.name')}
+              </span>
+            }
+          >
+            <PersonNameField state={state} name={f.name} autoFocus={isNew} onType={(name) => up({ name })} onPick={pickPerson} />
+          </Cell>
+        )}
         <Cell label={t('family.member.contact')}>
           {linked ? (
             <span className="muted">{contactText(f) || t('people.field.noContact')}</span>
