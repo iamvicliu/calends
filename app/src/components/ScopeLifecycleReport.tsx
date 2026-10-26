@@ -1,14 +1,13 @@
 import { useState, type ReactNode } from 'react';
-import { diffDays, durationLabel } from '../../../shared/billing.ts';
-import { cnDateAuto, flow } from '../../../shared/format.ts';
-import { amountTotal, formatTotal, totalNote } from '../../../shared/fx-total.ts';
+import { durationLabel } from '../../../shared/billing.ts';
+import { flow } from '../../../shared/format.ts';
+import { formatTotal, totalNote } from '../../../shared/fx-total.ts';
 import { t } from '../../../shared/i18n.ts';
 import type { Block, ScopeReport } from '../../../shared/scope-report.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { Gantt } from '../views/Gantt.tsx';
 import { Composition } from './Composition.tsx';
 import { MetricCards, Metric, CardTitle } from './ui.tsx';
-import { SubIcon } from './marks.tsx';
 
 /** Lifecycle presentation is exclusive to list selections; calendar blocks retain their renderer. */
 export function ScopeLifecycleReport({
@@ -83,58 +82,6 @@ export function ScopeLifecycleReport({
           </div>
           <Gantt rows={data.timeline} state={state} today={today} onOpen={onOpen} compact />
           {data.omitted > 0 && <p className="scope-note">{t('scope.lifecycle.omitted', { count: data.omitted })}</p>}
-        </div>
-      )}
-      {(data.stops.length > 0 || data.saved.value > 0 || data.saved.incomplete) && (
-        <div className="card scope-block scope-losses stop-report">
-          <div className="card-h">
-            <CardTitle>{t('report.stops.title')}</CardTitle>
-          </div>
-          <MetricCards inline>
-            <Metric
-              label={t('report.stops.saved')}
-              value={amount(data.saved, 1)}
-              valueClassName="green"
-              note={totalNote(data.saved) || t('report.stops.savedHint')}
-            />
-            <Metric
-              label={t('report.stops.loss')}
-              value={amount(data.loss)}
-              valueClassName={data.loss.value > 0 || data.loss.incomplete ? 'loss' : ''}
-              note={totalNote(data.loss) || t('report.stops.lossHint')}
-            />
-          </MetricCards>
-          <div className="stop-list">
-            {data.stops.map((r) => (
-              <button type="button" key={`${r.sub.id}-${r.phaseIndex}`} className="stop-row" onClick={() => onOpen(r.sub)}>
-                <SubIcon sub={r.sub} size={32} proxied />
-                <span className="stop-info">
-                  <b>{r.sub.name}</b>
-                  <small>
-                    {cnDateAuto(r.date, today)} / {t(r.kind === 'terminate' ? 'core.stop.terminate' : 'report.stops.cancel')}
-                  </small>
-                  <small>
-                    {t('scope.lifecycle.used', { span: durationLabel(Math.max(0, diffDays(r.phase.start, r.date))) })} /{' '}
-                    {r.date === r.paidThrough
-                      ? t('scope.lifecycle.noUnused')
-                      : t('scope.lifecycle.unused', { count: Math.max(0, diffDays(r.date, r.paidThrough)) })}
-                  </small>
-                  {r.reason && <small>{r.reason}</small>}
-                </span>
-                <span className="stop-amount">
-                  <b className={r.loss > 0 ? 'red' : ''}>
-                    {r.loss > 0 ? amount(amountTotal(r.loss, r.currency, r.lossBase)) : t(r.refunded > 0 ? 'scope.refunded' : 'scope.lifecycle.noLoss')}
-                  </b>
-                  {r.loss > 0 && r.currency !== base && <small>{flow(-r.loss, r.currency)}</small>}
-                  {r.refunded > 0 && (
-                    <small className="green">
-                      {t('scope.refunded')} / {amount(amountTotal(r.refunded, r.currency, r.refundedBase), 1)}
-                    </small>
-                  )}
-                </span>
-              </button>
-            ))}
-          </div>
         </div>
       )}
       {trend && <div className="card scope-block scope-cash scope-alone">{renderBlock(trend)}</div>}

@@ -2843,7 +2843,7 @@ test('全缺汇率的代付待收显示原币且不加约等号，完整折算�
   assert.match(complete, /≈/);
 });
 
-test('selection lifecycle renders four metrics, every stop, detail actions and six-event disclosure; copying includes all events', () => {
+test('selection lifecycle renders four metrics without a stop card and retains timeline detail actions and six-event disclosure; copying includes all events', () => {
   const opened: Subscription[] = [];
   const s: Subscription = {
     id: 's',
@@ -2879,18 +2879,17 @@ test('selection lifecycle renders four metrics, every stop, detail actions and s
   };
   let nodes = r.render('ScopeLifecycleReport', props);
   assert.equal(nodes.find((n) => n.props.className?.startsWith('metric-cards'))!.props['data-count'], 4);
-  assert.equal(nodes.filter((n) => n.props.className === 'stop-row').length, 1);
+  assert.equal(nodes.filter((n) => n.props.className === 'stop-row').length, 0);
+  assert.ok(!nodes.some((n) => n.children.includes('report.stops.title')));
   assert.ok(nodes.some((n) => n.type === 'h3' && String(n.props.hint).includes('scope.totalBasis')));
   assert.ok(!nodes.some((n) => n.props.className === 'metric-note' && n.children.includes('scope.totalBasis')));
   assert.ok(nodes.some((n) => n.props.className === 'card scope-block scope-cash scope-alone'));
   assert.ok(nodes.some((n) => n.type === 'Composition' && n.props.className === 'scope-block scope-spending scope-alone'));
   assert.equal(visible.at(-1), 6);
-  const row = nodes.find((n) => n.props.className === 'stop-row')!;
-  row.props.onClick();
-  assert.equal(opened[0], s);
   const gantt = nodes.find((n) => n.type === 'Gantt')!;
   assert.equal(gantt.props.compact, true);
-  assert.ok(nodes.some((n) => n.children.includes('scope.lifecycle.noUnused')));
+  gantt.props.onOpen(s);
+  assert.equal(opened[0], s);
   nodes.find((n) => n.props['aria-expanded'] === false)!.props.onClick();
   nodes = r.render('ScopeLifecycleReport', props);
   assert.equal(visible.at(-1), 9);
