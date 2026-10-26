@@ -406,7 +406,8 @@ export function MemberForm({
                       ? once && !st.gone
                         ? t('family.pool.settled')
                         : ''
-                      : `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}`,
+                      : // 下面有「已付至」时不再重复写应收哪天（就是已付至的后一天）
+                        `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${once ? t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) }) : t('family.pool.owedAmount', { amount: st.owed })}`,
                     ledger.unmatched.length ? t('receivable.unmatchedNote', { count: ledger.unmatched.length }) : '',
                   ]
                     .filter(Boolean)
