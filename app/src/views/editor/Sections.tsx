@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react';
 import type { EditorStatus } from './useEditorFields.ts';
 import { MemberSheet } from '../Members.tsx';
 import { isDataIcon } from '../../../../shared/icon.ts';
@@ -455,7 +456,7 @@ export function MoreFields({ context }: { context: ReturnType<typeof useEditorFi
             foot={t('detail.transfer.foot')}
             action={
               <button type="button" className="btn plain" onClick={() => setTransfer({})}>
-                {t('detail.transfer.add')}
+                <Plus size={14} /> {t('detail.transfer.add')}
               </button>
             }
           >
