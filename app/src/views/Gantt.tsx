@@ -548,7 +548,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       // 卖出时剩余服务随转让收回，不画已付未用
                       const unused = !state.readonly && !!stopped && stopped.wastedDays > 0 && !transferredStop(g.v);
                       const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
-                      const unusedWidth = unused ? Math.max(0, x(wastedUntil) - x(stopped!.date)) : 0;
+                      const unusedWidth = unused ? Math.max(BAR, x(wastedUntil) - x(stopped!.date)) : 0;
                       const unusedSeen = unused ? visible(x(stopped!.date), unusedWidth) : { l: 0, r: 0 };
                       // 按实际字体量文字宽度，加左右各 9px 内边距；服务方停用时，停用日右侧被标志盖住的半个圆不计入文字空间。
                       // 完整金额放不下时退到取整金额（精确值在悬停提示里），仍放不下才不显示

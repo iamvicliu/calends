@@ -658,3 +658,31 @@ test('all-history timeline omits today for stopped-only scopes even in the curre
   assert.equal(countToday(render([fullyRefunded])), 0);
   assert.equal(countToday(render([stopped, { ...sub, id: 'fictional-active' }])), 1);
 });
+
+test('narrow unused service keeps a full 22px display segment behind the termination mark', () => {
+  const stop = runtime('../app/src/components/StopPanel.tsx', { toast() {} }).exports;
+  const r = runtime('../app/src/views/Gantt.tsx', {
+    usePref: (_key: string, initial: unknown) => [initial, () => {}],
+    useWidth: () => [() => {}, 180],
+    perLabel: () => 'week',
+    stopDescription: stop.stopDescription,
+  });
+  const short = phases.stopSubscription({ ...sub, cycle: { unit: 'week', every: 1 }, price: 7 }, today, 'terminate', '2026-10-06');
+  const nodes = all(
+    r.render('Gantt', {
+      rows: [short],
+      state: { subscriptions: [short], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX },
+      today,
+      onOpen() {},
+    }),
+  );
+  const unused = nodes.find((e) => e.props.className === 'gt-unused')!;
+  const mark = nodes.find((e) => e.props.className === 'gt-stop')!;
+  assert.ok(unused);
+  assert.ok(unused.props.style.width >= 22);
+  assert.equal(unused.props.style.left, mark.props.style.left + 11);
+  assert.equal(
+    all(unused).some((e) => e.props.className === 'gt-unused-amount'),
+    false,
+  );
+});
