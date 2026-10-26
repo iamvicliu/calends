@@ -169,3 +169,29 @@ test('旧数据的节奏改过（断过再续）：转成节奏重新起算，�
   assert.equal(memberDues(s, '2026-10-28')[0].owed, 60);
   assert.equal(memberDues(s, '2026-10-27')[0].owed, 0);
 });
+
+test('MCP 记收款：期写成那一期里的某一天时，缺省金额按那一期的应收，不记成 0', async () => {
+  const { recordReceipt } = await import('./receivable-edit.ts');
+  const { DEFAULT_SETTINGS, FALLBACK_FX } = { ...(await import('./types.ts')), ...(await import('./billing.ts')) };
+  const s = {
+    id: 's',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 30,
+    currency: 'CNY',
+    start: '2026-01-01',
+    cycle: { unit: 'month' as const, every: 1 },
+    status: 'active' as const,
+    share: {
+      role: 'owner' as const,
+      seats: 3,
+      collectFrom: '2026-01-01',
+      members: [{ id: 'm', name: 'M', fee: 10, feeCurrency: 'CNY', billEvery: 1, joined: '2026-01-01' }],
+    },
+  };
+  const st = { subscriptions: [s], methods: [], settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' }, fx: FALLBACK_FX };
+  const out = recordReceipt(st, s, { kind: 'share', member: s.share.members[0] }, { id: 'r', date: '2026-03-12', periods: ['2026-03-10'] }, '2026-03-12');
+  assert.equal(out.record.amount, 10);
+  assert.deepEqual(out.after.share!.members[0].receipts![0].periods, ['2026-03-01']);
+});

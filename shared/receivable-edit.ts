@@ -5,7 +5,7 @@ import { periodsTotal } from './carpool.ts';
 import { convertOn } from './fx.ts';
 import { t } from './i18n.ts';
 import { proxyLedger } from './proxy.ts';
-import { isSettled, putRecord, removeRecord, type LedgerPeriod, type Receivable } from './receivables.ts';
+import { isSettled, putRecord, removeRecord, resolveKey, type LedgerPeriod, type Receivable } from './receivables.ts';
 import type { AppState, ProxyCharge, Receipt, ShareMember, Subscription, Waiver } from './types.ts';
 
 /** 往后最多推算多少年的期，用来提前收、提前免 */
@@ -60,7 +60,8 @@ export interface ReceiptInput {
 export function recordReceipt(st: AppState, s: Subscription, target: ReceivableTarget, input: ReceiptInput, today: string) {
   if (!validDay(input.date)) throw new Error(t('mcp.error.invalidTarget'));
   const r = receivableOf(st, s, target, today);
-  const picked = input.periods.map((k) => r.periods.find((p) => p.key === k)).filter((p): p is LedgerPeriod => !!p);
+  // 期可以写这一期里的任何一天（与 putRecord 同一套 resolveKey），默认金额按对上的期算，不会因为没写起始日变成 0
+  const picked = input.periods.map((k) => r.periods.find((p) => p.key === resolveKey(r.periods, k))).filter((p): p is LedgerPeriod => !!p);
   const total = periodsTotal(st, picked);
   const currency = (input.currency ?? total.currency).toUpperCase();
   const amount =
