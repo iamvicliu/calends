@@ -4,7 +4,7 @@ import { StopPanel } from '../components/StopPanel.tsx';
 import { createPortal } from 'react-dom';
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ExternalLink, X, Pause, Pencil, Play, Plus, Settings2, Share } from 'lucide-react';
+import { ExternalLink, CircleStop, Pause, Pencil, Play, Plus, Settings2, Share } from 'lucide-react';
 import { addDays, chargesBetween, currentPhase, cycleLabel, effectiveStatus, nextCharge, phaseSubs, priceAt, type Charge } from '../../../shared/billing.ts';
 import { cnDateFull } from '../../../shared/format.ts';
 import type { AppState, Payment, ShareMember, Subscription } from '../../../shared/types.ts';
@@ -159,7 +159,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
           }
         />
       )}
-      {sub.cycle.unit !== 'lifetime' && !isStopped(st) && <Act icon={<X size={15} />} label={t('core.stop.title')} onClick={() => setStopping(true)} />}
+      {sub.cycle.unit !== 'lifetime' && !isStopped(st) && <Act icon={<CircleStop size={15} />} label={t('core.stop.title')} onClick={() => setStopping(true)} />}
       {sub.stop?.kind === 'cancel' && (
         <Act icon={<Play size={15} />} label={t('core.stop.restore')} onClick={() => run(() => saveSub(reactivate(sub, today)), t('detail.toast.resumed'))} />
       )}
