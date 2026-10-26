@@ -339,7 +339,6 @@ export function scopeReportOut(st: AppState, today: string, f: Record<string, un
           terminated_count: report.lifecycle.terminatedCount,
           unrefunded_loss: lifecycleTotal(report.lifecycle.loss),
           termination_loss: lifecycleTotal(report.lifecycle.terminationLoss),
-          saved: lifecycleTotal(report.lifecycle.saved),
           stops: report.lifecycle.stops.map((r) => ({
             ...ref(r.sub),
             phase_start: r.phase.start,

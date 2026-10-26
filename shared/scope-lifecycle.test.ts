@@ -47,7 +47,6 @@ test('all stopped, no provider stops, a single subscription and empty selection 
   const ordinary = scopeReport(data.ordinary, data.ordinary.subscriptions, today).lifecycle!;
   assert.equal(ordinary.terminatedCount, 0);
   assert.equal(ordinary.stoppedCount, 1);
-  assert.ok(ordinary.saved.value > 0);
   assert.equal(scopeReport(data.single, data.single.subscriptions, today).lifecycle!.averageDays, 46);
   assert.equal(scopeReport(data.single, [], today).lifecycle!.averageDays, 0);
 });
@@ -140,6 +139,8 @@ test('MCP preserves legacy headline fields and adds lifetime, duration and all s
   assert.equal(out.lifecycle!.terminated_count, 6);
   assert.equal(out.lifecycle!.cumulative_spending.total, 490);
   assert.equal(out.lifecycle!.stops.length, 6);
+  assert.ok(!('saved' in out.lifecycle!));
+  for (const key of ['unrefunded_loss', 'termination_loss', 'stops', 'timeline', 'spending']) assert.ok(key in out.lifecycle!);
   const head = out.blocks.find((b) => b.type === 'headline')!;
   for (const key of ['mrr', 'annual', 'active_count', 'paid_this_year', 'stop_loss_this_year', 'mrr_change_since_last_month']) assert.ok(key in head);
   const missing = scopeReportOut(data.missing, today, undefined);

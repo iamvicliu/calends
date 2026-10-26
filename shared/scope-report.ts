@@ -5,7 +5,6 @@ import { addDays, addMonths, chargesBetween, collectCurrencyOf, memberDues, mySh
 import { diffDays, effectiveStatus, isStopped } from './billing.ts';
 import { chargeValue, toBaseOrNaN } from './fx.ts';
 import {
-  cancelSavings,
   stopHistory,
   cashVsAccrual,
   contributionOn,
@@ -84,7 +83,6 @@ export interface ScopeLifecycle {
   terminatedCount: number;
   loss: FxTotal;
   terminationLoss: FxTotal;
-  saved: FxTotal;
   stops: StopLoss[];
   timeline: Subscription[];
   omitted: number;
@@ -318,7 +316,6 @@ export function scopeReport(state: AppState, subs: readonly Subscription[], toda
     terminatedCount: stops.filter((s) => s.kind === 'terminate').length,
     loss: stopLosses(scoped, today).partial,
     terminationLoss: sumTotals(stops.filter((s) => s.kind === 'terminate').map((s) => amountTotal(s.loss, s.currency, s.lossBase))),
-    saved: cancelSavings(scoped, today).partial,
     stops,
     timeline: spentBySub
       .slice(0, 12)
