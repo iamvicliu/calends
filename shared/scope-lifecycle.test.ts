@@ -67,19 +67,50 @@ test('lifetime spending retains my share, negative refunds and missing currency 
 
 test('timeline caps at the twelve highest cumulative costs and current-month cash excludes future charges', () => {
   const st = structuredClone(data.single);
-  st.subscriptions = Array.from({ length: 14 }, (_, i) => ({ ...st.subscriptions[0], id: `${i}`, price: i + 1, start: '2026-10-01' }));
+  st.subscriptions = Array.from({ length: 14 }, (_, i) => ({
+    ...st.subscriptions[0],
+    id: `${i}`,
+    name: `Demo ${String(14 - i).padStart(2, '0')}`,
+    price: i + 1,
+    start: '2026-10-01',
+  }));
   const r = scopeReport(st, st.subscriptions, today).lifecycle!;
   assert.equal(r.timeline.length, 12);
   assert.equal(r.omitted, 2);
   assert.deepEqual(
-    r.timeline.map((s) => s.price),
+    r.timeline.map((s) => s.price).sort((a, b) => b - a),
     [14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3],
+  );
+  const chronological = structuredClone(data.single);
+  chronological.subscriptions = [
+    { ...chronological.subscriptions[0], id: 'old', start: '2025-01-01', name: 'Old' },
+    { ...chronological.subscriptions[0], id: 'new-b', start: '2026-10-01', name: 'Beta' },
+    { ...chronological.subscriptions[0], id: 'new-a', start: '2026-10-01', name: 'Alpha' },
+  ];
+  assert.deepEqual(
+    scopeReport(chronological, chronological.subscriptions, today).lifecycle!.timeline.map((s) => s.id),
+    ['new-a', 'new-b', 'old'],
   );
   const future = { ...st.subscriptions[0], start: '2026-10-30' };
   const report = scopeReport({ ...st, subscriptions: [future] }, [future], today);
   assert.equal(report.lifecycle!.spent.value, 0);
   const trend = report.blocks.find((b) => b.type === 'trend');
   assert.equal(trend, undefined);
+});
+
+test('timeline orders recent starts first and same-day names alphabetically after selecting the cost leaders', () => {
+  const st = structuredClone(data.single);
+  const sub = st.subscriptions[0];
+  st.subscriptions = [
+    { ...sub, id: 'old', name: 'Old', start: '2025-01-01' },
+    { ...sub, id: 'z', name: 'Zulu', start: '2026-09-01' },
+    { ...sub, id: 'a', name: 'Alpha', start: '2026-09-01' },
+    { ...sub, id: 'new', name: 'New', start: '2026-10-01' },
+  ];
+  assert.deepEqual(
+    scopeReport(st, st.subscriptions, today).lifecycle!.timeline.map((s) => s.id),
+    ['new', 'a', 'z', 'old'],
+  );
 });
 
 test('stop history retains separate historical phase stops without leaking proxy records', () => {

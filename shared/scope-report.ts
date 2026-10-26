@@ -320,7 +320,10 @@ export function scopeReport(state: AppState, subs: readonly Subscription[], toda
     terminationLoss: sumTotals(stops.filter((s) => s.kind === 'terminate').map((s) => amountTotal(s.loss, s.currency, s.lossBase))),
     saved: cancelSavings(scoped, today).partial,
     stops,
-    timeline: spentBySub.slice(0, 12).map((s) => s.sub),
+    timeline: spentBySub
+      .slice(0, 12)
+      .map((s) => s.sub)
+      .sort((a, b) => b.start.localeCompare(a.start) || a.name.localeCompare(b.name) || a.id.localeCompare(b.id)),
     omitted: Math.max(0, scoped.subscriptions.length - 12),
     spending: rows.flatMap((r) =>
       chargeSources(r.original).map((source) => ({
