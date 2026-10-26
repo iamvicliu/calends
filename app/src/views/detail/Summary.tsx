@@ -110,9 +110,9 @@ export function Summary({ sub, state, today }: { sub: Subscription; state: AppSt
         {/* 加入别人的合租只有「付给谁」一项，放在详情里，不单独成卡 */}
         {sub.share?.role === 'member' && <Prop k={t('detail.share.payTo')}>{sub.share.ownerName ?? t('detail.share.host')}</Prop>}
       </dl>
-      {/* 备注单独带一个标题，与上面的属性同一种「标签在上」写法，一眼看出这是备注 */}
+      {/* 备注单独带一个标题，与上面的属性同一种「标签在上」写法，一眼看出这是备注；属私人信息，复制成图片时不带 */}
       {sub.notes && (
-        <div className="dt-note-block">
+        <div className="dt-note-block" data-snapshot-hide>
           <span className="dt-note-k">{t('editor.field.notes')}</span>
           <Note text={sub.notes} />
         </div>
