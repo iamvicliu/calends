@@ -1,5 +1,6 @@
 import { toBlob } from 'html-to-image';
 import { base } from './base.ts';
+import { renderSnapshotCharts } from './snapshot-render.tsx';
 
 // 截图在独立的 SVG 里渲染，用不到页面加载的网络字体：把 Google Fonts 的字体转成 data URL 内嵌（只取一次）
 let fonts: Promise<string> | undefined;
@@ -24,88 +25,169 @@ function fontCSS(): Promise<string> {
   return fonts;
 }
 
-// SVG 的描边、填充来自样式表里的 class，克隆后会丢：截图前写成属性，截完还原
+// SVG descendants retain their stylesheet paint when embedded in a standalone image.
 const SVG_PROPS = ['stroke', 'fill', 'stroke-width', 'stroke-dasharray', 'stroke-opacity', 'fill-opacity', 'opacity', 'stop-color', 'stop-opacity'];
 function inlineSvg(el: HTMLElement) {
-  const saved: Array<[Element, string, string | null]> = [];
   el.querySelectorAll('svg *').forEach((n) => {
     const cs = getComputedStyle(n);
     for (const p of SVG_PROPS) {
-      saved.push([n, p, n.getAttribute(p)]);
       n.setAttribute(p, cs.getPropertyValue(p));
     }
   });
-  return () => saved.forEach(([n, p, v]) => (v == null ? n.removeAttribute(p) : n.setAttribute(p, v)));
 }
 
-/** 把元素渲染成 PNG：圆角与弹窗一致、圆角外透明，filter 可去掉按钮等 */
-export async function snapshot(
-  el: HTMLElement,
-  opts: { radius?: string; width?: number; height?: number; style?: Partial<CSSStyleDeclaration>; filter?: (n: HTMLElement) => boolean } = {},
-) {
-  const fontEmbedCSS = await fontCSS();
-  const restore = inlineSvg(el);
+/** Desktop detail width; independent of the caller's viewport and disclosure controls. */
+export const SNAPSHOT_WIDTH = 760;
+
+type SnapshotOptions = {
+  radius?: string;
+  width?: number;
+  pixelRatio?: number;
+  style?: Partial<CSSStyleDeclaration>;
+  filter?: (n: HTMLElement) => boolean;
+  prepare?: (clone: HTMLElement, copies: ReadonlyMap<Element, HTMLElement>) => void;
+};
+
+/** Lay out a private copy before html-to-image freezes computed widths and heights. */
+export async function snapshot(el: HTMLElement, opts: SnapshotOptions = {}) {
+  const frame = document.createElement('iframe');
+  frame.setAttribute('aria-hidden', 'true');
+  frame.tabIndex = -1;
+  Object.assign(frame.style, { position: 'fixed', left: '-100000px', top: '0', width: '1280px', height: '900px', borderWidth: '0', pointerEvents: 'none' });
+  document.body.appendChild(frame);
+  let disposeCharts: (() => void) | undefined;
   try {
-    return await toBlob(el, {
-      pixelRatio: 2,
+    const doc = frame.contentDocument!;
+    for (const attr of document.documentElement.attributes) doc.documentElement.setAttribute(attr.name, attr.value);
+    for (const attr of document.body.attributes) doc.body.setAttribute(attr.name, attr.value);
+    // Keep media queries desktop-sized and named ancestor containers intact. Only the
+    // copied wrappers lose their page positioning, padding and viewport height caps.
+    const styles = [...document.querySelectorAll('style, link[rel="stylesheet"]')].map((node) => {
+      const copy = node.cloneNode(true) as HTMLLinkElement;
+      const ready =
+        copy.tagName === 'LINK'
+          ? new Promise<void>((resolve, reject) => {
+              copy.onload = () => resolve();
+              copy.onerror = () => reject(new Error('Snapshot stylesheet'));
+            })
+          : Promise.resolve();
+      doc.head.appendChild(copy);
+      return ready;
+    });
+    const ancestors: HTMLElement[] = [];
+    for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) ancestors.unshift(node);
+    Object.assign(doc.body.style, { margin: '0', padding: '0', width: `${opts.width ?? SNAPSHOT_WIDTH}px` });
+    let parent = doc.body;
+    for (const node of ancestors) {
+      const wrapper = node.cloneNode(false) as HTMLElement;
+      Object.assign(wrapper.style, {
+        position: 'static',
+        display: 'block',
+        width: '100%',
+        minWidth: '0',
+        maxWidth: 'none',
+        height: 'auto',
+        minHeight: '0',
+        maxHeight: 'none',
+        overflow: 'visible',
+        margin: '0',
+        padding: '0',
+        transform: 'none',
+      });
+      parent.appendChild(wrapper);
+      parent = wrapper;
+    }
+    let clone = el.cloneNode(true) as HTMLElement;
+    const originals = [el, ...el.querySelectorAll('*')];
+    const copied = [clone, ...clone.querySelectorAll<HTMLElement>('*')];
+    const copies = new Map(originals.map((node, i) => [node, copied[i]]));
+    const exportStyle: Partial<CSSStyleDeclaration> = {
+      position: 'static',
+      width: `${opts.width ?? SNAPSHOT_WIDTH}px`,
+      maxWidth: 'none',
+      height: 'auto',
+      maxHeight: 'none',
+      margin: '0',
+      boxSizing: 'border-box',
+      borderRadius: opts.radius ?? '0',
+      overflow: 'hidden',
+      animation: 'none',
+      transition: 'none',
+      ...opts.style,
+    };
+    Object.assign(clone.style, exportStyle);
+    parent.appendChild(clone);
+    await Promise.all(styles);
+    const rendered = renderSnapshotCharts(copies, clone);
+    clone = rendered.clone;
+    disposeCharts = rendered.dispose;
+    Object.assign(clone.style, exportStyle);
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+    const allowed = (node: HTMLElement) => !node.hasAttribute('data-snapshot-hide') && !node.matches('.hint') && (opts.filter?.(node) ?? true);
+    // Remove before measuring, so notes and action rows leave no reserved space.
+    clone.querySelectorAll<HTMLElement>('*').forEach((node) => {
+      if (!allowed(node)) node.remove();
+      else {
+        node.style.animation = 'none';
+        node.style.transition = 'none';
+      }
+    });
+    clone.querySelectorAll<HTMLElement>('[data-private-account]').forEach((node) => {
+      node.classList.add('car-private');
+      node.setAttribute('aria-hidden', 'true');
+    });
+    const images = [...clone.querySelectorAll<HTMLImageElement>('img')];
+    images.forEach((image) => {
+      image.loading = 'eager';
+      if (/^https?:/.test(image.src) && new URL(image.src).origin !== location.origin) {
+        image.src = base(`/api/img?u=${encodeURIComponent(image.src)}`);
+        image.removeAttribute('srcset');
+      }
+    });
+    // Flush stylesheet layout so FontFaceSet tracks the faces actually in use.
+    void clone.offsetWidth;
+    await doc.fonts.ready;
+    await Promise.all(images.map((image) => image.decode().catch(() => {})));
+    opts.prepare?.(clone, copies);
+    const fontEmbedCSS = await fontCSS();
+    inlineSvg(clone);
+    return await toBlob(clone, {
+      pixelRatio: opts.pixelRatio ?? 2,
       fontEmbedCSS,
       cacheBust: false,
       includeQueryParams: true,
-      width: opts.width,
-      height: opts.height,
-      style: { borderRadius: opts.radius ?? '0', overflow: 'hidden', ...opts.style },
-      filter: (node) => !(node instanceof Element && (node.hasAttribute('data-snapshot-hide') || node.matches('.hint'))) && (opts.filter?.(node) ?? true),
+      width: clone.offsetWidth,
+      height: clone.offsetHeight,
     });
   } finally {
-    restore();
+    try {
+      disposeCharts?.();
+    } finally {
+      frame.remove();
+    }
   }
 }
 
-/** Capture the visible card at its current size, including scrolled viewports. */
+/** Capture a desktop card, retaining the selected chart viewport without touching it. */
 export async function snapshotCard(source: HTMLElement) {
-  await document.fonts.ready;
-  const clone = source.cloneNode(true) as HTMLElement;
-  const sourceNodes = [source, ...source.querySelectorAll<HTMLElement>('*')];
-  const cloneNodes = [clone, ...clone.querySelectorAll<HTMLElement>('*')];
-  sourceNodes.forEach((node, index) => {
-    const copy = cloneNodes[index];
-    if (node instanceof HTMLImageElement && copy instanceof HTMLImageElement && /^https?:/.test(node.src) && new URL(node.src).origin !== location.origin) {
-      copy.src = base(`/api/img?u=${encodeURIComponent(node.src)}`);
-      copy.removeAttribute('srcset');
-    }
-    copy.style.animation = 'none';
-    copy.style.transition = 'none';
-    if (node.scrollLeft || node.scrollTop) {
-      copy.style.overflow = 'hidden';
-      [...copy.children].forEach((child, i) => {
-        if (!(child instanceof HTMLElement || child instanceof SVGElement)) return;
-        const transform = getComputedStyle(node.children[i]).transform;
-        child.style.transform = `translate(${-node.scrollLeft}px, ${-node.scrollTop}px) ${transform === 'none' ? '' : transform}`;
-      });
-    }
-  });
   const style = getComputedStyle(source);
-  Object.assign(clone.style, {
-    position: 'fixed',
-    left: '-100000px',
-    top: '0',
-    width: `${source.offsetWidth}px`,
-    height: `${source.offsetHeight}px`,
-    margin: '0',
-    boxSizing: 'border-box',
-    backgroundColor: style.backgroundColor === 'rgba(0, 0, 0, 0)' ? style.getPropertyValue('--bg') : style.backgroundColor,
+  const sourceNodes = [source, ...source.querySelectorAll<HTMLElement>('*')];
+  return snapshot(source, {
+    radius: style.borderRadius === '0px' ? 'var(--radius-lg)' : style.borderRadius,
+    style: { backgroundColor: style.backgroundColor === 'rgba(0, 0, 0, 0)' ? style.getPropertyValue('--bg') : style.backgroundColor },
+    prepare: (_clone, copies) => {
+      sourceNodes.forEach((node) => {
+        const copy = copies.get(node);
+        if (!copy?.isConnected || (!node.scrollLeft && !node.scrollTop)) return;
+        copy.style.overflow = 'hidden';
+        [...node.children].forEach((child) => {
+          const target = copies.get(child);
+          if (!target?.isConnected) return;
+          const transform = getComputedStyle(child).transform;
+          target.style.transform = `translate(${-node.scrollLeft}px, ${-node.scrollTop}px) ${transform === 'none' ? '' : transform}`;
+        });
+      });
+    },
+    filter: (node) => !node.matches('.seg, .hint, .tl-home, .log-actions, .copy-controls > :not(.copy-hover)'),
   });
-  clone.setAttribute('aria-hidden', 'true');
-  document.body.appendChild(clone);
-  try {
-    return await snapshot(clone, {
-      width: source.offsetWidth,
-      height: source.offsetHeight,
-      radius: style.borderRadius === '0px' ? 'var(--radius-lg)' : style.borderRadius,
-      style: { position: 'static', left: 'auto', top: 'auto' },
-      filter: (node) => !(node instanceof Element && node.matches('.seg, .hint, .tl-home, .log-actions, .copy-controls > :not(.copy-hover)')),
-    });
-  } finally {
-    clone.remove();
-  }
 }

@@ -1,3 +1,4 @@
+import { useSnapshotRender } from '../snapshot-render.tsx';
 import { chargesTotal, formatTotal, scaleTotal, totalNote } from '../../../shared/fx-total.ts';
 import { FxAmount } from '../components/FxAmount.tsx';
 import { mrrTotal } from '../../../shared/metrics.ts';
@@ -484,11 +485,23 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
 type Dim = 'cat' | 'pay' | 'ccy' | 'cycle';
 
 /** 构成：树状图，面积 = 每月成本 */
-export function Composition({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+export function Composition({
+  state,
+  today,
+  onOpen,
+  snapshotSelection,
+}: {
+  state: AppState;
+  today: string;
+  onOpen: (s: Subscription) => void;
+  snapshotSelection?: { dim: Dim; focus: string | null };
+}) {
   const base = state.settings.baseCurrency;
-  const [dim, setDim] = useState<Dim>('cat');
-  const [focus, setFocus] = useState<string | null>(null);
+  const [dim, setDim] = useState<Dim>(snapshotSelection?.dim ?? 'cat');
+  const [focus, setFocus] = useState<string | null>(snapshotSelection?.focus ?? null);
   const [box, W] = useWidth();
+  const captureRef = useRef<HTMLDivElement>(null);
+  useSnapshotRender(captureRef, () => <Composition state={state} today={today} onOpen={onOpen} snapshotSelection={{ dim, focus }} />);
   const H = W < 560 ? 320 : 400;
   const live = state.subscriptions.map((s) => ({ s, v: contributionOn(state, s, today) })).filter((x) => x.v > 0);
   const total = live.reduce((a, x) => a + x.v, 0);
@@ -554,7 +567,7 @@ export function Composition({ state, today, onOpen }: { state: AppState; today: 
       );
     });
   return (
-    <div className="card copy-card" data-copy-card>
+    <div className="card copy-card" data-copy-card ref={captureRef}>
       <div className="card-h">
         <CardTitle hint={totalNote(partial) || undefined}>
           {copyParts(sel ? `${sel.name}\n${perMonth(flow(-sel.v, base, { compact: true }))}` : t('report.comp.title'))}

@@ -1,7 +1,8 @@
 import { amountTotal, chargesTotal, formatTotal, sumTotals } from '../../../../shared/fx-total.ts';
 import { copyParts } from '../../components/copy.tsx';
 import { chargeMethodId } from '../../../../shared/billing.ts';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { useSnapshotRender } from '../../snapshot-render.tsx';
 import {
   addDays,
   addMonths,
@@ -36,7 +37,19 @@ export type Range = 'all' | '1y' | '6m';
  * 预测长度按周期：月付及更短看半年，更长的看一个周期（至少半年、至多两年）。
  * 下次扣款的日期与金额在顶部四格；已结束、暂停按实际边界截断，未知结束日仅显示已知付款范围。
  */
-export function Timeline({ sub, state, today, history }: { sub: Subscription; state: AppState; today: string; history: Charge[] }) {
+export function Timeline({
+  sub,
+  state,
+  today,
+  history,
+  snapshotSelection,
+}: {
+  sub: Subscription;
+  state: AppState;
+  today: string;
+  history: Charge[];
+  snapshotSelection?: { range: Range; unit: 'base' | 'orig' };
+}) {
   const base = state.settings.baseCurrency;
   const st = effectiveStatus(sub, today);
   const cur = currentPhase(sub, today);
@@ -64,16 +77,18 @@ export function Timeline({ sub, state, today, history }: { sub: Subscription; st
       .map(([k, l]) => [k, l] as [Range, string]),
   ];
   // 月付及更短默认看最近一年，柱子不至于挤成一片；更长的周期默认看全部
-  const [range, setRange] = useState<Range>(() => (days <= 31 && ranges.some(([k]) => k === '1y') ? '1y' : 'all'));
+  const [range, setRange] = useState<Range>(() => snapshotSelection?.range ?? (days <= 31 && ranges.some(([k]) => k === '1y') ? '1y' : 'all'));
   const since = range === 'all' ? '' : addMonths(anchor, range === '1y' ? -12 : -6);
   const past = reg.filter((c) => c.date >= since);
   // 单位：记账货币，或（所有扣款同一种外币时）原币；原币下卡上另币种结算的那笔没有原币实扣，按标价画
   const ccys = [...new Set([...reg, ...future].map((c) => c.currency))];
   const origCcy = ccys.length === 1 && ccys[0] !== base ? ccys[0] : undefined;
   // 过去的扣款全都换算不了本位币时默认按原币画，否则本位币下全是 0 高的柱子，像没花钱
-  const [unit, setUnit] = useState<'base' | 'orig'>(() =>
-    origCcy && reg.length && reg.every((c) => !Number.isFinite(chargeBaseOrNaN(state, c, base))) ? 'orig' : 'base',
+  const [unit, setUnit] = useState<'base' | 'orig'>(
+    () => snapshotSelection?.unit ?? (origCcy && reg.length && reg.every((c) => !Number.isFinite(chargeBaseOrNaN(state, c, base))) ? 'orig' : 'base'),
   );
+  const captureRef = useRef<HTMLElement>(null);
+  useSnapshotRender(captureRef, () => <Timeline sub={sub} state={state} today={today} history={history} snapshotSelection={{ range, unit }} />);
   // 图表在柱子太密时按月、季、年汇总，图例里写明一根柱代表多久的合计
   const [bucket, setBucket] = useState(0);
   const ccy = unit === 'orig' && origCcy ? origCcy : base;
@@ -139,6 +154,7 @@ export function Timeline({ sub, state, today, history }: { sub: Subscription; st
   return (
     <Panel
       className="dt-chart"
+      snapshotRef={captureRef}
       title={t('detail.chart.title', { ccy })}
       aside={
         <>

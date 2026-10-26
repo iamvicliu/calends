@@ -1,3 +1,4 @@
+import { useSnapshotRender } from '../snapshot-render.tsx';
 import type { ReactNode as ComponentChildren } from 'react';
 import { tipProps } from './overlays.tsx';
 import { useWidth } from './inputs.tsx';
@@ -97,6 +98,7 @@ export function BarLine({
   const path = line.map((v, i) => `${i ? 'L' : 'M'}${cx(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
   // 每个月份标签约占 44px，按实际宽度决定隔几根柱子标一次，窄屏不挤
   const [box, w] = useWidth();
+  useSnapshotRender(box, () => <BarLine bars={bars} line={line} labels={labels} future={future} height={height} tip={tip} />);
   const step = Math.max(1, Math.ceil(n / Math.min(12, Math.max(2, Math.floor(w / 44) || 12))));
   return (
     <div className="barline" ref={box} style={{ height: height + 22 }}>

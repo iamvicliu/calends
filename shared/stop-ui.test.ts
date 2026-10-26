@@ -68,6 +68,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
         },
       ];
     },
+    useSnapshotRender() {},
     useRef(initial: unknown) {
       return { current: initial };
     },
