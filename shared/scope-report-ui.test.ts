@@ -2884,7 +2884,7 @@ test('selection lifecycle renders four metrics without a stop card and retains t
   assert.ok(nodes.some((n) => n.type === 'h3' && String(n.props.hint).includes('scope.totalBasis')));
   assert.ok(!nodes.some((n) => n.props.className === 'metric-note' && n.children.includes('scope.totalBasis')));
   assert.ok(nodes.some((n) => n.props.className === 'card scope-block scope-cash scope-alone'));
-  assert.ok(nodes.some((n) => n.type === 'Composition' && n.props.className === 'scope-block scope-spending scope-alone'));
+  assert.ok(!nodes.some((n) => n.type === 'Composition'));
   assert.equal(visible.at(-1), 6);
   const gantt = nodes.find((n) => n.type === 'Gantt')!;
   assert.equal(gantt.props.compact, true);

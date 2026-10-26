@@ -6,7 +6,6 @@ import { t } from '../../../shared/i18n.ts';
 import type { Block, ScopeReport } from '../../../shared/scope-report.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { Gantt } from '../views/Gantt.tsx';
-import { Composition } from './Composition.tsx';
 import { MetricCards, Metric, CardTitle } from './ui.tsx';
 
 /** Lifecycle presentation is exclusive to list selections; calendar blocks retain their renderer. */
@@ -85,9 +84,6 @@ export function ScopeLifecycleReport({
         </div>
       )}
       {trend && <div className="card scope-block scope-cash scope-alone">{renderBlock(trend)}</div>}
-      {data.spending.length > 0 && (
-        <Composition state={state} today={today} onOpen={onOpen} spending={data.spending} className="scope-block scope-spending scope-alone" />
-      )}
       {events && (
         <div className="card scope-block scope-events">
           {renderBlock({ ...events, rows: allEvents || copying ? events.rows : events.rows.slice(0, 6) })}
