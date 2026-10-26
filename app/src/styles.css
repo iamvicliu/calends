@@ -8920,11 +8920,15 @@ img.mm-flag {
 .gt-stop {
   position: absolute;
   z-index: 3;
+  width: 22px;
+  height: 22px;
 }
-.gt-stop,
 .lg-stop {
   width: 18px;
   height: 18px;
+}
+.gt-stop,
+.lg-stop {
   fill: var(--card);
   stroke: var(--red);
   stroke-width: 2.5;

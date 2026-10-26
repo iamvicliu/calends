@@ -60,7 +60,8 @@ const GAP_TUCK = 9;
  * 条按支付方式或地区上色；过去的实心、未来的半透明；计划中的斜线；两段之间空着的是断订；条下的小刻度是每笔扣款。
  */
 /** 停用标志与条同高，作为条的末端 */
-const STOP_CAP = 18;
+/** 停用标志直径：与胶囊同高（.gt-seg 22px），圆心落在停用日 */
+const STOP_CAP = 22;
 
 /** 损失金额（.gt-unused-amount：11px、600）的实际宽度；无法测量时按每字 7px 保守估算 */
 let measureCtx: CanvasRenderingContext2D | null | undefined;
@@ -627,7 +628,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                               className="gt-stop"
                               role="img"
                               aria-label={t('core.stop.terminate')}
-                              style={{ left: x(stopped.date) - STOP_CAP, top }}
+                              style={{ left: x(stopped.date) - STOP_CAP / 2, top }}
                               viewBox="0 0 20 20"
                             >
                               <title>{state.readonly ? t('core.stop.terminate') : stopDescription(g.v, today)}</title>
