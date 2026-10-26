@@ -108,7 +108,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
         <MetricCards plain>
           <Metric label={t('report.hero.annual')} value={signed(-now * 12)} />
           <Metric label={t('report.hero.perDay')} value={signed(-now / 30.4375, false)} />
-          <Metric label={t('report.hero.active')} value={tot.activeCount} />
+          <Metric label={t('report.hero.active')} value={tot.activeCount} note={tot.incomplete ? t('core.fxIncomplete') : undefined} />
           {tot.recoverMrr > 1 && <Metric label={t('report.hero.recover')} value={signed(tot.recoverMrr)} valueClassName="gain" />}
         </MetricCards>
       </div>

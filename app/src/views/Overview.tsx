@@ -509,7 +509,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
             }
           />
           <Metric label={t('overview.stmt.perDay')} value={flow(-tot.mrr / 30.4375, base)} />
-          <Metric label={t('overview.stmt.active')} value={tot.activeCount} />
+          <Metric label={t('overview.stmt.active')} value={tot.activeCount} note={tot.incomplete ? t('core.fxIncomplete') : undefined} />
         </MetricCards>
       </div>
       <div className="stmt-r">

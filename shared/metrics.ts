@@ -22,7 +22,7 @@ import {
   type Charge,
   DAYS_PER_MONTH,
 } from './billing.ts';
-import { chargeBaseOrNaN, chargeValue, convertOn, toBaseAt } from './fx.ts';
+import { chargeBaseOrNaN, chargeValue, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { cnDate, money } from './format.ts';
 import { intlLocale, t } from './i18n.ts';
 import type { AppState, PaymentMethod, Subscription } from './types.ts';
@@ -41,7 +41,7 @@ export function contributionOn(state: AppState, s: Subscription, day: string, fx
   if (s.status === 'cancelled' && !s.end) return 0;
   if (s.status === 'paused' && (s.pausedAt ?? day) <= day) return 0;
   if (s.status === 'trial' && s.trialEnd && s.trialEnd > day) return 0;
-  return toBaseAt(state, monthlyGross(s, day), s.currency, fxDate) * myShareFactor(s, day);
+  return toBaseOrNaN(state, monthlyGross(s, day), s.currency, fxDate) * myShareFactor(s, day);
 }
 
 /** fxDate 缺省为当前汇率；传入则按该日汇率 */

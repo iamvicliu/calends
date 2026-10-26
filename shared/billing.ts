@@ -945,14 +945,13 @@ export function monthlyMine(state: AppState, s: Subscription, day: string, metho
   return billedMonthly(state, s, day, methodId).mine;
 }
 
-/** 计费中各段的每月全额与我承担的部分（本位币）；折算不了的段跳过。monthlyMine 与 totals 共用 */
+/** 计费中各段的每月全额与我承担的部分（本位币）；折算不了时返回 NaN。monthlyMine 与 totals 共用 */
 function billedMonthly(state: AppState, s: Subscription, day: string, methodId?: string): { gross: number; mine: number } {
   let gross = 0;
   let mine = 0;
   for (const v of billedPhases(s, day)) {
     if ((methodId !== undefined && v.methodId !== methodId) || !['active', 'ending'].includes(effectiveStatus(v, day))) continue;
     const m = convert(monthlyGross(v, day), v.currency, state.settings.baseCurrency, state.fx);
-    if (!Number.isFinite(m)) continue;
     gross += m;
     mine += m * myShareFactor(v, day);
   }
@@ -964,6 +963,7 @@ export interface Totals {
   grossMrr: number;
   recoverMrr: number; // 合租每月回血
   activeCount: number;
+  incomplete: boolean;
 }
 
 export function totals(state: AppState, today: string): Totals {
@@ -984,7 +984,7 @@ export function totals(state: AppState, today: string): Totals {
     gross += m.gross;
     mrr += m.mine;
   }
-  return { mrr, grossMrr: gross, recoverMrr: gross - mrr, activeCount: count };
+  return { mrr, grossMrr: gross, recoverMrr: gross - mrr, activeCount: count, incomplete: !Number.isFinite(mrr) || !Number.isFinite(gross) };
 }
 
 // ---------- 余额续航 ----------
