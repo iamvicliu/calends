@@ -23,6 +23,7 @@ export function renderSnapshotCharts(copies: ReadonlyMap<Element, HTMLElement>, 
     for (const [source, copy] of copies) {
       const render = renderers.get(source);
       if (!render || !copy.isConnected) continue;
+      const gridColumn = getComputedStyle(copy).gridColumn;
       const host = copy.ownerDocument.createElement('div');
       host.style.display = 'contents';
       copy.replaceWith(host);
@@ -30,6 +31,9 @@ export function renderSnapshotCharts(copies: ReadonlyMap<Element, HTMLElement>, 
       roots.push(root);
       // useWidth's layout effect measures the detached desktop container synchronously.
       flushSync(() => root.render(render()));
+      // The display:contents host changes direct-child selectors; retain grid placement.
+      const rendered = host.firstElementChild as HTMLElement | null;
+      if (rendered) rendered.style.gridColumn = gridColumn;
       if (copy === boundary) clone = host.firstElementChild as HTMLElement;
     }
   } catch (error) {
