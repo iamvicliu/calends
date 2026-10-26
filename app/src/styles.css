@@ -6345,8 +6345,9 @@ a.car-toggle {
 }
 .gt-today {
   position: absolute;
-  top: 0;
-  bottom: 0;
+  /* 不顶天立地：与上下边框各留 5px */
+  top: 5px;
+  bottom: 5px;
   width: 1.5px;
   margin-left: -0.75px;
   background: var(--red-9);
