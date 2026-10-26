@@ -1,3 +1,4 @@
+import { currentPhase } from '../../../../shared/billing.ts';
 import { CopyImageButton } from '../../components/CopyImageButton.tsx';
 import { DetailHead, DetailSheet, Panel } from '../../components/DetailKit.tsx';
 import { ChargeMethods, chargeMethodIds, currencyTotals, YearLedger, YearMethods } from '../../components/YearLedger.tsx';
@@ -94,7 +95,7 @@ export function CarSheet({
           meta={
             <>
               <b>
-                {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+                {money(currentPhase(s, today).price, currentPhase(s, today).currency)} {cycleLabel(currentPhase(s, today).cycle)}
               </b>
               {!stopped && next && <span>{t('family.pool.next', { date: cnDate(next) })}</span>}
               <span>{t('family.sheet.seatsVal', { used: roster.taken, total: sh.seats })}</span>

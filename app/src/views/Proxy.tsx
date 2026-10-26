@@ -1,3 +1,4 @@
+import { currentPhase } from '../../../shared/billing.ts';
 import { copyParts } from '../components/copy.tsx';
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
@@ -55,7 +56,7 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
                 <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
               </div>
               <div className="muted ph-meta">
-                {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+                {money(currentPhase(s, today).price, currentPhase(s, today).currency)} {cycleLabel(currentPhase(s, today).cycle)}
                 {copyParts(stopped ? (s.end ? t('proxy.stoppedOn', { date: cnDate(s.end) }) : '') : next ? t('proxy.nextOn', { date: cnDate(next) }) : '')}
               </div>
             </div>
@@ -134,7 +135,7 @@ export function useProxySort(state: AppState, today: string, subs: Subscription[
       stopped,
       ...proxyTotals(list),
       next: stopped ? undefined : nextCharge(s, addDays(today, 1)),
-      priceBase: toBaseAt(state, s.price, s.currency),
+      priceBase: toBaseAt(state, currentPhase(s, today).price, currentPhase(s, today).currency),
     };
   });
   type Item = (typeof items)[number];

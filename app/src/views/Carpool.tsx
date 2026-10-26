@@ -1,3 +1,4 @@
+import { currentPhase } from '../../../shared/billing.ts';
 import { copyParts } from '../components/copy.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
 import { addDays, cycleLabel, effectiveStatus, memberDues, nextCharge, isStopped, collectCurrencyOf } from '../../../shared/billing.ts';
@@ -84,7 +85,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const value: Record<Exclude<CarSort, 'name' | 'next'>, (s: Subscription) => number> = {
     owed: owedOf,
     net: netOf,
-    price: (s) => num(toBaseAt(state, s.price, s.currency)),
+    price: (s) => num(toBaseAt(state, currentPhase(s, today).price, currentPhase(s, today).currency)),
     paid: (s) => books.get(s.id)!.paid,
     received: (s) => books.get(s.id)!.received,
     profit: (s) => -books.get(s.id)!.net,
@@ -231,7 +232,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                             <NameLink onClick={() => onOpen(s)}>{s.name}</NameLink>
                           </div>
                           <div className="muted car-sub">
-                            {money(s.price, s.currency)} {cycleLabel(s.cycle)}
+                            {money(currentPhase(s, today).price, currentPhase(s, today).currency)} {cycleLabel(currentPhase(s, today).cycle)}
                             {copyParts(next && live(s) ? `\n${t('family.pool.next', { date: cnDate(next) })}` : '')}
                           </div>
                         </div>
@@ -293,7 +294,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 sub={undefined}
                 onClick={() => onOpen(s)}
               >
-                {copyParts(t('family.pool.payTo', { name: s.share?.ownerName ?? t('family.pool.ownerDefault'), amount: flow(-s.price, s.currency) }))}
+                {copyParts(t('family.pool.payTo', { name: s.share?.ownerName ?? t('family.pool.ownerDefault'), amount: flow(-currentPhase(s, today).price, currentPhase(s, today).currency) }))}
               </Cell>
             ))}
           </Group>
@@ -310,7 +311,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                   </span>
                 </span>
                 <span className="cell-r">
-                  {money(s.price, s.currency)}
+                  {money(currentPhase(s, today).price, currentPhase(s, today).currency)}
                   <button className="btn tinted" onClick={() => setConvert(s)}>
                     {t('family.pool.convert')}
                   </button>
