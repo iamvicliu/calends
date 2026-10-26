@@ -1,3 +1,4 @@
+import { shouldGroupYears } from '../app/src/components/year-ledger.ts';
 import { readUiSource } from '../scripts/ui-test-source.ts';
 import * as phase2Icons from 'lucide-react';
 import { metricComponents } from '../scripts/ui-test-components.ts';
@@ -88,6 +89,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
           ? type({ ...props, children })
           : { type, props: props ?? {}, children },
     },
+    shouldGroupYears,
     canUseSingleKey,
     ...billing,
     ...listScope,
@@ -2267,7 +2269,9 @@ test('退款行显示负现金流和退款标签，全额退款后仍保留累�
     { Sheet: 'Sheet', NameLink: 'NameLink', perBill: () => '', createPortal: () => null },
   );
   const render = () => r.render('CarSheet', { state: st, s, today, book: carpool.carLedger(st, s, today), onClose() {}, onMember() {}, onOpenSub() {} });
-  // 只有一年的记录平铺，不用先展开；行与订阅详情的扣款记录同一套（ld-row dt-row）
+  // 同年多条先展开；退款行仍与订阅详情共用同一套。
+  const receiptsHead = render().find((n) => String(n.props.className ?? '').includes('ld-toggle'))!;
+  (receiptsHead.props.onClick as () => void)();
   const refund = render().find(
     (n) => String(n.props.className ?? '').startsWith('ld-row dt-row') && all(n.children).some((x) => x.children.includes('family.sheet.refund')),
   )!;

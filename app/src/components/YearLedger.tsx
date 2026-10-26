@@ -1,3 +1,4 @@
+import { shouldGroupYears } from './year-ledger.ts';
 import { Fragment, useState, type ReactNode } from 'react';
 import { t } from '../../../shared/i18n.ts';
 import type { AppState } from '../../../shared/types.ts';
@@ -9,7 +10,7 @@ import '../views/detail.css';
 /**
  * 按年分组的收付款表：订阅详情的扣款记录、合租的收款与付款共用这一套。
  * 四列（日期 · 第二列 · 原币金额 · 折合本位币）；给了 extraHead 时在第二列后多一列（如代付的「当时成本」，窄时收起）。
- * 只有一年的记录就平铺，跨年时按年分组且默认全部折叠；没有合计行，总数在上方的指标卡里。
+ * 每年最多一条时平铺；任意一年多条时整表按年分组且默认全部折叠；没有合计行，总数在上方的指标卡里。
  * 年份行是小计：点一下展开或折叠这一年；表头点一下全部展开或全部收起。
  * 第二列默认是支付方式，窄时收起（keepSecond 时保留，如合租收款的成员）
  */
@@ -43,7 +44,7 @@ export function YearLedger<T>({
   extraHead?: string;
 }) {
   const yearsOf = [...new Set(items.map((x) => dateOf(x).slice(0, 4)))];
-  const grouped = yearsOf.length > 1;
+  const grouped = shouldGroupYears(items, dateOf);
   const years = grouped ? yearsOf : [''];
   const [open, setOpen] = useState<Set<string>>(() => new Set());
   const inYear = (y: string) => items.filter((x) => dateOf(x).startsWith(y));

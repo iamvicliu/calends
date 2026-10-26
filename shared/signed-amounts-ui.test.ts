@@ -1,3 +1,4 @@
+import { shouldGroupYears } from '../app/src/components/year-ledger.ts';
 import { readUiSource, extractUiFunction } from '../scripts/ui-test-source.ts';
 import assert from 'node:assert/strict';
 import * as transfers from './transfers.ts';
@@ -32,7 +33,7 @@ const text = (html: string) => html.replace(/<[^>]*>/g, '');
 const yearLedger = (deps: Record<string, unknown>) => {
   const file = '../app/src/components/YearLedger.tsx';
   const src = read(file).split('export function YearLedger')[1].split('/** 年份行的支付方式')[0];
-  return load(file, 'YearLedger', `function YearLedger${src}`, { React, Fragment: React.Fragment, ...deps });
+  return load(file, 'YearLedger', `function YearLedger${src}`, { React, Fragment: React.Fragment, shouldGroupYears, ...deps });
 };
 afterEach(() => {
   setSignedAmounts(true);
@@ -236,7 +237,7 @@ test('Detail charge rows and annual totals show expenses/refunds consistently, i
   }
 });
 
-test('Detail charge history lists a year flat, and folds longer histories by year with a click on the year row', () => {
+test('Detail charge history groups every year when one year has multiple rows, and sparse years stay directly editable', () => {
   const file = '../app/src/views/Detail.tsx';
   const source = extractUiFunction(new URL(file, import.meta.url), 'Charges').split('function Charges(')[1];
   // 组件里有两个状态（显示全部、展开的年份）：按调用顺序存，重新渲染时沿用
@@ -311,11 +312,15 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
     }
   };
 
-  // 一年以内：不分年，全部列出，没有「显示全部」
+  // 同年多条也按年聚合：点击表头后显示明细，日期与支付方式不变
   const recent = monthly(10, 2026);
   values = [];
   let h = html(recent);
-  assert.equal(years(h), 0);
+  assert.equal(years(h), 1);
+  assert.equal(count(h), 0);
+  const recentHead = find(tree(recent), (p) => String(p.className ?? '').includes('ld-toggle'))!;
+  (recentHead.onClick as () => void)();
+  h = html(recent);
   assert.equal(count(h), 10);
   // 每一行都写支付方式
   assert.equal((h.match(/data-pay/g) ?? []).length, 10);
@@ -355,11 +360,12 @@ test('Detail charge history lists a year flat, and folds longer histories by yea
   assert.equal(count(html(long)), 82);
   (head().onClick as () => void)();
   assert.equal(count(html(long)), 0);
-  // 只跨一次年、只有两笔也按年折叠
+  // 每年各一笔：直接平铺，没有年份行或聚合按钮
   values = [];
   h = html([...monthly(1, 2025).map((c) => ({ ...c, date: '2025-12-15' })), ...monthly(1, 2026)]);
-  assert.equal(years(h), 2);
-  assert.equal(count(h), 0);
+  assert.equal(years(h), 0);
+  assert.equal(count(h), 2);
+  assert.ok(!h.includes('ld-toggle table-head'));
 
   // 没有记录：没有表格，也没有展开按钮
   values = [];
@@ -645,9 +651,9 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     const state: AppState = { settings: DEFAULT_SETTINGS, fx: FALLBACK_FX, methods: [], subscriptions: [sub] };
     const html = renderToStaticMarkup(React.createElement(Detail, { sub, state, today, onEdit: empty, onClose: empty }));
     assert.equal((html.match(/class="dt-charges[ "]/g) ?? []).length, 1, `${count} credits from ${start} at ${today}`);
-    // 跨年就按年分组并全部折叠（只见年份小计）；只有一年的全部平铺
+    // 任意一年多条就统一分组并全部折叠（只见年份小计）
     const charges = billing.chargesBetween(sub, sub.start, today, today);
-    const grouped = new Set(charges.map((c) => c.date.slice(0, 4))).size > 1;
+    const grouped = shouldGroupYears(charges, (c) => c.date);
     assert.equal((html.match(/class="ld-row dt-row/g) ?? []).length, grouped ? 0 : charges.length);
     // 这张表里欧元金额都是整数，原币不写 .00（平铺时看单笔返佣，分组时看年份小计）
     if (!grouped) assert.ok(/\+[$€]5(\.00)?(?!\d)/.test(text(html)));
