@@ -499,7 +499,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           <span className="scope-title">{title}</span>
         ) : (
           <button type="button" className="scope-trigger" aria-expanded={false} aria-controls={id} onClick={onToggle}>
-            {t('scope.expand')} <span className="copy-gap" aria-hidden="true" /> {title}
+            {t('scope.expand')}
           </button>
         )}
       </h2>
