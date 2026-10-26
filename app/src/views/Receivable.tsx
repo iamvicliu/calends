@@ -1,14 +1,15 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode, type CSSProperties } from 'react';
 import { addDays, addMonths, diffDays, uid } from '../../../shared/billing.ts';
 import { periodsTotal } from '../../../shared/carpool.ts';
 import { convertOn } from '../../../shared/fx.ts';
 import { cnDate, cnDateFull, currencyDecimals, flow, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
+import { periodGrid, periodTipData, type PeriodGridMode } from '../../../shared/period-grid.ts';
 import { isSettled, putRecord, removeRecord, resolveKey, resolvedPeriods, type LedgerPeriod, type Receivable } from '../../../shared/receivables.ts';
 import type { AppState, Receipt, Waiver } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
-import { ask, Sheet } from '../components/overlays.tsx';
+import { ask, Sheet, tipProps, tipSet, TipTable } from '../components/overlays.tsx';
 import { Cell, Group } from '../components/ui.tsx';
 import { NumInput, Seg, useSubmit } from '../components/inputs.tsx';
 import { run } from '../toast.ts';
@@ -227,28 +228,107 @@ export function ReceivableSheet({
   );
 }
 
-/**
- * 各期一览：最近的若干期一格一期，已收、已免、欠着、未到期颜色不同，一眼看出哪几期没收（可以不连续）。
- * 点欠着或未到期的格子去记收款，点已收的格子打开那一笔
- */
-export function PeriodStrip({ periods, today, onPick, max = 12 }: { periods: LedgerPeriod[]; today: string; onPick: (p: LedgerPeriod) => void; max?: number }) {
-  // 到今天为止的期，加上提前收了的期，再加下一期
-  const past = periods.filter((p) => p.from <= today || p.status === 'paid' || p.status === 'waived');
-  const next = periods.find((p) => p.from > today && !past.includes(p));
-  const list = [...past, ...(next ? [next] : [])].sort((a, b) => a.from.localeCompare(b.from)).slice(-max);
-  if (!list.length) return null;
+/** A period can occupy several months and several rows; all segments share one highlight. */
+export function PeriodStrip({
+  periods,
+  today,
+  onPick,
+  mode,
+}: {
+  periods: LedgerPeriod[];
+  today: string;
+  onPick: (p: LedgerPeriod) => void;
+  mode?: PeriodGridMode;
+}) {
+  const [active, setActive] = useState<string | null>(null);
+  const grid = periodGrid(periods, today, mode);
+  useEffect(() => {
+    const hide = () => setActive(null);
+    const key = (e: KeyboardEvent) => e.key === 'Escape' && hide();
+    document.addEventListener('scroll', hide, true);
+    document.addEventListener('keydown', key);
+    return () => {
+      document.removeEventListener('scroll', hide, true);
+      document.removeEventListener('keydown', key);
+      tipSet?.(null);
+    };
+  }, []);
+  if (!grid.rows.length) return null;
   return (
-    <div className="rv-strip" role="list">
-      {list.map((p) => (
-        <button
-          key={p.key}
-          type="button"
-          role="listitem"
-          className={`rv-cell ${p.status}`}
-          title={`${periodRange(p)}\n${t(`receivable.status.${p.status}`)}`}
-          aria-label={`${periodRange(p)}, ${t(`receivable.status.${p.status}`)}`}
-          onClick={() => onPick(p)}
-        />
+    <div className="rv-strip" style={{ '--rv-columns': grid.columns } as CSSProperties} role="list">
+      {grid.rows.map((row) => (
+        <div key={row.key}>
+          {row.year != null && (
+            <small className="muted">
+              {t(row.quarter ? 'receivable.grid.quarter' : 'receivable.grid.year', { year: row.year, quarter: row.quarter ?? 0 })}
+            </small>
+          )}
+          <div>
+            {row.segments.map((seg) => {
+              const p = seg.period;
+              const data = periodTipData(p);
+              const tips = tipProps(() => (
+                <TipTable
+                  head={[periodRange(p), t(`receivable.status.${p.status}`)]}
+                  rows={[
+                    { key: 'due', label: t('receivable.grid.due'), value: `${money(data.due, data.currency)} ${data.currency}` },
+                    ...(data.receipt
+                      ? data.receipt.opening
+                        ? [{ key: 'opening', label: t('receivable.opening'), value: '' }]
+                        : [
+                            { key: 'date', label: t('receivable.receivedOn'), value: cnDateFull(data.receipt.date) },
+                            {
+                              key: 'received',
+                              label: t('receivable.actual'),
+                              value: `${money(data.receipt.amount, data.receipt.currency)} ${data.receipt.currency}`,
+                            },
+                            { key: 'count', label: t('receivable.periods'), value: t('receivable.periodsCount', { count: data.receipt.count }) },
+                          ]
+                      : []),
+                    ...(data.note ? [{ key: 'note', label: t('receivable.note'), value: data.note }] : []),
+                  ]}
+                />
+              ));
+              return (
+                <button
+                  key={p.key}
+                  type="button"
+                  role="listitem"
+                  className={`rv-cell ${p.from > today ? 'upcoming' : p.status} ${active === p.key ? 'active' : ''}`}
+                  data-start={seg.start}
+                  data-end={seg.end}
+                  style={{ gridColumn: `${seg.column + 1} / span ${seg.span}` }}
+                  aria-label={`${periodRange(p)}, ${money(p.due, p.currency)} ${p.currency}, ${t(`receivable.status.${p.status}`)}`}
+                  data-period={p.key}
+                  {...tips}
+                  onMouseEnter={(e) => {
+                    setActive(p.key);
+                    tips.onMouseEnter(e);
+                  }}
+                  onMouseLeave={() => {
+                    setActive(null);
+                    tips.onMouseLeave();
+                  }}
+                  onFocus={(e) => {
+                    setActive(p.key);
+                    tips.onFocus(e);
+                  }}
+                  onBlur={() => {
+                    setActive(null);
+                    tips.onBlur();
+                  }}
+                  onPointerDown={(e) => {
+                    if (e.pointerType === 'touch') {
+                      setActive(p.key);
+                      tips.onFocus(e);
+                    }
+                  }}
+                  onClick={() => onPick(p)}
+                />
+              );
+            })}
+          </div>
+        </div>
       ))}
     </div>
   );

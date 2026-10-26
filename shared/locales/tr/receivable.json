@@ -45,5 +45,10 @@
     "upcoming": "Vadesi gelmedi",
     "this": "Bu ödeme"
   },
-  "confirmDelete": "{date} tarihli kayıt silinsin mi?"
+  "confirmDelete": "{date} tarihli kayıt silinsin mi?",
+  "grid": {
+    "year": "{year}",
+    "quarter": "{year} Q{quarter}",
+    "due": "Ödenecek tutar"
+  }
 }

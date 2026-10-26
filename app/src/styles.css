@@ -9911,14 +9911,33 @@ img.mm-flag {
   font-size: var(--fs-2);
 }
 
-/* 各期一览：一格一期，颜色与合租时间条一致（已收绿、免收浅灰斜纹、欠着红斜纹、未到期灰斜纹） */
+/* 各期一览：按年分行，颜色与合租时间条一致（已收绿、免收浅灰斜纹、欠着红斜纹、未到期灰斜纹） */
 .rv-strip {
-  display: flex;
-  gap: 3px;
+  display: grid;
+  gap: 6px;
   width: 100%;
+  min-width: 0;
+}
+.rv-strip > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.rv-strip > div > small {
+  flex: 0 0 auto;
+  color: var(--label-3);
+  font-size: var(--fs-1);
+  font-variant-numeric: tabular-nums;
+}
+.rv-strip > div > div {
+  display: grid;
+  grid-template-columns: repeat(var(--rv-columns), minmax(0, 1fr));
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
 }
 .rv-cell {
-  flex: 1 1 0;
   min-width: 0;
   height: 14px;
   border-radius: 3px;
@@ -9940,8 +9959,19 @@ img.mm-flag {
 .rv-cell.upcoming {
   background: repeating-linear-gradient(135deg, var(--gray-8) 0 2px, transparent 2px 5px);
 }
-.rv-cell:hover {
+.rv-cell:hover,
+.rv-cell.active {
   filter: brightness(0.92);
+  outline: var(--hairline) solid var(--focus-ring);
+  outline-offset: var(--hairline);
+}
+.rv-cell[data-start='false'] {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.rv-cell[data-end='false'] {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
 /* Shared-plan member presentation; dynamic dimensions remain explicit custom properties. */
