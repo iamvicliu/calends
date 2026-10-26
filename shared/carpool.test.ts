@@ -500,3 +500,32 @@ test('取消不分摊：生效日前没结清的期记成免收，不补收不�
   // 没有要免的期时原样返回
   assert.equal(waiveExemptSpan(s, m, '2026-03-01', '2026-03-10', 'CNY'), m);
 });
+
+test('已退出且提前收了的成员：已付至按收的钱覆盖到哪天，人员页、MCP、成员弹窗同一个值', async () => {
+  const { memberPaidThrough } = await import('./carpool.ts');
+  const months = ['2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01', '2026-06-01'];
+  const s: Subscription = {
+    id: 's',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 30,
+    currency: 'CNY',
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 3, collectFrom: '2026-01-01', members: [] },
+  };
+  const m = {
+    id: 'm',
+    name: 'M',
+    fee: 10,
+    feeCurrency: 'CNY',
+    billEvery: 1,
+    joined: '2026-01-01',
+    left: '2026-02-15',
+    receipts: [{ id: 'r', date: '2026-01-01', amount: 60, currency: 'CNY', periods: months }],
+  };
+  assert.equal(memberPaidThrough(s, m, '2026-03-10', 'CNY'), '2026-06-30');
+  assert.equal(memberPaidThrough(s, { ...m, receipts: [] }, '2026-03-10', 'CNY'), undefined);
+});

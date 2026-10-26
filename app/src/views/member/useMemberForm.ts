@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { todayIn, uid, memberBillMonths, memberCollection, collectionAnchor, collectCurrencyOf } from '../../../../shared/billing.ts';
 import { cnDateFull } from '../../../../shared/format.ts';
 import type { AppState, Receipt, ShareMember, Subscription } from '../../../../shared/types.ts';
-import { isSettled, paidThrough, putRecord, removeRecord, resolveKey, setOpening } from '../../../../shared/receivables.ts';
+import { isSettled, putRecord, removeRecord, resolveKey, setOpening } from '../../../../shared/receivables.ts';
 
 import { ask } from '../../components/overlays.tsx';
 
@@ -23,6 +23,7 @@ import {
   memberCashFlows,
   memberFlowValue,
   waiveExemptSpan,
+  memberPaidThrough,
 } from '../../../../shared/carpool.ts';
 
 import { t } from '../../../../shared/i18n.ts';
@@ -133,7 +134,7 @@ export function useMemberForm({
   const st = memberStatus(state, { ...s, share: { ...s.share!, members: s.share!.members.map((x) => (x.id === next.id ? next : x)) } }, next, today);
   const [receipt, setReceipt] = useState<{ edit?: string; preset?: string[] } | null>(initialReceipt ?? null);
   // 已付至按没退出算：退出后还有已付的天数时照样显示到那期期末，算退款要看
-  const paidUntil = next.left ? paidThrough(memberLedgerAhead(state, s, { ...next, left: undefined }, today).periods) : paidThrough(ledger.periods);
+  const paidUntil = memberPaidThrough(s, next, today, collectCcy);
 
   // 同一笔收款复制给其他成员：大家每期交的一样，不用一个个重填。对方这几期都还空着才能复制
   const others = (s.share?.members ?? []).filter((x) => x.id !== f.id);

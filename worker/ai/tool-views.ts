@@ -14,7 +14,6 @@ import {
   type MemberDue,
   memberCollection,
   memberUnpaidFrom,
-  memberLedger,
   monthlyGross,
   monthlyPriceTotal,
   myShareFactor,
@@ -24,10 +23,10 @@ import {
   type Charge,
 } from '../../shared/billing.ts';
 import { chargeBaseOrNaN, toBaseOrNaN } from '../../shared/fx.ts';
-import { paidThrough, type LedgerPeriod } from '../../shared/receivables.ts';
+import { type LedgerPeriod } from '../../shared/receivables.ts';
 import { personAmounts, type PersonLedger } from '../../shared/people.ts';
 import type { AppState, Person, ShareMember, Subscription } from '../../shared/types.ts';
-import { carRule, followsCar } from '../../shared/carpool.ts';
+import { carRule, followsCar, memberPaidThrough } from '../../shared/carpool.ts';
 
 export function money(st: AppState, amount: number, currency: string, date?: string, to = st.settings.baseCurrency) {
   const conv = !Number.isFinite(amount) ? NaN : currency === to ? amount : toBaseOrNaN(st, amount, currency, date, to);
@@ -122,7 +121,7 @@ export function collectionSummary(st: AppState, s: Subscription, m: ShareMember,
   return {
     follows_rule: rule ? followsCar(st, s, m, today) : false,
     collect_from: collectionAnchor(s),
-    paid_until: paidThrough(memberLedger(s, m, today, currency).periods) ?? null,
+    paid_until: memberPaidThrough(s, m, today, currency) ?? null,
     leave_refund: m.leaveRefund ?? null,
     first_collection: first,
     next_collection: next,

@@ -25,7 +25,7 @@ import {
 import { chargeBaseOrNaN, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { yearCost } from './metrics.ts';
 import { currencyDecimals } from './format.ts';
-import { isSettled, putRecord, type Period } from './receivables.ts';
+import { isSettled, paidThrough, putRecord, type Period } from './receivables.ts';
 import type { AppState, CarRule, MemberFeePoint, ShareMember, Subscription } from './types.ts';
 
 /** 成员实际交来、退回的钱：期初结清没有金额，不算；退款作为负数。不改变各期是否结清 */
@@ -47,6 +47,11 @@ function firstPeriodCut(s: Subscription, m: ShareMember, collectCurrency: string
   const joined = memberSince(s, m);
   const real = memberCollection(s, m, joined, collectCurrency);
   return real.until < memberCollection(s, { ...m, left: undefined }, joined, collectCurrency).until ? real : undefined;
+}
+
+/** 已付至：从第一期起连续结清到哪天。已退出的按没退出算，退出前提前收了的期也算进去（成员弹窗、人员页、MCP 同一口径） */
+export function memberPaidThrough(s: Subscription, m: ShareMember, today: string, collectCurrency: string): string | undefined {
+  return paidThrough(memberLedger(s, m.left ? { ...m, left: undefined } : m, today, collectCurrency).periods);
 }
 
 /** 清空退出日时一并清除退款，其他历史不动。 */
