@@ -10,7 +10,7 @@ const ai = (name: string, file: string, url: string, aka: string[] = [], cat: Ca
   aka,
   cat,
   url,
-  icon: ['kimi', 'qwen', 'doubao', 'zhipu', 'devin', 'coze', 'ideogram', 'kling', 'suno'].includes(file) ? `/brands/${file}.webp` : `/ai/${file}.svg`,
+  icon: ['claude', 'kimi', 'qwen', 'doubao', 'zhipu', 'devin', 'coze', 'ideogram', 'kling', 'suno'].includes(file) ? `/brands/${file}.webp` : `/ai/${file}.svg`,
   localized: LOCALIZED.has(file),
 });
 
