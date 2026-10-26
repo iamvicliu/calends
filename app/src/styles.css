@@ -8091,17 +8091,25 @@ a.car-toggle {
   --pc: var(--purple-8);
 }
 /* 参与的每一项：第一行订阅与状态，下面是标准的 Cell 行 */
-.pp-state {
-  flex: none;
-  font-size: var(--fs-2);
-  font-weight: 600;
-  color: var(--label-2);
-}
 .pp-head.off .pp-item-l {
   opacity: 0.6;
 }
 .pp-head {
   gap: 10px;
+}
+.pp-item-r {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+  font-size: var(--fs-2);
+}
+.pp-item-r small {
+  font-size: var(--fs-1);
+  color: var(--label-3);
+}
+.pp-item-r small.green {
+  color: var(--green);
 }
 .pp-item-l {
   display: flex;
@@ -9198,51 +9206,6 @@ img.mm-flag {
   color: var(--label);
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-/* 人员账号是关系草稿，随人员弹窗底部保存。 */
-.pp-account {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-}
-.pp-account-value {
-  flex: 0 1 auto;
-  min-width: 0;
-  border: 0;
-  padding: 0;
-  height: auto;
-  background: none;
-  color: var(--label);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.pp-account input {
-  width: 100%;
-  min-width: 0;
-  height: var(--ctl-h-md);
-  border: 0;
-  border-radius: var(--radius-sm);
-  padding: 0 6px;
-  background: var(--fill-2);
-  color: var(--label);
-  font: inherit;
-}
-.pp-account input:focus-visible,
-.pp-account-value:focus-visible {
-  outline: var(--hairline) solid var(--focus-ring);
-  outline-offset: 2px;
-}
-.pp-account .icon-btn {
-  flex: none;
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  min-height: 24px;
-  padding: 0;
-  box-shadow: none;
 }
 
 /* 成员区按实际内容宽度切换，收付款记录区保持原布局。 */

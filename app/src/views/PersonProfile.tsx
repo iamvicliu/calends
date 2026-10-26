@@ -1,24 +1,20 @@
-import { popupOpen, sheetSubmitKey } from '../keyboard.ts';
 import { useRef, useState } from 'react';
-import { Pencil } from 'lucide-react';
 import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { compressAvatar } from '../handoff.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { colorFor, peopleLedger, refsFor, type PersonItem, type PersonLedger } from '../../../shared/people.ts';
-import { proxyRows } from '../../../shared/proxy.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
 import { Picker } from '../components/Picker.tsx';
-import { Act } from './Detail.tsx';
-import { MetricCards, Metric, Cell, Group, IconButton } from '../components/ui.tsx';
+import { Cell, Group } from '../components/ui.tsx';
 import { ask, Sheet } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
 import { SubIcon } from '../components/marks.tsx';
-import { copyText, toast, run } from '../toast.ts';
-import { deletePerson, getState, mergePerson, savePerson, saveSub } from '../store.ts';
+import { toast, run } from '../toast.ts';
+import { deletePerson, mergePerson, savePerson } from '../store.ts';
 import type { MemberSheet } from './Members.tsx';
 import { ContactField, contactText, contactUrl, viaLabel } from '../components/Contact.tsx';
-import { EntrySheet, LedgerSheet } from './proxy/sheets.tsx';
+import { LedgerSheet } from './proxy/sheets.tsx';
 import './people-list.css';
 
 /** 联系按钮：Telegram、WhatsApp、邮箱、手机等能直接打开的渠道 */
@@ -75,21 +71,14 @@ export function PersonSheet({
   const up = (p: Partial<Person>) => setF({ ...f, ...p });
   const via = f.contactVia ?? 'Telegram';
   const profile = (p: Person) => JSON.stringify([p.name, p.contact ? p.contactVia : undefined, p.contact, p.note, p.color, p.avatar]);
-  const [accounts, setAccounts] = useState<Record<string, string>>({});
-  const [editingAccount, setEditingAccount] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const accountKey = (i: PersonItem) => `${i.sub.id}/${i.member!.id}`;
-  const accountValue = (i: PersonItem) => accounts[accountKey(i)] ?? i.member?.account ?? '';
-  const changedAccounts = l.items.filter((i) => i.member && accountValue(i).trim() !== (i.member.account ?? ''));
-  const dirty = (!!stored && profile(stored) !== profile(f)) || changedAccounts.length > 0;
+  const dirty = !!stored && profile(stored) !== profile(f);
   const refs = l.person.id ? refsFor(state.subscriptions, l.person.id).length : l.items.length;
   const others = (state.people ?? []).filter((p) => p.id !== l.person.id).sort((a, b) => a.name.localeCompare(b.name));
   const [member, setMember] = useState<{ s: Subscription; m: ShareMember; collect?: boolean } | null>(null);
   const [ledger, setLedger] = useState<Subscription | null>(null);
-  const [entry, setEntry] = useState<{ s: Subscription; row: ReturnType<typeof proxyRows>[number] } | null>(null);
   const ro = !!state.readonly;
   const fileInput = useRef<HTMLInputElement>(null);
-  const profileName = useRef<HTMLInputElement>(null);
   const busyRef = useRef(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const uploadAvatar = async (file?: File) => {
@@ -114,45 +103,14 @@ export function PersonSheet({
     setSaving(true);
     try {
       await run(async () => {
-        // 每次从当前状态取订阅，保留本弹窗打开后新增的收款及其他成员改动。
-        for (const subId of new Set(changedAccounts.map((i) => i.sub.id))) {
-          const current = getState().subscriptions.find((s) => s.id === subId);
-          if (!current?.share) throw new Error(t('people.sheet.accountMissing'));
-          const changes = changedAccounts.filter((i) => i.sub.id === subId);
-          if (changes.some((i) => !current.share!.members.some((m) => m.id === i.member!.id))) throw new Error(t('people.sheet.accountMissing'));
-          await saveSub({
-            ...current,
-            share: {
-              ...current.share,
-              members: current.share.members.map((m) => {
-                const item = changes.find((i) => i.member!.id === m.id);
-                return item ? { ...m, account: accountValue(item).trim() || undefined } : m;
-              }),
-            },
-          });
-        }
         if (stored && profile(stored) !== profile(f)) {
           const saved = await savePerson({ ...f, name: f.name.trim(), contactVia: f.contact ? via : undefined });
           setF((current) => (profile(current) === profile(f) ? saved : current));
         }
-        setAccounts({});
-        setEditingAccount(null);
       }, t('family.member.saved'));
     } finally {
       setSaving(false);
     }
-  };
-  /** 记收款：合租打开成员的收款表单，代付打开最早一期没收的 */
-  const record = (i: PersonItem) => {
-    const s = live(i.sub);
-    if (i.kind === 'share') {
-      const m = s.share?.members.find((x) => x.id === i.member!.id);
-      if (m) setMember({ s, m, collect: true });
-      return;
-    }
-    const open = proxyRows(state, s, today).filter((r) => r.receivedBase == null);
-    if (open.length) setEntry({ s, row: open[open.length - 1] });
-    else setLedger(s);
   };
   const tap = (i: PersonItem) => {
     const s = live(i.sub);
@@ -167,19 +125,6 @@ export function PersonSheet({
       narrow
       title={l.person.name}
       onClose={onClose}
-      actions={
-        stored && !ro ? (
-          <Act
-            primary
-            icon={<Pencil size={15} />}
-            label={t('detail.action.edit')}
-            onClick={() => {
-              profileName.current?.scrollIntoView({ block: 'center' });
-              profileName.current?.focus({ preventScroll: true });
-            }}
-          />
-        ) : undefined
-      }
       foot={
         stored && !ro ? (
           <>
@@ -218,119 +163,6 @@ export function PersonSheet({
             <ContactLink p={f} />
           </div>
         )}
-        {/* 参与多项时才汇总；只有一项时那一项里已经写着 */}
-        {l.items.length > 1 && (
-          <MetricCards>
-            <Metric
-              label={t('people.sheet.owed')}
-              value={l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}
-              valueClassName={l.owed > 0.005 ? 'warn' : 'done'}
-            />
-            <Metric label={t('people.sheet.received')} value={flow(l.received, base, { compact: true })} valueClassName="green" />
-          </MetricCards>
-        )}
-
-        {/* 参与的每一项各占一组：第一行是订阅与状态（点开成员弹窗），下面是账号、已付至、至今收回，最后记一笔 */}
-        {l.items.length === 0 && (
-          <Group title={t('people.sheet.in', { count: 0 })} foot={t('people.sheet.inEmpty')}>
-            {null}
-          </Group>
-        )}
-        {l.items.map((i, n) => {
-          const canCollect = !ro && !i.member?.exempt && (i.active || i.periodsOwed > 0);
-          const gone = !!i.member?.left && i.member.left <= today;
-          return (
-            <Group key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`} title={n === 0 ? t('people.sheet.in', { count: l.items.length }) : undefined}>
-              <button type="button" className={`cell tap pp-head ${i.active ? '' : 'off'}`} disabled={ro || saving} onClick={() => tap(i)}>
-                <span className="pp-item-l">
-                  <SubIcon sub={i.sub} size={30} />
-                  <span>
-                    {i.sub.name}
-                    <small>{t(`people.kind.${i.kind}`)}</small>
-                  </span>
-                </span>
-                {i.owed > 0.005 ? (
-                  <b className="pp-state" style={{ color: 'var(--orange)' }}>
-                    {t('family.pool.owedAmount', { amount: money(i.owed, base) })}
-                  </b>
-                ) : (
-                  <span className="pp-state" style={{ color: i.active ? 'var(--green)' : undefined }}>
-                    {gone ? t('people.item.left') : !i.active ? t('people.item.ended') : t('family.pool.settled')}
-                  </span>
-                )}
-                <Icon name="right" />
-              </button>
-              {i.member && (
-                <Cell label={t('family.member.accountHere')}>
-                  <span className="pp-account" data-submit={editingAccount === accountKey(i) ? '' : undefined}>
-                    {editingAccount === accountKey(i) ? (
-                      <input
-                        autoFocus
-                        autoCapitalize="off"
-                        aria-label={`${i.sub.name}\n${t('family.member.account')}`}
-                        placeholder={t('family.member.accountPhShort')}
-                        value={accountValue(i)}
-                        disabled={saving}
-                        onChange={(e) => setAccounts((draft) => ({ ...draft, [accountKey(i)]: e.target.value }))}
-                        onBlur={() => setEditingAccount(null)}
-                        onKeyDown={(e) => {
-                          if (sheetSubmitKey(e.nativeEvent) && !popupOpen(e.currentTarget.ownerDocument)) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setEditingAccount(null);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <button
-                        type="button"
-                        className="pp-account-value icon-text"
-                        disabled={ro || saving || !stored}
-                        aria-label={`${i.sub.name}\n${t('family.member.editAccount')}`}
-                        title={accountValue(i).trim() || t('family.member.accountEmpty')}
-                        onClick={() => setEditingAccount(accountKey(i))}
-                      >
-                        <span className="text-ellipsis">{accountValue(i).trim() || t('family.member.accountEmpty')}</span>
-                        {!ro && stored && <Pencil size={14} />}
-                      </button>
-                    )}
-                    {accountValue(i).trim() && editingAccount !== accountKey(i) && (
-                      <IconButton
-                        aria-label={t('family.member.copyAccount')}
-                        title={t('family.member.copyAccount')}
-                        onClick={() => void copyText(accountValue(i).trim(), t('detail.copied'))}
-                      >
-                        <Icon name="copy" size={14} />
-                      </IconButton>
-                    )}
-                  </span>
-                </Cell>
-              )}
-              {i.kind === 'share' ? (
-                <Cell label={t('family.member.paidUntil')}>
-                  {i.member?.exempt
-                    ? t('family.pool.exempt')
-                    : i.periodsOwed > 0
-                      ? t('people.item.owedPeriods', { count: i.periodsOwed })
-                      : i.paidUntil
-                        ? cnDateAuto(i.paidUntil, today)
-                        : t('people.item.noPay')}
-                </Cell>
-              ) : (
-                <Cell label={t('people.sheet.last')}>{i.lastPaid ? cnDateAuto(i.lastPaid, today) : t('people.item.noPay')}</Cell>
-              )}
-              <Cell label={t('people.sheet.received')}>
-                <span className={i.received ? 'green' : 'muted'}>{flow(i.received, base)}</span>
-              </Cell>
-              {canCollect && (
-                <button type="button" className="cell tap member-pay-add" onClick={() => record(i)}>
-                  <Icon name="plus" /> {t('family.quick.backCollect')}
-                </button>
-              )}
-            </Group>
-          );
-        })}
-
         {stored && (
           <Group
             title={t('people.sheet.profile')}
@@ -393,7 +225,7 @@ export function PersonSheet({
               )}
             </Cell>
             <Cell label={t('family.member.name')}>
-              <input ref={profileName} value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
+              <input value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
             </Cell>
             <Cell label={t('family.member.contact')}>
               <ContactField
@@ -445,6 +277,55 @@ export function PersonSheet({
             )}
           </Group>
         )}
+
+        {/* 参与的项目：一项一行，点开进成员弹窗（代付进账目），账号、记一笔都在那里 */}
+        <Group title={t('people.sheet.in', { count: l.items.length })} foot={l.items.length ? undefined : t('people.sheet.inEmpty')}>
+          {l.items.map((i) => {
+            const gone = !!i.member?.left && i.member.left <= today;
+            const detail =
+              i.kind === 'share'
+                ? i.member?.exempt
+                  ? t('family.pool.exempt')
+                  : i.periodsOwed > 0
+                    ? t('people.item.owedPeriods', { count: i.periodsOwed })
+                    : i.paidUntil
+                      ? `${t('family.member.paidUntil')} ${cnDateAuto(i.paidUntil, today)}`
+                      : t('people.item.noPay')
+                : i.lastPaid
+                  ? `${t('people.sheet.last')} ${cnDateAuto(i.lastPaid, today)}`
+                  : t('people.item.noPay');
+            return (
+              <button
+                key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`}
+                type="button"
+                className={`cell tap pp-head ${i.active ? '' : 'off'}`}
+                disabled={ro || saving}
+                onClick={() => tap(i)}
+              >
+                <span className="pp-item-l">
+                  <SubIcon sub={i.sub} size={30} />
+                  <span>
+                    {i.sub.name}
+                    <small>
+                      {t(`people.kind.${i.kind}`)} {detail}
+                    </small>
+                  </span>
+                </span>
+                <span className="pp-item-r">
+                  {i.owed > 0.005 ? (
+                    <b style={{ color: 'var(--orange)' }}>{t('family.pool.owedAmount', { amount: money(i.owed, base) })}</b>
+                  ) : (
+                    <b style={{ color: i.active ? 'var(--green)' : undefined }}>
+                      {gone ? t('people.item.left') : !i.active ? t('people.item.ended') : t('family.pool.settled')}
+                    </b>
+                  )}
+                  <small className={i.received ? 'green' : undefined}>{flow(i.received, base)}</small>
+                </span>
+                <Icon name="right" />
+              </button>
+            );
+          })}
+        </Group>
       </div>
       {member && (
         <MemberDialog
@@ -456,7 +337,6 @@ export function PersonSheet({
         />
       )}
       {ledger && <LedgerSheet state={state} s={live(ledger)} onOpen={onOpen} onClose={() => setLedger(null)} />}
-      {entry && <EntrySheet state={state} s={live(entry.s)} row={entry.row} onClose={() => setEntry(null)} />}
     </Sheet>
   );
 }

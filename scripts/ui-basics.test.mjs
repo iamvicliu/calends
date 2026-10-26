@@ -889,8 +889,6 @@ test('keyboard behavior stays in the shared Sheet and guards, with safe confirma
   assert.match(calendar, /if \(!canUseSingleKey\(e\)\) return/);
   assert.match(app, /const action = pageShortcut\(e, detail\)/);
   assert.match(app, /onEdit=\{editFromDetail\}/);
-  const people = sources.find(([file]) => file === 'views/People.tsx')[2];
-  assert.match(people, /data-submit=\{editingAccount === accountKey\(i\) \? '' : undefined\}/);
 });
 
 test('single-series charts share the monochrome chart ink and keep readable data-line widths', () => {

@@ -121,7 +121,7 @@ function harness() {
   return { render, saves, state: () => state };
 }
 
-test('family people tab opens the shared detail, header edit reaches the existing profile form and saved note updates it', async () => {
+test('family people tab opens the shared detail with the profile form on top and saved note updates it', async () => {
   const h = harness(),
     listHooks = hooks();
   const deps = {
@@ -144,22 +144,12 @@ test('family people tab opens the shared detail, header edit reaches the existin
   row.props.onClick();
   assert.equal(nodes(list(), (n) => n.type === 'PersonSheet')[0].props.l.person.id, 'p');
   let tree = h.render();
-  const edit = nodes(tree.props.actions, (n) => n.type === 'Act' && n.props.label === 'detail.action.edit')[0];
-  assert.ok(edit, 'detail header must expose the same primary Edit action as subscription details');
-  assert.equal(edit.props.primary, true);
-  const name = nodes(tree, (n) => n.type === 'input' && n.props.placeholder === 'family.member.namePh')[0];
-  let focused = false,
-    scrolled = false;
-  name.props.ref.current = {
-    scrollIntoView() {
-      scrolled = true;
-    },
-    focus() {
-      focused = true;
-    },
-  };
-  edit.props.onClick();
-  assert.ok(scrolled && focused, 'header edit reveals and focuses the existing form');
+  // 资料就在最上面，直接改；不再需要右上角「编辑」把人带过去
+  assert.equal(tree.props.actions, undefined);
+  const groups = nodes(tree, (n) => n.type === 'Group').map((n) => n.props.title);
+  assert.ok(
+    groups.indexOf('people.sheet.profile') >= 0 && groups.indexOf('people.sheet.profile') < groups.findIndex((x) => String(x).startsWith('people.sheet.in')),
+  );
   nodes(tree, (n) => n.type === 'input' && n.props.placeholder === 'people.sheet.notePh')[0].props.onChange({ target: { value: 'updated fictional note' } });
   tree = h.render();
   const save = nodes(tree.props.foot, (n) => n.type === 'button' && n.props.className === 'btn primary')[0];
@@ -169,27 +159,6 @@ test('family people tab opens the shared detail, header edit reaches the existin
   assert.equal(h.state().people[0].note, 'updated fictional note');
   assert.equal(nodes(tree, (n) => n.type === 'input' && n.props.placeholder === 'people.sheet.notePh')[0].props.value, 'updated fictional note');
   assert.equal(nodes(tree.props.foot, (n) => n.props.className === 'btn primary')[0].props.disabled, true);
-});
-
-test('per-car account exposes an edit affordance, saves only that relationship and preserves concurrent receipts', async () => {
-  const h = harness();
-  let tree = h.render();
-  const account = nodes(tree, (n) => n.type === 'button' && n.props['aria-label'] === 'Fictional a\nfamily.member.editAccount')[0];
-  assert.ok(nodes(account, (n) => n.type === 'Pencil').length, 'editable account must look actionable');
-  account.props.onClick();
-  tree = h.render();
-  nodes(tree, (n) => n.type === 'input' && n.props['aria-label'] === 'Fictional a\nfamily.member.account')[0].props.onChange({
-    target: { value: ' revised-a ' },
-  });
-  const receipt = { id: 'concurrent-receipt', date: '2026-10-26', amount: 20, currency: 'USD', periods: ['2026-10-01'] };
-  h.state().subscriptions[0].share.members[0].receipts = [receipt];
-  tree = h.render();
-  await nodes(tree.props.foot, (n) => n.props.className === 'btn primary')[0].props.onClick();
-  assert.equal(h.state().subscriptions[0].share.members[0].account, 'revised-a');
-  assert.equal(h.state().subscriptions[1].share.members[0].account, 'account-b');
-  assert.deepEqual(h.state().subscriptions[0].share.members[0].receipts, [receipt]);
-  assert.equal(h.saves.length, 1);
-  assert.ok(nodes(h.render(), (n) => n.type === 'button' && n.props.title === 'revised-a').length);
 });
 
 test('person car row explicitly opens member editing even when collection is overdue', () => {
