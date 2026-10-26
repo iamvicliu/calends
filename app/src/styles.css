@@ -8365,12 +8365,12 @@ a.car-toggle {
   color: var(--label-3);
   font-size: var(--fs-2);
 }
-.cal-daycards {
+.cal-selection .cal-daycards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 12px;
 }
-.cal-daycard {
+.cal-selection .cal-daycard {
   display: grid;
   grid-template-columns: 48px minmax(0, 1fr) max-content;
   /* 第二行随内容高度，不预留固定高度；同排卡片由网格拉齐 */
