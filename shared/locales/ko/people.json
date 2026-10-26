@@ -44,7 +44,6 @@
     "syncFoot": "이름이나 연락처를 바꾸면 {count}곳 모두에 반영돼요.",
     "merge": "병합 대상",
     "mergePick": "선택…",
-    "mergeFoot": "같은 사람이 두 번 등록됐나요? 병합하면 내역이 합쳐져요.",
     "mergeConfirm": "'{from}'을(를) '{into}'에 병합할까요? {from}의 공유와 대신 결제가 모두 {into}(으)로 옮겨지고, 이름과 연락처는 {into} 기준이 돼요.",
     "merged": "{name}에 병합했어요",
     "confirmDelete": "'{name}'을(를) 삭제할까요?",

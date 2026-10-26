@@ -44,7 +44,6 @@
     "syncFoot": "修改稱呼或聯絡方式會同步到 {count} 處共享和代付。",
     "merge": "合併到",
     "mergePick": "選擇…",
-    "mergeFoot": "同一個人被記成兩個？合併後帳目歸在一起。",
     "mergeConfirm": "把「{from}」合併到「{into}」？{from} 的共享和代付都會轉到 {into} 名下，稱呼和聯絡方式以 {into} 為準。",
     "merged": "已合併到 {name}",
     "confirmDelete": "刪除「{name}」？",

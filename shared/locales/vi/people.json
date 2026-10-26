@@ -44,7 +44,6 @@
     "syncFoot": "Đổi tên hoặc liên hệ sẽ áp dụng cho cả {count} chỗ.",
     "merge": "Gộp vào",
     "mergePick": "Chọn…",
-    "mergeFoot": "Một người bị ghi thành hai? Gộp lại để dồn gói và khoản thu về một chỗ.",
     "mergeConfirm": "Gộp “{from}” vào “{into}”? Mọi gói và khoản thu của {from} chuyển sang {into}, giữ tên và liên hệ của {into}.",
     "merged": "Đã gộp vào {name}",
     "confirmDelete": "Xoá “{name}”?",

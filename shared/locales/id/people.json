@@ -44,7 +44,6 @@
     "syncFoot": "Perubahan nama dan kontak berlaku di {count} tempat.",
     "merge": "Gabungkan ke",
     "mergePick": "Pilih…",
-    "mergeFoot": "Orang yang sama tercatat dua kali? Gabungkan agar paket dan pembayarannya menyatu.",
     "mergeConfirm": "Gabungkan “{from}” ke “{into}”? Semua paket dan pembayaran {from} pindah ke {into}, nama dan kontak mengikuti {into}.",
     "merged": "Digabung ke {name}",
     "confirmDelete": "Hapus “{name}”?",

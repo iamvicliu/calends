@@ -44,7 +44,6 @@
     "syncFoot": "呼び名や連絡先を変えると、{count} か所すべてに反映されます。",
     "merge": "統合先",
     "mergePick": "選択…",
-    "mergeFoot": "同じ人が二重に登録されていたら、統合して記録をまとめられます。",
     "mergeConfirm": "「{from}」を「{into}」に統合しますか？{from} の共有と立て替えはすべて {into} に移り、呼び名と連絡先は {into} のものになります。",
     "merged": "{name} に統合しました",
     "confirmDelete": "「{name}」を削除しますか？",

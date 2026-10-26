@@ -59,7 +59,6 @@
     },
     "merge": "Fusionner avec",
     "mergePick": "Choisir…",
-    "mergeFoot": "La même personne apparaît deux fois ? Fusionnez pour regrouper ses abonnements et paiements.",
     "mergeConfirm": "Fusionner « {from} » avec « {into} » ? Les abonnements et paiements de {from} passent à {into}, dont le nom et le contact sont conservés.",
     "merged": "Fusionné avec {name}",
     "confirmDelete": "Supprimer « {name} » ?",

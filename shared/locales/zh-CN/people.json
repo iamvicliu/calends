@@ -44,7 +44,6 @@
     "syncFoot": "改称呼或联系方式会同步到 {count} 处合租和代付。",
     "merge": "合并到",
     "mergePick": "选择…",
-    "mergeFoot": "同一个人被记成了两个？合并后账目归到一起。",
     "mergeConfirm": "把「{from}」合并到「{into}」？{from} 的合租和代付都会转到 {into} 名下，称呼和联系方式以 {into} 为准。",
     "merged": "已合并到 {name}",
     "confirmDelete": "删除「{name}」？",

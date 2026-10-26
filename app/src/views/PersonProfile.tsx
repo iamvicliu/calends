@@ -164,14 +164,7 @@ export function PersonSheet({
           </div>
         )}
         {stored && (
-          <Group
-            title={t('people.sheet.profile')}
-            foot={
-              [refs > 1 ? t('people.sheet.syncFoot', { count: refs }) : '', !ro && others.length > 0 ? t('people.sheet.mergeFoot') : '']
-                .filter(Boolean)
-                .join('\n') || undefined
-            }
-          >
+          <Group title={t('people.sheet.profile')} foot={refs > 1 ? t('people.sheet.syncFoot', { count: refs }) : undefined}>
             <Cell label={t('people.avatar.label')}>
               {!ro && (
                 <input

@@ -59,7 +59,6 @@
     },
     "merge": "Merge into",
     "mergePick": "Choose…",
-    "mergeFoot": "Recorded the same person twice? Merge them to combine their plans and payments.",
     "mergeConfirm": "Merge “{from}” into “{into}”? All of {from}'s plans and payments move to {into}, keeping {into}'s name and contact.",
     "merged": "Merged into {name}",
     "confirmDelete": "Delete “{name}”?",

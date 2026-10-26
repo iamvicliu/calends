@@ -59,7 +59,6 @@
     },
     "merge": "Birleştir",
     "mergePick": "Seç…",
-    "mergeFoot": "Aynı kişi iki kez mi kaydedildi? Birleştirince planlar ve ödemeler bir araya gelir.",
     "mergeConfirm": "“{from}” kişisi “{into}” ile birleştirilsin mi? {from} kişisinin tüm planları ve ödemeleri {into} kişisine geçer; ad ve iletişim {into} kişisinden alınır.",
     "merged": "{name} ile birleştirildi",
     "confirmDelete": "“{name}” silinsin mi?",
