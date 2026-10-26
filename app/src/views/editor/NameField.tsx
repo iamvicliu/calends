@@ -63,7 +63,9 @@ export function NameField({
 }) {
   const [hits, setHits] = useState<AppHit[]>([]);
   const [open, setOpen] = useState(false);
-  const [hi, setHi] = useState(0);
+  const [hi, setHi] = useState(-1);
+  const composing = useRef(false);
+  const keyboardHighlight = useRef(false);
   const timer = useRef(0);
   const seq = useRef(0);
   // 常用服务（本地目录）马上出；App Store 的结果随后补在下面
@@ -72,7 +74,8 @@ export function NameField({
   const search = (q: string) => {
     window.clearTimeout(timer.current);
     const term = q.trim();
-    setHi(0);
+    setHi(-1);
+    keyboardHighlight.current = false;
     setOpen(true);
     if (term.length < 2) return setHits([]);
     const fromLink = term.match(/apps\.apple\.com\/([a-z]{2})\//i)?.[1]?.toLowerCase();
@@ -91,6 +94,8 @@ export function NameField({
     if (x.c) onPickCatalog(x.c);
     else onPick(x.h!);
     setOpen(false);
+    setHi(-1);
+    keyboardHighlight.current = false;
     setHits([]);
   };
   return (
@@ -104,14 +109,27 @@ export function NameField({
           onInput(v);
           search(v);
         }}
-        onFocus={() => all.length && setOpen(true)}
+        onCompositionStart={() => {
+          composing.current = true;
+        }}
+        onCompositionEnd={() => {
+          composing.current = false;
+        }}
+        onFocus={() => {
+          setHi(-1);
+          keyboardHighlight.current = false;
+          if (all.length) setOpen(true);
+        }}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         onKeyDown={(e) => {
-          if (!open || !all.length) return;
-          if (e.key === 'ArrowDown') setHi((i) => Math.min(all.length - 1, i + 1));
-          else if (e.key === 'ArrowUp') setHi((i) => Math.max(0, i - 1));
-          else if (e.key === 'Enter') pick(all[hi]);
-          else if (e.key === 'Escape') setOpen(false);
+          if (composing.current || e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229 || !open || !all.length) return;
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            keyboardHighlight.current = true;
+            setHi((i) => (e.key === 'ArrowDown' ? Math.min(all.length - 1, i + 1) : i < 0 ? all.length - 1 : Math.max(0, i - 1)));
+          } else if (e.key === 'Enter') {
+            if (!keyboardHighlight.current || !all[hi]) return;
+            pick(all[hi]);
+          } else if (e.key === 'Escape') setOpen(false);
           else return;
           // 只关联想框，不让 Esc 冒泡去关整个编辑器
           e.preventDefault();
@@ -132,7 +150,10 @@ export function NameField({
                 type="button"
                 className={`hit ${i === hi ? 'hi' : ''}`}
                 onMouseDown={(e) => e.preventDefault()}
-                onMouseMove={() => setHi(i)}
+                onMouseMove={() => {
+                  keyboardHighlight.current = false;
+                  setHi(i);
+                }}
                 onClick={() => pick(x)}
               >
                 {x.c ? (
