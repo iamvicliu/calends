@@ -16,7 +16,17 @@ import {
 } from '../../../shared/billing.ts';
 import { flow, cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
-import { GANTT_STEP, ganttLabelBounds, ganttTicks, ganttWindow, isGanttZoom, snapGanttPan, stepGanttPan, type GanttZoom } from '../../../shared/gantt.ts';
+import {
+  GANTT_STEP,
+  ganttLabelBounds,
+  ganttOpenEnd,
+  ganttTicks,
+  ganttWindow,
+  isGanttZoom,
+  snapGanttPan,
+  stepGanttPan,
+  type GanttZoom,
+} from '../../../shared/gantt.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { IconButton } from '../components/ui.tsx';
 import { FlagImg, SubIcon } from '../components/marks.tsx';
@@ -513,7 +523,9 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                         );
                       })}
                     {r.segs.map((g, gi) => {
-                      const to = g.open && rEnd > g.to ? rEnd : g.to;
+                      // 没有结束日：画到下一期末尾为止（末端渐隐），不铺满整个视窗
+                      const openEnd = g.open && g.v.cycle.unit !== 'lifetime' ? ganttOpenEnd(g.v, today) : g.to;
+                      const to = g.open ? (openEnd < rEnd ? openEnd : rEnd) : g.to;
                       const left = x(g.from);
                       const top = 8 + r.lanes[gi] * LANE;
 

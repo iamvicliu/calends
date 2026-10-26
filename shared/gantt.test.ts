@@ -503,3 +503,21 @@ test('横滑与拖动在手势中只写位移变量，停下后才提交窗口�
   assert.equal(host.shift.value, '0px', '对齐到月份后无残余位移');
   assert.ok(!host.shift.classes.has('panning'));
 });
+
+test('没有结束日的订阅在时间轴上只画到下一期末尾，不铺满视窗', () => {
+  const base = {
+    id: 's',
+    name: 'Fictional',
+    category: 'tools',
+    tags: [],
+    price: 10,
+    currency: 'USD',
+    status: 'active' as const,
+  };
+  // 月付，每月 15 日扣款：今天 10-26，下一次扣款 11-15，覆盖到 12-15
+  assert.equal(gantt.ganttOpenEnd({ ...base, cycle: { unit: 'month', every: 1 }, start: '2026-01-15' }, '2026-10-26'), '2026-12-15');
+  // 年付：下一次扣款 2027-03-01，画到 2028-03-01，而不是视窗尽头
+  assert.equal(gantt.ganttOpenEnd({ ...base, cycle: { unit: 'year', every: 1 }, start: '2024-03-01' }, '2026-10-26'), '2028-03-01');
+  // 尚未开始：首扣即开始日，只画第一期
+  assert.equal(gantt.ganttOpenEnd({ ...base, cycle: { unit: 'month', every: 1 }, start: '2026-11-20' }, '2026-10-26'), '2026-12-20');
+});

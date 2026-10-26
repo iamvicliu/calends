@@ -1,10 +1,22 @@
 import { DAYS_PER_MONTH } from './billing.ts';
-import { addDays, addMonths, diffDays, parseDay } from './billing.ts';
+import { addDays, addMonths, chargeServicePeriod, chargesBetween, cycleDays, diffDays, parseDay } from './billing.ts';
+import type { Subscription } from './types.ts';
 import { dateFormat } from './intl.ts';
 
 export type GanttZoom = '3m' | '6m' | '1y' | '3y' | 'all';
 export const isGanttZoom = (v: string): v is GanttZoom => ['3m', '6m', '1y', '3y', 'all'].includes(v);
 export const GANTT_STEP: Record<Exclude<GanttZoom, 'all'>, number> = { '3m': 3, '6m': 6, '1y': 12, '3y': 36 };
+
+/**
+ * 没有结束日的订阅在时间轴上画到哪里：今天之后的下一次扣款所覆盖的服务期末尾。
+ * 即过去各期 + 当前这一期 + 再往后一期，不一直铺到视窗尽头（末端由视图渐隐表示还会继续）。
+ */
+export function ganttOpenEnd(v: Subscription, today: string): string {
+  const days = Math.max(1, Math.ceil(cycleDays(v.cycle)));
+  const from = v.start > today ? v.start : addDays(today, 1);
+  const next = chargesBetween(v, from, addDays(from, days * 2 + 31), today).find((c) => !c.kind);
+  return next ? chargeServicePeriod(v, next.date).until : addDays(from, days);
+}
 
 /** 名称列以图标为下限、最长名称为上限，至少给轨道留出一半容器。 */
 export function ganttLabelBounds(
