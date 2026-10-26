@@ -34,6 +34,9 @@ export function PaymentSheet({
   onClose: () => void;
 }) {
   const existingPay = edit?.pay;
+  const originalDate = existingPay?.date;
+  const originalIndex = edit?.index;
+  const originalPhase = edit?.phase;
   const [date, setDate] = useState(existingPay?.date ?? today);
   const [kind, setKind] = useState<Kind>(existingPay?.kind ?? 'charge');
   // 换区后新旧两段并行的日子：要选这笔记在哪一段（缺省为最晚开始的那段，修改时为原记录所在的段）
@@ -86,7 +89,7 @@ export function PaymentSheet({
     return submit(() =>
       run(
         async () => {
-          let next = savePayment(sub, today, pay, edit && { date: edit.pay.date, index: edit.index }, pick);
+          let next = savePayment(sub, today, pay, originalDate && originalIndex != null ? { date: originalDate, index: originalIndex } : undefined, pick);
           if (!split && changed && scope === 'phase') next = setPhaseMethod(next, phase.start, method);
           await saveSub(next);
           onClose();
@@ -95,14 +98,16 @@ export function PaymentSheet({
       ),
     );
   };
-  const remove = async () =>
-    (await ask(t('editor.payment.confirmDelete', { date: cnDateFull(edit!.pay.date) }))) &&
-    submit(() =>
+  const remove = async () => {
+    if (!originalDate || originalIndex == null) return;
+    if (!(await ask(t('editor.payment.confirmDelete', { date: cnDateFull(originalDate) })))) return;
+    return submit(() =>
       run(async () => {
-        await saveSub(deletePayment(sub, today, edit!.pay.date, edit!.index, edit!.phase));
+        await saveSub(deletePayment(sub, today, originalDate, originalIndex, originalPhase));
         onClose();
       }, t('editor.payment.toast.deleted')),
     );
+  };
 
   return (
     <Sheet
