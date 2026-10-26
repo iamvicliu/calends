@@ -138,6 +138,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
       },
     ],
     useMoneyPair: () => () => ({ main: '' }),
+    useSnapshotRender: () => {},
     useWidth: () => [null, 700],
     allCharges: () => [],
     sumBase: () => 0,
@@ -2732,31 +2733,9 @@ test('detail accounts and phone numbers start masked, can be revealed, and copy 
   }
 });
 
-test('detail PNG masks only a clone and removes it after success or failure while the visible account stays revealed', async () => {
+test('detail PNG delegates privacy and cleanup to the shared renderer and excludes only actions', async () => {
   for (const failed of [false, true]) {
-    const classes = new Set<string>();
-    let appended = false,
-      removed = false;
-    const value = { classList: { add: (name: string) => classes.add(name) }, setAttribute() {} };
-    const clone = {
-      style: {},
-      querySelectorAll: () => [value],
-      remove: () => {
-        removed = true;
-      },
-    };
-    const source = {
-      offsetWidth: 700,
-      offsetHeight: 1200,
-      closest: () => ({}),
-      cloneNode: () => clone,
-      parentElement: {
-        appendChild: (node: unknown) => {
-          assert.equal(node, clone);
-          appended = true;
-        },
-      },
-    };
+    const source = { closest: () => ({}) };
     const image = { fictional: true };
     const h = harness(
       '../app/src/views/Detail.tsx',
@@ -2764,10 +2743,11 @@ test('detail PNG masks only a clone and removes it after success or failure whil
       {},
       {
         getComputedStyle: () => ({ borderRadius: '16px' }),
-        snapshot: async (node: unknown) => {
-          assert.equal(node, clone);
-          assert.equal(appended, true);
-          assert.equal(classes.has('car-private'), true);
+        snapshot: async (node: unknown, options: { radius: string; filter: (node: { matches: (selector: string) => boolean }) => boolean }) => {
+          assert.equal(node, source);
+          assert.equal(options.radius, '16px');
+          assert.equal(options.filter({ matches: (selector) => selector.includes('.dt-actions') }), false);
+          assert.equal(options.filter({ matches: () => false }), true, 'transfer history explanations stay visible');
           if (failed) throw Error('fictional PNG failure');
           return image;
         },
@@ -2775,8 +2755,7 @@ test('detail PNG masks only a clone and removes it after success or failure whil
     );
     if (failed) await assert.rejects(h.call('detailImage', source), /fictional PNG failure/);
     else assert.equal(await h.call('detailImage', source), image);
-    assert.equal(removed, true);
-    assert.ok(!('classList' in source), 'masking never mutates the visible source');
+    assert.deepEqual(Object.keys(source), ['closest'], 'no mutation of the visible source');
   }
 });
 

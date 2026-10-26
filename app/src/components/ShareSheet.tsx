@@ -1,5 +1,5 @@
 import { CopyImageButton } from './CopyImageButton.tsx';
-import { toBlob } from 'html-to-image';
+import { snapshot } from '../snapshot.ts';
 import type { ReactNode as ComponentChildren } from 'react';
 import { useRef, useState } from 'react';
 import { flow } from '../../../shared/format.ts';
@@ -47,7 +47,7 @@ export function ShareSheet<S extends string>({
   const pick = (s: S) => setStyle(s);
 
   // 3 倍像素导出，发到聊天里也清楚
-  const render3x = () => toBlob(node.current!, { pixelRatio: 3, skipFonts: true, cacheBust: false, includeQueryParams: true });
+  const render3x = () => snapshot(node.current!, { width: 360, pixelRatio: 3 });
   const download = async () => {
     setBusy(true);
     try {

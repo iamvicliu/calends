@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { StickyNote, X } from 'lucide-react';
 import { t } from '../../../shared/i18n.ts';
 import { copyParts } from './copy.tsx';
@@ -61,15 +61,18 @@ export function Panel({
   children,
   className = '',
   onClick,
+  snapshotRef,
 }: {
   title?: ReactNode;
   aside?: ReactNode;
   children: ReactNode;
   className?: string;
   onClick?: () => void;
+  snapshotRef?: RefObject<HTMLElement | null>;
 }) {
   return (
     <section
+      ref={snapshotRef}
       className={`dt-panel ${className} ${onClick ? 'dt-tap' : ''}`}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}

@@ -1,3 +1,4 @@
+import { useSnapshotRender } from '../snapshot-render.tsx';
 import { chargesTotal, emptyTotal, formatTotal, scaleTotal, totalNote } from '../../../shared/fx-total.ts';
 import { FxAmount } from '../components/FxAmount.tsx';
 import { DAYS_PER_MONTH } from '../../../shared/billing.ts';
@@ -466,6 +467,8 @@ function openLosses() {
 }
 
 function Statement({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+  const captureRef = useRef<HTMLElement>(null);
+  useSnapshotRender(captureRef, () => <Statement state={state} today={today} onOpen={onOpen} />);
   const base = state.settings.baseCurrency;
   const tot = totals(state, today);
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);
@@ -503,7 +506,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
   const hv = hover != null ? live[hover] : undefined;
 
   return (
-    <section className="stmt copy-card" data-copy-card>
+    <section className="stmt copy-card" data-copy-card ref={captureRef}>
       <div className="copy-corner">
         <CopyImageButton hover />
       </div>

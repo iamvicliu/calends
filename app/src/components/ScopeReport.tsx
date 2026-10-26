@@ -62,8 +62,6 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         // 等待图表布局稳定，组装动画在复制后保持关闭。
         await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
         const image = await snapshot(el, {
-          width: el.offsetWidth + 40,
-          height: el.offsetHeight + 40,
           style: { backgroundColor: getComputedStyle(el).getPropertyValue('--bg'), padding: '20px', borderRadius: 'var(--radius-lg)' },
           filter: (n) => !(n instanceof Element && n.matches('.scope-actions')),
         });
