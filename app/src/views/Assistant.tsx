@@ -334,7 +334,6 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
                       state={state}
                       last={false}
                       confirming={confirming}
-                      onRetry={noop}
                       onSetup={() => setSetup(true)}
                       onApply={noop}
                       onEdit={noop}
@@ -481,7 +480,7 @@ export function BotMessage(props: {
   state: AppState;
   last: boolean;
   confirming: boolean;
-  onRetry: () => void;
+  onRetry?: () => void;
   onSetup: () => void;
   onApply: (p: Extract<Part, { kind: 'proposal' }>) => void;
   onEdit: (p: Extract<Part, { kind: 'proposal' }>) => void;
@@ -624,7 +623,7 @@ export function ToolCard({ part }: { part: Extract<Part, { kind: 'tool' }> }) {
   );
 }
 
-export function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKind; message: string }; onRetry: () => void; onSetup: () => void }) {
+export function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKind; message: string }; onRetry?: () => void; onSetup: () => void }) {
   const fixable = error.kind === 'auth' || error.kind === 'config' || error.kind === 'balance';
   return (
     <div className="as-error row" role="alert">
@@ -633,9 +632,9 @@ export function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKin
         <b>{t(`assistant.error.${error.kind}`)}</b>
         <small>{error.message}</small>
         <div className="as-error-acts">
-          <button className="btn" onClick={onRetry}>
+          {onRetry && <button className="btn" onClick={onRetry}>
             <RotateCcw size={14} /> {t('assistant.retry')}
-          </button>
+          </button>}
           {fixable && (
             <button className="btn plain" onClick={onSetup}>
               {t('assistant.settings')}
