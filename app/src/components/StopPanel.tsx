@@ -5,6 +5,7 @@ import { t } from '../../../shared/i18n.ts';
 import { reactivate } from '../../../shared/phases.ts';
 import { applyStopForm, stopForm, stopPreview, type StopForm, type StopMode } from '../../../shared/stop-form.ts';
 import type { Subscription } from '../../../shared/types.ts';
+import { getState } from '../store.ts';
 import { toast } from '../toast.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { CurrencySelect, Picker } from './Picker.tsx';
@@ -72,7 +73,7 @@ export function StopBadge({ sub, today }: { sub: Subscription; today: string }) 
 
 /** Standalone detail action: fields plus an explicit confirmation. */
 export function StopPanel({ sub, today, onApply }: { sub: Subscription; today: string; onApply: (s: Subscription) => unknown }) {
-  const [form, setForm] = useState(() => stopForm(sub, today));
+  const [form, setForm] = useState(() => stopForm(sub, today, getState()));
   const ended = isStopped(effectiveStatus(sub, today));
   const stops = phaseSubs(sub).filter((p) => p.stop);
   const [busy, submit] = useSubmit();

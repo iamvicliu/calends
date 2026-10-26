@@ -21,7 +21,7 @@ export function useEditorDraft({ sub, state, today, onClose }: { sub: Subscripti
   // 收费标准改了、车上已有跟随车的成员时，从哪天起按新标准收
   const [ruleFrom, setRuleFrom] = useState<string>();
   const [stop, setStop] = useState<StopForm | undefined>(
-    () => draft?.stop ?? (f.stop || f.end || ['cancelled', 'terminated'].includes(f.status) ? stopForm(f, today) : undefined),
+    () => draft?.stop ?? (f.stop || f.end || ['cancelled', 'terminated'].includes(f.status) ? stopForm(f, today, state) : undefined),
   );
   // 历程操作会改写价格；记录操作后的价格，用来判断表单里的价格是否又被手动改过
   const [basePrice, setBasePrice] = useState(draft?.basePrice ?? initialForm.price);
@@ -31,7 +31,7 @@ export function useEditorDraft({ sub, state, today, onClose }: { sub: Subscripti
     setBasePrice(form.price);
     // Existing history actions can resume or change an end date; keep the status draft aligned.
     if (form.end !== f.end || form.status !== f.status || JSON.stringify(form.stop) !== JSON.stringify(f.stop)) {
-      setStop(form.stop || form.end || ['cancelled', 'terminated'].includes(form.status) ? stopForm(form, today) : undefined);
+      setStop(form.stop || form.end || ['cancelled', 'terminated'].includes(form.status) ? stopForm(form, today, state) : undefined);
     }
   };
   const up = (p: Partial<Subscription>) => setFRaw((x) => ({ ...x, ...p }));
@@ -39,7 +39,7 @@ export function useEditorDraft({ sub, state, today, onClose }: { sub: Subscripti
     sig(f) !== initial ||
     !priceValid ||
     !!stop !== !!(initialForm.stop || initialForm.end || ['cancelled', 'terminated'].includes(initialForm.status)) ||
-    (!!stop && JSON.stringify(stop) !== JSON.stringify(stopForm(initialForm, today)));
+    (!!stop && JSON.stringify(stop) !== JSON.stringify(stopForm(initialForm, today, state)));
   // 关闭即存草稿；没改动就清掉
   const close = () => {
     writeDraft(key, dirty ? { form: f, basePrice, stop, base: isNew ? 'new' : initial } : undefined);
@@ -54,7 +54,7 @@ export function useEditorDraft({ sub, state, today, onClose }: { sub: Subscripti
     const fresh = isNew ? toEditForm(newSub(today, state.settings.defaultMethodId, state.settings.baseCurrency), today) : initialForm;
     setFRaw(fresh);
     setBasePrice(fresh.price);
-    setStop(fresh.stop || fresh.end || ['cancelled', 'terminated'].includes(fresh.status) ? stopForm(fresh, today) : undefined);
+    setStop(fresh.stop || fresh.end || ['cancelled', 'terminated'].includes(fresh.status) ? stopForm(fresh, today, state) : undefined);
   };
 
   return {

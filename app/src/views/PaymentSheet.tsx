@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { activePhases, chargesBetween, currentPhase, cycleLabel, phaseSubs } from '../../../shared/billing.ts';
 import { cnDateFull, currencyDecimals, money } from '../../../shared/format.ts';
+import { settlementCurrencyOf } from '../../../shared/fx.ts';
 import { t } from '../../../shared/i18n.ts';
 import { deletePayment, savePayment, setPhaseMethod } from '../../../shared/phases.ts';
 import type { Payment, Subscription } from '../../../shared/types.ts';
@@ -43,11 +44,12 @@ export function PaymentSheet({
   const ccy = phase.currency;
   const [amount, setAmount] = useState(edit ? String(Math.abs(edit.pay.amount)) : String(phase.price));
   const [settled, setSettled] = useState(existingPay?.settled ? String(Math.abs(existingPay.settled.amount)) : '');
-  const [settledCcy, setSettledCcy] = useState(existingPay?.settled?.currency ?? 'USD');
+  const [settledCcyOverride, setSettledCcy] = useState(existingPay?.settled?.currency);
   const [note, setNote] = useState(existingPay?.note ?? '');
   const sign = kind === 'refund' ? -1 : 1;
   // 支付方式：缺省为这一笔单独记的，否则是所属这一段的；换了卡时选只改这一笔，还是整段一起改
   const [method, setMethod] = useState(existingPay?.methodId ?? phase.methodId);
+  const settledCcy = settledCcyOverride ?? settlementCurrencyOf(getState(), ccy, method);
   const changed = method !== (existingPay?.methodId ?? phase.methodId);
   const [scope, setScope] = useState<'one' | 'phase'>(phase.methodId ? 'one' : 'phase');
   const phaseCount = chargesBetween(phase, phase.start, today, today).length;

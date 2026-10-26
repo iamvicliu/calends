@@ -2,6 +2,8 @@
 import { nonrenewalDate, billingPeriod, currentPhase, effectiveStatus, stopSummary, subError } from './billing.ts';
 import { cancelAtEnd, reactivate, reopenStopped, statusChangeError, stopSubscription } from './phases.ts';
 import { t } from './i18n.ts';
+import { settlementCurrencyOf } from './fx.ts';
+import { DEFAULT_SETTINGS, type AppState } from './types.ts';
 import type { Subscription } from './types.ts';
 
 export type StopMode = 'nonrenew' | 'cancel' | 'terminate';
@@ -17,7 +19,7 @@ export interface StopForm {
 }
 
 /** Existing refunds remain ordinary payment records; the fields edit the latest stop refund. */
-export function stopForm(sub: Subscription, today: string): StopForm {
+export function stopForm(sub: Subscription, today: string, state: Pick<AppState, 'methods' | 'settings'> = { methods: [], settings: DEFAULT_SETTINGS }): StopForm {
   const cur = currentPhase(sub, sub.stop?.date ?? today);
   const paid = nonrenewalDate(cur, today);
   const payment = cur.stop ? cur.payments?.filter((p) => p.kind === 'refund' && p.date >= cur.stop!.date).at(-1) : undefined;
@@ -29,8 +31,7 @@ export function stopForm(sub: Subscription, today: string): StopForm {
     refundDate: payment?.date,
     reason: sub.stop?.reason ?? '',
     settled: payment?.settled ? String(-payment.settled.amount) : '',
-    // 没记过卡上实退时的默认币种写死为 USD（不随卡或本位币）；改默认会改变表单初始显示，留待决定
-    settledCurrency: payment?.settled?.currency ?? 'USD',
+    settledCurrency: payment?.settled?.currency ?? settlementCurrencyOf(state, cur.currency, payment?.methodId ?? cur.methodId),
   };
 }
 

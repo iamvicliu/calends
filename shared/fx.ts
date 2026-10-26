@@ -113,3 +113,9 @@ export function chargeValue(state: AppState, c: ChargeLike, to = state.settings.
   const v = chargeBaseOrNaN(state, c, to);
   return Number.isFinite(v) ? v : 0;
 }
+
+/** Actual-card amount defaults to the selected account's currency, or base currency for a same-currency/no-card bill. */
+export function settlementCurrencyOf(state: Pick<AppState, 'methods' | 'settings'>, billCurrency: string, methodId?: string): string {
+  const currency = state.methods.find((m) => m.id === methodId)?.currency;
+  return currency && currency !== billCurrency ? currency : state.settings.baseCurrency;
+}
