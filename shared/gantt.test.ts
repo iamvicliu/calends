@@ -366,7 +366,8 @@ test('短窗口在窄/宽轨道中绘出价格、扣款、试用、首期优惠�
         `${zoom} ${width}: 扣款`,
       );
       const trialParts = all(rows[1]).filter((el) => el.props.className === 'gt-trial');
-      assert.ok(trialParts.length >= 2, '试用跨过调价切点仍完整显示');
+      // 宽轨道里调价切点单独成截，试用遮罩跨两截；窄轨道里不足一个正圆宽的那截并入相邻截，试用仍完整显示
+      assert.ok(trialParts.length >= (width >= 900 ? 2 : 1), '试用跨过调价切点仍完整显示');
       assert.ok(trialParts.every((el) => el.props.style.width > 0 && el.props.style.width <= width));
       assert.ok(all(rows[2]).some((el) => el.props.className?.split(' ').includes('planned')));
       assert.ok(all(rows[3]).some((el) => el.props.className?.split(' ').includes('intro')));
@@ -523,4 +524,26 @@ test('没有结束日的订阅在时间轴上只画到下一期末尾，不铺�
   assert.equal(gantt.ganttOpenEnd({ ...base, cycle: { unit: 'year', every: 1 }, start: '2024-03-01' }, '2026-10-26'), '2028-03-01');
   // 尚未开始：首扣即开始日，只画第一期
   assert.equal(gantt.ganttOpenEnd({ ...base, cycle: { unit: 'month', every: 1 }, start: '2026-11-20' }, '2026-10-26'), '2026-12-20');
+});
+
+test('时间轴每一截至少一个正圆宽，过近的切点不画成细竖线', () => {
+  for (const zoom of ['3m', '1y', '3y']) {
+    for (const width of [214, 900]) {
+      const host = mount(zoom, width);
+      // 开始两天后就调价、再过一周又调价：窄轨道里这些切点都不足一个条高
+      const sub = {
+        ...host.sub,
+        id: 'close-cuts',
+        start: '2026-09-01',
+        priceHistory: [
+          { from: '2026-09-03', amount: 11 },
+          { from: '2026-09-10', amount: 12 },
+        ],
+      };
+      const short = { ...host.sub, id: 'short', start: '2026-10-20', end: '2026-10-22' };
+      const segs = all(host.render([sub, short])).filter((el) => el.props.className?.split(' ').includes('gt-seg'));
+      assert.ok(segs.length > 0);
+      for (const el of segs) assert.ok(el.props.style.width >= 22, `${zoom} ${width}: ${el.props.style.width}`);
+    }
+  }
 });

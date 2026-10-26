@@ -70,8 +70,10 @@ const GAP_TUCK = 9;
  * 条按支付方式或地区上色；过去的实心、未来的半透明；计划中的斜线；两段之间空着的是断订；条下的小刻度是每笔扣款。
  */
 /** 停用标志与条同高，作为条的末端 */
-/** 停用标志直径：与胶囊同高（.gt-seg 22px），圆心落在停用日 */
-const STOP_CAP = 22;
+/** 胶囊高度（.gt-seg 22px）：任何一截最短画成直径等于条高的正圆 */
+const BAR = 22;
+/** 停用标志直径：与胶囊同高，圆心落在停用日 */
+const STOP_CAP = BAR;
 
 /** 损失金额（.gt-unused-amount：11px、600）的实际宽度；无法测量时按每字 7px 保守估算 */
 let measureCtx: CanvasRenderingContext2D | null | undefined;
@@ -579,7 +581,12 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                         ...new Set([g.from, ...(g.v.priceHistory ?? []).map((p) => p.from), ...(g.v.intro ? [g.v.intro.until] : []), ...cycleCuts, to]),
                       ]
                         .filter((d) => d >= g.from && d <= to)
-                        .sort();
+                        .sort()
+                        // 切出的每一截至少一个正圆宽：离前一个切点或终点不足条高的切点并入相邻那截，不画成细竖线
+                        .reduce<string[]>((kept, d, i, all) => {
+                          if (i === 0 || i === all.length - 1 || (x(d) - x(kept[kept.length - 1]) >= BAR && x(to) - x(d) >= BAR)) kept.push(d);
+                          return kept;
+                        }, []);
                       let labeled = '';
                       return (
                         <Fragment key={g.from}>
@@ -589,7 +596,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                             // 被服务方停用：最后一截至少一个标志宽，直角铺到停用日中线，停用标志以中线为圆心压在上面，四角不露底色
                             const capped = stopped?.kind === 'terminate' && n === cuts.length - 2 && b === stopped.date;
                             const pl = capped ? Math.min(x(a), x(b) - STOP_CAP) : x(a);
-                            const pw = Math.max(capped ? STOP_CAP : 3, x(b) - pl);
+                            const pw = Math.max(BAR, x(b) - pl);
                             const intro = g.v.intro && a < g.v.intro.until;
                             const price = priceAt(g.v, a);
                             const last = n === cuts.length - 2;
