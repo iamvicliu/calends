@@ -57,5 +57,10 @@
     "upcoming": "Not due",
     "this": "This payment"
   },
-  "confirmDelete": "Delete the record on {date}?"
+  "confirmDelete": "Delete the record on {date}?",
+  "grid": {
+    "year": "{year}",
+    "quarter": "{year} Q{quarter}",
+    "due": "Amount due"
+  }
 }

@@ -57,5 +57,10 @@
     "upcoming": "A vencer",
     "this": "Este recebimento"
   },
-  "confirmDelete": "Excluir o registro de {date}?"
+  "confirmDelete": "Excluir o registro de {date}?",
+  "grid": {
+    "year": "{year}",
+    "quarter": "{year} Q{quarter}",
+    "due": "Valor devido"
+  }
 }

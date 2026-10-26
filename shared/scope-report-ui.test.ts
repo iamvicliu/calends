@@ -21,6 +21,7 @@ import * as carpool from './carpool.ts';
 import * as carpoolTimeline from './carpool-timeline.ts';
 import * as proxy from './proxy.ts';
 import * as receivables from './receivables.ts';
+import * as periodGrid from './period-grid.ts';
 import * as assistantFields from '../app/src/views/assistant-fields.ts';
 import { detailForecast, detailHistoryEnd } from '../app/src/views/detail-data.ts';
 import { PERSON_COLORS, DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
@@ -107,6 +108,9 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...carpoolTimeline,
     ...proxy,
     ...receivables,
+    ...periodGrid,
+    ...(!source.includes('export function TipTable') ? { TipTable: 'TipTable' } : {}),
+    useId: () => `test-id-${cursor++}`,
     useTimelinePan: () => ({ current: null }),
     locale: () => 'en',
     useOrig: () => false,
@@ -120,7 +124,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     PersonAvatar: 'PersonAvatar',
     personFor: (state: AppState, id: string, name: string) => state.people?.find((p) => p.id === id) ?? { id, name },
     t: (key: string) => key,
-    tipProps: () => ({}),
+    tipProps: () => ({ onMouseEnter() {}, onMouseLeave() {}, onFocus() {}, onBlur() {} }),
     useMemo: (fn: () => unknown) => fn(),
     useRef: () => ({ current: null }),
     useEffect: (fn: () => unknown) => fn(),
@@ -510,7 +514,7 @@ test('member with a receipt and no paid-through date never claims no receipts an
     share: 10,
     fee: 10,
     feeCurrency: 'USD',
-    payments: [{ date: today, amount: 10, currency: 'USD', until: '2026-10-31' }],
+    receipts: [{ id: 'receipt', date: today, amount: 10, currency: 'USD', periods: ['2026-10-01'] }],
   };
   const sub: Subscription = {
     id: 's',
@@ -556,7 +560,7 @@ test('member with a receipt and no paid-through date never claims no receipts an
   const date = nodes.find((n) => n.type === 'DatePicker' && n.props.placeholder === 'family.pool.noPay');
   assert.ok(date);
   assert.equal(date.props.value, undefined, 'display correction does not invent a paid-through date');
-  const receipts = nodes.find((n) => n.type === 'Group' && String(n.props.title).startsWith('family.member.payments'))!;
+  const receipts = nodes.find((n) => n.type === 'Group' && all(n.props.title).some((title) => title.children.includes('family.member.payments')))!;
   assert.equal(String(receipts.props.foot).includes('family.member.receivedTotal'), false);
   assert.equal(saved, undefined);
 });
@@ -3152,4 +3156,88 @@ test('public stopped card omits the avoided-renewal total while retaining each o
   assert.ok(nodes.some((n) => String(n.props.className).includes('line-through') && n.children.includes('public.perMonth')));
   assert.ok(nodes.some((n) => n.children.includes(format.monthLabel(sub.end!.slice(0, 7)))));
   assert.ok(!('endedMonthly' in d));
+});
+
+test('收款记录默认收起、展开可逆、重新打开收起；零笔没有折叠标题仍可记一笔', () => {
+  const member = {
+    id: 'm',
+    name: 'Fictional',
+    share: 10,
+    fee: 10,
+    feeCurrency: 'USD',
+    billEvery: 1,
+    receipts: [{ id: 'r', date: '2026-01-01', amount: 10, currency: 'USD', periods: ['2026-01-01'] }],
+  };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Fictional',
+    category: 'Test',
+    tags: [],
+    price: 20,
+    currency: 'USD',
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 3, members: [member] },
+  };
+  const make = () =>
+    harness(
+      '../app/src/views/Members.tsx',
+      'MemberForm',
+      {},
+      {
+        Sheet: 'Sheet',
+        DatePicker: 'DatePicker',
+        Toggle: 'Toggle',
+        CurrencySelect: 'CurrencySelect',
+        NumInput: 'NumInput',
+        Picker: 'Picker',
+        todayIn: () => today,
+      },
+    );
+  const r = make();
+  const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  const toggle = (nodes: Node[]) => nodes.flatMap((n) => all(n.props.title)).find((n) => n.type === 'button' && n.props['aria-controls'])!;
+  let nodes = render();
+  assert.equal(toggle(nodes).props['aria-expanded'], false);
+  const id = toggle(nodes).props['aria-controls'];
+  assert.equal(nodes.find((n) => n.props.id === id)!.props.hidden, true);
+  toggle(nodes).props.onClick();
+  nodes = render();
+  assert.equal(toggle(nodes).props['aria-expanded'], true);
+  assert.equal(nodes.find((n) => n.props.id === id)!.props.hidden, false);
+  assert.ok(nodes.find((n) => n.props['aria-label'] === 'family.member.copyAria') === undefined); // No other member.
+  toggle(nodes).props.onClick();
+  assert.equal(toggle(render()).props['aria-expanded'], false);
+  assert.equal(toggle(make().render('MemberForm', { state: st, s: sub, member, onClose() {} })).props['aria-expanded'], false);
+  const zero = make().render('MemberForm', { state: st, s: sub, member: { ...member, receipts: [] }, onClose() {} });
+  assert.equal(toggle(zero), undefined);
+  assert.ok(zero.some((n) => n.type === 'button' && n.children.includes('family.quick.backCollect')));
+  const refund = make().render('MemberForm', {
+    state: st,
+    s: sub,
+    member: { ...member, receipts: [], left: '2026-03-01', leaveRefund: { date: '2026-03-01', amount: 5, currency: 'USD' } },
+    onClose() {},
+  });
+  assert.equal(refund.find((n) => n.type === 'div' && n.props.id)?.props.hidden, false, 'a refund without receipt history remains visible');
+});
+
+test('跨年各段悬停一起高亮，点击仍返回同一期；触屏按下和键盘聚焦能预览', () => {
+  const p = { key: '2024-10-17', from: '2024-10-17', until: '2026-10-16', due: 120, currency: 'USD', status: 'paid' as const };
+  const picked: unknown[] = [];
+  const r = harness('../app/src/views/Receivable.tsx', 'PeriodStrip');
+  const render = () => r.render('PeriodStrip', { periods: [p], today: '2026-01-01', mode: 'months', onPick: (period: unknown) => picked.push(period) });
+  let buttons = render().filter((n) => n.type === 'button');
+  assert.equal(buttons.length, 3);
+  buttons[0].props.onMouseEnter({});
+  assert.equal(render().filter((n) => n.type === 'button' && n.props.className.endsWith(' active')).length, 3);
+  buttons[1].props.onClick();
+  assert.deepEqual(picked, [p]);
+  buttons[0].props.onMouseLeave();
+  assert.equal(render().filter((n) => n.type === 'button' && n.props.className.endsWith(' active')).length, 0);
+  buttons[2].props.onPointerDown({ pointerType: 'touch' });
+  assert.equal(render().filter((n) => n.type === 'button' && n.props.className.endsWith(' active')).length, 3);
+  buttons[2].props.onBlur();
+  buttons[1].props.onFocus({});
+  assert.equal(render().filter((n) => n.type === 'button' && n.props.className.endsWith(' active')).length, 3);
 });

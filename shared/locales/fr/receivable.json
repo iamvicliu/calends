@@ -57,5 +57,10 @@
     "upcoming": "Pas encore dû",
     "this": "Ce paiement"
   },
-  "confirmDelete": "Supprimer l’enregistrement du {date} ?"
+  "confirmDelete": "Supprimer l’enregistrement du {date} ?",
+  "grid": {
+    "year": "{year}",
+    "quarter": "{year} Q{quarter}",
+    "due": "Montant dû"
+  }
 }

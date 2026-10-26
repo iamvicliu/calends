@@ -405,6 +405,7 @@ export function MemberForm({
                 {!once && (
                   <div className="cell">
                     <PeriodStrip
+                      mode="months"
                       periods={ledger.periods}
                       today={today}
                       onPick={(p) =>

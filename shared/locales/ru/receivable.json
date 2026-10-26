@@ -65,5 +65,10 @@
     "upcoming": "Не наступил",
     "this": "Этот платёж"
   },
-  "confirmDelete": "Удалить запись от {date}?"
+  "confirmDelete": "Удалить запись от {date}?",
+  "grid": {
+    "year": "{year}",
+    "quarter": "{year} Q{quarter}",
+    "due": "Сумма к оплате"
+  }
 }

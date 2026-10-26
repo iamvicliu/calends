@@ -45,5 +45,10 @@
     "upcoming": "도래 전",
     "this": "이번 입금"
   },
-  "confirmDelete": "{date} 기록을 삭제할까요?"
+  "confirmDelete": "{date} 기록을 삭제할까요?",
+  "grid": {
+    "year": "{year}",
+    "quarter": "{year} Q{quarter}",
+    "due": "청구 금액"
+  }
 }
