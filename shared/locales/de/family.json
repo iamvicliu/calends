@@ -79,6 +79,7 @@
     "account": "Mitgliedskonto",
     "accountPh": "E-Mail, Telefon, Benutzername oder ID bei {name}",
     "joined": "Beigetreten",
+    "tenure": "Dabei seit",
     "joinedPh": "Abo-Beginn ({date})",
     "notSet": "Nicht festgelegt",
     "left": "Ausgetreten",
@@ -275,7 +276,7 @@
   },
   "collect": {
     "next": "Nächste Einnahme {date}",
-    "editMember": "Bearbeiten",
+    "seatFee": "Platz & Gebühr",
     "until": "Gedeckt bis",
     "feeFrom": "Gültig ab",
     "feeHelp": "Der Beginn des abgedeckten Zeitraums bestimmt den Tarif für den gesamten Zeitraum. Gespeicherte Zahlungen bleiben unverändert.",

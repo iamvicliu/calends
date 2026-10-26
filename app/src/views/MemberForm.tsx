@@ -1,12 +1,12 @@
 import { useMemberForm, refundInvalid } from './member/useMemberForm.ts';
-import { FirstReceiptFields, ReceiptHistory } from './member/Receipts.tsx';
+import { FirstReceiptFields, PeriodPop } from './member/Receipts.tsx';
 
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
-import { collectionAnchor } from '../../../shared/billing.ts';
+import { calendarSpan, collectionAnchor } from '../../../shared/billing.ts';
 import { cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, Person, ShareMember, Subscription } from '../../../shared/types.ts';
-import { isSettled } from '../../../shared/receivables.ts';
+import { isSettled, type LedgerPeriod } from '../../../shared/receivables.ts';
 import { PeriodStrip } from './Receivable.tsx';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { IconButton, Cell, Group } from '../components/ui.tsx';
@@ -138,7 +138,8 @@ export function MemberForm({
 }) {
   const context = useMemberForm({ memberDialog, state, s, member, initialReceipt, onClose });
   // 已有成员：资料、座位、收费收在「编辑资料」里，默认收起；不分摊的成员没有收款可看，直接展开
-  const [editing, setEditing] = useState(() => !member || !!member.exempt);
+  const [seatFeeOpen, setSeatFeeOpen] = useState(() => !!member?.exempt);
+  const [cell, setCell] = useState<{ period: LedgerPeriod; anchor: HTMLElement } | null>(null);
   const {
     today,
     isNew,
@@ -178,8 +179,21 @@ export function MemberForm({
     submit,
     save,
   } = context;
-  // 是谁、座位、收费：新增成员直接填，已有成员收在「编辑资料」里；同一份表单只写一次
-  const profileGroups = (
+  // 加入时长：从加入日期算到退出日期（还在合租就到今天），几年几个月几天
+  const joinedOn = f.joined ?? s.share?.since ?? s.start;
+  const span = calendarSpan(joinedOn, f.left && f.left < today ? f.left : today);
+  const tenure =
+    joinedOn <= today
+      ? [
+          span.years && t('detail.stats.years', { count: span.years }),
+          span.months && t('detail.stats.months', { count: span.months }),
+          (span.days || (!span.years && !span.months)) && t('detail.stats.days', { count: span.days }),
+        ]
+          .filter(Boolean)
+          .join(' ')
+      : undefined;
+  // 是谁：新增和已有成员都放最前面
+  const whoGroup = (
     <>
       {/* 一、是谁：新建或从人员里选；已关联的人只读，资料在人员详情里改 */}
       <Group
@@ -241,7 +255,11 @@ export function MemberForm({
           <input autoCapitalize="off" value={f.account ?? ''} placeholder={t('family.member.accountPhShort')} onChange={(e) => up({ account: val(e) })} />
         </Cell>
       </Group>
-
+    </>
+  );
+  // 座位、收费：建成员时就定好，之后很少改；已有成员默认收起，标题下一行摘要
+  const seatFeeGroups = (
+    <>
       {/* 二、座位：哪天上车、首期怎么算、哪天下车 */}
       <Group title={t('family.member.seatGroup')}>
         <Cell label={t('family.member.joined')}>
@@ -252,6 +270,11 @@ export function MemberForm({
             onChange={(v) => up({ joined: v })}
           />
         </Cell>
+        {!isNew && tenure && (
+          <Cell label={t('family.member.tenure')}>
+            <span className="muted">{tenure}</span>
+          </Cell>
+        )}
         {first.partial && mode !== 'exempt' && !ledger.periods.some((p) => p.key === first.from && p.status === 'paid') && (
           <>
             {/* 首期起止写在「首期方式」标签下面；折算出的金额是首期金额的占位，不再单独一行提示 */}
@@ -324,16 +347,7 @@ export function MemberForm({
   return (
     <Sheet
       narrow
-      title={
-        isNew ? (
-          t('family.member.titleNew', { name: s.name })
-        ) : (
-          <span className="icon-text">
-            <PersonAvatar p={personFor(state, f.personId, f.name)} size={24} />
-            {member!.name || t('family.member.defaultName')}
-          </span>
-        )
-      }
+      title={isNew ? t('family.member.titleNew', { name: s.name }) : s.name}
       onClose={onClose}
       foot={
         <>
@@ -376,23 +390,30 @@ export function MemberForm({
       <div className="stack">
         {isNew ? (
           <>
-            {profileGroups}
+            {whoGroup}
+            {seatFeeGroups}
             {mode !== 'exempt' && <FirstReceiptFields context={context} />}
           </>
         ) : (
           <>
-            {/* 一、收款：状态一句话 + 一格一期，下面记一笔；欠款默认勾欠的期，结清了默认勾下一期（预收），一律在这里 */}
+            {/* 一、是谁 */}
+            {whoGroup}
+            {/* 二、收款：一格一期，点已收的格子看明细；已付至和记一笔跟在下面；欠款默认勾欠的期，结清了默认勾下一期（预收） */}
             {mode !== 'exempt' && (
               <Group
-                title={st.gone ? undefined : t('receivable.modeReceipt')}
+                title={t('receivable.modeReceipt')}
                 foot={
-                  st.gone
-                    ? undefined
-                    : st.owe
-                      ? `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}`
-                      : once
+                  [
+                    st.gone || !st.owe
+                      ? once && !st.gone
                         ? t('family.pool.settled')
-                        : t('family.quick.settled', { date: cnDateFull(st.next.from) })
+                        : ''
+                      : `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}`,
+                    adjustPaid ? t('receivable.openingHint') : '',
+                    ledger.unmatched.length ? t('receivable.unmatchedNote', { count: ledger.unmatched.length }) : '',
+                  ]
+                    .filter(Boolean)
+                    .join('\n') || undefined
                 }
               >
                 {!once && (
@@ -401,15 +422,32 @@ export function MemberForm({
                       mode="months"
                       periods={ledger.periods}
                       today={today}
-                      onPick={(p) =>
-                        p.receipt && !p.receipt.opening
-                          ? setReceipt({ edit: p.receipt.id })
-                          : p.waiver
-                            ? setReceipt({ edit: p.waiver.id })
-                            : !isSettled(p) && setReceipt({ preset: [p.key] })
-                      }
+                      onPick={(p, anchor) => (p.receipt || p.waiver ? setCell({ period: p, anchor }) : !isSettled(p) && setReceipt({ preset: [p.key] }))}
                     />
                   </div>
+                )}
+                {/* 已付至：从第一期起连续结清到哪天；点「调整」改期初已付至 */}
+                {!once && (
+                  <Cell label={t('family.member.paidUntil')}>
+                    {adjustPaid ? (
+                      <DatePicker value={openingEdit ?? undefined} clearable placeholder={t('family.pool.noPay')} onChange={setOpeningEdit} />
+                    ) : (
+                      <>
+                        <span className={paidUntil ? '' : 'muted'}>{paidUntil ? cnDateFull(paidUntil) : t('family.pool.noPay')}</span>
+                        <button
+                          type="button"
+                          className="btn plain"
+                          onClick={() => {
+                            const last = member?.receipts?.find((r) => r.opening)?.periods.at(-1);
+                            setOpeningEdit(ledger.periods.find((p) => p.key === last)?.until);
+                            setAdjustPaid(true);
+                          }}
+                        >
+                          {t('family.collect.adjustPaid')}
+                        </button>
+                      </>
+                    )}
+                  </Cell>
                 )}
                 {!st.gone && (
                   <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt({})}>
@@ -418,52 +456,35 @@ export function MemberForm({
                 )}
               </Group>
             )}
-            {/* 二、收款记录：默认收起 */}
-            <ReceiptHistory context={context} />
-            {/* 三、资料、座位、收费：平时不用，收在这里 */}
-            <Group
-              title={
-                <button type="button" className="car-departed-toggle" aria-expanded={editing} onClick={() => setEditing(!editing)}>
-                  {t('family.collect.editMember')}
-                  <Icon name="down" size={14} />
-                </button>
-              }
-            >
-              {null}
-            </Group>
-            {editing && (
-              <>
-                {profileGroups}
-                {mode !== 'exempt' && (
-                  <Group foot={adjustPaid ? t('receivable.openingHint') : undefined}>
-                    {/* 已付至：从第一期起连续结清到哪天；点「调整」改期初已付至 */}
-                    <Cell label={t('family.member.paidUntil')}>
-                      {adjustPaid ? (
-                        <DatePicker value={openingEdit ?? undefined} clearable placeholder={t('family.pool.noPay')} onChange={setOpeningEdit} />
-                      ) : (
-                        <>
-                          <span className={paidUntil ? '' : 'muted'}>{paidUntil ? cnDateFull(paidUntil) : t('family.pool.noPay')}</span>
-                          <button
-                            type="button"
-                            className="btn plain"
-                            onClick={() => {
-                              const last = member?.receipts?.find((r) => r.opening)?.periods.at(-1);
-                              setOpeningEdit(ledger.periods.find((p) => p.key === last)?.until);
-                              setAdjustPaid(true);
-                            }}
-                          >
-                            {t('family.collect.adjustPaid')}
-                          </button>
-                        </>
-                      )}
-                    </Cell>
-                  </Group>
+            {/* 三、座位与收费：建成员时定好，之后很少改；平时只读两行，点开才是完整表单 */}
+            {seatFeeOpen ? (
+              seatFeeGroups
+            ) : (
+              <Group title={t('family.collect.seatFee')}>
+                <Cell label={t('family.member.joined')} onClick={() => setSeatFeeOpen(true)}>
+                  {cnDateFull(joinedOn)}
+                </Cell>
+                {tenure && (
+                  <Cell label={t('family.member.tenure')} onClick={() => setSeatFeeOpen(true)}>
+                    {tenure}
+                  </Cell>
                 )}
-              </>
+                {f.left && (
+                  <Cell label={t('family.member.left')} onClick={() => setSeatFeeOpen(true)}>
+                    {cnDateFull(f.left)}
+                  </Cell>
+                )}
+                <Cell label={t('family.member.feeGroup')} onClick={() => setSeatFeeOpen(true)}>
+                  {mode === 'custom'
+                    ? perBill('family.pool.perFee', fee.billEvery, { fee: money(fee.amount, fee.currency) })
+                    : perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
+                </Cell>
+              </Group>
             )}
           </>
         )}
       </div>
+      {cell && <PeriodPop context={context} period={cell.period} anchor={cell.anchor} onClose={() => setCell(null)} />}
       {/* 记一笔、改某一笔：叠在成员表单上，存完回到这里，成员表单里没保存的修改不丢 */}
       {receipt !== null && member && (
         <ReceiptForm state={state} s={s} member={member} editId={receipt.edit} preset={receipt.preset} onOpenSub={onOpenSub} onDone={() => setReceipt(null)} />

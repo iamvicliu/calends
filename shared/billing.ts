@@ -47,6 +47,13 @@ export function diffDays(a: string, b: string): number {
 }
 
 /** 按月加，保留原始日号并在短月夹紧到月底（1/31 → 2/28 → 3/31） */
+/** 两个日期之间相隔几年几个月几天：先数整月（月底按 addMonths 对齐），剩下的算天 */
+export function calendarSpan(from: string, to: string): { years: number; months: number; days: number } {
+  let months = 0;
+  while (addMonths(from, months + 1) <= to) months++;
+  return { years: Math.floor(months / 12), months: months % 12, days: Math.max(0, diffDays(addMonths(from, months), to)) };
+}
+
 export function addMonths(s: string, n: number): string {
   const [y, m, d] = s.split('-').map(Number);
   const total = y * 12 + (m - 1) + n;

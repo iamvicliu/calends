@@ -4980,6 +4980,12 @@ button.h-price-row:focus-visible {
 .member-pay {
   flex-wrap: wrap;
 }
+.period-pop-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
 .copy-pay {
   flex-basis: 100%;
   margin-top: 10px;

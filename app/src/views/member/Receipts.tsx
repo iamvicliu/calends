@@ -1,15 +1,11 @@
-import { useState, useId } from 'react';
-import { copyParts } from '../../components/copy.tsx';
-
 import { addDays } from '../../../../shared/billing.ts';
-import { flow, cnDate, cnDateFull } from '../../../../shared/format.ts';
+import { cnDate, cnDateFull } from '../../../../shared/format.ts';
 
-import { paidThrough } from '../../../../shared/receivables.ts';
-import { isReceipt, recordPeriods } from '../Receivable.tsx';
+import { paidThrough, type LedgerPeriod } from '../../../../shared/receivables.ts';
+import { isReceipt, periodRange, PeriodTip } from '../Receivable.tsx';
+import { Pop } from '../../components/Pop.tsx';
 import { DatePicker } from '../../components/DatePicker.tsx';
-import { IconButton, Cell, Group } from '../../components/ui.tsx';
-
-import { Icon } from '../../components/icons.tsx';
+import { Cell, Group } from '../../components/ui.tsx';
 import { NumInput, Stepper, Toggle } from '../../components/inputs.tsx';
 
 import { CurrencySelect } from '../../components/Picker.tsx';
@@ -68,79 +64,59 @@ export function FirstReceiptFields({ context }: { context: ReturnType<typeof use
   );
 }
 
-export function ReceiptHistory({ context }: { context: ReturnType<typeof useMemberForm> }) {
-  const { member, collectCcy, ledger, records, received, setReceipt, others, copying, setCopying, startCopy, removeRecordById } = context;
-  const [expanded, setExpanded] = useState(false);
-  const historyId = useId();
+/** 点开一格：这一期的明细，下面改这笔、复制给其他成员、删掉（删后这几期回到未收） */
+export function PeriodPop({
+  context,
+  period: p,
+  anchor,
+  onClose,
+}: {
+  context: ReturnType<typeof useMemberForm>;
+  period: LedgerPeriod;
+  anchor: HTMLElement;
+  onClose: () => void;
+}) {
+  const { setReceipt, others, copying, setCopying, startCopy, removeRecordById } = context;
+  const r = p.receipt ?? p.waiver!;
+  const opening = isReceipt(r) && r.opening;
   return (
-    <Group
-      title={
-        records.length > 0 && (
-          <button type="button" className="car-departed-toggle" aria-expanded={expanded} aria-controls={historyId} onClick={() => setExpanded(!expanded)}>
-            {t('family.member.payments', { count: records.length })}
-            <Icon name="down" size={14} />
+    <Pop triggerRef={{ current: anchor }} label={periodRange(p)} className="period-pop" placement="bottom start" onClose={onClose}>
+      <PeriodTip p={p} />
+      {copying === r.id && isReceipt(r) ? (
+        <CopyReceiptFields context={context} record={r} />
+      ) : (
+        <div className="period-pop-actions">
+          <button
+            className="btn plain"
+            style={{ color: 'var(--red)' }}
+            onClick={() => {
+              onClose();
+              void removeRecordById(r.id, r.date);
+            }}
+          >
+            {t('common.delete')}
           </button>
-        )
-      }
-      foot={
-        (expanded || records.length === 0) &&
-        (records.length > 1 || !!member!.leaveRefund || (isReceipt(records[0]) && records[0].currency !== collectCcy)) &&
-        t('family.member.receivedTotal', { amount: flow(received, collectCcy) })
-      }
-    >
-      <div id={historyId} hidden={records.length > 0 && !expanded}>
-        {ledger.unmatched.length > 0 && <div className="cell muted">{t('receivable.unmatchedNote', { count: ledger.unmatched.length })}</div>}
-        {records.map((r) => {
-          const opening = isReceipt(r) && r.opening;
-          return (
-            <div key={r.id} className="cell member-pay">
-              <button
-                type="button"
-                className="cell-l member-pay-edit"
-                disabled={opening}
-                onClick={() => setReceipt({ edit: r.id })}
-                aria-label={t('family.member.editPayAria')}
-              >
-                {isReceipt(r) && !opening ? (
-                  <span className="green">{flow(r.amount, r.currency)}</span>
-                ) : (
-                  <span>{t(opening ? 'receivable.opening' : 'receivable.waived')}</span>
-                )}
-                <small>
-                  {copyParts(opening ? recordPeriods(r, ledger.periods) : `${cnDateFull(r.date)}\n${recordPeriods(r, ledger.periods)}`)}
-                  {copyParts(r.note ? `\n${r.note}` : '')}
-                </small>
-              </button>
-              <span className="cell-r">
-                {isReceipt(r) && !opening && others.length > 0 && (
-                  <IconButton
-                    className={`${copying === r.id ? 'on' : ''}`}
-                    aria-label={t('family.member.copyAria')}
-                    title={t('family.member.copyAria')}
-                    onClick={() => (copying === r.id ? setCopying(null) : startCopy(r))}
-                  >
-                    <Icon name="copy" />
-                  </IconButton>
-                )}
-                <IconButton aria-label={t('family.member.removePayAria')} onClick={() => removeRecordById(r.id, r.date)}>
-                  <Icon name="x" />
-                </IconButton>
-              </span>
-              {copying === r.id && isReceipt(r) && <CopyReceiptFields context={context} record={r} />}
-            </div>
-          );
-        })}
-        {member!.leaveRefund && (
-          <Cell label={t('family.sheet.refund')}>
-            <span>
-              {cnDateFull(member!.leaveRefund.date)}
-              {copyParts(member!.leaveRefund.note ? `\n${member!.leaveRefund.note}` : '')}
-            </span>
-            <b>{flow(-member!.leaveRefund.amount, member!.leaveRefund.currency)}</b>
-          </Cell>
-        )}
-      </div>
-    </Group>
+          <span className="grow" />
+          {isReceipt(r) && !opening && others.length > 0 && (
+            <button className="btn" onClick={() => startCopy(r)}>
+              {t('family.member.copyAria')}
+            </button>
+          )}
+          {!opening && (
+            <button
+              className="btn primary"
+              onClick={() => {
+                onClose();
+                setCopying(null);
+                setReceipt({ edit: r.id });
+              }}
+            >
+              {t('detail.action.edit')}
+            </button>
+          )}
+        </div>
+      )}
+    </Pop>
   );
 }
 

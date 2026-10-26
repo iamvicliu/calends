@@ -79,6 +79,7 @@
     "account": "Compte du membre",
     "accountPh": "E-mail, téléphone, pseudo ou ID sur {name}",
     "joined": "Arrivée",
+    "tenure": "Ancienneté",
     "joinedPh": "Début du partage ({date})",
     "notSet": "Non défini",
     "left": "Départ",
@@ -275,7 +276,7 @@
   },
   "collect": {
     "next": "Prochain encaissement {date}",
-    "editMember": "Modifier",
+    "seatFee": "Place et tarif",
     "until": "Couvre jusqu’au",
     "feeFrom": "À partir du",
     "feeHelp": "Le début de la couverture détermine le tarif pour toute la période. Les paiements enregistrés restent inchangés.",

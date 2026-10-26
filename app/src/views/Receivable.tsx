@@ -225,6 +225,33 @@ export function ReceivableSheet({
 }
 
 /** A period can occupy several months and several rows; all segments share one highlight. */
+/** 一期的明细：应收、实收、日期、覆盖几期、备注；悬停提示和点开的小弹窗共用 */
+export function PeriodTip({ p }: { p: LedgerPeriod }) {
+  const data = periodTipData(p);
+  return (
+    <TipTable
+      head={[periodRange(p), t(`receivable.status.${p.status}`)]}
+      rows={[
+        { key: 'due', label: t('receivable.grid.due'), value: `${money(data.due, data.currency)} ${data.currency}` },
+        ...(data.receipt
+          ? data.receipt.opening
+            ? [{ key: 'opening', label: t('receivable.opening'), value: '' }]
+            : [
+                { key: 'date', label: t('receivable.receivedOn'), value: cnDateFull(data.receipt.date) },
+                {
+                  key: 'received',
+                  label: t('receivable.actual'),
+                  value: `${money(data.receipt.amount, data.receipt.currency)} ${data.receipt.currency}`,
+                },
+                { key: 'count', label: t('receivable.periods'), value: t('receivable.periodsCount', { count: data.receipt.count }) },
+              ]
+          : []),
+        ...(data.note ? [{ key: 'note', label: t('receivable.note'), value: data.note }] : []),
+      ]}
+    />
+  );
+}
+
 export function PeriodStrip({
   periods,
   today,
@@ -233,7 +260,7 @@ export function PeriodStrip({
 }: {
   periods: LedgerPeriod[];
   today: string;
-  onPick: (p: LedgerPeriod) => void;
+  onPick: (p: LedgerPeriod, el: HTMLElement) => void;
   mode?: PeriodGridMode;
 }) {
   const [active, setActive] = useState<string | null>(null);
@@ -262,29 +289,7 @@ export function PeriodStrip({
           <div>
             {row.segments.map((seg) => {
               const p = seg.period;
-              const data = periodTipData(p);
-              const tips = tipProps(() => (
-                <TipTable
-                  head={[periodRange(p), t(`receivable.status.${p.status}`)]}
-                  rows={[
-                    { key: 'due', label: t('receivable.grid.due'), value: `${money(data.due, data.currency)} ${data.currency}` },
-                    ...(data.receipt
-                      ? data.receipt.opening
-                        ? [{ key: 'opening', label: t('receivable.opening'), value: '' }]
-                        : [
-                            { key: 'date', label: t('receivable.receivedOn'), value: cnDateFull(data.receipt.date) },
-                            {
-                              key: 'received',
-                              label: t('receivable.actual'),
-                              value: `${money(data.receipt.amount, data.receipt.currency)} ${data.receipt.currency}`,
-                            },
-                            { key: 'count', label: t('receivable.periods'), value: t('receivable.periodsCount', { count: data.receipt.count }) },
-                          ]
-                      : []),
-                    ...(data.note ? [{ key: 'note', label: t('receivable.note'), value: data.note }] : []),
-                  ]}
-                />
-              ));
+              const tips = tipProps(() => <PeriodTip p={p} />);
               return (
                 <button
                   key={p.key}
@@ -319,7 +324,10 @@ export function PeriodStrip({
                       tips.onFocus(e);
                     }
                   }}
-                  onClick={() => onPick(p)}
+                  onClick={(e) => {
+                    tipSet?.(null);
+                    onPick(p, e.currentTarget);
+                  }}
                 />
               );
             })}

@@ -79,6 +79,7 @@
     "account": "Üye hesabı",
     "accountPh": "{name} için e-posta, telefon, kullanıcı adı veya ID",
     "joined": "Katılma",
+    "tenure": "Üyelik süresi",
     "joinedPh": "Plan başlangıcı ({date})",
     "notSet": "Belirtilmedi",
     "left": "Ayrılma",
@@ -272,7 +273,7 @@
   },
   "collect": {
     "next": "Sonraki tahsilat {date}",
-    "editMember": "Düzenle",
+    "seatFee": "Koltuk ve ücret",
     "until": "Kapsadığı son tarih",
     "feeFrom": "Geçerlilik tarihi",
     "feeHelp": "Kapsam başlangıcındaki tarife tüm dönem için geçerlidir. Kayıtlı ödemeler değişmez.",

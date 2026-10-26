@@ -78,6 +78,7 @@
     "account": "Akun anggota",
     "accountPh": "Email, telepon, nama pengguna atau ID di {name}",
     "joined": "Bergabung",
+    "tenure": "Lama bergabung",
     "joinedPh": "Awal paket ({date})",
     "notSet": "Belum diatur",
     "left": "Keluar",
@@ -264,7 +265,7 @@
   },
   "collect": {
     "next": "Penagihan berikutnya {date}",
-    "editMember": "Edit",
+    "seatFee": "Kursi & biaya",
     "until": "Berlaku sampai",
     "feeFrom": "Berlaku mulai",
     "feeHelp": "Awal cakupan menentukan tarif untuk seluruh periode. Pembayaran tersimpan tidak berubah.",

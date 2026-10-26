@@ -79,6 +79,7 @@
     "account": "Member account",
     "accountPh": "Email, phone, username or ID on {name}",
     "joined": "Joined",
+    "tenure": "Member for",
     "joinedPh": "Plan start ({date})",
     "notSet": "Not set",
     "left": "Left",
@@ -275,7 +276,7 @@
   },
   "collect": {
     "next": "Next collection {date}",
-    "editMember": "Edit member",
+    "seatFee": "Seat & fee",
     "until": "Covers through",
     "feeFrom": "Effective from",
     "feeHelp": "The coverage start selects the rate for the whole period. Saved receipts stay unchanged.",

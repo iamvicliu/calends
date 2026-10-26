@@ -31,12 +31,8 @@ type Node = { type: string; props: Record<string, any>; children: unknown[] };
 const all = (n: unknown): Node[] =>
   Array.isArray(n) ? n.flatMap(all) : n && typeof n === 'object' && 'type' in n ? [n as Node, ...all((n as Node).children)] : [];
 const st: AppState = { subscriptions: [], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX };
-// 已有成员的资料、座位、收费收在「编辑资料」里，默认收起；要改这些字段的用例先展开
-const expandMember = (nodes: Node[]) =>
-  nodes
-    .flatMap((n) => all(n.props.title))
-    .find((n) => n.type === 'button' && n.props['aria-expanded'] === false && n.children.includes('family.collect.editMember'))
-    ?.props.onClick();
+// 已有成员的座位与收费默认收起成只读几行，点任一行展开完整表单；要改这些字段的用例先展开
+const expandMember = (nodes: Node[]) => nodes.find((n) => n.type === 'Cell' && n.props.label === 'family.member.joined' && n.props.onClick)?.props.onClick();
 const today = '2026-10-22';
 function harness(file: string, names: string, prefs: Record<string, string> = {}, extra: Record<string, unknown> = {}) {
   const source = readUiSource(new URL(file, import.meta.url))
@@ -89,7 +85,8 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
           'ReceivableSheet',
           'PeriodStrip',
           'FirstReceiptFields',
-          'ReceiptHistory',
+          'PeriodPop',
+          'PeriodTip',
           'CopyReceiptFields',
           'BillingFields',
           'StatusFields',
@@ -131,6 +128,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     personFor: (state: AppState, id: string, name: string) => state.people?.find((p) => p.id === id) ?? { id, name },
     t: (key: string) => key,
     tipProps: () => ({ onMouseEnter() {}, onMouseLeave() {}, onFocus() {}, onBlur() {} }),
+    ...(!/(let|const|var) tipSet\b/.test(source) ? { tipSet: null } : {}),
     useMemo: (fn: () => unknown) => fn(),
     useRef: () => ({ current: null }),
     useEffect: (fn: () => unknown) => fn(),
@@ -171,6 +169,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     },
     Cell: 'Cell',
     Group: 'Group',
+    Pop: 'Pop',
     Icon: 'Icon',
     IconButton: 'button',
     CardTitle: 'h3',
@@ -558,7 +557,6 @@ test('member with a receipt and no paid-through date never claims no receipts an
     },
   );
   const render = () => r.render('MemberForm', { state: { ...st, subscriptions: [sub] }, s: sub, member, onClose() {} });
-  expandMember(render());
   // 已付到默认只读，点「调整」才出现这一期开始
   render()
     .find((n) => n.type === 'button' && n.children.includes('family.collect.adjustPaid'))!
@@ -567,8 +565,11 @@ test('member with a receipt and no paid-through date never claims no receipts an
   const date = nodes.find((n) => n.type === 'DatePicker' && n.props.placeholder === 'family.pool.noPay');
   assert.ok(date);
   assert.equal(date.props.value, undefined, 'display correction does not invent a paid-through date');
-  const receipts = nodes.find((n) => n.type === 'Group' && all(n.props.title).some((title) => title.children.includes('family.member.payments')))!;
-  assert.equal(String(receipts.props.foot).includes('family.member.receivedTotal'), false);
+  assert.equal(
+    nodes.some((n) => all(n.props.title).some((title) => title.children.includes('family.member.payments'))),
+    false,
+    'no separate receipt list',
+  );
   assert.equal(saved, undefined);
 });
 
@@ -1937,12 +1938,22 @@ test('删除一笔收款：它抵扣的期恢复为没收，期初结清不受�
     );
   const r = make();
   const left = () => saved!.share!.members[0].receipts!.map((x) => x.id);
-  // 成员表单的收款列表直接删（列表新的在前：第一行是 r1）
-  await r
-    .render('MemberForm', { state: st, s: sub, member, onClose() {} })
-    .find((n) => n.type === 'button' && n.props['aria-label'] === 'family.member.removePayAria')!
+  // 成员表单里点 r1 抵扣的那一格，小弹窗里直接删
+  const form = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  form()
+    .find((n) => n.type === 'button' && n.props['data-period'] === '2026-04-14')!
+    .props.onClick({ currentTarget: 'cell' });
+  const pop = form().find((n) => n.type === 'Pop')!;
+  all(pop)
+    .find((n) => n.type === 'button' && n.children.includes('common.delete'))!
     .props.onClick();
+  await new Promise((done) => setTimeout(done, 0));
   assert.deepEqual(left(), ['o']);
+  assert.equal(
+    form().some((n) => n.type === 'Pop'),
+    false,
+    'the popover closes before confirming',
+  );
   // 点开那一笔在收款表单里删，结果一样
   saved = undefined;
   await all(
@@ -2061,7 +2072,6 @@ test('成员表单：已付至点「调整」直接改日期；改自定义收�
     },
   );
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
-  expandMember(render());
   const save = async () =>
     all(render().find((n) => n.type === 'Sheet')!.props.foot)
       .find((n) => n.type === 'button' && n.children.includes('family.member.save'))!
@@ -2077,6 +2087,7 @@ test('成员表单：已付至点「调整」直接改日期；改自定义收�
   await save();
   assert.deepEqual(saved!.share!.members[0].receipts![0].periods, ['2025-01-17', '2025-07-17', '2026-01-17', '2026-07-17']);
 
+  expandMember(render());
   render()
     .find((n) => n.type === 'Seg' && n.props.value === 'follow')!
     .props.onChange('custom');
@@ -3168,7 +3179,7 @@ test('public stopped card omits the avoided-renewal total while retaining each o
   assert.ok(!('endedMonthly' in d));
 });
 
-test('收款记录默认收起、展开可逆、重新打开收起；零笔没有折叠标题仍可记一笔', () => {
+test('点开已收的格子弹出这一笔的明细，可改可删；没收的格子直接记这一期；不再有收款记录列表', () => {
   const member = {
     id: 'm',
     name: 'Fictional',
@@ -3176,7 +3187,8 @@ test('收款记录默认收起、展开可逆、重新打开收起；零笔没�
     fee: 10,
     feeCurrency: 'USD',
     billEvery: 1,
-    receipts: [{ id: 'r', date: '2026-01-01', amount: 10, currency: 'USD', periods: ['2026-01-01'] }],
+    joined: '2026-08-01',
+    receipts: [{ id: 'r', date: '2026-08-01', amount: 10, currency: 'USD', periods: ['2026-08-01'] }],
   };
   const sub: Subscription = {
     id: 's',
@@ -3185,55 +3197,76 @@ test('收款记录默认收起、展开可逆、重新打开收起；零笔没�
     tags: [],
     price: 20,
     currency: 'USD',
-    start: '2026-01-01',
+    start: '2026-08-01',
     cycle: { unit: 'month', every: 1 },
     status: 'active',
-    share: { role: 'owner', seats: 3, members: [member] },
+    share: { role: 'owner', seats: 3, collectFrom: '2026-08-01', members: [member] },
   };
-  const make = () =>
-    harness(
-      '../app/src/views/Members.tsx',
-      'MemberForm',
-      {},
-      {
-        Sheet: 'Sheet',
-        DatePicker: 'DatePicker',
-        Toggle: 'Toggle',
-        CurrencySelect: 'CurrencySelect',
-        NumInput: 'NumInput',
-        Picker: 'Picker',
-        todayIn: () => today,
-      },
-    );
-  const r = make();
+  const r = harness(
+    '../app/src/views/Members.tsx',
+    'MemberForm',
+    {},
+    {
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      Toggle: 'Toggle',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      Picker: 'Picker',
+      todayIn: () => today,
+    },
+  );
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
-  expandMember(render());
-  const toggle = (nodes: Node[]) => nodes.flatMap((n) => all(n.props.title)).find((n) => n.type === 'button' && n.props['aria-controls'])!;
+  const cell = (key: string) => render().find((n) => n.type === 'button' && n.props['data-period'] === key)!;
+  assert.equal(
+    render().some((n) => n.props.className === 'cell member-pay'),
+    false,
+    'no receipt list rows',
+  );
+  // 已收：弹出明细，只有一个成员时不出现复制
+  cell('2026-08-01').props.onClick({ currentTarget: 'cell' });
+  const pop = render().find((n) => n.type === 'Pop')!;
+  assert.equal(pop.props.triggerRef.current, 'cell');
+  const buttons = all(pop).filter((n) => n.type === 'button');
+  assert.deepEqual(
+    buttons.map((n) => n.children.join('')),
+    ['common.delete', 'detail.action.edit'],
+  );
+  buttons[1].props.onClick();
   let nodes = render();
-  assert.equal(toggle(nodes).props['aria-expanded'], false);
-  const id = toggle(nodes).props['aria-controls'];
-  assert.equal(nodes.find((n) => n.props.id === id)!.props.hidden, true);
-  toggle(nodes).props.onClick();
-  nodes = render();
-  assert.equal(toggle(nodes).props['aria-expanded'], true);
-  assert.equal(nodes.find((n) => n.props.id === id)!.props.hidden, false);
-  assert.ok(nodes.find((n) => n.props['aria-label'] === 'family.member.copyAria') === undefined); // No other member.
-  toggle(nodes).props.onClick();
-  assert.equal(toggle(render()).props['aria-expanded'], false);
-  assert.equal(toggle(make().render('MemberForm', { state: st, s: sub, member, onClose() {} })).props['aria-expanded'], false);
-  const zero = make().render('MemberForm', { state: st, s: sub, member: { ...member, receipts: [] }, onClose() {} });
-  assert.equal(toggle(zero), undefined);
-  assert.ok(zero.some((n) => n.type === 'button' && n.children.includes('family.quick.backCollect')));
-  const refund = make().render('MemberForm', {
-    state: st,
-    s: sub,
-    member: { ...member, receipts: [], left: '2026-03-01', leaveRefund: { date: '2026-03-01', amount: 5, currency: 'USD' } },
-    onClose() {},
-  });
-  assert.equal(refund.find((n) => n.type === 'div' && n.props.id)?.props.hidden, false, 'a refund without receipt history remains visible');
+  assert.equal(
+    nodes.some((n) => n.type === 'Pop'),
+    false,
+  );
+  assert.equal(nodes.find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!.props.editId, 'r');
+  // 没收的一期：不弹明细，直接记这一期
+  const r2 = harness(
+    '../app/src/views/Members.tsx',
+    'MemberForm',
+    {},
+    {
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      Toggle: 'Toggle',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      Picker: 'Picker',
+      todayIn: () => today,
+    },
+  );
+  const again = () => r2.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  again()
+    .find((n) => n.type === 'button' && n.props['data-period'] === '2026-09-01')!
+    .props.onClick({ currentTarget: 'cell' });
+  nodes = again();
+  assert.equal(
+    nodes.some((n) => n.type === 'Pop'),
+    false,
+  );
+  assert.deepEqual(nodes.find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!.props.preset, ['2026-09-01']);
 });
 
-test('成员弹窗：收款在最上面，已结清的成员也能直接记一笔预收；资料默认收起，不分摊的成员直接展开', () => {
+test('成员弹窗：先是谁，再是收款（含已付至、记一笔预收），座位与收费收成只读几行、点开可改', () => {
   const months = ['2026-08-01', '2026-09-01', '2026-10-01'];
   const member = {
     id: 'm',
@@ -3276,23 +3309,34 @@ test('成员弹窗：收款在最上面，已结清的成员也能直接记一�
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
   const nodes = render();
   const groups = nodes.filter((n) => n.type === 'Group');
-  // 第一块就是收款：已结清，下面直接有「记一笔」
-  const collect = groups[0];
+  // 先是谁，再是收款：已结清，下面直接有「记一笔」
+  assert.equal(groups[0].props.title, 'family.member.group');
+  const collect = groups[1];
   assert.equal(collect.props.title, 'receivable.modeReceipt');
   const add = all(collect).find((n) => n.type === 'button' && n.children.includes('family.quick.backCollect'))!;
   assert.ok(add, 'settled members can record from the top section');
-  // 资料、座位、收费默认收起
-  assert.equal(
-    nodes.some((n) => n.type === 'Group' && n.props.title === 'family.member.seatGroup'),
-    false,
-  );
+  // 已付至在收款这一块里，不再单独一块，也不再重复「下次应收」
+  assert.ok(all(collect).some((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil'));
+  assert.equal(collect.props.foot, undefined);
+  // 座位与收费：低频，只读几行；点开才是完整表单
+  const titles = groups.map((n) => n.props.title);
+  assert.deepEqual(titles, ['family.member.group', 'receivable.modeReceipt', 'family.collect.seatFee']);
+  expandMember(nodes);
+  const open = render()
+    .filter((n) => n.type === 'Group')
+    .map((n) => n.props.title);
+  assert.ok(open.includes('family.member.seatGroup') && open.includes('family.member.feeGroup'));
   // 记一笔：叠上收款表单，不预设期，收款表单默认勾最早没结清的一期，也就是下一期（预收）
   add.props.onClick();
   const receipt = render().find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!;
   assert.ok(receipt);
   assert.equal(receipt.props.preset, undefined);
-  // 不分摊的成员没有收款可看，资料直接展开
+  // 不分摊的成员没有收款一块，只有资料
   const exempt = make().render('MemberForm', { state: st, s: sub, member: { ...member, exempt: true }, onClose() {} });
+  assert.equal(
+    exempt.some((n) => n.type === 'Group' && n.props.title === 'receivable.modeReceipt'),
+    false,
+  );
   assert.ok(exempt.some((n) => n.type === 'Group' && n.props.title === 'family.member.seatGroup'));
 });
 
@@ -3300,13 +3344,14 @@ test('跨年各段悬停一起高亮，点击仍返回同一期；触屏按下�
   const p = { key: '2024-10-17', from: '2024-10-17', until: '2026-10-16', due: 120, currency: 'USD', status: 'paid' as const };
   const picked: unknown[] = [];
   const r = harness('../app/src/views/Receivable.tsx', 'PeriodStrip');
-  const render = () => r.render('PeriodStrip', { periods: [p], today: '2026-01-01', mode: 'months', onPick: (period: unknown) => picked.push(period) });
+  const render = () =>
+    r.render('PeriodStrip', { periods: [p], today: '2026-01-01', mode: 'months', onPick: (period: unknown, el: unknown) => picked.push(period, el) });
   let buttons = render().filter((n) => n.type === 'button');
   assert.equal(buttons.length, 3);
   buttons[0].props.onMouseEnter({});
   assert.equal(render().filter((n) => n.type === 'button' && n.props.className.endsWith(' active')).length, 3);
-  buttons[1].props.onClick();
-  assert.deepEqual(picked, [p]);
+  buttons[1].props.onClick({ currentTarget: 'cell' });
+  assert.deepEqual(picked, [p, 'cell']);
   buttons[0].props.onMouseLeave();
   assert.equal(render().filter((n) => n.type === 'button' && n.props.className.endsWith(' active')).length, 0);
   buttons[2].props.onPointerDown({ pointerType: 'touch' });

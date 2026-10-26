@@ -1296,7 +1296,13 @@
                           ]
                         }
                       ]
-                    },
+                    }
+                  ]
+                },
+                {
+                  "type": "Fragment",
+                  "props": {},
+                  "children": [
                     {
                       "type": {
                         "render": "[handler]"
@@ -1323,6 +1329,7 @@
                             }
                           ]
                         },
+                        false,
                         {
                           "type": "Fragment",
                           "props": {},
@@ -1480,6 +1487,7 @@
             }
           ]
         },
+        null,
         false,
         false
       ]
@@ -1656,7 +1664,13 @@
                       ]
                     }
                   ]
-                },
+                }
+              ]
+            },
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
                 {
                   "type": {
                     "render": "[handler]"
@@ -1683,6 +1697,7 @@
                         }
                       ]
                     },
+                    false,
                     {
                       "type": "Fragment",
                       "props": {},
@@ -2006,7 +2021,13 @@
                   ]
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
             {
               "type": {
                 "render": "[handler]"
@@ -2033,6 +2054,7 @@
                     }
                   ]
                 },
+                false,
                 {
                   "type": "Fragment",
                   "props": {},
@@ -2349,156 +2371,6 @@
                 }
               ]
             }
-          ]
-        },
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.seatGroup"
-          },
-          "children": [
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.joined"
-              },
-              "children": [
-                {
-                  "type": "DatePicker",
-                  "props": {
-                    "value": "2026-10-22",
-                    "clearable": true,
-                    "placeholder": "family.member.notSet",
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Fragment",
-              "props": {},
-              "children": [
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstPeriod",
-                    "sub": "Oct 22 – Oct 31"
-                  },
-                  "children": [
-                    {
-                      "type": "Picker",
-                      "props": {
-                        "value": "prorate",
-                        "onChange": "[handler]",
-                        "options": [
-                          {
-                            "value": "prorate",
-                            "label": "family.member.firstMode.prorate"
-                          },
-                          {
-                            "value": "full",
-                            "label": "family.member.firstMode.full"
-                          },
-                          {
-                            "value": "free",
-                            "label": "family.member.firstMode.free"
-                          }
-                        ]
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstAmount"
-                  },
-                  "children": [
-                    {
-                      "type": "NumInput",
-                      "props": {
-                        "ccy": "USD",
-                        "className": "num",
-                        "placeholder": "1.61",
-                        "onValue": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.source"
-              },
-              "children": [
-                {
-                  "type": "input",
-                  "props": {
-                    "value": "",
-                    "placeholder": "family.member.sourcePh",
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            false
-          ]
-        },
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "div",
-              "props": {
-                "className": "cell"
-              },
-              "children": [
-                {
-                  "type": "Seg",
-                  "props": {
-                    "value": "follow",
-                    "onChange": "[handler]",
-                    "options": [
-                      ["follow", "family.rule.follow"],
-                      ["custom", "family.rule.custom"],
-                      ["exempt", "family.member.exempt"]
-                    ]
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "span",
-                  "props": {
-                    "className": "muted"
-                  },
-                  "children": ["family.pool.perFee.m1"]
-                }
-              ]
-            },
-            false,
-            false,
-            []
           ]
         }
       ]
@@ -2919,6 +2791,163 @@
       "children": []
     },
     {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.seatGroup"
+          },
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.joined"
+              },
+              "children": [
+                {
+                  "type": "DatePicker",
+                  "props": {
+                    "value": "2026-10-22",
+                    "clearable": true,
+                    "placeholder": "family.member.notSet",
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false,
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstPeriod",
+                    "sub": "Oct 22 – Oct 31"
+                  },
+                  "children": [
+                    {
+                      "type": "Picker",
+                      "props": {
+                        "value": "prorate",
+                        "onChange": "[handler]",
+                        "options": [
+                          {
+                            "value": "prorate",
+                            "label": "family.member.firstMode.prorate"
+                          },
+                          {
+                            "value": "full",
+                            "label": "family.member.firstMode.full"
+                          },
+                          {
+                            "value": "free",
+                            "label": "family.member.firstMode.free"
+                          }
+                        ]
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstAmount"
+                  },
+                  "children": [
+                    {
+                      "type": "NumInput",
+                      "props": {
+                        "ccy": "USD",
+                        "className": "num",
+                        "placeholder": "1.61",
+                        "onValue": "[handler]"
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.source"
+              },
+              "children": [
+                {
+                  "type": "input",
+                  "props": {
+                    "value": "",
+                    "placeholder": "family.member.sourcePh",
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false
+          ]
+        },
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.feeGroup"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "cell"
+              },
+              "children": [
+                {
+                  "type": "Seg",
+                  "props": {
+                    "value": "follow",
+                    "onChange": "[handler]",
+                    "options": [
+                      ["follow", "family.rule.follow"],
+                      ["custom", "family.rule.custom"],
+                      ["exempt", "family.member.exempt"]
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.feeGroup"
+              },
+              "children": [
+                {
+                  "type": "span",
+                  "props": {
+                    "className": "muted"
+                  },
+                  "children": ["family.pool.perFee.m1"]
+                }
+              ]
+            },
+            false,
+            false,
+            []
+          ]
+        }
+      ]
+    },
+    {
       "type": {
         "render": "[handler]"
       },
@@ -2944,6 +2973,7 @@
             }
           ]
         },
+        false,
         {
           "type": "Fragment",
           "props": {},
@@ -4712,7 +4742,13 @@
                           ]
                         }
                       ]
-                    },
+                    }
+                  ]
+                },
+                {
+                  "type": "Fragment",
+                  "props": {},
+                  "children": [
                     {
                       "type": {
                         "render": "[handler]"
@@ -4739,6 +4775,7 @@
                             }
                           ]
                         },
+                        false,
                         {
                           "type": "Fragment",
                           "props": {},
@@ -4896,6 +4933,7 @@
             }
           ]
         },
+        null,
         false,
         false
       ]
@@ -5072,7 +5110,13 @@
                       ]
                     }
                   ]
-                },
+                }
+              ]
+            },
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
                 {
                   "type": {
                     "render": "[handler]"
@@ -5099,6 +5143,7 @@
                         }
                       ]
                     },
+                    false,
                     {
                       "type": "Fragment",
                       "props": {},
@@ -5422,7 +5467,13 @@
                   ]
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
             {
               "type": {
                 "render": "[handler]"
@@ -5449,6 +5500,7 @@
                     }
                   ]
                 },
+                false,
                 {
                   "type": "Fragment",
                   "props": {},
@@ -5765,156 +5817,6 @@
                 }
               ]
             }
-          ]
-        },
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.seatGroup"
-          },
-          "children": [
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.joined"
-              },
-              "children": [
-                {
-                  "type": "DatePicker",
-                  "props": {
-                    "value": "2026-10-22",
-                    "clearable": true,
-                    "placeholder": "family.member.notSet",
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Fragment",
-              "props": {},
-              "children": [
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstPeriod",
-                    "sub": "Oct 22 – Oct 31"
-                  },
-                  "children": [
-                    {
-                      "type": "Picker",
-                      "props": {
-                        "value": "prorate",
-                        "onChange": "[handler]",
-                        "options": [
-                          {
-                            "value": "prorate",
-                            "label": "family.member.firstMode.prorate"
-                          },
-                          {
-                            "value": "full",
-                            "label": "family.member.firstMode.full"
-                          },
-                          {
-                            "value": "free",
-                            "label": "family.member.firstMode.free"
-                          }
-                        ]
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstAmount"
-                  },
-                  "children": [
-                    {
-                      "type": "NumInput",
-                      "props": {
-                        "ccy": "USD",
-                        "className": "num",
-                        "placeholder": "1.61",
-                        "onValue": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.source"
-              },
-              "children": [
-                {
-                  "type": "input",
-                  "props": {
-                    "value": "",
-                    "placeholder": "family.member.sourcePh",
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            false
-          ]
-        },
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "div",
-              "props": {
-                "className": "cell"
-              },
-              "children": [
-                {
-                  "type": "Seg",
-                  "props": {
-                    "value": "follow",
-                    "onChange": "[handler]",
-                    "options": [
-                      ["follow", "family.rule.follow"],
-                      ["custom", "family.rule.custom"],
-                      ["exempt", "family.member.exempt"]
-                    ]
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "span",
-                  "props": {
-                    "className": "muted"
-                  },
-                  "children": ["family.pool.perFee.m1"]
-                }
-              ]
-            },
-            false,
-            false,
-            []
           ]
         }
       ]
@@ -6335,6 +6237,163 @@
       "children": []
     },
     {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.seatGroup"
+          },
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.joined"
+              },
+              "children": [
+                {
+                  "type": "DatePicker",
+                  "props": {
+                    "value": "2026-10-22",
+                    "clearable": true,
+                    "placeholder": "family.member.notSet",
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false,
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstPeriod",
+                    "sub": "Oct 22 – Oct 31"
+                  },
+                  "children": [
+                    {
+                      "type": "Picker",
+                      "props": {
+                        "value": "prorate",
+                        "onChange": "[handler]",
+                        "options": [
+                          {
+                            "value": "prorate",
+                            "label": "family.member.firstMode.prorate"
+                          },
+                          {
+                            "value": "full",
+                            "label": "family.member.firstMode.full"
+                          },
+                          {
+                            "value": "free",
+                            "label": "family.member.firstMode.free"
+                          }
+                        ]
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstAmount"
+                  },
+                  "children": [
+                    {
+                      "type": "NumInput",
+                      "props": {
+                        "ccy": "USD",
+                        "className": "num",
+                        "placeholder": "1.61",
+                        "onValue": "[handler]"
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.source"
+              },
+              "children": [
+                {
+                  "type": "input",
+                  "props": {
+                    "value": "",
+                    "placeholder": "family.member.sourcePh",
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false
+          ]
+        },
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.feeGroup"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "cell"
+              },
+              "children": [
+                {
+                  "type": "Seg",
+                  "props": {
+                    "value": "follow",
+                    "onChange": "[handler]",
+                    "options": [
+                      ["follow", "family.rule.follow"],
+                      ["custom", "family.rule.custom"],
+                      ["exempt", "family.member.exempt"]
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.feeGroup"
+              },
+              "children": [
+                {
+                  "type": "span",
+                  "props": {
+                    "className": "muted"
+                  },
+                  "children": ["family.pool.perFee.m1"]
+                }
+              ]
+            },
+            false,
+            false,
+            []
+          ]
+        }
+      ]
+    },
+    {
       "type": {
         "render": "[handler]"
       },
@@ -6360,6 +6419,7 @@
             }
           ]
         },
+        false,
         {
           "type": "Fragment",
           "props": {},
@@ -8118,7 +8178,13 @@
                           ]
                         }
                       ]
-                    },
+                    }
+                  ]
+                },
+                {
+                  "type": "Fragment",
+                  "props": {},
+                  "children": [
                     {
                       "type": {
                         "render": "[handler]"
@@ -8145,6 +8211,7 @@
                             }
                           ]
                         },
+                        false,
                         {
                           "type": "Fragment",
                           "props": {},
@@ -8302,6 +8369,7 @@
             }
           ]
         },
+        null,
         false,
         false
       ]
@@ -8478,7 +8546,13 @@
                       ]
                     }
                   ]
-                },
+                }
+              ]
+            },
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
                 {
                   "type": {
                     "render": "[handler]"
@@ -8505,6 +8579,7 @@
                         }
                       ]
                     },
+                    false,
                     {
                       "type": "Fragment",
                       "props": {},
@@ -8828,7 +8903,13 @@
                   ]
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
             {
               "type": {
                 "render": "[handler]"
@@ -8855,6 +8936,7 @@
                     }
                   ]
                 },
+                false,
                 {
                   "type": "Fragment",
                   "props": {},
@@ -9171,156 +9253,6 @@
                 }
               ]
             }
-          ]
-        },
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.seatGroup"
-          },
-          "children": [
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.joined"
-              },
-              "children": [
-                {
-                  "type": "DatePicker",
-                  "props": {
-                    "value": "2026-10-22",
-                    "clearable": true,
-                    "placeholder": "family.member.notSet",
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Fragment",
-              "props": {},
-              "children": [
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstPeriod",
-                    "sub": "Oct 22 – Oct 31"
-                  },
-                  "children": [
-                    {
-                      "type": "Picker",
-                      "props": {
-                        "value": "prorate",
-                        "onChange": "[handler]",
-                        "options": [
-                          {
-                            "value": "prorate",
-                            "label": "family.member.firstMode.prorate"
-                          },
-                          {
-                            "value": "full",
-                            "label": "family.member.firstMode.full"
-                          },
-                          {
-                            "value": "free",
-                            "label": "family.member.firstMode.free"
-                          }
-                        ]
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstAmount"
-                  },
-                  "children": [
-                    {
-                      "type": "NumInput",
-                      "props": {
-                        "ccy": "USD",
-                        "className": "num",
-                        "placeholder": "1.61",
-                        "onValue": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.source"
-              },
-              "children": [
-                {
-                  "type": "input",
-                  "props": {
-                    "value": "",
-                    "placeholder": "family.member.sourcePh",
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            false
-          ]
-        },
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "div",
-              "props": {
-                "className": "cell"
-              },
-              "children": [
-                {
-                  "type": "Seg",
-                  "props": {
-                    "value": "follow",
-                    "onChange": "[handler]",
-                    "options": [
-                      ["follow", "family.rule.follow"],
-                      ["custom", "family.rule.custom"],
-                      ["exempt", "family.member.exempt"]
-                    ]
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "span",
-                  "props": {
-                    "className": "muted"
-                  },
-                  "children": ["family.pool.perFee.m1"]
-                }
-              ]
-            },
-            false,
-            false,
-            []
           ]
         }
       ]
@@ -9741,6 +9673,163 @@
       "children": []
     },
     {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.seatGroup"
+          },
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.joined"
+              },
+              "children": [
+                {
+                  "type": "DatePicker",
+                  "props": {
+                    "value": "2026-10-22",
+                    "clearable": true,
+                    "placeholder": "family.member.notSet",
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false,
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstPeriod",
+                    "sub": "Oct 22 – Oct 31"
+                  },
+                  "children": [
+                    {
+                      "type": "Picker",
+                      "props": {
+                        "value": "prorate",
+                        "onChange": "[handler]",
+                        "options": [
+                          {
+                            "value": "prorate",
+                            "label": "family.member.firstMode.prorate"
+                          },
+                          {
+                            "value": "full",
+                            "label": "family.member.firstMode.full"
+                          },
+                          {
+                            "value": "free",
+                            "label": "family.member.firstMode.free"
+                          }
+                        ]
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstAmount"
+                  },
+                  "children": [
+                    {
+                      "type": "NumInput",
+                      "props": {
+                        "ccy": "USD",
+                        "className": "num",
+                        "placeholder": "1.61",
+                        "onValue": "[handler]"
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.source"
+              },
+              "children": [
+                {
+                  "type": "input",
+                  "props": {
+                    "value": "",
+                    "placeholder": "family.member.sourcePh",
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false
+          ]
+        },
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.feeGroup"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "cell"
+              },
+              "children": [
+                {
+                  "type": "Seg",
+                  "props": {
+                    "value": "follow",
+                    "onChange": "[handler]",
+                    "options": [
+                      ["follow", "family.rule.follow"],
+                      ["custom", "family.rule.custom"],
+                      ["exempt", "family.member.exempt"]
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.feeGroup"
+              },
+              "children": [
+                {
+                  "type": "span",
+                  "props": {
+                    "className": "muted"
+                  },
+                  "children": ["family.pool.perFee.m1"]
+                }
+              ]
+            },
+            false,
+            false,
+            []
+          ]
+        }
+      ]
+    },
+    {
       "type": {
         "render": "[handler]"
       },
@@ -9766,6 +9855,7 @@
             }
           ]
         },
+        false,
         {
           "type": "Fragment",
           "props": {},

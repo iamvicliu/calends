@@ -79,6 +79,7 @@
     "account": "Conta do membro",
     "accountPh": "E-mail, telefone, usuário ou ID no {name}",
     "joined": "Entrou em",
+    "tenure": "Tempo no grupo",
     "joinedPh": "Início do plano ({date})",
     "notSet": "Não definido",
     "left": "Saiu em",
@@ -275,7 +276,7 @@
   },
   "collect": {
     "next": "Próxima cobrança {date}",
-    "editMember": "Editar",
+    "seatFee": "Vaga e cobrança",
     "until": "Cobre até",
     "feeFrom": "Vigente a partir de",
     "feeHelp": "O início da cobertura define a tarifa de todo o período. Os pagamentos registrados permanecem inalterados.",

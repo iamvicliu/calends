@@ -78,6 +78,7 @@
     "account": "Tài khoản thành viên",
     "accountPh": "Email, điện thoại, tên người dùng hoặc ID trên {name}",
     "joined": "Ngày tham gia",
+    "tenure": "Thời gian tham gia",
     "joinedPh": "Ngày bắt đầu gói ({date})",
     "notSet": "Chưa đặt",
     "left": "Ngày rời",
@@ -264,7 +265,7 @@
   },
   "collect": {
     "next": "Lần thu tiếp theo {date}",
-    "editMember": "Sửa",
+    "seatFee": "Chỗ & phí",
     "until": "Áp dụng đến",
     "feeFrom": "Có hiệu lực từ",
     "feeHelp": "Mức phí tại ngày bắt đầu được áp dụng cho toàn kỳ. Các khoản thu đã lưu không thay đổi.",

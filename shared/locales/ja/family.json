@@ -78,6 +78,7 @@
     "account": "メンバーアカウント",
     "accountPh": "{name} のメール、電話番号、ユーザー名または ID",
     "joined": "参加日",
+    "tenure": "参加期間",
     "joinedPh": "プラン開始日（{date}）",
     "notSet": "未設定",
     "left": "脱退日",
@@ -264,7 +265,7 @@
   },
   "collect": {
     "next": "次回の集金 {date}",
-    "editMember": "編集",
+    "seatFee": "席と料金",
     "until": "対象期間の終わり",
     "feeFrom": "適用開始日",
     "feeHelp": "対象期間の開始日の料金を期間全体に適用します。記録済みの入金は変更されません。",

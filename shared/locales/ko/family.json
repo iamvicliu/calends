@@ -78,6 +78,7 @@
     "account": "멤버 계정",
     "accountPh": "{name}의 이메일, 전화번호, 사용자 이름 또는 ID",
     "joined": "참여일",
+    "tenure": "참여 기간",
     "joinedPh": "플랜 시작일({date})",
     "notSet": "설정 안 함",
     "left": "탈퇴일",
@@ -264,7 +265,7 @@
   },
   "collect": {
     "next": "다음 수금 {date}",
-    "editMember": "편집",
+    "seatFee": "자리 및 요금",
     "until": "적용 종료일",
     "feeFrom": "적용 시작일",
     "feeHelp": "적용 기간 시작일의 요금이 전체 기간에 적용됩니다. 저장된 수금 내역은 변경되지 않습니다.",
