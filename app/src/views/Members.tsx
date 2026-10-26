@@ -21,7 +21,7 @@ export function MemberSheet({
   state: AppState;
   s: Subscription;
   member?: ShareMember;
-  /** 从「收款」进来：直接记一笔 */
+  /** true 直接记一笔；false 直接编辑成员；省略时按待收状态选择 */
   collect?: boolean;
   /** 从收款表点某一笔进来：直接打开这笔收款（或免收）的编辑 */
   editId?: string;
@@ -36,6 +36,7 @@ export function MemberSheet({
   const [view, setView] = useState<'member' | 'receipt'>(() => {
     if (!m) return 'member';
     if (editId) return 'receipt';
+    if (collect === false) return 'member';
     const st = memberStatus(state, live, m, today);
     return collect || (!m.exempt && !st.gone && st.owe) ? 'receipt' : 'member';
   });
