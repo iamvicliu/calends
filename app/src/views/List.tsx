@@ -231,7 +231,7 @@ export function List({
           />
           {q && (
             <IconButton type="button" className="tb-search-x" onClick={() => setQ('')} aria-label={t('common.clear')}>
-              <Icon name="x" size={14} />
+              <Icon name="x" size={15} />
             </IconButton>
           )}
         </label>

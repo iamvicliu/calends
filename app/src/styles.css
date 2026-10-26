@@ -223,6 +223,17 @@ a {
 .tb-search input::-webkit-search-cancel-button {
   display: none;
 }
+/* 清空按钮与左侧放大镜同一种图标样式：无描边、无底色，点击区域保持按钮尺寸，图标与左侧对称 */
+.tb-search .tb-search-x {
+  /* 6px 内边距 + 负外边距 + 按钮内留白 = 12px，与左侧放大镜对称；随按钮档位（32/40px）自动换算 */
+  margin-right: calc((27px - var(--icon-button-size)) / 2);
+  color: var(--label-3);
+  box-shadow: none;
+}
+.tb-search .tb-search-x:hover {
+  background: none;
+  color: var(--label-2);
+}
 
 .tb-actions {
   display: flex;
