@@ -71,7 +71,6 @@
     "prepaidItem": "{name}\n{amount}\nuntil {until}",
     "prepaid": "Prepaid value",
     "prepaidSub": "{count} paid, not used up",
-    "savedItem": "{name}\n{amount}\nsince {since}",
     "saved": "Less per month from cancelling",
     "savedSub": "{count} cancelled",
     "next90": "Due in the next 90 days",
@@ -138,7 +137,7 @@
     "loss": "Unrefunded loss",
     "savedHint": "Estimated renewals avoided since cancellation, through today",
     "lossHint": "Paid for service that ended early and was not refunded",
-    "basis": "All history\nMy share; savings at current FX, unrefunded loss at stop-date FX.",
+    "basis": "All history\nMy share; unrefunded loss at stop-date FX.",
     "details": "Unrefunded loss details",
     "cancel": "Voluntary early cancellation"
   }

@@ -270,7 +270,7 @@ test('9/17. 所有语言区分报告全额实付与年度我的份额，并说�
 });
 
 test('报告损失明细可打开原订阅；四种年度分享在非零且未隐藏时展示损失', async () => {
-  const { cancelSavings, stopLosses, yearReview } = await import('./metrics.ts');
+  const { stopLosses, yearReview } = await import('./metrics.ts');
   const { stopSubscription } = await import('./phases.ts');
   const { cnDate, flow, money } = await import('./format.ts');
   const { flatten, setLocale, t } = await import('./i18n.ts');
@@ -307,7 +307,6 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     flow,
     cnDate,
     useMemo: (f: () => unknown) => f(),
-    cancelSavings,
     stopLosses,
     tipProps: () => ({}),
     SubIcon: 'SubIcon',
@@ -352,6 +351,12 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
         opened = s;
       },
     });
+    assert.ok(!text(tree).includes(t('report.stops.saved')));
+    assert.ok(!text(tree).includes(t('report.stops.savedHint')));
+    assert.equal(all(tree).filter((e) => e.props.className === 'metric').length, 1);
+    const single = StopsCard({ state: { ...st, subscriptions: [stopped] }, today, onOpen() {} });
+    assert.equal(all(single).filter((e) => e.props.className === 'metric').length, 0);
+    assert.equal(all(single).filter((e) => e.props.className === 'stop-row').length, 1);
     const rows = all(tree).filter((e) => e.props.className === 'stop-row');
     assert.equal(rows.length, 2);
     const terminated = rows.find((e) => text(e).includes('abuse'))!;
@@ -365,6 +370,9 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     terminated.props.onClick();
     assert.equal(opened, stopped);
     const empty = StopsCard({ state: { ...st, subscriptions: [] }, today, onOpen() {} });
+    assert.equal(all(empty).filter((e) => e.props.className === 'metric').length, 1);
+    assert.ok(text(empty).includes(t('report.stops.loss')));
+    assert.ok(!text(empty).includes(t('report.stops.saved')));
     // 没有未退款损失：不放明细标题和空提示
     assert.ok(!text(empty).includes(t('report.stops.details')));
     assert.equal(all(empty).filter((e) => e.props.className === 'stop-row').length, 0);
