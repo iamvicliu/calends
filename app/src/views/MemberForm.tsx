@@ -150,8 +150,6 @@ export function MemberForm({
     feeFrom,
     setFeeFrom,
     rateChanged,
-    openingEdit,
-    setOpeningEdit,
     next,
     ledger,
     firstPay,
@@ -163,8 +161,6 @@ export function MemberForm({
     st,
     receipt,
     setReceipt,
-    adjustPaid,
-    setAdjustPaid,
     paidUntil,
     busy,
     submit,
@@ -411,7 +407,6 @@ export function MemberForm({
                         ? t('family.pool.settled')
                         : ''
                       : `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) })}`,
-                    adjustPaid ? t('receivable.openingHint') : '',
                     ledger.unmatched.length ? t('receivable.unmatchedNote', { count: ledger.unmatched.length }) : '',
                   ]
                     .filter(Boolean)
@@ -435,27 +430,10 @@ export function MemberForm({
                       : perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
                   </Cell>
                 )}
-                {/* 已付至：从第一期起连续结清到哪天；点「调整」改期初已付至 */}
+                {/* 已付至：从第一期起连续结清到哪天 */}
                 {!once && (
                   <Cell label={t('family.member.paidUntil')}>
-                    {adjustPaid ? (
-                      <DatePicker value={openingEdit ?? undefined} clearable placeholder={t('family.pool.noPay')} onChange={setOpeningEdit} />
-                    ) : (
-                      <>
-                        <span className={paidUntil ? '' : 'muted'}>{paidUntil ? cnDateFull(paidUntil) : t('family.pool.noPay')}</span>
-                        <button
-                          type="button"
-                          className="btn plain"
-                          onClick={() => {
-                            const last = member?.receipts?.find((r) => r.opening)?.periods.at(-1);
-                            setOpeningEdit(ledger.periods.find((p) => p.key === last)?.until);
-                            setAdjustPaid(true);
-                          }}
-                        >
-                          {t('family.collect.adjustPaid')}
-                        </button>
-                      </>
-                    )}
+                    <span className={paidUntil ? '' : 'muted'}>{paidUntil ? cnDateFull(paidUntil) : t('family.pool.noPay')}</span>
                   </Cell>
                 )}
                 {!st.gone && (
@@ -467,8 +445,12 @@ export function MemberForm({
             )}
             {/* 收费：标题旁「编辑收费信息」点开，紧跟在收款下面 */}
             {feeOpen && feeGroup}
-            {/* 三、座位：加入日期、加入时长、退出日期，直接改 */}
-            {seatGroup}
+            {/* 三、座位：加入日期、加入时长只展示；退出日期是记下车的唯一入口，先保留可改（退出流程另议） */}
+            <Group title={t('family.member.seatGroup')}>
+              <Cell label={t('family.member.joined')}>{cnDateFull(joinedOn)}</Cell>
+              {tenure && <Cell label={t('family.member.tenure')}>{tenure}</Cell>}
+              <MemberLeaveFields state={state} s={s} member={f} onChange={up} />
+            </Group>
           </>
         )}
       </div>

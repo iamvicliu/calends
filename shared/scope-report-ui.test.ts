@@ -562,14 +562,13 @@ test('member with a receipt and no paid-through date never claims no receipts an
     },
   );
   const render = () => r.render('MemberForm', { state: { ...st, subscriptions: [sub] }, s: sub, member, onClose() {} });
-  // 已付到默认只读，点「调整」才出现这一期开始
-  render()
-    .find((n) => n.type === 'button' && n.children.includes('family.collect.adjustPaid'))!
-    .props.onClick();
+  // 已付至只展示，不再有「调整」；没收过就写「还没收」，不编造日期
   const nodes = render();
-  const date = nodes.find((n) => n.type === 'DatePicker' && n.props.placeholder === 'family.pool.noPay');
-  assert.ok(date);
-  assert.equal(date.props.value, undefined, 'display correction does not invent a paid-through date');
+  assert.equal(
+    nodes.some((n) => n.type === 'button' && n.children.includes('family.collect.adjustPaid')),
+    false,
+  );
+  assert.ok(all(nodes.find((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil')).some((n) => n.children.includes('family.pool.noPay')));
   assert.equal(
     nodes.some((n) => all(n.props.title).some((title) => title.children.includes('family.member.payments'))),
     false,
@@ -2030,7 +2029,7 @@ test('person avatar drafts remain unsaved until Save; server field order does no
 });
 
 /** 成员弹窗：有欠款时默认是记收款，点底部「调整收费与退出」切到设置；已结清的本来就是设置 */
-test('成员表单：已付至点「调整」直接改日期；改自定义收费从生效日起记调价', async () => {
+test('成员表单：改自定义收费从生效日起记调价', async () => {
   const member = {
     id: 'm',
     name: 'Member',
@@ -2081,17 +2080,6 @@ test('成员表单：已付至点「调整」直接改日期；改自定义收�
     all(render().find((n) => n.type === 'Sheet')!.props.foot)
       .find((n) => n.type === 'button' && n.children.includes('family.member.save'))!
       .props.onClick();
-  // 已付至默认是文字，点「调整」原地变成日期选择：改的是期初已付至，这天及之前没记收款的期算已收清
-  render()
-    .find((n) => n.type === 'button' && n.children.includes('family.collect.adjustPaid'))!
-    .props.onClick();
-  render()
-    .find((n) => n.type === 'DatePicker' && n.props.value === '2026-07-16')!
-    .props.onChange('2027-01-16');
-  assert.equal(render().find((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil') != null, true);
-  await save();
-  assert.deepEqual(saved!.share!.members[0].receipts![0].periods, ['2025-01-17', '2025-07-17', '2026-01-17', '2026-07-17']);
-
   expandMember(render());
   render()
     .find((n) => n.type === 'Seg' && n.props.value === 'follow')!

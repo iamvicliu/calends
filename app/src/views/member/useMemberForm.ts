@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { todayIn, uid, memberBillMonths, memberCollection, memberPeriods, collectionAnchor, collectCurrencyOf } from '../../../../shared/billing.ts';
+import { todayIn, uid, memberBillMonths, memberCollection, collectionAnchor, collectCurrencyOf } from '../../../../shared/billing.ts';
 import { cnDateFull } from '../../../../shared/format.ts';
 import type { AppState, Receipt, ShareMember, Subscription } from '../../../../shared/types.ts';
 import { isSettled, paidThrough, putRecord, removeRecord, resolveKey, setOpening } from '../../../../shared/receivables.ts';
@@ -103,13 +103,10 @@ export function useMemberForm({
   };
   const rateChanged = !isNew && mode !== 'exempt' && (mode === 'follow' ? initialMode !== 'follow' : initialMode !== 'custom' || feeEdited);
 
-  // 期初已付至：默认只看已付至；点「调整」改这个日期，这天及之前没记收款的期算开始记账前已收清（null 表示没改过，undefined 表示清空）
-  const [openingEdit, setOpeningEdit] = useState<string | undefined | null>(null);
   const draft = (): ShareMember => {
     const m = withFee(f);
-    // 收款、免收以账本为准：收款表单另行保存，这里只在调整了已付至时改期初结清
-    const r = { ...m, receipts: member?.receipts, waivers: member?.waivers };
-    return openingEdit === null ? r : { ...r, ...setOpening(r, memberPeriods(s, r, openingEdit ?? today, collectCcy), openingEdit) };
+    // 收款、免收以账本为准：收款表单另行保存
+    return { ...m, receipts: member?.receipts, waivers: member?.waivers };
   };
   const next = draft();
   const ledger = memberLedgerAhead(state, s, next, today);
@@ -134,7 +131,6 @@ export function useMemberForm({
   const received = member ? memberCashFlows(member).reduce((a, p) => a + memberFlowValue(state, p, collectCcy), 0) : 0;
   const st = memberStatus(state, { ...s, share: { ...s.share!, members: s.share!.members.map((x) => (x.id === next.id ? next : x)) } }, next, today);
   const [receipt, setReceipt] = useState<{ edit?: string; preset?: string[] } | null>(initialReceipt ?? null);
-  const [adjustPaid, setAdjustPaid] = useState(false);
   // 已付至按没退出算：退出后还有已付的天数时照样显示到那期期末，算退款要看
   const paidUntil = next.left ? paidThrough(memberLedgerAhead(state, s, { ...next, left: undefined }, today).periods) : paidThrough(ledger.periods);
 
@@ -178,10 +174,8 @@ export function useMemberForm({
         const sh = current.share!;
         const stored = sh.members.find((x) => x.id === next.id);
         const base: ShareMember = { ...next, name: f.name.trim(), account: f.account?.trim() || undefined, personId: link.id };
-        // 收款、免收以账本里最新的为准（期间可能在收款表单里记过），只叠加这里调整的期初结清和首笔收款
-        const latest = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
-        const opened =
-          openingEdit === null ? latest : { ...latest, ...setOpening(latest, memberPeriods(current, latest, openingEdit ?? today, collectCcy), openingEdit) };
+        // 收款、免收以账本里最新的为准（期间可能在收款表单里记过），只叠加首笔收款
+        const opened = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
         const out: ShareMember =
           isNew && firstPay
             ? {
@@ -238,8 +232,6 @@ export function useMemberForm({
     start,
     withFee,
     rateChanged,
-    openingEdit,
-    setOpeningEdit,
     draft,
     next,
     ledger,
@@ -264,8 +256,6 @@ export function useMemberForm({
     st,
     receipt,
     setReceipt,
-    adjustPaid,
-    setAdjustPaid,
     paidUntil,
     others,
     copying,
