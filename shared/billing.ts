@@ -1195,12 +1195,12 @@ export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
  * 成员的应收期：从加入日起按条款切——首期对齐车的收款节奏，之后按成员自己的周期接着切；
  * 与收没收钱无关，所以可以单独收第 3 期、留着第 2 期。到退出日、订阅结束或 last 为止
  */
-export function memberPeriods(s: Subscription, m: ShareMember, last: string, collectCurrency: string): Period[] {
+export function memberPeriods(s: Subscription, m: ShareMember, last: string, collectCurrency: string, legacyDrift = false): Period[] {
   const out: Period[] = [];
   const end = shareLastDay(s);
   for (let from = memberSince(s, m), guard = 0; from <= last && guard < 1200; guard++) {
     if ((m.left && from >= m.left) || (end && from > end)) break;
-    const c = memberCollection(s, m, from, collectCurrency);
+    const c = memberCollection(s, m, from, collectCurrency, legacyDrift);
     out.push({ key: c.from, from: c.from, until: c.until, due: c.amount, currency: c.currency });
     if (c.next <= from) break;
     from = c.next;
@@ -1218,13 +1218,35 @@ export function memberLedger(s: Subscription, m: ShareMember, today: string, col
   return settle(memberPeriods(s, m, last, collectCurrency), m, today);
 }
 
+/**
+ * 成员每期从哪天起收：最近一次节奏重起（restarts）那天的日子，否则是收款基准日的日子。
+ * 29–31 号起收的，短月夹到月底后下一期回到原来的日子，不会一路漂到 28 号
+ */
+function collectionDayOf(s: Subscription, m: ShareMember, from: string): number {
+  const restart = (m.restarts ?? [])
+    .filter((r) => r <= from)
+    .sort()
+    .at(-1);
+  return Number((restart ?? m.anchor ?? collectionAnchor(s)).slice(8, 10));
+}
+/** 把某天挪到同月的第 day 号（短月夹到月底），只往后挪 */
+function onCollectionDay(date: string, day: number): string {
+  const last = Number(addDays(addMonths(date.slice(0, 8) + '01', 1), -1).slice(8, 10));
+  const want = Math.min(day, last);
+  return want > Number(date.slice(8, 10)) ? `${date.slice(0, 8)}${String(want).padStart(2, '0')}` : date;
+}
+
 /** 只有首次未收款的加入期对齐统一日；之后按成员自己的覆盖起点收完整一期。 */
-export function memberCollection(s: Subscription, m: ShareMember, from: string, collectCurrency: string) {
+export function memberCollection(s: Subscription, m: ShareMember, from: string, collectCurrency: string, legacyDrift = false) {
   const joined = memberSince(s, m);
   const first = collectionPeriod(s, m, joined);
   const isFirst = from === joined;
   const rate = memberRate(s, m, from, collectCurrency);
-  const natural = isFirst ? first.next : addMonths(from, rate.billEvery);
+  const natural = isFirst
+    ? first.next
+    : legacyDrift
+      ? addMonths(from, rate.billEvery)
+      : onCollectionDay(addMonths(from, rate.billEvery), collectionDayOf(s, m, from));
   // 收款节奏从某天起重新起算（比如订阅断过又在别的日子续上）：这一期截到那天前一天，按天折算
   const restart = (m.restarts ?? []).filter((r) => r > from && r < natural).sort()[0];
   const next = restart ?? natural;

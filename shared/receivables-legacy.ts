@@ -1,7 +1,7 @@
 // 旧版应收数据一次性转成按期记账（receivables.ts）。读账本、导入备份后都会经过这里，转过的数据原样返回。
 // 旧合租成员：paidUntil（已付至）+ payments（每笔收款写覆盖起止日）；旧代付：entries（每期一条，收款、实扣混在一起）。
 // 收到的钱一笔不丢：对不上任何一期的收款保留原来覆盖的起始日，界面上作为对不上的记录单独列出
-import { addDays, addMonths, chargesBetween, diffDays, memberBillMonths, memberPeriods, memberSince } from './billing.ts';
+import { addDays, addMonths, chargesBetween, collectionAnchor, diffDays, memberBillMonths, memberPeriods, memberSince } from './billing.ts';
 import type { Period } from './receivables.ts';
 import type { ProxyCharge, Receipt, ShareMember, Subscription } from './types.ts';
 
@@ -33,6 +33,50 @@ const isLegacyProxy = (p: Subscription['proxy']) => !!p && 'entries' in p;
 
 /** 有旧版字段的订阅转成新结构；没有的原样返回（同一个对象），调用方据此判断要不要写回 */
 export function migrateReceivables(s: Subscription, baseCurrency: string): Subscription {
+  return alignDriftedKeys(convertLegacy(s, baseCurrency), baseCurrency);
+}
+
+/**
+ * 旧版成员分期在 29–31 号起收时，短月夹到 28 号后一路按 28 号往下切；现在每期回到原来的日子。
+ * 已记的收款、免收里正好是旧期起始日的，按「第几期」改成现在那一期的起始日（只往后挪 0–3 天，超出就不动）；
+ * 已经是现在的起始日或期内其他日子的不动，所以可重复执行，没变化时原样返回同一个对象
+ */
+function alignDriftedKeys(s: Subscription, collectCurrency: string): Subscription {
+  if (s.share?.role !== 'owner') return s;
+  const day = (d?: string) => Number(d?.slice(8, 10) ?? 0);
+  let changed = false;
+  const members = s.share.members.map((m) => {
+    const records = [...(m.receipts ?? []), ...(m.waivers ?? [])];
+    if (!records.length || ![collectionAnchor(s), m.anchor, ...(m.restarts ?? [])].some((d) => day(d) >= 29)) return m;
+    const last = addDays(
+      records
+        .flatMap((r) => r.periods)
+        .sort()
+        .at(-1)!,
+      7,
+    );
+    const now = memberPeriods(s, m, last, collectCurrency);
+    const old = memberPeriods(s, m, last, collectCurrency, true);
+    const starts = new Set(now.map((p) => p.key));
+    const move = (k: string) => {
+      if (starts.has(k)) return k;
+      const i = old.findIndex((p) => p.key === k);
+      const to = i < 0 ? undefined : now[i]?.key;
+      return to && to >= k && diffDays(k, to) <= 3 ? to : k;
+    };
+    const fix = <T extends { periods: string[] }>(list?: T[]) =>
+      list?.map((r) => {
+        const periods = r.periods.map(move);
+        if (periods.every((k, j) => k === r.periods[j])) return r;
+        changed = true;
+        return { ...r, periods };
+      });
+    return { ...m, receipts: fix(m.receipts), waivers: fix(m.waivers) };
+  });
+  return changed ? { ...s, share: { ...s.share, members } } : s;
+}
+
+function convertLegacy(s: Subscription, baseCurrency: string): Subscription {
   const members = s.share?.members;
   const legacyShare = !!members?.some(isLegacyMember);
   const legacyProxy = isLegacyProxy(s.proxy);

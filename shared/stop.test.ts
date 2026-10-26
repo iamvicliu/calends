@@ -980,7 +980,7 @@ describe('MCP 合租统一收款与首期', () => {
       assert.equal((await f.run('get_carpool')).plans[0].collect_from, '2026-01-31');
       // 改了基准日，期重新切过；旧收款按落在哪一期对上，不会变成欠款
       const received = await f.run('record_receivable', { kind: 'share', member: 'old', amount: 9, currency: 'USD' });
-      assert.equal(received.member.paid_until, '2026-10-27');
+      assert.equal(received.member.paid_until, '2026-10-30');
       const history = f.saved().share!.members[0].receipts!;
       assert.deepEqual(
         history.map((r) => [r.amount, r.opening ?? false]),
