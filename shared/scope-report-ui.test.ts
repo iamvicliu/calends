@@ -2880,6 +2880,10 @@ test('selection lifecycle renders four metrics, every stop, detail actions and s
   let nodes = r.render('ScopeLifecycleReport', props);
   assert.equal(nodes.find((n) => n.props.className?.startsWith('metric-cards'))!.props['data-count'], 4);
   assert.equal(nodes.filter((n) => n.props.className === 'stop-row').length, 1);
+  assert.ok(nodes.some((n) => n.type === 'h3' && String(n.props.hint).includes('scope.totalBasis')));
+  assert.ok(!nodes.some((n) => n.props.className === 'metric-note' && n.children.includes('scope.totalBasis')));
+  assert.ok(nodes.some((n) => n.props.className === 'card scope-block scope-cash scope-alone'));
+  assert.ok(nodes.some((n) => n.type === 'Composition' && n.props.className === 'scope-block scope-spending scope-alone'));
   assert.equal(visible.at(-1), 6);
   const row = nodes.find((n) => n.props.className === 'stop-row')!;
   row.props.onClick();

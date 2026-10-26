@@ -45,7 +45,15 @@ export function ScopeLifecycleReport({
       <div className="scope-headline scope-block">
         {actions}
         <MetricCards>
-          <Metric label={t('scope.totalSpent')} value={amount(data.spent)} note={totalNote(data.spent) || t('scope.totalBasis')} />
+          <Metric
+            label={
+              <CardTitle as="span" className="icon-text" hint={[t('scope.totalBasis'), totalNote(data.spent)].filter(Boolean).join('\n')}>
+                {t('scope.totalSpent')}
+              </CardTitle>
+            }
+            value={amount(data.spent)}
+            note={totalNote(data.spent) || undefined}
+          />
           <Metric
             label={t('scope.monthly')}
             value={data.activeCount ? (mrr ? amount(mrr) : flow(0, base)) : '—'}
@@ -129,15 +137,9 @@ export function ScopeLifecycleReport({
           </div>
         </div>
       )}
-      {trend && <div className="card scope-block scope-cash">{renderBlock(trend)}</div>}
+      {trend && <div className="card scope-block scope-cash scope-alone">{renderBlock(trend)}</div>}
       {data.spending.length > 0 && (
-        <Composition
-          state={state}
-          today={today}
-          onOpen={onOpen}
-          spending={data.spending}
-          className={`scope-block ${trend ? 'scope-spending' : 'scope-alone'}`}
-        />
+        <Composition state={state} today={today} onOpen={onOpen} spending={data.spending} className="scope-block scope-spending scope-alone" />
       )}
       {events && (
         <div className="card scope-block scope-events">

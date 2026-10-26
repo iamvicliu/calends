@@ -145,9 +145,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   );
   const headlineHeading = (label: string, hint?: string) => (
     <div className="scope-headline-header">
-      <CardTitle as="div" className="stat-label" hint={hint ? t(hint) : undefined}>
-        {t(label)}
-      </CardTitle>
+      {label && (
+        <CardTitle as="div" className="stat-label" hint={hint ? t(hint) : undefined}>
+          {t(label)}
+        </CardTitle>
+      )}
       <div className="scope-actions">
         <CopyImageButton render={copyImage} disabled={copying} />
         <IconButton
@@ -538,7 +540,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             onOpen={onOpen}
             id={id}
             copying={copying}
-            actions={headlineHeading('scope.totalSpent', 'scope.totalBasis')}
+            actions={headlineHeading('')}
             renderBlock={render}
           />
         )}

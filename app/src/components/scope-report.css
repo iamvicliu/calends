@@ -384,6 +384,7 @@
 
 /* Selection-only layout: shared cards, type sizes and timeline capsules. */
 .scope-lifecycle .scope-headline-header {
+  justify-content: flex-end;
   margin-bottom: 8px;
 }
 .scope-timeline .gt {
@@ -394,7 +395,11 @@
   padding-right: 8px;
   font-size: var(--fs-1);
 }
-.scope-lifecycle > .scope-spending .card-h {
+.scope-lifecycle .scope-spending .card-h {
   justify-content: space-between;
   flex-wrap: wrap;
+}
+
+.scope-lifecycle .scope-headline .metric-grid {
+  grid-auto-rows: 1fr;
 }

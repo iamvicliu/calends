@@ -106,7 +106,7 @@ export function Gantt({
   compact?: boolean;
 }) {
   const captureRef = useRef<HTMLDivElement>(null);
-  useSnapshotRender(captureRef, () => compact ? <Gantt rows={subs} state={state} today={today} onOpen={onOpen} compact /> : null);
+  useSnapshotRender(captureRef, () => (compact ? <Gantt rows={subs} state={state} today={today} onOpen={onOpen} compact /> : null));
   // 缩放与着色方式存在服务端，多台设备一致
   const [savedZoom, setZoomRaw] = usePref<GanttZoom>('gantt-zoom', '1y', isGanttZoom);
   const zoom = compact ? 'all' : savedZoom;
