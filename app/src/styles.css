@@ -9845,6 +9845,10 @@ img.mm-flag {
 }
 
 /* 各期一览：按年分行，颜色与合租时间条一致（已收绿、免收浅灰斜纹、欠着红斜纹、未到期灰斜纹） */
+/* 格子所在的行：上下留白与左右一致 */
+.cell:has(> .rv-strip) {
+  padding-block: 16px;
+}
 .rv-strip {
   display: grid;
   gap: 6px;

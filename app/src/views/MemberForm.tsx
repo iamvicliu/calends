@@ -450,7 +450,14 @@ export function MemberForm({
             {seatFeeOpen ? (
               seatFeeGroups
             ) : (
-              <Group title={t('family.collect.seatFee')}>
+              <Group
+                title={t('family.collect.seatFee')}
+                action={
+                  <button type="button" className="btn plain" onClick={() => setSeatFeeOpen(true)}>
+                    {t('detail.action.edit')}
+                  </button>
+                }
+              >
                 <Cell label={t('family.member.joined')} onClick={() => setSeatFeeOpen(true)}>
                   {cnDateFull(joinedOn)}
                 </Cell>
