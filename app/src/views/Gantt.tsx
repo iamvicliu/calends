@@ -523,13 +523,13 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
                       const unusedWidth = unused ? Math.max(0, x(wastedUntil) - x(stopped!.date)) : 0;
                       const unusedSeen = unused ? visible(x(stopped!.date), unusedWidth) : { l: 0, r: 0 };
-                      // 按实际字体量文字宽度，加左右各 9px 内边距；停用标志占据的半圆不计入文字空间。
+                      // 按实际字体量文字宽度，加左右各 9px 内边距；服务方停用时，停用日右侧被标志盖住的半个圆不计入文字空间。
                       // 完整金额放不下时退到取整金额（精确值在悬停提示里），仍放不下才不显示
                       const unusedAmount = unused
                         ? [
                             flow(-stopped!.unusedValue, g.v.currency, { compact: true }),
                             flow(-Math.round(stopped!.unusedValue), g.v.currency, { compact: true }),
-                          ].find((text) => unusedSeen.r - unusedSeen.l >= amountWidth(text) + 18)
+                          ].find((text) => unusedSeen.r - unusedSeen.l >= amountWidth(text) + 18 + (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0))
                         : undefined;
                       const showUnusedAmount = !!unusedAmount;
                       if ((unused ? wastedUntil : to) < rStart || g.from > rEnd) return null;
@@ -604,11 +604,11 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           {unused && (
                             <span
                               className="gt-unused"
-                              // 被服务方停用时，灰段起点藏到停用标志下半个圆，接缝处只露出完整的圆
+                              // 被服务方停用时，灰段起点藏到以停用日为圆心的标志下，接缝处只露出完整的圆；金额文字从圆的右缘之后开始
                               style={{
                                 left: x(stopped!.date) - (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0),
                                 width: unusedWidth + (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0),
-                                paddingLeft: stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0,
+                                paddingLeft: stopped!.kind === 'terminate' ? STOP_CAP : 0,
                                 top,
                               }}
                               title={stopDescription(g.v, today)}
