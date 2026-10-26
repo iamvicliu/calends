@@ -78,10 +78,6 @@
     "stopped": "Đã dừng",
     "averageDuration": "Thời gian trung bình",
     "omitted": "12 đăng ký chi nhiều nhất; còn {count} đăng ký",
-    "used": "Đã dùng {span}",
-    "noUnused": "Không có thời gian chưa dùng",
-    "unused": "Chưa dùng {count} ngày",
-    "noLoss": "Không có tổn thất chưa hoàn tiền",
     "cashWindow": "12 tháng đến tháng này; chi đến hôm nay, trừ hoàn tiền."
   }
 }

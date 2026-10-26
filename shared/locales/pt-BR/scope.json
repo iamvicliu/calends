@@ -80,10 +80,6 @@
     "stopped": "Encerradas",
     "averageDuration": "Duração média",
     "omitted": "As 12 com maior gasto total; mais {count}",
-    "used": "Uso: {span}",
-    "noUnused": "Sem período não utilizado",
-    "unused": "{count} dias não utilizados",
-    "noLoss": "Sem perda não reembolsada",
     "cashWindow": "12 meses até este mês; gastos até hoje, descontados os reembolsos."
   }
 }

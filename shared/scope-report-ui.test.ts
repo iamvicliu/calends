@@ -2900,62 +2900,59 @@ test('selection lifecycle renders four metrics without a stop card and retains t
   assert.equal(visible.at(-1), 6);
 });
 
-test('selection composition keeps net refunds signed and never paints unavailable spending as zero', () => {
-  const r = harness('../app/src/components/Composition.tsx', 'Composition', {}, { squarify: () => [] });
-  const s: Subscription = {
-    id: 's',
-    name: 'Fictional Refund',
-    category: 'Tools',
-    tags: [],
-    price: 10,
-    currency: 'USD',
-    cycle: { unit: 'month', every: 1 },
-    start: today,
-    status: 'active',
-  };
-  const state = { ...st, subscriptions: [s], settings: { ...st.settings, baseCurrency: 'USD' } };
-  const spending = (value: fxTotals.FxTotal): reports.ScopeLifecycle['spending'] => [{ sub: s, category: s.category, region: 'US', total: value }];
-  const nodes = r.render('Composition', { state, today, onOpen() {}, spending: spending(fxTotals.amountTotal(-30, 'USD', -30)) });
-  assert.ok(nodes.some((n) => n.props.className === 'num green' && n.children.includes('+$30.00')));
-  const missing = r.render('Composition', { state, today, onOpen() {}, spending: spending(fxTotals.amountTotal(30, 'XCD', NaN)) });
-  const empty = missing.find((n) => n.props.className === 'empty')!;
-  assert.ok(JSON.stringify(empty.children).includes('XCD'));
-  assert.ok(!JSON.stringify(empty.children).includes('$0.00'));
-});
-
-test('cumulative composition opens the original subscription rather than a historical payment-source projection', () => {
+test('full report composition retains MRR dimensions, drill-down, subscription opening and snapshot selection', () => {
+  let snapshot: (() => unknown) | undefined;
   const r = harness(
     '../app/src/components/Composition.tsx',
     'Composition',
     {},
-    { squarify: (values: number[], x = 0, y = 0, w = 100, h = 100) => values.map((_, i) => ({ i, x, y, w: w / values.length, h })) },
+    {
+      squarify: (values: number[], x = 0, y = 0, w = 100, h = 100) => values.map((_, i) => ({ i, x, y, w: w / values.length, h })),
+      useSnapshotRender: (_ref: unknown, render: () => unknown) => {
+        snapshot = render;
+      },
+    },
   );
-  const s: Subscription = {
-    id: 's',
-    name: 'Fictional Phase',
+  const sub: Subscription = {
+    id: 'active',
+    name: 'Fictional Current',
     category: 'Tools',
     tags: [],
     price: 10,
     currency: 'USD',
-    methodId: 'current',
-    region: 'US',
     cycle: { unit: 'month', every: 1 },
     start: today,
     status: 'active',
   };
-  const state = { ...st, subscriptions: [s] };
+  const stopped: Subscription = { ...sub, id: 'stopped', name: 'Fictional Stopped', price: 100, start: '2025-01-01', status: 'ended', end: '2026-10-21' };
+  const state = { ...st, subscriptions: [sub, stopped], settings: { ...st.settings, baseCurrency: 'USD' } };
   let opened: Subscription | undefined;
-  const nodes = r.render('Composition', {
+  const props = {
     state,
     today,
     onOpen: (s: Subscription) => {
       opened = s;
     },
-    spending: [{ sub: s, methodId: 'historical', region: 'JP', category: 'Tools', total: fxTotals.amountTotal(20, 'USD', 20) }],
-  });
+  };
+  let nodes = r.render('Composition', props);
+  assert.deepEqual(
+    nodes.find((n) => n.type === 'Seg')!.props.options.map((o: string[]) => o[0]),
+    ['cat', 'pay', 'ccy', 'cycle'],
+  );
+  assert.equal(nodes.filter((n) => n.props.className?.startsWith('tm-cell')).length, 1);
+  assert.ok(JSON.stringify(nodes).includes('−$10'));
+  assert.ok(nodes.some((n) => n.type === 'CopyImageButton'));
+  nodes.find((n) => n.props.className === 'tm-head')!.props.onClick();
+  nodes = r.render('Composition', props);
   nodes.find((n) => n.props.className?.startsWith('tm-cell'))!.props.onClick();
-  assert.equal(opened, s);
-  assert.equal(opened!.methodId, 'current');
+  assert.equal(opened, sub);
+  const copy = snapshot!() as Node;
+  assert.deepEqual(copy.props.snapshotSelection, { dim: 'cat', focus: 'Tools' });
+  nodes.find((n) => n.props.className === 'btn plain')!.props.onClick();
+  nodes = r.render('Composition', props);
+  nodes.find((n) => n.type === 'Seg')!.props.onChange('ccy');
+  r.render('Composition', props);
+  assert.deepEqual((snapshot!() as Node).props.snapshotSelection, { dim: 'ccy', focus: null });
 });
 
 test('selection cash keeps its chart without data disclosure; legacy cash retains the data table', () => {

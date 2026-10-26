@@ -79,10 +79,6 @@
     "stopped": "Beendet",
     "averageDuration": "Durchschnittliche Dauer",
     "omitted": "Top 12 nach Gesamtausgaben; {count} weitere Abos",
-    "used": "Genutzt: {span}",
-    "noUnused": "Keine ungenutzte Zeit",
-    "unused": "{count} ungenutzte Tage",
-    "noLoss": "Kein unerstatteter Verlust",
     "cashWindow": "12 Monate bis diesen Monat; Ausgaben bis heute abzüglich Erstattungen."
   }
 }

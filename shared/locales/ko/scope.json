@@ -78,10 +78,6 @@
     "stopped": "중지됨",
     "averageDuration": "평균 이용 기간",
     "omitted": "누적 지출 상위 12개; 나머지 {count}개",
-    "used": "이용 {span}",
-    "noUnused": "미사용 기간 없음",
-    "unused": "미사용 {count}일",
-    "noLoss": "미환불 손실 없음",
     "cashWindow": "이번 달까지 12개월, 오늘까지 지출에서 환불을 차감합니다."
   }
 }

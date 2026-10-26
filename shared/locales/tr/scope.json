@@ -79,10 +79,6 @@
     "stopped": "Durdurulan",
     "averageDuration": "Ortalama süre",
     "omitted": "Toplam harcamaya göre ilk 12; {count} abonelik daha",
-    "used": "Kullanılan {span}",
-    "noUnused": "Kullanılmamış süre yok",
-    "unused": "{count} kullanılmamış gün",
-    "noLoss": "İade edilmemiş kayıp yok",
     "cashWindow": "Bu ay dahil 12 ay; bugüne kadarki harcamalar, iadeler düşülmüş."
   }
 }

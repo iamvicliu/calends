@@ -37,7 +37,7 @@ export function ScopeLifecycleReport({
   const upcoming = report.blocks.find((b) => b.type === 'upcoming');
   const mrr = head?.mode === 'scope' ? head.partial?.mrr : undefined;
   const count = (n: number) => t('scope.lifecycle.times', { count: n });
-  const amount = (total: Parameters<typeof formatTotal>[0], direction: 1 | -1 = -1) => formatTotal(total, base, { direction, main: true });
+  const amount = (total: Parameters<typeof formatTotal>[0]) => formatTotal(total, base, { direction: -1, main: true });
   return (
     <div id={id} className="scope-grid scope-lifecycle">
       <div className="scope-headline scope-block">

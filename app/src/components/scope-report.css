@@ -397,10 +397,6 @@
   padding-right: 8px;
   font-size: var(--fs-1);
 }
-.scope-lifecycle .scope-spending .card-h {
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
 
 .scope-lifecycle .scope-headline .metric-grid {
   grid-auto-rows: 1fr;
