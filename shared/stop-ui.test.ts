@@ -203,11 +203,13 @@ test('真实甘特结构：未退款段接在实线后、红色停用标记、�
     if (amount !== 31) {
       const unused = withClass(nodes, 'gt-unused')[0];
       assert.equal(unused.props.style.top, withClass(nodes, 'gt-seg')[0].props.style.top);
-      // 被服务方停用：彩色段直角铺到停用日中线，与条同高的停用标志以停用日为圆心，灰段起点与标志左缘对齐、接缝藏在圆下
+      // 被服务方停用：彩色段直角铺到停用日中线，灰段从中线开始，与条同高的停用标志以中线为圆心压在两者之上
       assert.equal(withClass(nodes, 'joined').length, 1);
       const stop = withClass(nodes, 'gt-stop')[0];
+      const seg = withClass(nodes, 'gt-seg').at(-1);
       assert.equal(stop.props.style.top, unused.props.style.top);
-      assert.equal(unused.props.style.left, stop.props.style.left);
+      assert.equal(unused.props.style.left, stop.props.style.left + 11);
+      assert.equal(seg.props.style.left + seg.props.style.width, unused.props.style.left);
       assert.ok(unused.props.style.width > 0);
       assert.ok(unused.props.title.includes('abuse'));
     }
@@ -412,7 +414,7 @@ test('时间轴金额：宽段显示紧凑负金额，窄段仅保留悬停说�
     tree = render(s);
     assert.equal(withClass(tree, 'gt-unused-amount').length, 1);
     assert.equal(text(withClass(tree, 'gt-unused-amount')), `−${format.money(16, 'USD', { compact: true })}`);
-    assert.equal(withClass(tree, 'gt-unused')[0].props.style.paddingLeft, kind === 'terminate' ? 22 : 0);
+    assert.equal(withClass(tree, 'gt-unused')[0].props.style.paddingLeft, kind === 'terminate' ? 11 : 0);
     assert.equal(withClass(render(s, true), 'gt-unused-amount').length, 0);
     // 同样宽度下，超长金额仍应隐藏而不是压到标志或被裁掉。
     assert.equal(withClass(render(phases.stopSubscription({ ...sub, price: 1234567890123 }, today, kind)), 'gt-unused-amount').length, 0);

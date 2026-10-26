@@ -625,11 +625,12 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           {unused && (
                             <span
                               className="gt-unused"
-                              // 被服务方停用时，灰段起点藏到以停用日为圆心的标志下，接缝处只露出完整的圆；金额文字从圆的右缘之后开始
+                              // 灰段从停用日中线开始：中线左侧是直角铺到中线的彩色段，右侧是灰段，停用标志以中线为圆心压在两者之上；
+                              // 金额文字从圆的右缘之后开始
                               style={{
-                                left: x(stopped!.date) - (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0),
-                                width: unusedWidth + (stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0),
-                                paddingLeft: stopped!.kind === 'terminate' ? STOP_CAP : 0,
+                                left: x(stopped!.date),
+                                width: unusedWidth,
+                                paddingLeft: stopped!.kind === 'terminate' ? STOP_CAP / 2 : 0,
                                 top,
                               }}
                               title={stopDescription(g.v, today)}
