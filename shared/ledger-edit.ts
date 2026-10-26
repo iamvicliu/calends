@@ -304,3 +304,20 @@ export function editRecord<T>(records: T[], index: number, replacement: T | unde
   if (expected !== undefined && JSON.stringify(expected) !== JSON.stringify(records[index])) throw new Error(t('mcp.error.staleRecord'));
   return records.flatMap((x, i) => (i === index ? (replacement === undefined ? [] : [replacement]) : [x]));
 }
+
+/**
+ * 只把这次表单里真正改动的字段合并到最新数据上：
+ * 打开表单期间别处（另一个标签页、同步脚本）改过的其他字段不会被旧数据覆盖。
+ */
+export function mergeEdits<T extends { id: string }>(original: T, edited: T, latest: T | undefined): T {
+  // 打开表单期间在别处被删掉了：不按旧表单把它写回来
+  if (!latest) throw new Error(t('ui.error.deletedElsewhere'));
+  const out: Record<string, unknown> = { ...latest };
+  const keys = new Set([...Object.keys(original), ...Object.keys(edited)]);
+  for (const k of keys) {
+    const a = (original as Record<string, unknown>)[k];
+    const b = (edited as Record<string, unknown>)[k];
+    if (JSON.stringify(a) !== JSON.stringify(b)) out[k] = b;
+  }
+  return out as T;
+}

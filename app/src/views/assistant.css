@@ -77,10 +77,6 @@
   max-width: var(--as-w);
   margin: 0 auto 10px;
   overflow-x: auto;
-  scrollbar-width: none;
-}
-.as-suggest::-webkit-scrollbar {
-  display: none;
 }
 .as-suggest button {
   flex-shrink: 0;

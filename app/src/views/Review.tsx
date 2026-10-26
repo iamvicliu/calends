@@ -8,7 +8,9 @@ import { cancelSavings, yearReview, type YearReview } from '../../../shared/metr
 import type { AppState } from '../../../shared/types.ts';
 import { packCircles } from '../components/charts.tsx';
 import { ShareSheet } from '../components/ShareSheet.tsx';
-import { MetricCards, Metric, Seg, SubIcon } from '../components/ui.tsx';
+import { MetricCards, Metric } from '../components/ui.tsx';
+import { Seg } from '../components/inputs.tsx';
+import { SubIcon } from '../components/marks.tsx';
 import { allCharges, catColor, sortValue, firstStart } from '../derive.ts';
 
 type Style = 'receipt' | 'poster' | 'card' | 'stars';

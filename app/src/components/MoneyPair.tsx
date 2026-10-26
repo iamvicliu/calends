@@ -8,7 +8,7 @@ import { convert } from '../../../shared/billing.ts';
 import { toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState } from '../../../shared/types.ts';
 import { useOrig } from '../display.ts';
-import { Amount } from './ui.tsx';
+import { Amount } from './inputs.tsx';
 
 export interface Pair {
   /** 大字 */

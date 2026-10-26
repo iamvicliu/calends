@@ -28,7 +28,8 @@ import {
   type WriteVerification,
 } from '../../shared/assistant-result.ts';
 import type { Env } from '../env.ts';
-import { decodeEntities, state, TOOLS, type Tool, type ToolCtx } from './mcp-tools.ts';
+import { TOOLS } from './mcp-tools.ts';
+import { decodeEntities, state, type Tool, type ToolCtx } from './tool-kit.ts';
 import { searchAppStore } from '../appstore.ts';
 import { getKv, loadState, putKv } from '../store.ts';
 

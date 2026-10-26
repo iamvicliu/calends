@@ -2,10 +2,14 @@ import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
-import { CardTitle, ask, Icon, IconButton, LoadFailed, Sheet, Toggle, Toolbar } from '../components/ui.tsx';
+import { CardTitle, IconButton, Toolbar } from '../components/ui.tsx';
+import { ask, LoadFailed, Sheet } from '../components/overlays.tsx';
+import { Icon } from '../components/icons.tsx';
+import { Toggle } from '../components/inputs.tsx';
 import { ChartPie, Eye, KeyRound, Layers, PencilLine, ReceiptText, Settings2, Shapes, Tags, Trash2, Users, Wallet } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { api, copyText, run, saveSettings } from '../store.ts';
+import { api, saveSettings } from '../store.ts';
+import { copyText, run } from '../toast.ts';
 import { localTime } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 

@@ -10,7 +10,11 @@ import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosse
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
-import { MetricCards, Metric, IconButton, Amount, CardTitle, CatIcon, TipTable, Icon, MethodMark, Seg, SubIcon, Toolbar } from '../components/ui.tsx';
+import { MetricCards, Metric, IconButton, CardTitle, Toolbar } from '../components/ui.tsx';
+import { Amount, Seg } from '../components/inputs.tsx';
+import { CatIcon, MethodMark, SubIcon } from '../components/marks.tsx';
+import { TipTable } from '../components/overlays.tsx';
+import { Icon } from '../components/icons.tsx';
 import { allCharges, catColor, sortValue, sumBaseOrNaN, firstStart } from '../derive.ts';
 import { go } from '../router.ts';
 import { useMoneyPair } from '../components/MoneyPair.tsx';

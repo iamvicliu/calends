@@ -23,7 +23,11 @@ import {
 } from '../../../shared/metrics.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
 import { AreaChart, BarLine, squarify } from '../components/charts.tsx';
-import { MetricCards, Metric, IconButton, Amount, CatIcon, CardTitle, Icon, MethodMark, Seg, SubIcon, tipProps, Toolbar, useWidth } from '../components/ui.tsx';
+import { MetricCards, Metric, IconButton, CardTitle, Toolbar } from '../components/ui.tsx';
+import { Amount, Seg, useWidth } from '../components/inputs.tsx';
+import { CatIcon, MethodMark, SubIcon } from '../components/marks.tsx';
+import { Icon } from '../components/icons.tsx';
+import { tipProps } from '../components/overlays.tsx';
 import { allCharges, catColor, KIND_BG, paletteColor, sumBaseOrNaN, toBase, firstStart } from '../derive.ts';
 import { SpendingDelta } from '../components/ScopeReport.tsx';
 

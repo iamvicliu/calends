@@ -7,7 +7,8 @@ import { flatten, setLocale, t } from './i18n.ts';
 import { inListScope, listWords } from './list-scope.ts';
 import { monthReport, scopeReport, type Block, type ScopeReport } from './scope-report.ts';
 import { DEFAULT_SETTINGS, type PaymentMethod, type Subscription } from './types.ts';
-import { state, TOOLS, type ToolCtx } from '../worker/ai/mcp-tools.ts';
+import { TOOLS } from '../worker/ai/mcp-tools.ts';
+import { state, type ToolCtx } from '../worker/ai/tool-kit.ts';
 import { MIGRATIONS } from '../worker/migrations.gen.ts';
 import type { Env } from '../worker/env.ts';
 

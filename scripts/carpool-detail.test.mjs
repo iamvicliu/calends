@@ -1,3 +1,4 @@
+import { readUiSource } from './ui-test-source.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -13,7 +14,7 @@ import { carpoolRoster, carpoolTimeline } from '../shared/carpool-timeline.ts';
 import { DEFAULT_SETTINGS } from '../shared/types.ts';
 import { flatten, setLocale, t } from '../shared/i18n.ts';
 
-const source = readFileSync(new URL('../app/src/views/Carpool.tsx', import.meta.url), 'utf8');
+const source = readUiSource(new URL('../app/src/views/Carpool.tsx', import.meta.url));
 const ast = await parsers.typescript.parse(source);
 const nodes = ast.body.map((n) => n.declaration ?? n);
 const locales = ['family', 'detail', 'calendar'].reduce((all, ns) => {

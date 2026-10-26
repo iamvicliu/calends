@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Icon, IconButton } from './ui.tsx';
+import { Icon } from './icons.tsx';
+import { IconButton } from './ui.tsx';
 
 /**
  * 行尾的「编辑 + 删除」两个圆形按钮，删除需要二次确认：

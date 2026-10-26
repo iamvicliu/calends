@@ -284,3 +284,70 @@ export function nextCollectionDay(s: Subscription, billEvery: number, today: str
   while (addMonths(anchor, k * every) <= today) k++;
   return addMonths(anchor, k * every);
 }
+
+import { addDays, memberUnpaidFrom, memberCollection, memberDues } from './billing.ts';
+
+/** 成员一行的收款状态：逾期几天 / 待收 / 已结清，合租表格和收费弹窗共用 */
+export function memberStatus(state: AppState, s: Subscription, m: ShareMember, today: string) {
+  const collect = collectCurrencyOf(state.settings);
+  const d = memberDues(s, today, collect, state).find((x) => x.member.id === m.id);
+  const next = memberCollection(s, m, memberUnpaidFrom(s, m), collect);
+  const owe = !!d && d.periodsOwed > 0;
+  // 本期：今天所在的这个人自己的收费期；还没加入或已经退出时取最早没结清的一期
+  const now = memberLedger(s, m, today, collect).periods.find((p) => p.from <= today && p.until >= today);
+  const period = now ? { from: now.from, until: now.until, paid: isSettled(now) } : { from: next.from, until: next.until, paid: false };
+  return {
+    owe,
+    period,
+    owed: owe ? d!.owed : undefined,
+    currency: d?.currency ?? collect,
+    late: owe && next.from < today ? diffDays(next.from, today) : 0,
+    next,
+    gone: !!m.left && next.from >= m.left,
+  };
+}
+
+/** 成员时间条上的一段：已收、免收（含免费）、该收没收（到今天为止）、还没到期的下一期，以及退出后没用完的已付天数 */
+export interface MemberSegment {
+  from: string;
+  until: string;
+  kind: 'paid' | 'due' | 'future' | 'unused' | 'waived';
+}
+
+/**
+ * 成员在时间窗口内的各期：按这个人自己的收费周期切分，每期按收款、免收推算状态，可以不连续。
+ * 已退出的截到退出前一天；不分摊的没有分段。
+ */
+export function memberSegments(s: Subscription, m: ShareMember, today: string, start: string, end: string): MemberSegment[] {
+  if (m.exempt) return [];
+  const stop = m.left ? addDays(m.left, -1) : end;
+  const out: MemberSegment[] = [];
+  const push = (from: string, until: string, kind: MemberSegment['kind']) => {
+    const a = from < start ? start : from;
+    const b = [until, stop, end].sort()[0];
+    if (a <= b) out.push({ from: a, until: b, kind });
+  };
+  const { periods } = memberLedger(s, m, today, s.currency, end);
+  let future = false;
+  for (const p of periods) {
+    if (p.until < start || p.from > end) continue;
+    if (p.status === 'upcoming') {
+      // 还没到期的只画下一期
+      if (future) continue;
+      future = true;
+    }
+    push(p.from, p.until, p.status === 'paid' ? 'paid' : p.status === 'due' ? 'due' : p.status === 'upcoming' ? 'future' : 'waived');
+  }
+  // 退出时已付到退出日之后、又没退钱：退出后到已付至的那段画成没用完
+  const paid =
+    m.left && !m.leaveRefund
+      ? memberLedger(s, { ...m, left: undefined }, today, s.currency, m.left).periods.filter((p) => p.status === 'paid' && p.until >= m.left!)
+      : [];
+  if (paid.length) {
+    const from = [m.left!, start].sort().at(-1)!;
+    const last = paid.at(-1)!.until;
+    const until = last < end ? last : end;
+    if (from <= until) out.push({ from, until, kind: 'unused' });
+  }
+  return out;
+}

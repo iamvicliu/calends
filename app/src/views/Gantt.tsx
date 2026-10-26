@@ -17,9 +17,12 @@ import { flow, cnDate, money, monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import { GANTT_STEP, ganttLabelBounds, ganttTicks, ganttWindow, isGanttZoom, snapGanttPan, stepGanttPan, type GanttZoom } from '../../../shared/gantt.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { IconButton, FlagImg, Icon, Seg, SubIcon, useMedia, useWidth } from '../components/ui.tsx';
+import { IconButton } from '../components/ui.tsx';
+import { FlagImg, SubIcon } from '../components/marks.tsx';
+import { Icon } from '../components/icons.tsx';
+import { Seg, useMedia, useWidth } from '../components/inputs.tsx';
 import { perLabel } from './Overview.tsx';
-import { usePref } from '../store.ts';
+import { usePref } from '../prefs.ts';
 
 type ColorBy = 'method' | 'region';
 const isColorBy = (v: string): v is ColorBy => v === 'method' || v === 'region';

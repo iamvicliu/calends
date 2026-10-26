@@ -5,7 +5,8 @@ import { cnDateFull, monthLabel, weekdayShort } from '../../../shared/format.ts'
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import { parseDateInput } from '../../../shared/date-input.ts';
 import { getState, today as todayOf } from '../store.ts';
-import { IconButton, Icon } from './ui.tsx';
+import { IconButton } from './ui.tsx';
+import { Icon } from './icons.tsx';
 import { Pop } from './Pop.tsx';
 import { Picker } from './Picker.tsx';
 

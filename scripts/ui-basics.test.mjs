@@ -1,3 +1,4 @@
+import { readUiSource } from './ui-test-source.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
@@ -10,7 +11,7 @@ import { tooltipPosition } from '../app/src/components/tooltip-position.ts';
 const root = new URL('../app/src/', import.meta.url);
 const sources = [];
 for (const file of readdirSync(root, { recursive: true }).filter((file) => file.endsWith('.tsx') && !file.startsWith('public/'))) {
-  const source = readFileSync(new URL(file, root), 'utf8');
+  const source = readUiSource(new URL(file, root));
   sources.push([file, await parsers.typescript.parse(source), source]);
 }
 const visit = (node, fn) => {
@@ -499,7 +500,7 @@ test('timeline loss amount uses its own line box so the digits stay vertically c
 });
 
 const styleFiles = readdirSync(root, { recursive: true }).filter((file) => file.endsWith('.css'));
-const styleSources = styleFiles.map((file) => [file, readFileSync(new URL(file, root), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '')]);
+const styleSources = styleFiles.map((file) => [file, readUiSource(new URL(file, root)).replace(/\/\*[\s\S]*?\*\//g, '')]);
 // 钱包卡面按用户要求与 main 第一版保持一致（实体卡模拟：卡面配色、投影、倾斜反光、随卡片缩放的字号），
 // 不受全站视觉规范约束；其余样式仍按规范检查。
 const walletRule = (selector) => selector.split(',').every((sel) => /(?:^|\s)\.(?:paycard|pc-[\w-]+|sim-[\w-]+)(?=[.:\s]|$)|^\.wallet-grid/.test(sel.trim()));
@@ -519,7 +520,7 @@ test('app and public CSS use only the four shared type sizes, including font sho
     }
   }
   for (const file of readdirSync(root, { recursive: true }).filter((file) => file.endsWith('.tsx'))) {
-    const source = readFileSync(new URL(file, root), 'utf8');
+    const source = readUiSource(new URL(file, root));
     visit(await parsers.typescript.parse(source), (node) => {
       if (node.type !== 'ObjectProperty' || node.key.name !== 'fontSize') return;
       if (node.value.type !== 'StringLiteral' || !/^var\(--fs-[1-4]\)$/.test(node.value.value)) failures.push(`${file}: inline fontSize`);
@@ -631,7 +632,7 @@ test('copy separates facts into elements and preserves punctuation in user names
 test('UI copy and locale templates never introduce middle-dot separators', async () => {
   const failures = [];
   for (const file of readdirSync(root, { recursive: true }).filter((file) => file.endsWith('.tsx'))) {
-    const source = readFileSync(new URL(file, root), 'utf8');
+    const source = readUiSource(new URL(file, root));
     const ast = await parsers.typescript.parse(source);
     visit(ast, (node) => {
       const value = node.type === 'JSXText' ? node.value : node.type === 'Literal' ? node.value : node.type === 'TemplateElement' ? node.value.raw : undefined;
@@ -1175,7 +1176,7 @@ test('sheet and embedded form action rows use one right-aligned container with t
   assert.deepEqual(sheetActionViolations(await parsers.typescript.parse(bad), bad), ['action row missing sheet-actions']);
   const good = bad.replace('className="row"', 'className="sheet-actions"');
   assert.deepEqual(sheetActionViolations(await parsers.typescript.parse(good), good), []);
-  const ui = readFileSync(new URL('components/ui.tsx', root), 'utf8');
+  const ui = readUiSource(new URL('components/ui.tsx', root));
   assert.match(ui, /className="sheet-foot sheet-actions"/);
   const kit = readFileSync(new URL('components/DetailKit.tsx', root), 'utf8');
   assert.match(kit, /className="sheet-actions dt-actions"/);
@@ -1193,7 +1194,7 @@ test('sheet and embedded form action rows use one right-aligned container with t
 
 test('image clipboard construction has one owner and Sheet actions precede Close in every header mode', () => {
   for (const file of readdirSync(root, { recursive: true }).filter((file) => /\.tsx?$/.test(file))) {
-    const source = readFileSync(new URL(file, root), 'utf8');
+    const source = readUiSource(new URL(file, root));
     if (file === 'components/CopyImageButton.tsx') assert.match(source, /new ClipboardItem/);
     else assert.doesNotMatch(source, /new ClipboardItem/, file);
   }

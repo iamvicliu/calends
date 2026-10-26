@@ -2,7 +2,7 @@
 import type { ShareMember } from '../../../shared/types.ts';
 import { t } from '../../../shared/i18n.ts';
 import { Picker } from './Picker.tsx';
-import { Icon } from './ui.tsx';
+import { Icon } from './icons.tsx';
 
 // 渠道值存进数据里（微信、邮箱等保持中文代码），显示时再翻译
 const CONTACT_VIA = ['Telegram', '微信', 'WhatsApp', '邮箱', '手机', 'X', 'Discord', '其他'];

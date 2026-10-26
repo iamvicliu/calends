@@ -18,23 +18,11 @@ import {
 import { flow, cnDate, money, relDays } from '../../../shared/format.ts';
 import { toBaseOrNaN } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import {
-  IconButton,
-  Amount,
-  CatChip,
-  CatIcon,
-  Icon,
-  MethodMark,
-  PayBadge,
-  RegionTag,
-  FlagImg,
-  regionLabel,
-  Seg,
-  subRegion,
-  SubIcon,
-  Toolbar,
-} from '../components/ui.tsx';
-import { proxyOwed } from './Proxy.tsx';
+import { IconButton, Toolbar } from '../components/ui.tsx';
+import { Amount, Seg } from '../components/inputs.tsx';
+import { CatChip, CatIcon, MethodMark, PayBadge, RegionTag, FlagImg, regionLabel, subRegion, SubIcon } from '../components/marks.tsx';
+import { Icon } from '../components/icons.tsx';
+import { proxyOwed } from './proxy/common.tsx';
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import { cancelSavings } from '../../../shared/metrics.ts';
@@ -44,7 +32,7 @@ import { useOrig } from '../display.ts';
 import { Gantt } from './Gantt.tsx';
 import { perLabel } from './Overview.tsx';
 import { SortControl } from '../components/SortControl.tsx';
-import { usePref } from '../store.ts';
+import { usePref } from '../prefs.ts';
 import { scopeReport } from '../../../shared/scope-report.ts';
 import { ScopeReport } from '../components/ScopeReport.tsx';
 import { useTextSearch } from '../use-search.ts';

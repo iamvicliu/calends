@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { addMonths, diffDays } from '../../../shared/billing.ts';
 import { monthLabel } from '../../../shared/format.ts';
-import { useWidth } from '../components/ui.tsx';
+import { useWidth } from '../components/inputs.tsx';
 
 export interface ChartBar {
   date: string;

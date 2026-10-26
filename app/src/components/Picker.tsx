@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CURRENCIES } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import { ccyFlag, ccyName, FLAGS } from '../display.ts';
-import { Icon } from './ui.tsx';
+import { Icon } from './icons.tsx';
 import { Pop } from './Pop.tsx';
 import { useTextSearch } from '../use-search.ts';
 

@@ -1,24 +1,15 @@
-import { browserSupportsWebAuthnAutofill, startAuthentication, WebAuthnAbortService } from '@simplewebauthn/browser';
-import { beginPasskeyAutofill } from './passkey-autofill.ts';
-import { BASE_PATH, base, storageKey } from './base.ts';
+import { createAuth, CACHE_KEY, ASSISTANT_KEY, HANDOFF_KEY } from './auth.ts';
+import { createLedgerWrites } from './ledger-writes.ts';
+import { configurePrefs, notifyPrefs, mirrorPrefs, migratePrefs } from './prefs.ts';
+
+import { BASE_PATH, base } from './base.ts';
 import { useSyncExternalStore } from 'react';
 import { todayIn } from '../../shared/billing.ts';
-import type { AppState, PaymentMethod, Person, Settings, Subscription } from '../../shared/types.ts';
-import { mergePeople, syncPerson } from '../../shared/people.ts';
-import { locale, t } from '../../shared/i18n.ts';
-import { renameInSubs, type Category } from '../../shared/categories.ts';
-import { resyncShares } from '../../shared/carpool.ts';
-import { deleteMethodData, deleteSubscriptionSettings } from '../../shared/ledger-edit.ts';
-import { PREF_KEYS, type PrefKey } from '../../shared/prefs.ts';
-import { toast as sonner } from 'sonner';
-import { advanceRevision, canApplySnapshot, CHECK_THROTTLE, shouldCheck, shouldPoll, syncedPrefs, SYNC_INTERVAL } from '../../shared/live-sync.ts';
+import type { AppState } from '../../shared/types.ts';
 
-const CACHE_KEY = storageKey('ledger:state:v1');
-/** 助手会话（本机副本）与新建表单交给助手的内容：都属于登录后的私有数据 */
-export const ASSISTANT_KEY = storageKey('calends.assistant');
-export const HANDOFF_KEY = storageKey('calends.assistant.handoff');
-/** 编辑草稿的键 ledger:draft:<new|id>（经 storageKey）；只认本安装的 */
-const isDraftKey = (k: string) => k.startsWith('ledger:draft:') && (BASE_PATH ? k.endsWith(`:${BASE_PATH}`) : !k.includes(':/'));
+import { locale, t } from '../../shared/i18n.ts';
+
+import { advanceRevision, canApplySnapshot, CHECK_THROTTLE, shouldCheck, shouldPoll, syncedPrefs, SYNC_INTERVAL } from '../../shared/live-sync.ts';
 
 type Phase = 'loading' | 'login' | 'ready' | 'offline';
 
@@ -31,9 +22,10 @@ interface Store {
 let store: Store = { phase: 'loading' };
 const listeners = new Set<() => void>();
 
-function set(patch: Partial<Store>) {
+export function set(patch: Partial<Store>) {
   store = { ...store, ...patch };
   listeners.forEach((l) => l());
+  notifyPrefs();
   updatePolling();
 }
 
@@ -98,7 +90,7 @@ const prefEdits = new Map<string, number>();
 let forceSnapshot = false;
 let prefRetry: ReturnType<typeof setTimeout> | undefined;
 
-function replaceSyncedState(state: AppState) {
+export function replaceSyncedState(state: AppState) {
   const merged = syncedPrefs(state.prefs ?? {}, store.state?.prefs ?? {}, prefEdits, prefQueue, Date.now());
   forceSnapshot = merged.retryAt > 0;
   clearTimeout(prefRetry);
@@ -106,7 +98,7 @@ function replaceSyncedState(state: AppState) {
   knownRev = state.rev;
   ownRevisions = ownRevisions.filter((r) => knownRev === undefined || r.rev > knownRev);
   replaceState({ ...state, prefs: merged.prefs });
-  mirrorPrefs();
+  mirrorPrefs(store.state);
 }
 
 function acknowledgeWrite(res: Response) {
@@ -216,8 +208,12 @@ export async function boot(): Promise<void> {
     set({ phase: 'ready', state });
     if (!state.readonly) {
       void syncFx();
-      migratePrefs();
-      mirrorPrefs();
+      const migrated = migratePrefs(store.state);
+      if (migrated) {
+        replacePrefs({ ...store.state!.prefs, ...migrated });
+        queuePrefs(migrated);
+      }
+      mirrorPrefs(store.state);
     }
   } catch (e) {
     // 401 时 api() 已清掉本机私有数据（含旧缓存），避免他人设备残留
@@ -225,23 +221,6 @@ export async function boot(): Promise<void> {
     if (store.state) set({ phase: 'offline' });
     else set({ phase: 'offline', error: e instanceof Error ? e.message : String(e) });
   }
-}
-
-/**
- * 只把这次表单里真正改动的字段合并到最新数据上：
- * 打开表单期间别处（另一个标签页、同步脚本）改过的其他字段不会被旧数据覆盖。
- */
-export function mergeEdits<T extends { id: string }>(original: T, edited: T, latest: T | undefined): T {
-  // 打开表单期间在别处被删掉了：不按旧表单把它写回来
-  if (!latest) throw new Error(t('ui.error.deletedElsewhere'));
-  const out: Record<string, unknown> = { ...latest };
-  const keys = new Set([...Object.keys(original), ...Object.keys(edited)]);
-  for (const k of keys) {
-    const a = (original as Record<string, unknown>)[k];
-    const b = (edited as Record<string, unknown>)[k];
-    if (JSON.stringify(a) !== JSON.stringify(b)) out[k] = b;
-  }
-  return out as T;
 }
 
 /**
@@ -384,143 +363,12 @@ export function syncFx(): Promise<void> {
   return syncing;
 }
 
-export async function login(password: string): Promise<void> {
-  await api('/api/login', { method: 'POST', body: JSON.stringify({ password }) });
-  set({ phase: 'loading' });
-  await boot();
-}
-
-export const authStatus = () => api<{ needsSetup: boolean; passkeys: number; publicView: boolean }>('/api/auth/status');
-
-/** 首次设置密码（需要部署时配置的初始化令牌） */
-export async function setupPassword(setupToken: string, password: string): Promise<void> {
-  await api('/api/auth/setup', { method: 'POST', body: JSON.stringify({ setupToken, password }) });
-  set({ phase: 'loading' });
-  await boot();
-  // 新部署：按浏览器的时区和地区猜好本位币，之后可在设置里改
-  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const ccy = guessCurrency();
-  if (store.state) await saveSettings({ ...(tz ? { timezone: tz } : {}), ...(ccy ? { baseCurrency: ccy } : {}) }).catch(() => {});
-}
-
-/** 按浏览器语言里的地区猜本位币，例如 zh-CN → CNY、en-GB → GBP；猜不出时返回 undefined */
-function guessCurrency(): string | undefined {
-  const MAP: Record<string, string> = {
-    CN: 'CNY',
-    US: 'USD',
-    GB: 'GBP',
-    HK: 'HKD',
-    TW: 'TWD',
-    JP: 'JPY',
-    KR: 'KRW',
-    SG: 'SGD',
-    AU: 'AUD',
-    CA: 'CAD',
-    IN: 'INR',
-    TR: 'TRY',
-    RU: 'RUB',
-    BR: 'BRL',
-    ID: 'IDR',
-    VN: 'VND',
-    PH: 'PHP',
-    TH: 'THB',
-    MY: 'MYR',
-    NG: 'NGN',
-    CH: 'CHF',
-    UA: 'UAH',
-    KZ: 'KZT',
-    PK: 'PKR',
-    EG: 'EGP',
-    AR: 'ARS',
-    DE: 'EUR',
-    FR: 'EUR',
-    ES: 'EUR',
-    IT: 'EUR',
-    NL: 'EUR',
-    PT: 'EUR',
-    AT: 'EUR',
-    BE: 'EUR',
-    IE: 'EUR',
-    FI: 'EUR',
-    GR: 'EUR',
-  };
-  for (const l of navigator.languages ?? [navigator.language]) {
-    try {
-      const region = new Intl.Locale(l).maximize().region;
-      if (region && MAP[region]) return MAP[region];
-    } catch {
-      /* 非法的语言标签 */
-    }
-  }
-  return undefined;
-}
-
-export async function loginPasskey(useBrowserAutofill = false, signal?: AbortSignal): Promise<void> {
-  const { options, challengeId } = await api<{ options: Parameters<typeof startAuthentication>[0]['optionsJSON']; challengeId: string }>(
-    '/api/auth/passkey/login/options',
-    { method: 'POST', signal },
-  );
-  signal?.throwIfAborted();
-  const response = await startAuthentication({ optionsJSON: options, useBrowserAutofill });
-  signal?.throwIfAborted();
-  await api('/api/auth/passkey/login', { method: 'POST', body: JSON.stringify({ challengeId, response }), signal });
-  signal?.throwIfAborted();
-  set({ phase: 'loading' });
-  await boot();
-}
-
-/** 条件式登录与按钮登录各取独立挑战；停止时也取消尚未返回的网络请求。 */
-export function startPasskeyAutofill(): () => void {
-  return beginPasskeyAutofill({
-    supports: browserSupportsWebAuthnAutofill,
-    login: (signal) => loginPasskey(true, signal),
-    cancel: () => WebAuthnAbortService.cancelCeremony(),
-  });
-}
-
-export async function registerPasskey(name: string): Promise<void> {
-  const { startRegistration } = await import('@simplewebauthn/browser');
-  const { options, challengeId } = await api<{ options: Parameters<typeof startRegistration>[0]['optionsJSON']; challengeId: string }>(
-    '/api/auth/passkey/register/options',
-    { method: 'POST' },
-  );
-  const response = await startRegistration({ optionsJSON: options });
-  await api('/api/auth/passkey/register', { method: 'POST', body: JSON.stringify({ challengeId, response, name }) });
-}
-
-export async function logout(): Promise<void> {
-  await api('/api/logout', { method: 'POST' }).catch(() => {});
-  await clearLocalSession();
-}
-
-/**
- * 退出登录或登录失效（401）：清掉本机的私有数据——账本缓存、离线缓存、助手会话、编辑草稿、交给助手的内容，
- * 回到登录页。界面偏好与语言不属于账本内容，保留。
- */
-async function clearLocalSession() {
-  knownRev = undefined;
-  ownRevisions = [];
-  try {
-    localStorage.removeItem(CACHE_KEY);
-    localStorage.removeItem(ASSISTANT_KEY);
-    for (let i = (localStorage.length ?? 0) - 1; i >= 0; i--) {
-      const k = localStorage.key(i);
-      if (k && isDraftKey(k)) localStorage.removeItem(k);
-    }
-    sessionStorage.removeItem(HANDOFF_KEY);
-  } catch {
-    /* 隐私模式等 */
-  }
-  await globalThis.caches?.delete(`calends:${base('/')}:data-v5`).catch(() => false);
-  set({ phase: 'login', state: undefined });
-}
-
-function patchState(fn: (s: AppState) => AppState) {
+export function patchState(fn: (s: AppState) => AppState) {
   replaceState(fn(store.state!));
 }
 
 /** 按 id 替换列表里的一项，没有就追加 */
-function upsertById<T extends { id: string }>(list: T[], item: T): T[] {
+export function upsertById<T extends { id: string }>(list: T[], item: T): T[] {
   return list.some((x) => x.id === item.id) ? list.map((x) => (x.id === item.id ? item : x)) : [...list, item];
 }
 
@@ -553,146 +401,12 @@ async function optimistic<T>(fn: (s: AppState) => AppState, req: () => Promise<T
  * 写入模板：先在本地改（local），请求成功后用服务端返回的权威结果再改一次（apply，可选），失败按 optimistic 回滚。
  * apply 在写入计数内执行，期间拉回的旧快照不会覆盖它。
  */
-function write<T>(local: (s: AppState) => AppState, req: () => Promise<T>, apply?: (s: AppState, r: T) => AppState): Promise<T> {
+export function write<T>(local: (s: AppState) => AppState, req: () => Promise<T>, apply?: (s: AppState, r: T) => AppState): Promise<T> {
   return optimistic(local, async () => {
     const r = await req();
     if (apply && store.state) patchState((s) => apply(s, r));
     return r;
   });
-}
-
-/** 换上服务端改过的订阅（同步人的资料、合并、改分类名时一次改好几条）；没出现的保持不变 */
-const withSubs = (s: AppState, subs: Subscription[]): AppState => {
-  const by = new Map(subs.map((x) => [x.id, x]));
-  return { ...s, subscriptions: s.subscriptions.map((x) => by.get(x.id) ?? x) };
-};
-
-export function saveSub(next: Subscription) {
-  // 改了开始日期或周期后，新的扣款日需要补汇率
-  setTimeout(() => void syncFx(), 500);
-  const st = getState();
-  const sub = resyncShares(
-    st,
-    st.subscriptions.find((x) => x.id === next.id),
-    next,
-  );
-  return write(
-    (s) => ({ ...s, subscriptions: upsertById(s.subscriptions, sub) }),
-    () => api<Subscription>(`/api/subscriptions/${sub.id}`, { method: 'PUT', body: JSON.stringify(sub) }),
-    // 服务端会规范化（补字段、时间戳）：本地换成它返回的那条，和下次同步拿到的一致；期间本地又改过这一条（更晚的写入）就不覆盖
-    (s, saved) =>
-      saved?.id === sub.id && s.subscriptions.find((x) => x.id === sub.id) === sub ? { ...s, subscriptions: upsertById(s.subscriptions, saved) } : s,
-  );
-}
-
-export function deleteSub(id: string) {
-  // 服务端在同一事务里把它从公开页隐藏列表去掉（与 MCP delete_subscription 相同），本地同步
-  return write(
-    (s) => ({ ...s, subscriptions: s.subscriptions.filter((x) => x.id !== id), settings: deleteSubscriptionSettings(s.settings, id) }),
-    () => api(`/api/subscriptions/${id}`, { method: 'DELETE' }),
-  );
-}
-
-/** 钱包卡片换顺序：按新顺序重写每张卡的 order */
-export function reorderMethods(ids: string[]) {
-  const prev = store.state!.methods;
-  const next = ids.map((id, i) => ({ ...prev.find((m) => m.id === id)!, order: i }));
-  // 全部重写，避免本地数据过期时出现重复的序号；部分失败时整体回滚并强制同步，以服务端为准
-  return write(
-    (s) => ({ ...s, methods: next }),
-    () => Promise.all(next.map((m) => api(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }))),
-  );
-}
-
-export function saveMethod(m: PaymentMethod) {
-  return write(
-    (s) => ({ ...s, methods: upsertById(s.methods, m) }),
-    () => api<PaymentMethod>(`/api/methods/${m.id}`, { method: 'PUT', body: JSON.stringify(m) }),
-    (s, saved) => (saved?.id === m.id && s.methods.find((x) => x.id === m.id) === m ? { ...s, methods: upsertById(s.methods, saved) } : s),
-  );
-}
-
-/**
- * 删除支付方式：订阅、阶段、单笔扣款、拆分来源与默认支付方式里的引用由服务端在同一事务里处理（与 MCP 删卡同一套 deleteMethodData）。
- * into 为另一张卡的 id 时迁过去，null 清空引用；有引用时必须二选一，否则服务端拒绝。
- */
-export async function deleteMethod(id: string, into?: string | null) {
-  const query = into ? `?into=${encodeURIComponent(into)}` : into === null ? '?clear=1' : '';
-  await write(
-    (s) => {
-      const d = deleteMethodData(s, id, into);
-      return withSubs({ ...s, methods: s.methods.filter((x) => x.id !== id), settings: d.settings }, d.subscriptions);
-    },
-    () => api<{ subscriptions: Subscription[] }>(`/api/methods/${id}${query}`, { method: 'DELETE' }),
-    (s, r) => withSubs(s, r.subscriptions),
-  );
-}
-
-/** 保存一个人：称呼、联系方式同步到所有引用他的成员、代付上（本地先同步，服务端再同步一遍并返回结果） */
-export async function savePerson(p: Person) {
-  const r = await write(
-    (s) => withSubs({ ...s, people: upsertById(s.people ?? [], p) }, syncPerson(s.subscriptions, p)),
-    () => api<{ person: Person; subscriptions: Subscription[] }>(`/api/people/${p.id}`, { method: 'PUT', body: JSON.stringify(p) }),
-    (s, r) => withSubs({ ...s, people: upsertById(s.people ?? [], r.person) }, r.subscriptions),
-  );
-  return r.person;
-}
-
-/** 删除一个人：只能删没有被任何合租、代付引用的（服务端会再检查一次） */
-export function deletePerson(id: string) {
-  return write(
-    (s) => ({ ...s, people: (s.people ?? []).filter((x) => x.id !== id) }),
-    () => api(`/api/people/${id}`, { method: 'DELETE' }),
-  );
-}
-
-/** 把 from 合并到 into：引用全部改指向 into，from 从名册里去掉 */
-export async function mergePerson(from: string, into: string) {
-  await write(
-    (s) => {
-      const m = mergePeople(s.people ?? [], s.subscriptions, from, into);
-      return withSubs({ ...s, people: m.people }, m.subs);
-    },
-    () => api<{ people: Person[]; subscriptions: Subscription[] }>(`/api/people/${from}/merge`, { method: 'POST', body: JSON.stringify({ into }) }),
-    (s, r) => withSubs({ ...s, people: r.people }, r.subscriptions),
-  );
-}
-
-export function saveSettings(patch: Partial<Settings>) {
-  return write(
-    (s) => ({ ...s, settings: { ...s.settings, ...patch } }),
-    // 清空的字段（undefined）以 null 传给服务端，否则 JSON 会丢掉这个键，旧值留在库里
-    () =>
-      api<Settings>('/api/settings', {
-        method: 'PUT',
-        body: JSON.stringify(Object.fromEntries(Object.entries({ ...store.state!.settings, ...patch }).map(([k, v]) => [k, v === undefined ? null : v]))),
-      }),
-    (s, settings) => ({ ...s, settings }),
-  );
-}
-
-/**
- * 保存分类表（顺序即显示顺序）。renames 是旧名 → 新名：改名、删除分类时把订阅移过去，服务端一次改写所有相关订阅。
- * 返回改动了几个订阅。
- */
-export async function saveCategories(categories: Category[], renames: Record<string, string> = {}) {
-  const r = await write(
-    (s) => withSubs({ ...s, settings: { ...s.settings, categories } }, renameInSubs(s.subscriptions, renames)),
-    () => api<{ settings: Settings; subscriptions: Subscription[] }>('/api/categories', { method: 'PUT', body: JSON.stringify({ categories, renames }) }),
-    (s, r) => withSubs({ ...s, settings: r.settings }, r.subscriptions),
-  );
-  return r.subscriptions.length;
-}
-
-export async function rotateIcs() {
-  const settings = await api<Settings>('/api/ics/rotate', { method: 'POST' });
-  patchState((s) => ({ ...s, settings }));
-}
-
-export async function importData(body: { subscriptions: Subscription[]; methods: PaymentMethod[]; mode: 'merge' | 'replace' }) {
-  const state = await api<unknown>('/api/import', { method: 'POST', body: JSON.stringify(body) });
-  if (!isLedger(state)) throw new Error(t('ui.error.requestFailed', { status: 200 }));
-  replaceSyncedState(state);
 }
 
 /**
@@ -707,111 +421,8 @@ export function adoptRestored(state: unknown) {
   void syncFx();
 }
 
-export async function refreshFx() {
-  const fx = await api<AppState['fx']>('/api/fx/refresh', { method: 'POST' });
-  patchState((s) => ({ ...s, fx }));
-}
-
-// ---------- toast ----------
-// 统一走 Sonner：成功、失败、提示、警告、进行中五种状态，可叠放、滑动关闭，可带「撤销」等操作按钮
-
-export type ToastKind = 'success' | 'error' | 'info' | 'warning';
-export interface ToastOptions {
-  kind?: ToastKind;
-  /** 第二行的补充说明 */
-  description?: string;
-  /** 例如「撤销」 */
-  action?: { label: string; onClick: () => void };
-  /** 替换已有的那条（例如把「进行中」换成结果） */
-  id?: string | number;
-}
-
-/** 提示条：第二个参数是种类（缺省成功），或带撤销按钮、替换已有提示等选项 */
-export function toast(text: string, how: ToastKind | ToastOptions = {}): string | number {
-  const opts = typeof how === 'string' ? { kind: how } : how;
-  const kind = opts.kind ?? 'success';
-  return sonner[kind](text, { id: opts.id, description: opts.description, action: opts.action, duration: kind === 'error' ? 5000 : 2800 });
-}
-
-/** 复制文字：浏览器不支持剪贴板（非 HTTPS、旧浏览器）或被拒绝时提示失败，不静默 */
-export async function copyText(text: string, ok: string): Promise<boolean> {
-  try {
-    if (!navigator.clipboard?.writeText) throw new Error('clipboard unavailable');
-    await navigator.clipboard.writeText(text);
-    toast(ok);
-    return true;
-  } catch {
-    toast(t('ai.copyFailed'), 'error');
-    return false;
-  }
-}
-
-/**
- * 执行一个操作并给出反馈：超过 400ms 还没完成就先显示「处理中」，完成后原地换成成功或失败。
- * ok 也可以是 ToastOptions（带撤销按钮等）。
- */
-export async function run(fn: () => Promise<unknown>, ok?: string | (ToastOptions & { text: string })) {
-  let pending: string | number | undefined;
-  const timer = setTimeout(() => (pending = sonner.loading(t('ui.working'))), 400);
-  try {
-    await fn();
-    clearTimeout(timer);
-    if (ok) {
-      const o = typeof ok === 'string' ? { text: ok } : ok;
-      toast(o.text, { ...o, id: pending });
-    } else if (pending !== undefined) sonner.dismiss(pending);
-  } catch (e) {
-    clearTimeout(timer);
-    toast(e instanceof Error ? e.message : String(e), { kind: 'error', id: pending });
-  }
-}
-
-// ---------- 界面配置：服务端为准，本机留一份副本供首屏和离线用 ----------
-
-const PREF_LS = (k: string) => storageKey(`ledger:${k}`);
-const PREF_MIGRATED = storageKey('ledger:prefs:migrated');
-
-function mirrorPrefs() {
-  if (!store.state || store.state.readonly) return;
-  try {
-    for (const key of PREF_KEYS) {
-      const value = store.state.prefs?.[key];
-      if (value == null) localStorage.removeItem(PREF_LS(key));
-      else localStorage.setItem(PREF_LS(key), value);
-    }
-  } catch {
-    /* Private browsing. */
-  }
-}
-
-function localPref(key: PrefKey): string | null {
-  try {
-    return localStorage.getItem(PREF_LS(key));
-  } catch {
-    return null;
-  }
-}
-
 let prefQueue: Record<string, string | null> = {};
 let prefTimer: ReturnType<typeof setTimeout> | undefined;
-
-/** 改一项配置：立即生效，短暂合并后发给服务端；离线失败的留到下次一起发 */
-export function writePref(key: PrefKey, value: string | null) {
-  prefEdits.set(key, Date.now());
-  try {
-    if (value == null) localStorage.removeItem(PREF_LS(key));
-    else localStorage.setItem(PREF_LS(key), value);
-  } catch {
-    /* 隐私模式等 */
-  }
-  const st = store.state;
-  if (!st) return set({});
-  const prefs = { ...st.prefs };
-  if (value == null) delete prefs[key];
-  else prefs[key] = value;
-  replacePrefs(prefs);
-  if (!st.readonly) queuePrefs({ [key]: value });
-}
 
 function queuePrefs(patch: Record<string, string | null>) {
   Object.assign(prefQueue, patch);
@@ -840,33 +451,35 @@ async function flushPrefs() {
   }
 }
 
-/** 老版本只存在本机的配置：服务端还没有的，上传一次 */
-function migratePrefs() {
-  try {
-    if (localStorage.getItem(PREF_MIGRATED)) return;
-    localStorage.setItem(PREF_MIGRATED, '1');
-  } catch {
-    /* Private browsing. */
-  }
-  const patch: Record<string, string> = {};
-  for (const k of PREF_KEYS) {
-    if (store.state?.prefs?.[k] != null) continue;
-    try {
-      const v = localStorage.getItem(PREF_LS(k));
-      if (v != null) patch[k] = v;
-    } catch {
-      return;
-    }
-  }
-  if (!Object.keys(patch).length) return;
-  replacePrefs({ ...store.state!.prefs, ...patch });
-  queuePrefs(patch);
-}
+export { ASSISTANT_KEY, HANDOFF_KEY };
+export { toast, copyText, run, type ToastKind, type ToastOptions } from './toast.ts';
+export { writePref, usePref } from './prefs.ts';
+export const {
+  saveSub,
+  deleteSub,
+  reorderMethods,
+  saveMethod,
+  deleteMethod,
+  savePerson,
+  deletePerson,
+  mergePerson,
+  saveSettings,
+  saveCategories,
+  rotateIcs,
+  importData,
+  refreshFx,
+} = createLedgerWrites({ api, getState, syncFx, write, patchState, replaceSyncedState, isLedger, upsertById });
+export const { login, authStatus, setupPassword, loginPasskey, startPasskeyAutofill, registerPasskey, logout, clearLocalSession } = createAuth({
+  api,
+  boot,
+  set,
+  snapshot: () => store,
+  saveSettings,
+  resetSessionRevision: () => {
+    knownRev = undefined;
+    ownRevisions = [];
+  },
+});
+configurePrefs({ state: () => store.state, noteEdit: (key) => prefEdits.set(key, Date.now()), notify: () => set({}), replacePrefs, queuePrefs });
 
-/** 组件里用：值变了（本机改、别的设备改后刷新）会重新渲染 */
-export function usePref<T extends string>(key: PrefKey, fallback: T, valid?: (v: string) => v is T): [T, (v: T | null) => void] {
-  // 订阅实际偏好值；公开页没有 state 时，本机值变化也必须提供新的快照。
-  const raw = useSyncExternalStore(subscribe, () => (store.state ? (store.state.prefs?.[key] ?? null) : localPref(key)));
-  const value = raw != null && (!valid || valid(raw)) ? (raw as T) : fallback;
-  return [value, (v) => writePref(key, v)];
-}
+export { mergeEdits } from '../../shared/ledger-edit.ts';

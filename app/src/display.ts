@@ -1,7 +1,7 @@
 import { base } from './base.ts';
 // 金额显示偏好：列表里显示原币，还是折算成本位币。只存在本机，侧边栏与列表共用
 import { intlLocale, t } from '../../shared/i18n.ts';
-import { usePref, writePref } from './store.ts';
+import { usePref, writePref } from './prefs.ts';
 
 /** 按当前语言缓存一份货币名称表 */
 let namesLoc = '';

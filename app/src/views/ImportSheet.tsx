@@ -3,9 +3,12 @@ import { prepareImport, type ImportFixes, type ImportSource } from '../../../sha
 import type { AppState, Cycle } from '../../../shared/types.ts';
 import { t } from '../../../shared/i18n.ts';
 import { cycleLabel } from '../../../shared/billing.ts';
-import { ask, Cell, Group, NumInput, Sheet, Toggle } from '../components/ui.tsx';
+import { ask, Sheet } from '../components/overlays.tsx';
+import { Cell, Group } from '../components/ui.tsx';
+import { NumInput, Toggle } from '../components/inputs.tsx';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
-import { importData, run } from '../store.ts';
+import { importData } from '../store.ts';
+import { run } from '../toast.ts';
 
 export function ImportSheet({ source, state, today, onClose }: { source: ImportSource; state: AppState; today: string; onClose: () => void }) {
   const [user, setUser] = useState(source.users.length === 1 ? source.users[0].id : '');

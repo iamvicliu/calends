@@ -2,9 +2,13 @@ import { base } from '../base.ts';
 import { useState } from 'react';
 import { uid } from '../../../shared/billing.ts';
 import { channelsOf, type AppState, type Channel, type ChannelKind } from '../../../shared/types.ts';
-import { ask, Cell, Group, Icon, Sheet, Toggle } from '../components/ui.tsx';
+import { ask, Sheet } from '../components/overlays.tsx';
+import { Cell, Group } from '../components/ui.tsx';
+import { Icon } from '../components/icons.tsx';
+import { Toggle } from '../components/inputs.tsx';
 import { Picker } from '../components/Picker.tsx';
-import { api, run, saveSettings } from '../store.ts';
+import { api, saveSettings } from '../store.ts';
+import { run } from '../toast.ts';
 import { t } from '../../../shared/i18n.ts';
 
 interface Field {

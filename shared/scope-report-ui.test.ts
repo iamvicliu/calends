@@ -1,3 +1,5 @@
+import { readUiSource } from '../scripts/ui-test-source.ts';
+import * as phase2Icons from 'lucide-react';
 import { metricComponents } from '../scripts/ui-test-components.ts';
 import * as transfers from './transfers.ts';
 import * as listScope from './list-scope.ts';
@@ -5,7 +7,7 @@ import { canUseSingleKey } from '../app/src/keyboard.ts';
 import { numberFormat } from './intl.ts';
 import { loadSearch, matchText, searchIndex } from '../app/src/search.ts';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { transformSync } from 'oxc-transform-react';
 import * as billing from './billing.ts';
@@ -28,28 +30,28 @@ const all = (n: unknown): Node[] =>
 const st: AppState = { subscriptions: [], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX };
 const today = '2026-10-22';
 function harness(file: string, names: string, prefs: Record<string, string> = {}, extra: Record<string, unknown> = {}) {
-  const source = readFileSync(new URL(file, import.meta.url), 'utf8')
+  const source = readUiSource(new URL(file, import.meta.url))
     .replace(/^import[\s\S]*?;\n/gm, '')
     .replace(/^export \{.*\};\n/gm, '');
   const copySource = readFileSync(new URL('../app/src/components/copy.tsx', import.meta.url), 'utf8').replace(/^import.*;\n/gm, '');
   // 详情类视图共用的头部、面板与事实项在 DetailKit，与被测文件一起编译
-  const kitSource = /DetailKit\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+  const kitSource = /DetailKit\.tsx/.test(readUiSource(new URL(file, import.meta.url)))
     ? readFileSync(new URL('../app/src/components/DetailKit.tsx', import.meta.url), 'utf8').replace(/^import[\s\S]*?;\n/gm, '')
     : '';
   // 合租、订阅详情的收付款表共用 YearLedger：一起编译并在渲染时展开
-  const ledgerSource = /YearLedger\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+  const ledgerSource = /YearLedger\.tsx/.test(readUiSource(new URL(file, import.meta.url)))
     ? readFileSync(new URL('../app/src/components/YearLedger.tsx', import.meta.url), 'utf8')
         .replace(/^import[\s\S]*?;\n/gm, '')
         .replace(/export function /g, 'function ')
     : '';
   // 合租与代付共用的按期收款表单：一起编译并在渲染时展开
-  const receivableSource = /Receivable\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+  const receivableSource = /Receivable\.tsx/.test(readUiSource(new URL(file, import.meta.url)))
     ? readFileSync(new URL('../app/src/views/Receivable.tsx', import.meta.url), 'utf8')
         .replace(/^import[\s\S]*?;\n/gm, '')
         .replace(/export (function|const) /g, '$1 ')
     : '';
   // 联系方式工具在 components/Contact.tsx：一起编译
-  const contactSource = /Contact\.tsx/.test(readFileSync(new URL(file, import.meta.url), 'utf8'))
+  const contactSource = /Contact\.tsx/.test(readUiSource(new URL(file, import.meta.url)))
     ? readFileSync(new URL('../app/src/components/Contact.tsx', import.meta.url), 'utf8')
         .replace(/^import[\s\S]*?;\n/gm, '')
         .replace(/export (function|const) /g, '$1 ')
@@ -67,7 +69,22 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     React: {
       Fragment: 'Fragment',
       createElement: (type: string | ((p: any) => unknown), props: Node['props'], ...children: unknown[]) =>
-        typeof type === 'function' && ['MetricCards', 'Metric', 'YearLedger', 'FeeRuleFields', 'ReceivableSheet', 'PeriodStrip'].includes(type.name)
+        typeof type === 'function' &&
+        [
+          'MetricCards',
+          'Metric',
+          'YearLedger',
+          'FeeRuleFields',
+          'ReceivableSheet',
+          'PeriodStrip',
+          'FirstReceiptFields',
+          'ReceiptHistory',
+          'CopyReceiptFields',
+          'BillingFields',
+          'StatusFields',
+          'SharingFields',
+          'MoreFields',
+        ].includes(type.name)
           ? type({ ...props, children })
           : { type, props: props ?? {}, children },
     },
@@ -79,6 +96,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...fx,
     ...reports,
     ...carpool,
+    statusOf: carpool.memberStatus,
     ...metrics,
     ...carpoolTimeline,
     ...proxy,
@@ -483,6 +501,7 @@ test('member with a receipt and no paid-through date never claims no receipts an
     {},
     {
       ...carpool,
+      statusOf: carpool.memberStatus,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
       Toggle: 'Toggle',
@@ -906,6 +925,7 @@ test('收款表单按应收预填：上面只读的收费，默认勾最早没�
       {},
       {
         ...carpool,
+        statusOf: carpool.memberStatus,
         Sheet: 'Sheet',
         DatePicker: 'DatePicker',
         Toggle: 'Toggle',
@@ -1699,6 +1719,7 @@ test('收款保存失败保留草稿且不关闭；重试成功只增加一条�
     {},
     {
       ...carpool,
+      statusOf: carpool.memberStatus,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
       CurrencySelect: 'CurrencySelect',
@@ -1774,6 +1795,7 @@ test('成员先改收费再改生效日只留下一个调整，今天标准与�
     {},
     {
       ...carpool,
+      statusOf: carpool.memberStatus,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
       Toggle: 'Toggle',
@@ -1853,6 +1875,7 @@ test('删除一笔收款：它抵扣的期恢复为没收，期初结清不受�
       {},
       {
         ...carpool,
+        statusOf: carpool.memberStatus,
         Sheet: 'Sheet',
         DatePicker: 'DatePicker',
         Toggle: 'Toggle',
@@ -1977,6 +2000,7 @@ test('成员表单：已付至点「调整」直接改日期；改自定义收�
     {},
     {
       ...carpool,
+      statusOf: carpool.memberStatus,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
       Toggle: 'Toggle',
@@ -2180,6 +2204,7 @@ test('成员表单设置下车退款保留原始已付至，金额无效不能�
     {},
     {
       ...carpool,
+      statusOf: carpool.memberStatus,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
       Toggle: 'Toggle',
@@ -2298,6 +2323,7 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
     {},
     {
       ...carpool,
+      statusOf: carpool.memberStatus,
       Sheet: 'Sheet',
       NameLink: 'NameLink',
       StatusPill: 'StatusPill',
@@ -2382,7 +2408,7 @@ test('收款表点某一笔直接进入这笔收款的编辑，而不是成员�
   };
   // 跨年时先点表头全部展开；只有一年的记录本来就平铺
   r.render('CarSheet', props)
-    .find((n) => n.props.className === 'ld-row ld-th car-ledger-head table-head')
+    .find((n) => n.props.className === 'ld-row ld-th ld-toggle table-head')
     ?.props.onClick();
   const row = r.render('CarSheet', props).find((n) => n.type === 'button' && String(n.props.className ?? '').startsWith('ld-row dt-row'))!;
   row.props.onClick();
@@ -2441,6 +2467,7 @@ test('所有入口打开同一个成员入口：欠款先到收款表单，其�
     {},
     {
       ...carpool,
+      statusOf: carpool.memberStatus,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
       Toggle: 'Toggle',
@@ -2503,6 +2530,7 @@ test('欠了好几期：默认勾最早一期，再勾两期就补前三期，�
     {},
     {
       ...carpool,
+      statusOf: carpool.memberStatus,
       Sheet: 'Sheet',
       DatePicker: 'DatePicker',
       CurrencySelect: 'CurrencySelect',
@@ -2541,4 +2569,91 @@ test('欠了好几期：默认勾最早一期，再勾两期就补前三期，�
   };
   const kinds = (r.call('memberSegments', sub, waived, today, '2025-01-01', '2027-06-30') as { kind: string; from: string }[]).map((g) => g.kind);
   assert.deepEqual(kinds.slice(0, 4), ['waived', 'waived', 'waived', 'paid']);
+});
+
+test('phase2 rendered ledger sections and assistant summaries retain their frozen normal, zero and missing-FX output', () => {
+  const baseSub: Subscription = {
+    id: 'frozen',
+    name: 'Fictional plan',
+    category: 'Tools',
+    tags: [],
+    price: 20,
+    currency: 'USD',
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: {
+      role: 'owner',
+      seats: 4,
+      collectFrom: '2026-01-01',
+      members: [{ id: 'm', name: 'Fictional member', share: 5, fee: 5, feeCurrency: 'USD', joined: '2026-01-01' }],
+    },
+  };
+  const output: Record<string, unknown> = {};
+  const extra = {
+    ...Object.fromEntries(Object.entries(phase2Icons).filter(([key]) => key !== 'default' && /^[A-Za-z_$][\w$]*$/.test(key))),
+    ...assistantFields,
+    storageKey: (s: string) => s,
+    Sheet: 'Sheet',
+    DatePicker: 'DatePicker',
+    Toggle: 'Toggle',
+    CurrencySelect: 'CurrencySelect',
+    NumInput: 'NumInput',
+    MoneyInput: 'MoneyInput',
+    NameLink: 'NameLink',
+    MemberPeriod: 'MemberPeriod',
+    PersonNameField: 'PersonNameField',
+    PersonProfileSheet: 'PersonProfileSheet',
+    ReceiptForm: 'ReceiptForm',
+    MemberLeaveFields: 'MemberLeaveFields',
+    createPortal: () => null,
+    todayIn: () => today,
+    detailForecast,
+    detailHistoryEnd,
+    toBase: (s: AppState, n: number, c: string) => fx.toBaseOrNaN(s, n, c),
+    linkPerson: async () => ({}),
+    getState: () => st,
+  };
+  for (const [kind, sub] of [
+    ['normal', baseSub],
+    ['zero', { ...baseSub, price: 0 }],
+    ['missing-fx', { ...baseSub, currency: 'XCD' }],
+  ] as const) {
+    const state = { ...st, subscriptions: [sub] };
+    const props = {
+      sub,
+      s: sub,
+      state,
+      today,
+      history: billing.chargesBetween(sub, sub.start, today, today),
+      book: carpool.carLedger(state, sub, today),
+      base: 'USD',
+      list: proxy.proxyRows(state, { ...sub, share: undefined, proxy: { forName: 'Fictional recipient' } }, today),
+      onClose() {},
+      onOpen() {},
+      onMember() {},
+      onOpenSub() {},
+    };
+    for (const [file, name] of [
+      ['Detail', 'Kpis'],
+      ['Carpool', 'CarFacts'],
+      ['Members', 'MemberForm'],
+      ['Proxy', 'OwedOrNet'],
+    ]) {
+      const h = harness(`../app/src/views/${file}.tsx`, name, {}, extra);
+      output[`${kind}/${name}`] = h.render(name, props);
+    }
+  }
+  const assistant = harness('../app/src/views/Assistant.tsx', 'summaryRows', {}, extra);
+  output.proposal = assistant.call(
+    'summaryRows',
+    'update_subscription',
+    { subscription: 'frozen', set: { category: 'Tools', status: 'active', price: 20 } },
+    st,
+    'USD',
+  );
+  const normalized = JSON.parse(JSON.stringify(output, (_k, v) => (typeof v === 'function' ? '[handler]' : v)));
+  const path = new URL('./fixtures/phase2-views.json', import.meta.url);
+  if (process.env.CALENDS_UPDATE_FROZEN_VIEWS === '1') writeFileSync(path, JSON.stringify(normalized, null, 2) + '\n');
+  assert.deepEqual(normalized, JSON.parse(readFileSync(path, 'utf8')));
 });

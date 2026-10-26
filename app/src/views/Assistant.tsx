@@ -1,7 +1,6 @@
-import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import type { ReactNode } from 'react';
-import { Fragment, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import {
   ArrowDown,
   ArrowUp,
@@ -16,9 +15,6 @@ import {
   Image as ImageIcon,
   ImagePlus,
   KeyRound,
-  Loader2,
-  Pencil,
-  ReceiptText,
   RotateCcw,
   Settings2,
   Square,
@@ -26,217 +22,40 @@ import {
   Wrench,
   X,
 } from 'lucide-react';
-import { cycleLabel, collectCurrencyOf } from '../../../shared/billing.ts';
-import { flow, billLabel, cnDate, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
-import type { ApiMessage, AssistantConfigView, Effort, ErrorKind } from '../../../shared/deepseek.ts';
-import { dropOldImages } from '../../../shared/deepseek.ts';
-import { confirmInOrder, type AssistantOutcome, type WriteVerification } from '../../../shared/assistant-result.ts';
+import { confirmInOrder, type WriteVerification } from '../../../shared/assistant-result.ts';
+import type { ApiMessage, AssistantConfigView, ErrorKind } from '../../../shared/deepseek.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { IconButton, ask, PayBadge, Sheet, SubIcon, Toolbar } from '../components/ui.tsx';
-import { Picker } from '../components/Picker.tsx';
-import { catColor } from '../derive.ts';
-import { api, ASSISTANT_KEY, copyText, getState, refresh, toast } from '../store.ts';
-import { newSub } from './Editor.tsx';
-import { interrupted, isDateField, proposalDay, settleTurns } from './assistant-fields.ts';
+import { IconButton, Toolbar } from '../components/ui.tsx';
+import { api, getState, refresh } from '../store.ts';
+import { copyText, toast } from '../toast.ts';
+import { newSub } from './editor/new-sub.ts';
+import { interrupted } from './assistant-fields.ts';
 import { compressImage as compress, takeHandoff } from '../handoff.ts';
 import './assistant.css';
 import { Streamdown, type Components } from 'streamdown';
-
-// ---------- 会话数据 ----------
-
-type ToolStatus = 'running' | 'done' | 'error';
-type ProposalState = 'pending' | 'applying' | 'applied' | 'dismissed' | 'error' | 'unverified';
-
-type Part =
-  | { kind: 'reasoning'; text: string; start: number; ms?: number }
-  | { kind: 'text'; text: string }
-  | { kind: 'tool'; id: string; name: string; args: Record<string, unknown>; status: ToolStatus; result?: unknown; error?: string }
-  | {
-      kind: 'proposal';
-      id: string;
-      tool: string;
-      args: Record<string, unknown>;
-      preview: Preview;
-      filled?: string[];
-      state: ProposalState;
-      error?: string;
-      subId?: string;
-    };
-
-interface Preview {
-  before?: unknown;
-  after?: unknown;
-  references?: unknown;
-  created_category?: { name: string };
-  created_person?: { name: string };
-  subscription?: { id: string; name: string; category?: string; price?: number; currency?: string; cycle?: string; next_charge?: string | null };
-  next_charges?: Array<{ date: string; amount: number; currency: string }>;
-}
-
-type ChatTurn =
-  | {
-      id: string;
-      role: 'user';
-      text: string;
-      images: string[];
-      /** 发送时历史的长度：重试、重新生成时截回这里 */ at: number;
-      /** 存到服务端时图片不保存，只记张数 */ imgs?: number;
-    }
-  | {
-      id: string;
-      role: 'assistant';
-      parts: Part[];
-      status: 'streaming' | 'done' | 'error' | 'stopped';
-      outcome?: AssistantOutcome;
-      error?: { kind: ErrorKind; message: string };
-    };
-
-interface Saved {
-  /** 对话 id：服务端按它存；「新对话」换一个新的 */
-  id: string;
-  createdAt: string;
-  turns: ChatTurn[];
-  history: ApiMessage[];
-}
-
-const rid = () => Math.random().toString(36).slice(2, 10);
-const newChat = (): Saved => ({ id: rid(), createdAt: new Date().toISOString(), turns: [], history: [] });
-
-/** 存到服务端的样子：图片换成张数，历史里的图片换成占位文字 */
-function forServer(s: Saved) {
-  return {
-    createdAt: s.createdAt,
-    turns: s.turns.map((x) => (x.role === 'user' && x.images.length ? { ...x, images: [], imgs: x.images.length } : x)),
-    history: dropOldImages(s.history, 0, '[image]'),
-  };
-}
-
-/** 会话存在本机浏览器里（只是方便，不是账本数据）：较早的图片不存，免得撑爆存储 */
-function load(): Saved {
-  try {
-    const raw = localStorage.getItem(ASSISTANT_KEY);
-    // 老版本没有 id：补上，之后照常存到服务端
-    if (raw) {
-      const saved = settleInterrupted({ ...newChat(), ...(JSON.parse(raw) as Partial<Saved>) } as Saved);
-      // 还没说过话的对话：分割线上的时间按这次打开算
-      return saved.turns.length ? saved : { ...saved, createdAt: new Date().toISOString() };
-    }
-  } catch {
-    /* 隐私模式等读不到就当新会话 */
-  }
-  return newChat();
-}
-/** 上次关页时还在流式输出的回复不会再继续：记为中断，显示重试入口 */
-const settleInterrupted = (s: Saved): Saved => ({ ...s, turns: settleTurns(s.turns ?? []) });
-
-function persist(s: Saved) {
-  try {
-    let users = 0;
-    const turns = s.turns
-      .slice()
-      .reverse()
-      .map((x) => (x.role === 'user' && x.images.length && ++users > 2 ? { ...x, images: [] } : x))
-      .reverse();
-    localStorage.setItem(ASSISTANT_KEY, JSON.stringify({ id: s.id, createdAt: s.createdAt, turns, history: dropOldImages(s.history, 0, '[image]') }));
-  } catch {
-    /* 存不下就算了 */
-  }
-}
+import type { Part } from './assistant-chat.ts';
+import type { ChatTurn } from './assistant-chat.ts';
+import type { Saved } from './assistant-chat.ts';
+import { rid } from './assistant-chat.ts';
+import { newChat } from './assistant-chat.ts';
+import { forServer } from './assistant-chat.ts';
+import { load } from './assistant-chat.ts';
+import { persist } from './assistant-chat.ts';
+import type { ServerEvent } from './assistant-chat.ts';
+import { stream } from './assistant-chat.ts';
+import { reduce } from './assistant-chat.ts';
+import { Proposal } from './AssistantProposal.tsx';
+import { SetupSheet } from './AssistantSetup.tsx';
 
 /** 对话分隔线上的时间：今年的不写年份 */
-function fmtWhen(iso: string): string {
+export function fmtWhen(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '';
   return d.toLocaleString(locale(), { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-// ---------- 流式请求 ----------
-
-type ServerEvent =
-  | { type: 'reasoning'; delta: string }
-  | { type: 'text'; delta: string }
-  | { type: 'step' }
-  | { type: 'tool'; id: string; name: string; args: Record<string, unknown>; status: ToolStatus; result?: unknown; error?: string }
-  | { type: 'proposal'; id: string; tool: string; args: Record<string, unknown>; preview: Preview; filled?: string[] }
-  | { type: 'usage' }
-  | { type: 'error'; kind: ErrorKind; message: string }
-  | { type: 'done'; messages: ApiMessage[]; aborted?: boolean; outcome?: AssistantOutcome };
-
-async function stream(body: unknown, signal: AbortSignal, on: (e: ServerEvent) => void) {
-  // 带上界面语言：服务端按它给出分类名称和回复语言
-  const res = await fetch(base('/api/assistant/chat'), {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: { 'content-type': 'application/json', 'x-locale': locale() },
-    body: JSON.stringify(body),
-    signal,
-  });
-  if (!res.ok || !res.body) {
-    const b = (await res.json().catch(() => ({}))) as { error?: string };
-    throw Object.assign(new Error(b.error ?? `HTTP ${res.status}`), { kind: res.status === 401 ? 'auth' : 'server' });
-  }
-  const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
-  let buf = '';
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buf += value;
-    let i;
-    while ((i = buf.indexOf('\n\n')) >= 0) {
-      const chunk = buf.slice(0, i);
-      buf = buf.slice(i + 2);
-      for (const line of chunk.split('\n')) if (line.startsWith('data:')) on(JSON.parse(line.slice(5)) as ServerEvent);
-    }
-  }
-}
-
-/** 把服务端事件并进当前这条助手消息 */
-function reduce(turn: Extract<ChatTurn, { role: 'assistant' }>, e: ServerEvent): Extract<ChatTurn, { role: 'assistant' }> {
-  const parts = turn.parts.slice();
-  const last = parts[parts.length - 1];
-  const closeReasoning = () => {
-    const r = parts[parts.length - 1];
-    if (r?.kind === 'reasoning' && r.ms == null) parts[parts.length - 1] = { ...r, ms: Date.now() - r.start };
-  };
-  switch (e.type) {
-    case 'reasoning':
-      if (last?.kind === 'reasoning' && last.ms == null) parts[parts.length - 1] = { ...last, text: last.text + e.delta };
-      else parts.push({ kind: 'reasoning', text: e.delta, start: Date.now() });
-      break;
-    case 'text':
-      closeReasoning();
-      if (parts[parts.length - 1]?.kind === 'text') {
-        const p = parts[parts.length - 1] as Extract<Part, { kind: 'text' }>;
-        parts[parts.length - 1] = { ...p, text: p.text + e.delta };
-      } else parts.push({ kind: 'text', text: e.delta });
-      break;
-    case 'step':
-      closeReasoning();
-      break;
-    case 'tool': {
-      closeReasoning();
-      const i = parts.findIndex((p) => p.kind === 'tool' && p.id === e.id);
-      const next: Part = { kind: 'tool', id: e.id, name: e.name, args: e.args, status: e.status, result: e.result, error: e.error };
-      if (i >= 0) parts[i] = next;
-      else parts.push(next);
-      break;
-    }
-    case 'proposal':
-      parts.push({ kind: 'proposal', id: e.id, tool: e.tool, args: e.args, preview: e.preview, filled: e.filled, state: 'pending' });
-      break;
-    case 'error':
-      closeReasoning();
-      return { ...turn, parts, status: 'error', error: { kind: e.kind, message: e.message } };
-    case 'done':
-      closeReasoning();
-      return { ...turn, parts, outcome: e.outcome, status: e.aborted ? 'stopped' : 'done' };
-  }
-  return { ...turn, parts };
-}
-
 // ---------- 页面 ----------
-
 export function Assistant({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const [cfg, setCfg] = useState<AssistantConfigView | null>(null);
   const [setup, setSetup] = useState(false);
@@ -594,8 +413,7 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
 }
 
 // ---------- 空状态（对应 AI Elements 的 ConversationEmptyState）与建议（Suggestions） ----------
-
-const SUGGESTIONS: Array<{ key: string; send: boolean }> = [
+export const SUGGESTIONS: Array<{ key: string; send: boolean }> = [
   { key: 'receipt', send: false },
   { key: 'screenshot', send: false },
   { key: 'month', send: true },
@@ -603,9 +421,9 @@ const SUGGESTIONS: Array<{ key: string; send: boolean }> = [
 ];
 
 /** 欢迎语随机轮换一套场景示例；标题与描述都做轻，只作提示 */
-const WELCOME_COUNT = 20;
+export const WELCOME_COUNT = 20;
 
-function Welcome({ ready, cfg, onSetup }: { ready: boolean; cfg: AssistantConfigView | null; onSetup: () => void }) {
+export function Welcome({ ready, cfg, onSetup }: { ready: boolean; cfg: AssistantConfigView | null; onSetup: () => void }) {
   const [n] = useState(() => Math.floor(Math.random() * WELCOME_COUNT) + 1);
   return (
     <div className="as-welcome">
@@ -625,7 +443,7 @@ function Welcome({ ready, cfg, onSetup }: { ready: boolean; cfg: AssistantConfig
 }
 
 /** 输入框上方一排可横向滑动的建议（窄屏换行） */
-function Suggestions({ onPick }: { onPick: (s: { text: string; send: boolean }) => void }) {
+export function Suggestions({ onPick }: { onPick: (s: { text: string; send: boolean }) => void }) {
   return (
     <div className="as-suggest">
       {SUGGESTIONS.map((s) => (
@@ -638,8 +456,7 @@ function Suggestions({ onPick }: { onPick: (s: { text: string; send: boolean }) 
 }
 
 // ---------- 消息 ----------
-
-function UserBubble({ turn }: { turn: Extract<ChatTurn, { role: 'user' }> }) {
+export function UserBubble({ turn }: { turn: Extract<ChatTurn, { role: 'user' }> }) {
   return (
     <div className="as-user">
       {turn.images.length > 0 && (
@@ -659,7 +476,7 @@ function UserBubble({ turn }: { turn: Extract<ChatTurn, { role: 'user' }> }) {
   );
 }
 
-function BotMessage(props: {
+export function BotMessage(props: {
   turn: Extract<ChatTurn, { role: 'assistant' }>;
   state: AppState;
   last: boolean;
@@ -739,7 +556,7 @@ function BotMessage(props: {
   );
 }
 
-function Dots() {
+export function Dots() {
   return (
     <div className="as-dots" aria-label={t('assistant.thinking')}>
       <i />
@@ -750,7 +567,7 @@ function Dots() {
 }
 
 /** 思考过程（AI Elements Reasoning）：进行中展开并显示流光，结束 1 秒后自动收起成「思考了 N 秒」 */
-function Reasoning({ part, live }: { part: Extract<Part, { kind: 'reasoning' }>; live: boolean }) {
+export function Reasoning({ part, live }: { part: Extract<Part, { kind: 'reasoning' }>; live: boolean }) {
   const [open, setOpen] = useState(live);
   useEffect(() => {
     if (live) return setOpen(true);
@@ -771,7 +588,7 @@ function Reasoning({ part, live }: { part: Extract<Part, { kind: 'reasoning' }>;
 }
 
 /** 工具调用：名称、状态，点开看参数与结果 */
-function ToolCard({ part }: { part: Extract<Part, { kind: 'tool' }> }) {
+export function ToolCard({ part }: { part: Extract<Part, { kind: 'tool' }> }) {
   const [open, setOpen] = useState(false);
   // 没有本地化名称的工具（t 原样返回键名）显示工具名本身，不显示 mcp.tool.xxx
   const key = `mcp.tool.${part.name}`;
@@ -807,349 +624,7 @@ function ToolCard({ part }: { part: Extract<Part, { kind: 'tool' }> }) {
   );
 }
 
-/** 草稿卡片：新增订阅时显示图标、名称、价格与接下来的扣款；其他写操作显示要改的内容 */
-/** 各写操作的草稿内容：用人话把参数列出来（标签与取值都本地化） */
-function summaryRows(
-  tool: string,
-  a: Record<string, unknown>,
-  state: AppState,
-  subCcy?: string,
-  preview?: Record<string, unknown>,
-): Array<[string, ReactNode]> {
-  const rows: Array<[string, ReactNode]> = [];
-  const add = (label: string, v: ReactNode | undefined | null | false) => {
-    if (v !== undefined && v !== null && v !== false && v !== '') rows.push([label, v]);
-  };
-  const day = proposalDay;
-  const collect = collectCurrencyOf(state.settings);
-  const method = (v: unknown) => state.methods.find((m) => m.id === v || m.name === v);
-  switch (tool) {
-    case 'record_receivable': {
-      // 预览里带着写入后的那一笔：抵扣哪几期、金额（没写金额时按应收算出来的）
-      const r = preview?.after as { periods?: string[]; amount?: number; currency?: string; date?: string } | null | undefined;
-      const action = String(a.action ?? 'record');
-      add(t('receivable.action'), t(`receivable.actions.${action}`));
-      add(t('assistant.f.member'), a.member ? String(a.member) : a.person ? String(a.person) : undefined);
-      if (action === 'charged') {
-        add(t('proxy.table.date'), day(a.charge));
-        add(
-          t('proxy.table.charged'),
-          a.charged_amount != null ? money(Number(a.charged_amount), String(a.charged_currency ?? subCcy ?? collect)) : t('receivable.chargedClear'),
-        );
-        break;
-      }
-      const keys = r?.periods ?? (Array.isArray(a.periods) ? (a.periods as string[]) : undefined);
-      add(
-        t('receivable.periods'),
-        keys ? keys.map((k) => cnDate(k)).join('\n') : a.count ? t('receivable.periodsCount', { count: Number(a.count) }) : undefined,
-      );
-      if (action !== 'delete' && action !== 'waive') {
-        const amount = r?.amount ?? (a.amount != null ? Number(a.amount) : undefined);
-        add(t('assistant.f.amount'), amount != null ? <span className="green">{flow(amount, String(r?.currency ?? a.currency ?? collect))}</span> : undefined);
-      }
-      if (action !== 'delete') add(t('assistant.f.date'), day(r?.date ?? a.date) ?? t('assistant.card.today'));
-      add(t('receivable.note'), a.note ? String(a.note) : undefined);
-      break;
-    }
-    case 'save_share_member':
-      add(t('assistant.f.member'), String(a.name ?? a.member ?? ''));
-      add(
-        t('assistant.f.fee'),
-        a.exempt
-          ? t('assistant.v.exempt')
-          : a.fee != null
-            ? `${money(Number(a.fee), String(a.fee_currency ?? collect))}\n${billLabel(Number(a.bill_every ?? 1))}`
-            : undefined,
-      );
-      add(t('assistant.f.paidUntil'), day(a.paid_until));
-      add(t('family.member.firstPeriod'), a.first_period ? t(`family.member.firstMode.${String(a.first_period)}`) : undefined);
-      add(t('family.member.firstAmount'), a.first_amount != null ? money(Number(a.first_amount), String(a.fee_currency ?? collect)) : undefined);
-      add(t('assistant.f.joined'), day(a.joined));
-      add(t('assistant.f.left'), a.left === null ? t('family.member.notSet') : day(a.left));
-      if ('leave_refund' in a || a.left === null) {
-        const r = a.leave_refund as { amount: number; currency?: string; date?: string; note?: string } | null;
-        const actual = (preview?.member as { leave_refund?: { currency: string; date: string } } | undefined)?.leave_refund;
-        const suggested = preview?.suggested_refund as { currency?: string } | undefined;
-        add(t('family.refund.title'), r ? flow(-r.amount, r.currency ?? actual?.currency ?? suggested?.currency ?? collect) : t('family.refund.none'));
-        if (r) {
-          add(t('family.refund.date'), day(r.date ?? actual?.date ?? a.left));
-          add(t('family.member.note'), r.note);
-        }
-      }
-      add(t('assistant.f.contact'), [a.contact_via, a.contact].filter(Boolean).join(' ') || undefined);
-      break;
-    case 'remove_share_member':
-      add(t('assistant.f.member'), String(a.member ?? ''));
-      break;
-    case 'set_share':
-      add(t('assistant.f.role'), t(`assistant.v.${a.role === 'member' ? 'member' : a.role === 'none' ? 'unshare' : 'owner'}`));
-      add(t('assistant.f.seats'), a.seats != null ? String(a.seats) : undefined);
-      add(t('assistant.f.ownerName'), a.owner_name ? String(a.owner_name) : undefined);
-      add(t('assistant.f.since'), day(a.since));
-      add(t('family.member.collectionAnchor'), day(a.collect_from));
-      break;
-    case 'change_price':
-      add(t('assistant.f.newPrice'), a.amount != null ? money(Number(a.amount), subCcy ?? state.settings.baseCurrency) : undefined);
-      add(t('assistant.f.from'), day(a.from) ?? t('assistant.card.today'));
-      break;
-    case 'set_status':
-      add(t('assistant.f.action'), t(`assistant.v.${String(a.action)}`));
-      add(t('assistant.f.date'), a.at === null ? t('assistant.v.dateUnknown') : day(a.at));
-      break;
-    case 'save_subscription': {
-      const rec = (a.subscription ?? {}) as Partial<Subscription>;
-      const computed = (preview?.computed as { after?: { next_charge?: string | null; spent_total?: { amount: number | null; currency: string } } } | undefined)
-        ?.after;
-      const pays = [...(rec.payments ?? []), ...(rec.phases ?? []).flatMap((p) => p.payments ?? [])];
-      if (rec.status === 'cancelled' || rec.status === 'terminated')
-        add(t(`assistant.v.${rec.status === 'terminated' ? 'terminate' : 'cancel'}`), day(rec.stop?.date ?? rec.end) ?? t('assistant.v.dateUnknown'));
-      add(t('assistant.f.phases'), rec.phases?.length ? String(rec.phases.length) : undefined);
-      add(t('assistant.f.payments'), pays.length ? String(pays.length) : undefined);
-      add(t('assistant.f.spent'), computed?.spent_total?.amount != null ? money(computed.spent_total.amount, computed.spent_total.currency) : undefined);
-      add(t('assistant.f.next_due'), day(computed?.next_charge));
-      add(t('assistant.f.changes'), Array.isArray(preview?.changes) ? String(preview.changes.length) : undefined);
-      break;
-    }
-    case 'record_payment':
-      add(t('assistant.f.kind'), a.kind && a.kind !== 'charge' ? t(`detail.charges.kind.${String(a.kind)}`) : t('assistant.v.charge'));
-      add(
-        t('assistant.f.amount'),
-        a.amount != null ? (
-          <span className={a.kind === 'refund' ? 'green' : undefined}>
-            {flow(a.kind === 'refund' ? Math.abs(Number(a.amount)) : -Number(a.amount), subCcy ?? state.settings.baseCurrency)}
-          </span>
-        ) : undefined,
-      );
-      add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
-      if (Array.isArray(a.funding))
-        add(
-          t('assistant.f.funding'),
-          (a.funding as Array<{ method: string; amount: number }>)
-            .map((f) => `${method(f.method)?.name ?? f.method} ${money(Number(f.amount), subCcy ?? state.settings.baseCurrency)}`)
-            .join('\n'),
-        );
-      break;
-    case 'record_transfer': {
-      const del = a.delete as { date?: string } | undefined;
-      if (del) {
-        add(t('assistant.f.effect'), t('detail.transfer.deleted'));
-        add(t('assistant.f.date'), day(del.date));
-        break;
-      }
-      add(t('assistant.f.kind'), a.kind === 'sell' ? t('detail.transfer.kind.sell') : t('detail.transfer.kind.buy'));
-      add(
-        t('assistant.f.amount'),
-        a.amount != null ? (
-          <span className={a.kind === 'sell' ? 'green' : undefined}>
-            {flow(
-              a.kind === 'sell' ? Math.abs(Number(a.amount)) : -Math.abs(Number(a.amount)),
-              String(a.currency ?? subCcy ?? state.settings.baseCurrency).toUpperCase(),
-            )}
-          </span>
-        ) : undefined,
-      );
-      add(t('assistant.f.date'), day(a.date) ?? t('assistant.card.today'));
-      break;
-    }
-    case 'delete_subscription':
-      add(t('assistant.f.effect'), t('assistant.v.deleteAll'));
-      break;
-    default: {
-      // update_subscription / change_plan 等：逐项列出要改的字段
-      const set = (a.set && typeof a.set === 'object' ? a.set : a.plan && typeof a.plan === 'object' ? a.plan : a) as Record<string, unknown>;
-      for (const [k, v] of Object.entries(set)) {
-        if (['subscription', 'id', 'force', 'dry_run', 'set', 'plan'].includes(k)) continue;
-        const label = t(`assistant.f.${k}`) === `assistant.f.${k}` ? k : t(`assistant.f.${k}`);
-        const val =
-          k === 'method'
-            ? (method(v)?.name ?? String(v))
-            : isDateField(k)
-              ? day(v)
-              : Array.isArray(v)
-                ? v.join('、')
-                : typeof v === 'object'
-                  ? JSON.stringify(v)
-                  : String(v);
-        add(label, val);
-      }
-      if (tool === 'change_plan') add(t('assistant.f.from'), day(a.at));
-    }
-  }
-  return rows;
-}
-
-function Proposal(props: {
-  disabled: boolean;
-  siblings: Array<{ tool: string; args: Record<string, unknown> }>;
-  part: Extract<Part, { kind: 'proposal' }>;
-  state: AppState;
-  onApply: () => void;
-  onEdit: () => void;
-  onDismiss: () => void;
-  onOpen: (id: string) => void;
-}) {
-  const { part, state } = props;
-  const a = part.args;
-  const create = part.tool === 'create_subscription';
-  const sub = part.preview.subscription;
-  const name = String(
-    a.name ?? sub?.name ?? (a.set as { name?: string } | undefined)?.name ?? a.method ?? a.person ?? a.category ?? t(`mcp.tool.${part.tool}`),
-  );
-  const sib = props.siblings.find((x) => x.tool === 'create_subscription' && x.args.id && x.args.id === sub?.id)?.args;
-  const sibling = sib ? { icon: sib.icon ? String(sib.icon) : undefined, url: sib.url ? String(sib.url) : undefined } : undefined;
-  const icon: Pick<Subscription, 'name' | 'icon' | 'url' | 'category'> = {
-    name,
-    // 同一轮先建的订阅还没保存时，从那张新建草稿里取图标和链接
-    icon: a.icon ? String(a.icon) : (state.subscriptions.find((s) => s.id === sub?.id)?.icon ?? sibling?.icon),
-    url: a.url ? String(a.url) : (state.subscriptions.find((s) => s.id === sub?.id)?.url ?? sibling?.url),
-    category: String(a.category ?? sub?.category ?? ''),
-  };
-  const cyc = a.cycle as { unit: Subscription['cycle']['unit']; every?: number } | undefined;
-  const history = create && Array.isArray(a.payments) ? (a.payments as Array<{ amount: number }>) : [];
-  // method=null 明确不绑定支付方式，卡片上不显示默认卡
-  const method =
-    state.methods.find((m) => m.id === a.method || m.name === a.method) ??
-    (create && a.method !== null ? state.methods.find((m) => m.id === state.settings.defaultMethodId) : undefined);
-  const done = part.state === 'applied';
-  const destructive =
-    part.tool === 'delete_subscription' ||
-    part.tool === 'delete_payment' ||
-    (part.tool === 'record_transfer' && !!a.delete) ||
-    part.tool === 'remove_share_member' ||
-    a.action === 'delete' ||
-    a.action === 'remove' ||
-    a.top_up_action === 'delete' ||
-    (part.tool === 'set_share' && a.role === 'none');
-  // 没识别出来、用了默认值的字段：提醒用户核对
-  const missing = create
-    ? [!a.start && t('assistant.card.start'), a.method === undefined && t('detail.field.method'), !a.category && t('detail.field.category')].filter(
-        (x): x is string => !!x,
-      )
-    : [];
-  const gone = part.state === 'dismissed';
-  const rows: Array<[string, ReactNode]> = create
-    ? [
-        [t('assistant.card.start'), proposalDay(a.start) ?? t('assistant.card.today')],
-        ...(a.region ? [[t('detail.field.region'), String(a.region).toUpperCase()] as [string, ReactNode]] : []),
-        ...(a.status === 'trial' && a.trial_end ? [[t('detail.field.trialEnd'), proposalDay(a.trial_end)] as [string, ReactNode]] : []),
-        [t('detail.field.method'), <PayBadge key="m" m={method} />],
-        ...(history.length
-          ? [
-              [
-                t('assistant.card.history'),
-                `${t('assistant.card.historyCount', { count: history.length })}\n${flow(-history.reduce((x, p) => x + p.amount, 0), String(a.currency))}`,
-              ] as [string, ReactNode],
-            ]
-          : []),
-      ]
-    : summaryRows(part.tool, a, state, sub?.currency, part.preview as Record<string, unknown>);
-  return (
-    <div className={`as-card ${part.state}`} style={{ '--tint': catColor(icon.category) } as Record<string, string>}>
-      <div className="as-card-tag">
-        <ReceiptText size={12} /> {create ? t('assistant.card.draft') : t(`mcp.tool.${part.tool}`)}
-      </div>
-      <div className="as-card-head row">
-        <SubIcon sub={icon} size={44} />
-        <div className="as-card-id">
-          <b className="text-ellipsis">{name}</b>
-          {create && cyc ? (
-            <span>
-              {money(Number(a.price), String(a.currency))} {cycleLabel({ unit: cyc.unit, every: Number(cyc.every ?? 1) })}
-              {copyParts(a.category ? `\n${String(a.category)}` : '')}
-            </span>
-          ) : (
-            sub && <span>{copyParts([sub.price != null && sub.currency ? money(sub.price, sub.currency) : '', sub.cycle].filter(Boolean).join('\n'))}</span>
-          )}
-        </div>
-      </div>
-      <dl className="as-card-rows">
-        {rows.map(([k, v]) => (
-          <Fragment key={k}>
-            <dt>{k}</dt>
-            <dd>{copyParts(v)}</dd>
-          </Fragment>
-        ))}
-      </dl>
-      {part.preview.created_category && <div className="as-card-next">{t('mcp.label.createCategory', { name: part.preview.created_category.name })}</div>}
-      {part.preview.created_person && <div className="as-card-next">{t('mcp.label.createPerson', { name: part.preview.created_person.name })}</div>}
-      {!create && part.preview.before !== undefined && (
-        <details className="as-tool-detail">
-          <summary>{t('assistant.card.changes')}</summary>
-          <pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', maxHeight: 260, overflow: 'auto', fontSize: 'var(--fs-1)' }}>
-            {JSON.stringify({ before: part.preview.before, after: part.preview.after, references: part.preview.references }, null, 2)}
-          </pre>
-        </details>
-      )}
-      {create && part.preview.next_charges && part.preview.next_charges.length > 0 && (
-        <div className="as-card-next">
-          <small>{t('assistant.card.next')}</small>
-          <div>
-            {part.preview.next_charges.map((c) => (
-              <span key={c.date}>
-                {c.date.slice(5).replace('-', '/')} <span className="copy-gap" aria-hidden="true" /> {flow(-c.amount, c.currency)}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-      {create && part.state === 'pending' && (missing.length > 0 || part.filled?.length) ? (
-        <div className="as-card-note">
-          {missing.length > 0 && (
-            <span className="warn">
-              <CircleAlert size={13} /> {t('assistant.card.missing', { fields: missing.join(t('assistant.card.sep')) })}
-            </span>
-          )}
-          {part.filled?.length ? <span>{t('assistant.card.filled')}</span> : null}
-        </div>
-      ) : null}
-      {(part.state === 'error' || part.state === 'unverified') && part.error && (
-        <div className="as-card-err icon-text">
-          <CircleAlert size={14} /> {part.error}
-        </div>
-      )}
-      <div className="as-card-foot">
-        {done || part.state === 'unverified' ? (
-          <>
-            <span className={`${done ? 'as-ok' : 'as-muted'} icon-text`}>
-              {done ? <Check size={15} /> : <CircleAlert size={15} />}{' '}
-              {done ? (create ? t('assistant.card.added') : t('assistant.card.done')) : t('assistant.card.unverified')}
-            </span>
-            {part.subId && (
-              <button className="btn" onClick={() => props.onOpen(part.subId!)}>
-                {t('assistant.card.view')}
-              </button>
-            )}
-          </>
-        ) : gone ? (
-          <span className="as-muted icon-text">
-            <CircleX size={15} /> {t('assistant.card.dismissed')}
-          </span>
-        ) : (
-          <>
-            <button className="btn plain" onClick={props.onDismiss} disabled={props.disabled || part.state === 'applying'}>
-              {t('assistant.card.dismiss')}
-            </button>
-            {create && (
-              <button className="btn" onClick={props.onEdit} disabled={props.disabled || part.state === 'applying'}>
-                <Pencil size={14} /> {t('assistant.card.edit')}
-              </button>
-            )}
-            <button
-              className={`btn ${destructive ? 'danger-solid' : 'primary'}`}
-              onClick={props.onApply}
-              disabled={props.disabled || part.state === 'applying'}
-            >
-              {part.state === 'applying' ? <Loader2 size={14} className="spin" /> : <Check size={14} />}
-              {create ? t('assistant.card.add') : t('assistant.card.confirm')}
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKind; message: string }; onRetry: () => void; onSetup: () => void }) {
+export function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKind; message: string }; onRetry: () => void; onSetup: () => void }) {
   const fixable = error.kind === 'auth' || error.kind === 'config' || error.kind === 'balance';
   return (
     <div className="as-error row" role="alert">
@@ -1177,7 +652,7 @@ function ErrorCard({ error, onRetry, onSetup }: { error: { kind: ErrorKind; mess
  * 流式输出时自动补全没写完的 Markdown（半张表、没闭合的粗体）。后台不用 Tailwind，样式写在 assistant.css；
  * 关掉它自带的复制 / 下载按钮和外链确认弹窗，外链直接新标签打开。
  */
-const MD_COMPONENTS: Components = {
+export const MD_COMPONENTS: Components = {
   table: ({ children }) => (
     <div className="as-table">
       <table>{children}</table>
@@ -1192,7 +667,7 @@ const MD_COMPONENTS: Components = {
   code: ({ className, children }) => <code className={className}>{children}</code>,
 };
 
-function Markdown({ text, streaming }: { text: string; streaming?: boolean }) {
+export function Markdown({ text, streaming }: { text: string; streaming?: boolean }) {
   return (
     <Streamdown
       className="as-md"
@@ -1209,12 +684,11 @@ function Markdown({ text, streaming }: { text: string; streaming?: boolean }) {
 }
 
 // ---------- 输入框：文字 + 图片（粘贴、拖拽、选择） ----------
-
-interface ComposerHandle {
+export interface ComposerHandle {
   prefill: (text: string, images?: string[]) => void;
 }
 
-function Composer({
+export function Composer({
   ref,
   busy,
   disabled,
@@ -1369,227 +843,5 @@ function Composer({
       </div>
       <p className="as-foot">{t('assistant.disclaimer')}</p>
     </div>
-  );
-}
-
-// ---------- 配置：DeepSeek API Key、Base URL、模型、思考强度 ----------
-
-function SetupSheet({
-  cfg,
-  onClose,
-  onSaved,
-  onClearChats,
-}: {
-  cfg: AssistantConfigView | null;
-  onClose: () => void;
-  onSaved: (c: AssistantConfigView) => void;
-  onClearChats: () => void;
-}) {
-  const [key, setKey] = useState('');
-  const [baseUrl, setBaseUrl] = useState(cfg?.baseUrl ?? 'https://api.deepseek.com');
-  const [model, setModel] = useState(cfg?.model ?? 'deepseek-flash');
-  const [effort, setEffort] = useState<Effort>(cfg?.effort ?? 'low');
-  const [saving, setSaving] = useState(false);
-  // 模型列表：填好地址和 Key 后向服务商的 /models 取；取不到（有的服务没有这个接口）时可以手动填
-  const [models, setModels] = useState<string[] | null>(null);
-  const [fetching, setFetching] = useState(false);
-  const [fetchErr, setFetchErr] = useState<string | null>(null);
-  const [manual, setManual] = useState(false);
-  const canFetch = !!baseUrl.trim() && (!!key.trim() || !!cfg?.configured);
-
-  const fetchModels = async () => {
-    if (!canFetch) return;
-    setFetching(true);
-    setFetchErr(null);
-    try {
-      const r = await api<{ ok: boolean; message?: string; models?: string[] }>('/api/assistant/test', {
-        method: 'POST',
-        body: JSON.stringify({ apiKey: key.trim() || undefined, baseUrl }),
-      });
-      if (!r.ok || !r.models?.length) {
-        setModels(null);
-        setFetchErr(r.ok ? t('assistant.setup.noModels') : (r.message ?? t('assistant.error.network')));
-        return;
-      }
-      const list = [...r.models].sort((a, b) => a.localeCompare(b));
-      setModels(list);
-      setManual(false);
-      // 当前模型不在列表里：优先挑一个 Flash，其次第一个
-      setModel((m) => (list.includes(m) ? m : (list.find((x) => /flash/i.test(x)) ?? list[0])));
-    } catch (e) {
-      setModels(null);
-      setFetchErr((e as Error).message);
-    } finally {
-      setFetching(false);
-    }
-  };
-  // 打开时（已保存 Key）以及改了地址或 Key 后，停顿一下自动获取
-  useEffect(() => {
-    if (!canFetch) return;
-    const h = setTimeout(() => void fetchModels(), key || baseUrl !== (cfg?.baseUrl ?? '') ? 700 : 0);
-    return () => clearTimeout(h);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, baseUrl]);
-  const save = async () => {
-    setSaving(true);
-    try {
-      const v = await api<AssistantConfigView>('/api/assistant/config', { method: 'PUT', body: JSON.stringify({ apiKey: key, baseUrl, model, effort }) });
-      onSaved(v);
-      toast(t('assistant.setup.saved'));
-      onClose();
-    } catch (e) {
-      toast((e as Error).message, 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
-  const clear = async () => {
-    const v = await api<AssistantConfigView>('/api/assistant/config', { method: 'PUT', body: JSON.stringify({ apiKey: null }) });
-    onSaved(v);
-    toast(t('assistant.setup.cleared'));
-  };
-
-  return (
-    <Sheet
-      narrow
-      title={t('assistant.setup.title')}
-      onClose={onClose}
-      foot={
-        <>
-          {cfg?.configured && (
-            <button className="btn danger" style={{ marginRight: 'auto' }} onClick={() => void clear()}>
-              {t('assistant.setup.clear')}
-            </button>
-          )}
-          <button className="btn" onClick={onClose}>
-            {t('common.cancel')}
-          </button>
-          <button className="btn primary" onClick={() => void save()} disabled={saving || (!key && !cfg?.configured) || !model.trim()}>
-            {t('common.save')}
-          </button>
-        </>
-      }
-    >
-      <div className="as-setup">
-        {/* 清空聊天记录：服务端和本机都删掉，不可恢复，所以要确认 */}
-        <div className="as-clear-chats">
-          <span>{t('assistant.clearChatsHint')}</span>
-          <button
-            type="button"
-            className="btn danger"
-            onClick={async () =>
-              (await ask(t('assistant.clearChatsConfirm'))) &&
-              void api('/api/assistant/chats', { method: 'DELETE' }).then(() => {
-                try {
-                  localStorage.removeItem(ASSISTANT_KEY);
-                } catch {
-                  /* ignore */
-                }
-                onClearChats();
-                toast(t('assistant.clearChatsDone'));
-              })
-            }
-          >
-            {t('assistant.clearChats')}
-          </button>
-        </div>
-        <p className="as-setup-intro">
-          {t('assistant.setup.intro')}{' '}
-          <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noreferrer">
-            platform.deepseek.com
-          </a>
-        </p>
-        <label className="as-field">
-          <span>Base URL</span>
-          <input spellCheck={false} value={baseUrl} placeholder="https://api.deepseek.com" onChange={(e) => setBaseUrl(e.target.value)} />
-          <small>{t('assistant.setup.baseHint')}</small>
-        </label>
-        <label className="as-field">
-          <span>API Key</span>
-          <input
-            type="password"
-            autoComplete="off"
-            spellCheck={false}
-            value={key}
-            placeholder={cfg?.configured ? t('assistant.setup.keySaved', { hint: cfg.keyHint ?? '' }) : 'sk-…'}
-            onChange={(e) => setKey(e.target.value)}
-          />
-        </label>
-        <div className="as-field">
-          <span className="as-model-head">
-            {t('assistant.setup.model')}
-            {models && !manual && (
-              <button type="button" className="as-link" onClick={() => void fetchModels()} disabled={fetching}>
-                {fetching ? <Loader2 size={12} className="spin" /> : <RotateCcw size={12} />} {t('assistant.setup.refresh')}
-              </button>
-            )}
-          </span>
-          {models && !manual ? (
-            <div className="as-model-pick">
-              <Picker
-                variant="btn"
-                value={model}
-                ariaLabel={t('assistant.setup.model')}
-                search
-                options={[
-                  ...(model && !models.includes(model) ? [{ value: model, label: model, hint: t('assistant.setup.notInList') }] : []),
-                  ...models.map((m) => ({
-                    value: m,
-                    label: m.includes('/') ? m.slice(m.indexOf('/') + 1) : m,
-                    group: m.includes('/') ? m.slice(0, m.indexOf('/')) : undefined,
-                  })),
-                ]}
-                onChange={setModel}
-              />
-            </div>
-          ) : manual ? (
-            <input spellCheck={false} value={model} placeholder="deepseek-flash" onChange={(e) => setModel(e.target.value)} />
-          ) : (
-            <div className="as-model-empty">
-              {fetching ? (
-                <>
-                  <Loader2 size={14} className="spin" /> {t('assistant.setup.fetching')}
-                </>
-              ) : (
-                (fetchErr ?? t('assistant.setup.fetchHint'))
-              )}
-            </div>
-          )}
-          <small className="as-model-foot">
-            {models && !manual ? t('assistant.setup.fetched', { count: models.length }) : t('assistant.setup.modelHint')}
-            {!manual ? (
-              <>
-                {fetchErr && !fetching && (
-                  <button type="button" className="as-link" onClick={() => void fetchModels()}>
-                    {t('assistant.setup.retry')}
-                  </button>
-                )}
-                <button type="button" className="as-link" onClick={() => setManual(true)}>
-                  {t('assistant.setup.manual')}
-                </button>
-              </>
-            ) : (
-              models && (
-                <button type="button" className="as-link" onClick={() => setManual(false)}>
-                  {t('assistant.setup.pickList')}
-                </button>
-              )
-            )}
-          </small>
-        </div>
-        <div className="as-field">
-          <span>{t('assistant.setup.effort')}</span>
-          <div className="as-effort">
-            {(['none', 'low', 'high'] as Effort[]).map((e) => (
-              <button key={e} className={effort === e ? 'on' : ''} onClick={() => setEffort(e)}>
-                <b>{t(`assistant.setup.effort_${e}`)}</b>
-                <small>{t(`assistant.setup.effort_${e}Hint`)}</small>
-              </button>
-            ))}
-          </div>
-        </div>
-        <p className="as-setup-note">{t('assistant.setup.privacy')}</p>
-      </div>
-    </Sheet>
   );
 }

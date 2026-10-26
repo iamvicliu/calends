@@ -3,7 +3,9 @@ import { t } from '../../../shared/i18n.ts';
 import type { Transfer } from '../../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { CurrencySelect } from './Picker.tsx';
-import { ask, Cell, Group, MoneyInput, Seg, Sheet, useSubmit } from './ui.tsx';
+import { ask, Sheet } from './overlays.tsx';
+import { Cell, Group } from './ui.tsx';
+import { MoneyInput, Seg, useSubmit } from './inputs.tsx';
 import { cnDateFull } from '../../../shared/format.ts';
 
 /**
