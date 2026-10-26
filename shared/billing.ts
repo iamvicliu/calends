@@ -904,6 +904,12 @@ export function memberSince(s: Subscription, m: Pick<ShareMember, 'joined'>): st
   return m.joined ?? s.share?.since ?? s.start;
 }
 
+/** 合租向成员收钱的最后一天：订阅结束日；暂停中的订阅到暂停前一天（与 memberDues 同一口径，暂停期间不生成新的应收期） */
+export function shareLastDay(s: Pick<Subscription, 'end' | 'status' | 'pausedAt'>): string | undefined {
+  const paused = s.status === 'paused' && s.pausedAt ? addDays(s.pausedAt, -1) : undefined;
+  return [s.end, paused].filter((d): d is string => !!d).sort()[0];
+}
+
 /** 加入日当天生效，退出日当天已离开。 */
 export function memberAboard(m: { joined?: string; left?: string }, day: string): boolean {
   return (!m.joined || m.joined <= day) && (!m.left || m.left > day);
@@ -1191,8 +1197,9 @@ export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
  */
 export function memberPeriods(s: Subscription, m: ShareMember, last: string, collectCurrency: string): Period[] {
   const out: Period[] = [];
+  const end = shareLastDay(s);
   for (let from = memberSince(s, m), guard = 0; from <= last && guard < 1200; guard++) {
-    if ((m.left && from >= m.left) || (s.end && from > s.end)) break;
+    if ((m.left && from >= m.left) || (end && from > end)) break;
     const c = memberCollection(s, m, from, collectCurrency);
     out.push({ key: c.from, from: c.from, until: c.until, due: c.amount, currency: c.currency });
     if (c.next <= from) break;
@@ -1232,7 +1239,8 @@ export function memberCollection(s: Subscription, m: ShareMember, from: string, 
         ? 0
         : (m.firstAmount ?? (mode === 'full' ? amount : (amount * Math.max(0, diffDays(from, until) + 1)) / (diffDays(first.from, first.until) + 1)));
   }
-  if (m.exempt || until < from || (m.left && from >= m.left) || (s.end && from > s.end)) amount = 0;
+  const end = shareLastDay(s);
+  if (m.exempt || until < from || (m.left && from >= m.left) || (end && from > end)) amount = 0;
   return { from, until, next: addDays(until, 1) > from ? addDays(until, 1) : next, amount: Math.round(amount * 100) / 100, currency: rate.currency, partial };
 }
 
@@ -1249,7 +1257,8 @@ export function memberUnpaidFrom(s: Subscription, m: ShareMember): string {
     const open = periods.find((p) => !isSettled(p));
     if (open) return open.from;
     const last = periods.at(-1);
-    if (last && ((m.left && addDays(last.until, 1) >= m.left) || (s.end && addDays(last.until, 1) > s.end))) return addDays(last.until, 1);
+    const end = shareLastDay(s);
+    if (last && ((m.left && addDays(last.until, 1) >= m.left) || (end && addDays(last.until, 1) > end))) return addDays(last.until, 1);
   }
   return joined;
 }
@@ -1257,8 +1266,8 @@ export function memberUnpaidFrom(s: Subscription, m: ShareMember): string {
 export function memberDues(s: Subscription, today: string, collectCurrency: string, fxState?: Pick<AppState, 'fx' | 'fxHistory' | 'settings'>): MemberDue[] {
   if (!s.share || s.share.role !== 'owner') return [];
   const stop = [
-    s.end,
-    s.status === 'paused' ? addDays(s.pausedAt ?? today, -1) : undefined,
+    shareLastDay(s),
+    s.status === 'paused' && !s.pausedAt ? addDays(today, -1) : undefined,
     s.status === 'cancelled' && !s.end ? (lastCharge(s, today) ?? s.start) : undefined,
     today,
   ]
