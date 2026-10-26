@@ -142,6 +142,7 @@ export function Charges({
               </>
             ),
             base: Number.isFinite(b) ? flow(-b, base) : '—',
+            baseClass: b < 0 ? 'dt-in' : undefined,
           })}
           rowKey={({ c }, i) => `${c.date}-${c.sub.start}-${i}`}
           rowClass={({ c }) => c.kind ?? ''}
