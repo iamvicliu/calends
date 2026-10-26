@@ -633,3 +633,28 @@ test('编辑状态跟随既有历程操作：停用后新增阶段续订不会�
   assert.equal(r.saved[0].phases![0].stop!.kind, 'terminate');
   assert.equal(r.saved[0].phases![0].payments!.filter((p) => p.kind === 'refund').length, 1);
 });
+
+test('all-history timeline omits today for stopped-only scopes even in the current month or with future unused service', () => {
+  const stop = runtime('../app/src/components/StopPanel.tsx', { toast() {} }).exports;
+  const r = runtime('../app/src/views/Gantt.tsx', {
+    usePref: (key: string, initial: unknown) => [key === 'gantt-zoom' ? 'all' : initial, () => {}],
+    useWidth: () => [() => {}, 600],
+    perLabel: () => 'mo',
+    stopDescription: stop.stopDescription,
+  });
+  const render = (subs: Subscription[]) =>
+    all(
+      r.render('Gantt', {
+        rows: subs,
+        state: { subscriptions: subs, methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX },
+        today,
+        onOpen() {},
+      }),
+    );
+  const countToday = (nodes: Element[]) => nodes.filter((e) => e.props.className === 'gt-today').length;
+  const stopped = phases.stopSubscription(sub, today, 'terminate', '2026-10-10');
+  assert.equal(countToday(render([stopped])), 0);
+  const fullyRefunded = phases.stopSubscription(sub, today, 'terminate', '2026-10-10', undefined, { amount: 31 });
+  assert.equal(countToday(render([fullyRefunded])), 0);
+  assert.equal(countToday(render([stopped, { ...sub, id: 'fictional-active' }])), 1);
+});

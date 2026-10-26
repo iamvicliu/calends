@@ -9,6 +9,7 @@ import {
   coveredUntil,
   diffDays,
   effectiveStatus,
+  isStopped,
   stopSummary,
   phaseLanes,
   phaseSubs,
@@ -226,7 +227,10 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
 
   const earliest = rows.reduce((m, r) => (r.first < m ? r.first : m), today);
   const latest = rows.length ? rows.reduce((m, r) => (r.last > m ? r.last : m), rows[0].last) : today;
-  const { start: baseStart, end: baseEnd } = ganttWindow(zoom, today, earliest, latest);
+  // 灰色已付未用段可以延伸到未来，不代表这批订阅仍在进行。买断只是一个购买点。
+  const ongoing = rows.some((r) => r.segs.some((g) => g.v.cycle.unit !== 'lifetime' && !isStopped(effectiveStatus(g.v, today))));
+  const showToday = zoom !== 'all' || ongoing;
+  const { start: baseStart, end: baseEnd } = ganttWindow(zoom, today, earliest, latest, ongoing);
   const offset = zoom === 'all' ? 0 : Math.round(pan);
   const start = addDays(baseStart, offset);
   const end = addDays(baseEnd, offset);
@@ -685,7 +689,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
           <div className="gt-grid gt-now">
             <div className="gt-label" />
             <div className="gt-track">
-              <div className="gt-pan">{today >= rStart && today <= rEnd && <b className="gt-today" style={{ left: x(today) }} />}</div>
+              <div className="gt-pan">{showToday && today >= rStart && today <= rEnd && <b className="gt-today" style={{ left: x(today) }} />}</div>
             </div>
           </div>
         </div>
