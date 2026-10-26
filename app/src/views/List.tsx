@@ -27,7 +27,6 @@ import { Icon } from '../components/icons.tsx';
 import { proxyOwed } from './proxy/common.tsx';
 import { locale, t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
-import { cancelSavings } from '../../../shared/metrics.ts';
 import { catColor, categories, isDomainCat, subImage, toBase } from '../derive.ts';
 import { useIconTint } from '../iconTint.ts';
 import { useOrig } from '../display.ts';
@@ -197,7 +196,6 @@ export function List({
     return dir === 'asc' ? asc(a, b) : asc(b, a);
   });
   const sum = sumTotals(rows.filter((s) => !isStopped(effectiveStatus(s, today))).map((s) => monthlyTotal(state, s, today)));
-  const saved = new Map(cancelSavings(state, today).items.map((x) => [x.sub.id, x.saved]));
   // 只按筛选范围识别报告，排序、视图及时间轴窗口不影响报告。
   const reportKey = JSON.stringify([category ?? null, filter, cat, pay, words.join(' ')]);
   const [reportPref] = usePref<string>('list-report', '');
@@ -373,23 +371,7 @@ export function List({
                   <div className="sc-foot">
                     <span>{v.sub ?? '\u00a0'}</span>
                     <span className={d != null && d <= 3 ? 'soon' : ''}>
-                      {st === 'lifetime' ? (
-                        s.start.slice(0, 7)
-                      ) : isStopped(st) ? (
-                        saved.get(s.id) ? (
-                          <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
-                        ) : (
-                          (s.end ?? '')
-                        )
-                      ) : n ? (
-                        d! <= 14 ? (
-                          relDays(d!)
-                        ) : (
-                          cnDate(n)
-                        )
-                      ) : (
-                        ''
-                      )}
+                      {st === 'lifetime' ? s.start.slice(0, 7) : isStopped(st) ? (s.end ?? '') : n ? (d! <= 14 ? relDays(d!) : cnDate(n)) : ''}
                     </span>
                   </div>
                 </button>
@@ -493,11 +475,7 @@ export function List({
                       {st === 'lifetime' ? (
                         t('list.status.lifetime')
                       ) : isStopped(st) ? (
-                        saved.get(s.id) ? (
-                          <span className="green">{t('list.saved', { amount: money(saved.get(s.id)!, base, { compact: true }) })}</span>
-                        ) : (
-                          <>{tx('list.endedOn', { date: <small>{s.end ?? '—'}</small> })}</>
-                        )
+                        <>{tx('list.endedOn', { date: <small>{s.end ?? '—'}</small> })}</>
                       ) : n ? (
                         <>
                           {cnDate(n)}

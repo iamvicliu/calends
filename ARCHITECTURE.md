@@ -83,7 +83,7 @@ The editor's `NameField` combines local catalogue and App Store suggestions with
 
 Card and row subscription lists share `SubBadges`: owner sharing needs at least one recorded member, joined sharing uses the member role, upcoming status is shown only without a separate upcoming-phase badge, and proxy status comes from `ProxyBadge` (pending receivables).
 
-Subscription filters in `List.tsx` default to all statuses, the current category route (or all categories), all payment methods and an empty search; Clear restores those values.
+Subscription filters in `List.tsx` default to all statuses, the current category route (or all categories), all payment methods and an empty search; Clear restores those values. Stopped subscriptions in both card and list views use their existing end-date display; estimated renewals avoided are not shown.
 
 Monthly/day averages and timeline durations use `DAYS_PER_MONTH = 30.4375`. `durationLabel()` applies the history rule consistently: round days to months, display months once that rounds to at least one, otherwise days.
 

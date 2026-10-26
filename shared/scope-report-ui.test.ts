@@ -2958,3 +2958,52 @@ test('cumulative composition opens the original subscription rather than a histo
   assert.equal(opened, s);
   assert.equal(opened!.methodId, 'current');
 });
+
+test('stopped subscription cards and list rows keep the existing end-date fallback without estimated savings', () => {
+  const sub: Subscription = {
+    id: 'stopped',
+    name: 'Fictional stopped',
+    category: 'Tools',
+    tags: [],
+    price: 12,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    end: '2026-08-01',
+    status: 'ended',
+  };
+  const state = { ...st, subscriptions: [sub] };
+  assert.ok(metrics.cancelSavings(state, today).total > 0, 'fixture must previously display savings');
+  for (const view of ['grid', 'list']) {
+    let opened: unknown;
+    const r = harness(
+      '../app/src/views/List.tsx',
+      'List',
+      { 'list-view': view },
+      {
+        isMarked: () => false,
+        stopLabel: () => '',
+        stopDescription: () => '',
+        CatChip: 'CatChip',
+        CardGlow: 'CardGlow',
+        StopBadge: 'StopBadge',
+        StopText: 'StopText',
+        SubBadges: 'SubBadges',
+        useIconTint: () => undefined,
+      },
+    );
+    const nodes = r.render('List', {
+      state,
+      today,
+      onOpen(s: Subscription) {
+        opened = s;
+      },
+      onAdd() {},
+    });
+    const visible = JSON.stringify(nodes);
+    assert.ok(!visible.includes('list.saved'));
+    assert.ok(visible.includes(sub.end!));
+    nodes.find((n) => n.props.className === (view === 'grid' ? 'scard st-ended' : 'lt-row st-ended'))!.props.onClick();
+    assert.equal(opened, sub);
+  }
+});
