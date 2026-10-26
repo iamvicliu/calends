@@ -577,7 +577,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                           {cuts.slice(0, -1).map((a, n) => {
                             const b = cuts[n + 1];
                             if (b < rStart || a > rEnd) return null;
-                            // 被服务方停用：最后一截至少是一个正圆，停用标志正好嵌在末端
+                            // 被服务方停用：最后一截至少一个标志宽，直角铺到停用日中线，停用标志以中线为圆心压在上面，四角不露底色
                             const capped = stopped?.kind === 'terminate' && n === cuts.length - 2 && b === stopped.date;
                             const pl = capped ? Math.min(x(a), x(b) - STOP_CAP) : x(a);
                             const pw = Math.max(capped ? STOP_CAP : 3, x(b) - pl);
@@ -594,7 +594,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                             return (
                               <span
                                 key={a}
-                                className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 && !cycleCuts.has(a) ? 'cont' : ''} ${!last && !cycleCuts.has(b) ? 'cut' : ''} ${last && unused && !capped ? 'joined' : ''} ${intro ? 'intro' : ''} ${pnow === 0 ? 'ahead' : ''}`}
+                                className={`gt-seg ${g.v.planned ? 'planned' : ''} ${last && g.open ? 'open' : ''} ${n > 0 && !cycleCuts.has(a) ? 'cont' : ''} ${!last && !cycleCuts.has(b) ? 'cut' : ''} ${last && (unused || capped) ? 'joined' : ''} ${intro ? 'intro' : ''} ${pnow === 0 ? 'ahead' : ''}`}
                                 style={{ left: pl, width: pw, top, '--c': color(g.v), '--now': `${pnow}px` } as Record<string, string | number>}
                                 title={ptip || tip}
                               >

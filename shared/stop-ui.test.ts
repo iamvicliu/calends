@@ -203,8 +203,8 @@ test('真实甘特结构：未退款段接在实线后、红色停用标记、�
     if (amount !== 31) {
       const unused = withClass(nodes, 'gt-unused')[0];
       assert.equal(unused.props.style.top, withClass(nodes, 'gt-seg')[0].props.style.top);
-      // 被服务方停用：与条同高的停用标志以停用日为圆心，灰段起点与标志左缘对齐、整段接缝藏在圆下
-      assert.equal(withClass(nodes, 'joined').length, 0);
+      // 被服务方停用：彩色段直角铺到停用日中线，与条同高的停用标志以停用日为圆心，灰段起点与标志左缘对齐、接缝藏在圆下
+      assert.equal(withClass(nodes, 'joined').length, 1);
       const stop = withClass(nodes, 'gt-stop')[0];
       assert.equal(stop.props.style.top, unused.props.style.top);
       assert.equal(unused.props.style.left, stop.props.style.left);
