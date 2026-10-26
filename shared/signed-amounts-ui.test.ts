@@ -488,6 +488,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     CatChip: empty,
     Region: empty,
     X: empty,
+    CircleStop: empty,
     Pencil: empty,
     Pause: empty,
     Play: empty,
@@ -537,6 +538,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
       t: (key: string) => key,
       IconButton: empty,
       X: empty,
+      CircleStop: empty,
     }),
     DetailSheet: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
   });
