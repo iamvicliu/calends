@@ -41,7 +41,7 @@ export interface FundingPart {
   amount: number;
 }
 
-/** 转让收付：二手转入时付给原主、转出时收到的实际现金（正数），不是服务商扣款 */
+/** 转让收付：二手买入时付给原主、卖出时收到的实际现金（正数），不是服务商扣款 */
 export interface Transfer {
   kind: 'buy' | 'sell';
   date: string;
@@ -294,7 +294,7 @@ export interface Subscription extends RenewalRules {
   showOnPublic?: boolean;
   /** 实际扣款记录：有则以此为准（一次付多年、提前续费、促销价都能准确记录） */
   payments?: Payment[];
-  /** 转让收付（二手转入、转出）；计入生命周期净成本与现金流，不计入 MRR、预测与扣款统计。公开页不下发 */
+  /** 转让收付（二手买入、卖出）；计入生命周期净成本与现金流，不计入 MRR、预测与扣款统计。公开页不下发 */
   transfers?: Transfer[];
   /** 下次扣款日：之后的扣款从这一天按周期推算 */
   nextDue?: string;

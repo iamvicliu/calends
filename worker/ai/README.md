@@ -50,3 +50,5 @@ Tool results longer than 24,000 characters reach the model as valid JSON `{trunc
 2. Validate inputs with the shared helpers and throw errors with `t('mcp.error.*')`. Add new error keys to all 14 locales in `shared/locales/<lang>/mcp.json`.
 3. Reuse domain logic from `shared/` (billing, phases, carpool, metrics) instead of re-implementing it, so the app, the MCP server and the assistant agree.
 4. Add tests under `shared/*.test.ts`, run `npm run i18n:check` and `npm test`, and keep this catalogue summary and the architecture boundary current. The connection page reads `/api/mcp/tools` dynamically; add localized `mcp.tool.<name>` titles rather than maintaining a duplicate list.
+
+Transfer labels use Bought / Sold (买入 / 卖出 in Simplified Chinese) across the detail card, editor, history and assistant proposal. MCP `record_transfer.kind` and read/report JSON retain the machine values `buy` / `sell`; amount signs and transfer accounting are unchanged.

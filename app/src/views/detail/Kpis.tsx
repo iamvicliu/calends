@@ -36,10 +36,10 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
   const base = state.settings.baseCurrency;
   const st = effectiveStatus(sub, today);
   const end = detailHistoryEnd(sub, today);
-  // 累计 = 服务付款 + 转入 − 转出；有一笔转让缺汇率就不能求和：显示「—」，不能把缺的那笔当 0
+  // 累计 = 服务付款 + 买入 − 卖出；有一笔转让缺汇率就不能求和：显示「—」，不能把缺的那笔当 0
   const cost = netCost(state, sub, today, base);
   const transferred = transfersOf(sub).some((tr) => tr.date <= today);
-  // 停用日不详时时长与均价算不准；转出日已知则持有期到转出为止，照常计算
+  // 停用日不详时时长与均价算不准；卖出日已知则持有期到卖出为止，照常计算
   const undated = end.unknown && !transfersOf(sub).some((tr) => tr.kind === 'sell' && tr.date <= today);
   const total = cost.net;
   // 缺汇率的那笔不参与均价与走势（不能当 0 拉低平均）
@@ -48,7 +48,7 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
     .filter(Number.isFinite);
   // 实际在订的天数：各段到今天（或结束日）为止，不算断档，并行的不重复计
   const served = servedTime(sub, today);
-  // 有转让时按持有期：最早转入起，转出那天止
+  // 有转让时按持有期：最早买入起，卖出那天止
   const active = transferred ? cost.days : served.days;
   const gaps = served.gaps.length;
   // 按平均月长取整：11-24 到次年 10-24 是 11 个月，不能因为差几天算成 10 个月
@@ -111,7 +111,7 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
       {(next || ended) && durationCell}
       {/* 只有一笔时累计就是那一笔，扣款记录里已有，不再占一格 */}
       {/* 导入边界之前的历史没有记录：没有一笔时写「—」，小字说明只算导入之后 */}
-      {/* 有转让时是净花费：转入、转出各自的金额在下方转让卡片，这里只写合计 */}
+      {/* 有转让时是净花费：买入、卖出各自的金额在下方转让卡片，这里只写合计 */}
       {(history.length !== 1 || transferred) && (
         <Metric
           label={transferred ? t(total < 0 ? 'detail.transfer.netGain' : 'detail.transfer.net') : t('detail.stats.spent')}

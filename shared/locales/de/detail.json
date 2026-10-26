@@ -190,8 +190,8 @@
     "included": "Inkl. Übertragungen",
     "kind": {
       "label": "Art",
-      "buy": "Übernommen",
-      "sell": "Abgegeben"
+      "buy": "Gekauft",
+      "sell": "Verkauft"
     },
     "hint": {
       "buy": "Bargeld an den Vorbesitzer bei der Übernahme (inkl. Aufpreis). Gib den tatsächlich gezahlten Betrag ein.",

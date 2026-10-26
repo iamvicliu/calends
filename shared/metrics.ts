@@ -326,7 +326,7 @@ export function stopLosses(state: AppState, today: string, range?: { from?: stri
     if (sub.proxy) continue;
     phaseSubs(sub).forEach((phase, phaseIndex) => {
       if (!phase.stop || phase.stop.date > today || (range?.from && phase.stop.date < range.from) || (range?.to && phase.stop.date > range.to)) return;
-      // 转出时剩余服务已随转让收回，不算已付未用
+      // 卖出时剩余服务已随转让收回，不算已付未用
       if (transferredStop(phase)) return;
       const summary = stopSummary(phase, today)!;
       const factor = myShareFactor(phase, summary.date);
@@ -714,7 +714,7 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
     bySub.set(c.sub.id, r);
     byMonth.set(c.date.slice(0, 7), (byMonth.get(c.date.slice(0, 7)) ?? 0) + v);
   }
-  // 转让是现金流：转入加、转出减，计入总额与各月，但不算扣款笔数和币种
+  // 转让是现金流：买入加、卖出减，计入总额与各月，但不算扣款笔数和币种
   for (const r of transferRows(state, from, to, today)) {
     total += r.amount;
     const e = bySub.get(r.sub.id) ?? { sub: r.sub, sum: 0 };

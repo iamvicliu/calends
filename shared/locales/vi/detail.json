@@ -175,8 +175,8 @@
     "included": "Gồm chuyển nhượng",
     "kind": {
       "label": "Loại",
-      "buy": "Nhận chuyển nhượng",
-      "sell": "Chuyển nhượng đi"
+      "buy": "Mua vào",
+      "sell": "Bán ra"
     },
     "hint": {
       "buy": "Tiền trả cho chủ cũ khi nhận lại (gồm phần chênh). Nhập số tiền thực trả.",

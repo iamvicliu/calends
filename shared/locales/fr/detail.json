@@ -190,8 +190,8 @@
     "included": "Cessions incluses",
     "kind": {
       "label": "Type",
-      "buy": "Repris",
-      "sell": "Cédé"
+      "buy": "Acheté",
+      "sell": "Vendu"
     },
     "hint": {
       "buy": "Somme versée à l’ancien titulaire lors de la reprise (prime comprise). Saisissez le montant réellement payé.",

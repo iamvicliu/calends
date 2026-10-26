@@ -10,8 +10,8 @@ import { t } from '../../../../shared/i18n.ts';
 import { Panel } from '../../components/DetailKit.tsx';
 
 /**
- * 转让收付：二手转入付给原主的钱、转出收到的钱，与扣款记录同一张表（日期 · 类型 · 原币 · 折合）；
- * 金额只在这里出现，顶部「净花费」只写合计。转入是支出（负），转出是收入（正）
+ * 转让收付：二手买入付给原主的钱、卖出收到的钱，与扣款记录同一张表（日期 · 类型 · 原币 · 折合）；
+ * 金额只在这里出现，顶部「净花费」只写合计。买入是支出（负），卖出是收入（正）
  */
 export function Transfers({ sub, state, onRow, onAdd }: { sub: Subscription; state: AppState; onRow?: (index: number) => void; onAdd?: () => void }) {
   const base = state.settings.baseCurrency;
@@ -44,7 +44,7 @@ export function Transfers({ sub, state, onRow, onAdd }: { sub: Subscription; sta
         ]}
         yearCells={(ys) => {
           const total = ys.reduce((a, r) => a + r.v, 0);
-          // 一年里都是同一种（通常只有一笔）时照样标出转入 / 转出
+          // 一年里都是同一种（通常只有一笔）时照样标出买入 / 卖出
           const kinds = new Set(ys.map((r) => r.tr.kind));
           const kind = kinds.size === 1 ? ys[0].tr.kind : undefined;
           return {

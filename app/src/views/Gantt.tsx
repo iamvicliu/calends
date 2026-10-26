@@ -541,7 +541,7 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
                       const top = 8 + r.lanes[gi] * LANE;
 
                       const stopped = stopSummary(g.v, today);
-                      // 转出时剩余服务随转让收回，不画已付未用
+                      // 卖出时剩余服务随转让收回，不画已付未用
                       const unused = !state.readonly && !!stopped && stopped.wastedDays > 0 && !transferredStop(g.v);
                       const wastedUntil = unused ? addDays(stopped!.date, stopped!.wastedDays) : '';
                       const unusedWidth = unused ? Math.max(0, x(wastedUntil) - x(stopped!.date)) : 0;
