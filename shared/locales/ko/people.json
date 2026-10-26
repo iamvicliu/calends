@@ -59,6 +59,7 @@
     "noContact": "연락처 없음"
   },
   "avatar": {
+    "label": "프로필 사진",
     "change": "아바타 변경",
     "help": "PNG, JPEG, WebP 이미지를 클릭하거나 끌어 놓거나 붙여넣으세요(최대 8 MB).",
     "remove": "아바타 삭제",

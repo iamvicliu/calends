@@ -1,7 +1,6 @@
 import { popupOpen, sheetSubmitKey } from '../keyboard.ts';
 import { useRef, useState } from 'react';
 import { Pencil } from 'lucide-react';
-import { Act } from './Detail.tsx';
 import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { compressAvatar } from '../handoff.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
@@ -10,6 +9,7 @@ import { colorFor, peopleLedger, refsFor, type PersonItem, type PersonLedger } f
 import { proxyRows } from '../../../shared/proxy.ts';
 import { PERSON_COLORS, type AppState, type Person, type ShareMember, type Subscription } from '../../../shared/types.ts';
 import { Picker } from '../components/Picker.tsx';
+import { Act } from './Detail.tsx';
 import { MetricCards, Metric, Cell, Group, IconButton } from '../components/ui.tsx';
 import { ask, Sheet } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
@@ -210,187 +210,188 @@ export function PersonSheet({
       }
     >
       <div className="stack">
-        <div className="ld-head">
-          {stored && !ro ? (
-            <>
-              <input
-                ref={fileInput}
-                type="file"
-                hidden
-                accept="image/png,image/jpeg,image/webp"
-                onChange={(e) => {
-                  void uploadAvatar(e.target.files?.[0]);
-                  e.target.value = '';
-                }}
-              />
-              <button
-                type="button"
-                className="person-avatar-edit"
-                aria-label={t('people.avatar.change')}
-                title={t('people.avatar.help')}
-                disabled={avatarBusy}
-                onClick={() => fileInput.current?.click()}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  void uploadAvatar(e.dataTransfer.files[0]);
-                }}
-                onPaste={(e) => {
-                  const file = [...e.clipboardData.files][0];
-                  if (file) {
-                    e.preventDefault();
-                    void uploadAvatar(file);
-                  }
-                }}
-              >
-                <PersonAvatar p={f} size={52} />
-              </button>
-            </>
-          ) : (
+        {/* 没建档的人没有资料可改：只在顶部显示头像和联系方式 */}
+        {!stored && (
+          <div className="ld-head">
             <PersonAvatar p={f} size={52} />
-          )}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="ph-name text-ellipsis">{f.name || l.person.name}</div>
-            <div className={`muted ph-meta ${contactText(f) ? '' : 'm-hide'}`}>{contactText(f) || t('people.card.noContact')}</div>
-          </div>
-          <ContactLink p={f} />
-        </div>
-
-        {/* 上传说明只放在头像的悬停提示里；有头像时这里只留「移除头像」 */}
-        {stored && !ro && f.avatar && (
-          <div className="row person-avatar-help">
-            <span className="grow" />
-            <button
-              type="button"
-              className="btn plain"
-              disabled={avatarBusy}
-              onClick={async () => {
-                if (await ask(t('people.avatar.removeConfirm'))) setF((current) => ({ ...current, avatar: undefined }));
-              }}
-            >
-              {t('people.avatar.remove')}
-            </button>
+            <div className={`muted ph-meta grow ${contactText(f) ? '' : 'm-hide'}`}>{contactText(f) || t('people.card.noContact')}</div>
+            <ContactLink p={f} />
           </div>
         )}
-        <MetricCards>
-          <Metric
-            label={t('people.sheet.owed')}
-            value={l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}
-            valueClassName={l.owed > 0.005 ? 'warn' : 'done'}
-          />
-          <Metric label={t('people.sheet.received')} value={flow(l.received, base, { compact: true })} valueClassName="green" />
-          <Metric label={t('people.sheet.last')} value={l.lastPaid ? cnDateAuto(l.lastPaid, today) : '—'} />
-        </MetricCards>
+        {/* 参与多项时才汇总；只有一项时那一项里已经写着 */}
+        {l.items.length > 1 && (
+          <MetricCards>
+            <Metric
+              label={t('people.sheet.owed')}
+              value={l.owed > 0.005 ? money(l.owed, base, { compact: true }) : t('family.pool.settled')}
+              valueClassName={l.owed > 0.005 ? 'warn' : 'done'}
+            />
+            <Metric label={t('people.sheet.received')} value={flow(l.received, base, { compact: true })} valueClassName="green" />
+          </MetricCards>
+        )}
 
-        <Group title={t('people.sheet.in', { count: l.items.length })} foot={l.items.length ? undefined : t('people.sheet.inEmpty')}>
-          {/* 每一项是一张带标签的小表：头部订阅与状态，中间账号 / 已付至 / 已收，右下「收款」 */}
-          {l.items.map((i) => {
-            const canCollect = !ro && !i.member?.exempt && (i.active || i.periodsOwed > 0);
-            const gone = !!i.member?.left && i.member.left <= today;
-            return (
-              <div key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`} className={`cell pp-item ${i.active ? '' : 'off'}`}>
-                <div className="pp-row">
-                  <button className="pp-item-l" disabled={ro || saving} onClick={() => tap(i)}>
-                    <SubIcon sub={i.sub} size={30} />
-                    <span>
-                      {i.sub.name}
-                      <small>{t(`people.kind.${i.kind}`)}</small>
-                    </span>
-                  </button>
-                  {i.owed > 0.005 ? (
-                    <b className="pp-state" style={{ color: 'var(--orange)' }}>
-                      {t('family.pool.owedAmount', { amount: money(i.owed, base) })}
-                    </b>
-                  ) : (
-                    <span className="pp-state" style={{ color: i.active ? 'var(--green)' : undefined }}>
-                      {gone ? t('people.item.left') : !i.active ? t('people.item.ended') : t('family.pool.settled')}
-                    </span>
-                  )}
-                </div>
-                <dl className="pp-kv">
-                  {i.member && (
-                    <>
-                      <dt>{t('family.member.accountHere')}</dt>
-                      <dd className="pp-account" data-submit={editingAccount === accountKey(i) ? '' : undefined}>
-                        {editingAccount === accountKey(i) ? (
-                          <input
-                            autoFocus
-                            autoCapitalize="off"
-                            aria-label={`${i.sub.name}\n${t('family.member.account')}`}
-                            placeholder={t('family.member.accountPhShort')}
-                            value={accountValue(i)}
-                            disabled={saving}
-                            onChange={(e) => setAccounts((draft) => ({ ...draft, [accountKey(i)]: e.target.value }))}
-                            onBlur={() => setEditingAccount(null)}
-                            onKeyDown={(e) => {
-                              if (sheetSubmitKey(e.nativeEvent) && !popupOpen(e.currentTarget.ownerDocument)) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setEditingAccount(null);
-                              }
-                            }}
-                          />
-                        ) : (
-                          <button
-                            type="button"
-                            className="pp-account-value icon-text"
-                            disabled={ro || saving || !stored}
-                            aria-label={`${i.sub.name}\n${t('family.member.editAccount')}`}
-                            title={accountValue(i).trim() || t('family.member.accountEmpty')}
-                            onClick={() => setEditingAccount(accountKey(i))}
-                          >
-                            <span className="text-ellipsis">{accountValue(i).trim() || t('family.member.accountEmpty')}</span>
-                            {!ro && stored && <Pencil size={14} />}
-                          </button>
-                        )}
-                        {accountValue(i).trim() && editingAccount !== accountKey(i) && (
-                          <IconButton
-                            aria-label={t('family.member.copyAccount')}
-                            title={t('family.member.copyAccount')}
-                            onClick={() => void copyText(accountValue(i).trim(), t('detail.copied'))}
-                          >
-                            <Icon name="copy" size={14} />
-                          </IconButton>
-                        )}
-                      </dd>
-                    </>
-                  )}
-                  {i.kind === 'share' ? (
-                    <>
-                      <dt>{t('family.member.paidUntil')}</dt>
-                      <dd>
-                        {i.member?.exempt
-                          ? t('family.pool.exempt')
-                          : i.periodsOwed > 0
-                            ? t('people.item.owedPeriods', { count: i.periodsOwed })
-                            : i.paidUntil
-                              ? cnDateAuto(i.paidUntil, today)
-                              : t('people.item.noPay')}
-                      </dd>
-                    </>
-                  ) : (
-                    <>
-                      <dt>{t('people.sheet.last')}</dt>
-                      <dd>{i.lastPaid ? cnDateAuto(i.lastPaid, today) : t('people.item.noPay')}</dd>
-                    </>
-                  )}
-                  <dt>{t('people.sheet.received')}</dt>
-                  <dd className={i.received ? 'green' : 'muted'}>{flow(i.received, base)}</dd>
-                </dl>
-                {canCollect && (
-                  <div className="pp-row pp-actions">
-                    <button className={`btn ${i.periodsOwed > 0 ? 'tinted' : ''} pp-collect`} onClick={() => record(i)}>
-                      <Icon name="check" /> {t('family.pool.collect')}
-                    </button>
-                  </div>
+        {/* 参与的每一项各占一组：第一行是订阅与状态（点开成员弹窗），下面是账号、已付至、至今收回，最后记一笔 */}
+        {l.items.length === 0 && (
+          <Group title={t('people.sheet.in', { count: 0 })} foot={t('people.sheet.inEmpty')}>
+            {null}
+          </Group>
+        )}
+        {l.items.map((i, n) => {
+          const canCollect = !ro && !i.member?.exempt && (i.active || i.periodsOwed > 0);
+          const gone = !!i.member?.left && i.member.left <= today;
+          return (
+            <Group key={`${i.kind}-${i.sub.id}-${i.member?.id ?? ''}`} title={n === 0 ? t('people.sheet.in', { count: l.items.length }) : undefined}>
+              <button type="button" className={`cell tap pp-head ${i.active ? '' : 'off'}`} disabled={ro || saving} onClick={() => tap(i)}>
+                <span className="pp-item-l">
+                  <SubIcon sub={i.sub} size={30} />
+                  <span>
+                    {i.sub.name}
+                    <small>{t(`people.kind.${i.kind}`)}</small>
+                  </span>
+                </span>
+                {i.owed > 0.005 ? (
+                  <b className="pp-state" style={{ color: 'var(--orange)' }}>
+                    {t('family.pool.owedAmount', { amount: money(i.owed, base) })}
+                  </b>
+                ) : (
+                  <span className="pp-state" style={{ color: i.active ? 'var(--green)' : undefined }}>
+                    {gone ? t('people.item.left') : !i.active ? t('people.item.ended') : t('family.pool.settled')}
+                  </span>
                 )}
-              </div>
-            );
-          })}
-        </Group>
+                <Icon name="right" />
+              </button>
+              {i.member && (
+                <Cell label={t('family.member.accountHere')}>
+                  <span className="pp-account" data-submit={editingAccount === accountKey(i) ? '' : undefined}>
+                    {editingAccount === accountKey(i) ? (
+                      <input
+                        autoFocus
+                        autoCapitalize="off"
+                        aria-label={`${i.sub.name}\n${t('family.member.account')}`}
+                        placeholder={t('family.member.accountPhShort')}
+                        value={accountValue(i)}
+                        disabled={saving}
+                        onChange={(e) => setAccounts((draft) => ({ ...draft, [accountKey(i)]: e.target.value }))}
+                        onBlur={() => setEditingAccount(null)}
+                        onKeyDown={(e) => {
+                          if (sheetSubmitKey(e.nativeEvent) && !popupOpen(e.currentTarget.ownerDocument)) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setEditingAccount(null);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        className="pp-account-value icon-text"
+                        disabled={ro || saving || !stored}
+                        aria-label={`${i.sub.name}\n${t('family.member.editAccount')}`}
+                        title={accountValue(i).trim() || t('family.member.accountEmpty')}
+                        onClick={() => setEditingAccount(accountKey(i))}
+                      >
+                        <span className="text-ellipsis">{accountValue(i).trim() || t('family.member.accountEmpty')}</span>
+                        {!ro && stored && <Pencil size={14} />}
+                      </button>
+                    )}
+                    {accountValue(i).trim() && editingAccount !== accountKey(i) && (
+                      <IconButton
+                        aria-label={t('family.member.copyAccount')}
+                        title={t('family.member.copyAccount')}
+                        onClick={() => void copyText(accountValue(i).trim(), t('detail.copied'))}
+                      >
+                        <Icon name="copy" size={14} />
+                      </IconButton>
+                    )}
+                  </span>
+                </Cell>
+              )}
+              {i.kind === 'share' ? (
+                <Cell label={t('family.member.paidUntil')}>
+                  {i.member?.exempt
+                    ? t('family.pool.exempt')
+                    : i.periodsOwed > 0
+                      ? t('people.item.owedPeriods', { count: i.periodsOwed })
+                      : i.paidUntil
+                        ? cnDateAuto(i.paidUntil, today)
+                        : t('people.item.noPay')}
+                </Cell>
+              ) : (
+                <Cell label={t('people.sheet.last')}>{i.lastPaid ? cnDateAuto(i.lastPaid, today) : t('people.item.noPay')}</Cell>
+              )}
+              <Cell label={t('people.sheet.received')}>
+                <span className={i.received ? 'green' : 'muted'}>{flow(i.received, base)}</span>
+              </Cell>
+              {canCollect && (
+                <button type="button" className="cell tap member-pay-add" onClick={() => record(i)}>
+                  <Icon name="plus" /> {t('family.quick.backCollect')}
+                </button>
+              )}
+            </Group>
+          );
+        })}
 
         {stored && (
-          <Group title={t('people.sheet.profile')} foot={refs > 1 ? t('people.sheet.syncFoot', { count: refs }) : undefined}>
+          <Group
+            title={t('people.sheet.profile')}
+            foot={
+              [refs > 1 ? t('people.sheet.syncFoot', { count: refs }) : '', !ro && others.length > 0 ? t('people.sheet.mergeFoot') : '']
+                .filter(Boolean)
+                .join('\n') || undefined
+            }
+          >
+            <Cell label={t('people.avatar.label')}>
+              {!ro && (
+                <input
+                  ref={fileInput}
+                  type="file"
+                  hidden
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) => {
+                    void uploadAvatar(e.target.files?.[0]);
+                    e.target.value = '';
+                  }}
+                />
+              )}
+              {!ro && f.avatar && (
+                <button
+                  type="button"
+                  className="btn plain"
+                  disabled={avatarBusy}
+                  onClick={async () => {
+                    if (await ask(t('people.avatar.removeConfirm'))) setF((current) => ({ ...current, avatar: undefined }));
+                  }}
+                >
+                  {t('people.avatar.remove')}
+                </button>
+              )}
+              {ro ? (
+                <PersonAvatar p={f} size={32} />
+              ) : (
+                <button
+                  type="button"
+                  className="person-avatar-edit"
+                  aria-label={t('people.avatar.change')}
+                  title={t('people.avatar.help')}
+                  disabled={avatarBusy}
+                  onClick={() => fileInput.current?.click()}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    void uploadAvatar(e.dataTransfer.files[0]);
+                  }}
+                  onPaste={(e) => {
+                    const file = [...e.clipboardData.files][0];
+                    if (file) {
+                      e.preventDefault();
+                      void uploadAvatar(file);
+                    }
+                  }}
+                >
+                  <PersonAvatar p={f} size={32} />
+                </button>
+              )}
+            </Cell>
             <Cell label={t('family.member.name')}>
               <input ref={profileName} value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
             </Cell>
@@ -420,31 +421,28 @@ export function PersonSheet({
                 ))}
               </span>
             </Cell>
-          </Group>
-        )}
-
-        {stored && !ro && others.length > 0 && (
-          <Group foot={t('people.sheet.mergeFoot')}>
-            <Cell label={t('people.sheet.merge')}>
-              <Picker
-                value=""
-                search={others.length > 6}
-                ariaLabel={t('people.sheet.merge')}
-                display={<span>{t('people.sheet.mergePick')}</span>}
-                onChange={async (into) => {
-                  const target = others.find((p) => p.id === into);
-                  if (!target || !(await ask(t('people.sheet.mergeConfirm', { from: stored.name, into: target.name })))) return;
-                  run(
-                    async () => {
-                      await mergePerson(stored.id, target.id);
-                      onClose();
-                    },
-                    t('people.sheet.merged', { name: target.name }),
-                  );
-                }}
-                options={others.map((p) => ({ value: p.id, label: p.name, hint: contactText(p) || undefined, icon: <PersonAvatar p={p} size={20} /> }))}
-              />
-            </Cell>
+            {!ro && others.length > 0 && (
+              <Cell label={t('people.sheet.merge')}>
+                <Picker
+                  value=""
+                  search={others.length > 6}
+                  ariaLabel={t('people.sheet.merge')}
+                  display={<span>{t('people.sheet.mergePick')}</span>}
+                  onChange={async (into) => {
+                    const target = others.find((p) => p.id === into);
+                    if (!target || !(await ask(t('people.sheet.mergeConfirm', { from: stored.name, into: target.name })))) return;
+                    run(
+                      async () => {
+                        await mergePerson(stored.id, target.id);
+                        onClose();
+                      },
+                      t('people.sheet.merged', { name: target.name }),
+                    );
+                  }}
+                  options={others.map((p) => ({ value: p.id, label: p.name, hint: contactText(p) || undefined, icon: <PersonAvatar p={p} size={20} /> }))}
+                />
+              </Cell>
+            )}
           </Group>
         )}
       </div>

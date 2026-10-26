@@ -195,7 +195,7 @@ test('per-car account exposes an edit affordance, saves only that relationship a
 test('person car row explicitly opens member editing even when collection is overdue', () => {
   const h = harness();
   let tree = h.render();
-  nodes(tree, (n) => n.type === 'button' && n.props.className === 'pp-item-l')[0].props.onClick();
+  nodes(tree, (n) => n.type === 'button' && String(n.props.className).includes('pp-head'))[0].props.onClick();
   tree = h.render();
   const dialog = nodes(tree, (n) => n.type === 'MemberDialog')[0];
   assert.equal(dialog.props.collect, false);

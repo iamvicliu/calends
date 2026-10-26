@@ -74,6 +74,7 @@
     "noContact": "Aucun contact"
   },
   "avatar": {
+    "label": "Avatar",
     "change": "Changer l’avatar",
     "help": "Cliquez, déposez ou collez une image PNG, JPEG ou WebP (8 Mo maximum).",
     "remove": "Supprimer l’avatar",

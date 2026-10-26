@@ -59,6 +59,7 @@
     "noContact": "未填聯絡方式"
   },
   "avatar": {
+    "label": "頭像",
     "change": "更換頭像",
     "help": "點擊、拖放或貼上 PNG、JPEG、WebP 圖片（最大 8 MB）。",
     "remove": "移除頭像",

@@ -74,6 +74,7 @@
     "noContact": "Kein Kontakt"
   },
   "avatar": {
+    "label": "Avatar",
     "change": "Profilbild ändern",
     "help": "PNG, JPEG oder WebP anklicken, ablegen oder einfügen (bis 8 MB).",
     "remove": "Profilbild entfernen",

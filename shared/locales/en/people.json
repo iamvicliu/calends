@@ -74,6 +74,7 @@
     "noContact": "No contact"
   },
   "avatar": {
+    "label": "Avatar",
     "change": "Change avatar",
     "help": "Click, drop or paste a PNG, JPEG or WebP image (up to 8 MB).",
     "remove": "Remove avatar",

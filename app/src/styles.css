@@ -8090,53 +8090,18 @@ a.car-toggle {
 :root[data-theme='dark'] .c-purple {
   --pc: var(--purple-8);
 }
-.pp-item {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 6px;
-}
-/* 参与的每一项：头部订阅与状态；中间带标签的小表（与订阅名左对齐）；右下收款 */
-.pp-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-}
+/* 参与的每一项：第一行订阅与状态，下面是标准的 Cell 行 */
 .pp-state {
   flex: none;
   font-size: var(--fs-2);
   font-weight: 600;
   color: var(--label-2);
 }
-.pp-kv {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 4px 14px;
-  align-items: center;
-  margin: 2px 0 0;
-  padding-left: 40px;
-  font-size: var(--fs-1);
-  font-variant-numeric: tabular-nums;
-}
-.pp-kv dt {
-  color: var(--label-3);
-}
-.pp-kv dd {
-  margin: 0;
-  min-width: 0;
-  color: var(--label);
-}
-.pp-kv dd.green {
-  color: var(--green);
-}
-.pp-kv dd.muted {
-  color: var(--label-3);
-}
-.pp-actions {
-  justify-content: flex-end;
-}
-.pp-item.off .pp-item-l {
+.pp-head.off .pp-item-l {
   opacity: 0.6;
+}
+.pp-head {
+  gap: 10px;
 }
 .pp-item-l {
   display: flex;
@@ -8144,13 +8109,7 @@ a.car-toggle {
   gap: 10px;
   flex: 1;
   min-width: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--label);
-  font: inherit;
   text-align: left;
-  cursor: pointer;
 }
 .pp-item-l > span {
   display: flex;
@@ -8166,16 +8125,6 @@ a.car-toggle {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.pp-collect {
-  height: var(--ctl-h-md);
-  padding: 0 11px;
-  font-size: var(--fs-2);
-  gap: 4px;
-}
-.pp-collect .i {
-  width: 13px;
-  height: 13px;
 }
 .pp-colors {
   display: inline-flex;
@@ -8201,15 +8150,6 @@ a.car-toggle {
 }
 .pp-dot:active {
   transform: scale(0.9);
-}
-@media (max-width: 560px) {
-  .pp-item {
-    flex-wrap: wrap;
-  }
-  .pp-item .cell-r {
-    width: 100%;
-    justify-content: space-between;
-  }
 }
 
 /* 时间线左右平移：范围标签在中间，点它回到当前；拖动时显示抓手 */
@@ -9276,7 +9216,6 @@ img.mm-flag {
   background: none;
   color: var(--label);
   font: inherit;
-  font-size: var(--fs-1);
   text-align: left;
   cursor: pointer;
 }
@@ -9290,7 +9229,6 @@ img.mm-flag {
   background: var(--fill-2);
   color: var(--label);
   font: inherit;
-  font-size: var(--fs-1);
 }
 .pp-account input:focus-visible,
 .pp-account-value:focus-visible {

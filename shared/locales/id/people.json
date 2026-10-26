@@ -59,6 +59,7 @@
     "noContact": "Tanpa kontak"
   },
   "avatar": {
+    "label": "Avatar",
     "change": "Ganti avatar",
     "help": "Klik, seret, atau tempel gambar PNG, JPEG, atau WebP (maksimal 8 MB).",
     "remove": "Hapus avatar",

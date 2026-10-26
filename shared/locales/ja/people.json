@@ -59,6 +59,7 @@
     "noContact": "連絡先なし"
   },
   "avatar": {
+    "label": "アイコン",
     "change": "アバターを変更",
     "help": "PNG・JPEG・WebP 画像をクリック、ドロップ、貼り付け（最大 8 MB）。",
     "remove": "アバターを削除",

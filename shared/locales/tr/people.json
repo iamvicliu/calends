@@ -74,6 +74,7 @@
     "noContact": "İletişim yok"
   },
   "avatar": {
+    "label": "Avatar",
     "change": "Avatarı değiştir",
     "help": "PNG, JPEG veya WebP görselini tıklayın, bırakın veya yapıştırın (en fazla 8 MB).",
     "remove": "Avatarı kaldır",
