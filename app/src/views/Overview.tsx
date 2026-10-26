@@ -1,4 +1,4 @@
-import { chargesTotal, formatTotal, scaleTotal, totalNote } from '../../../shared/fx-total.ts';
+import { chargesTotal, emptyTotal, formatTotal, scaleTotal, totalNote } from '../../../shared/fx-total.ts';
 import { FxAmount } from '../components/FxAmount.tsx';
 import { DAYS_PER_MONTH } from '../../../shared/billing.ts';
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
@@ -471,7 +471,10 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
   const series = useMemo(() => mrrSeries(state, today, 24, true), [state, today]);
   const delta = mrrChangeSinceLastMonth(state, today);
   const ytd = useMemo(() => chargesTotal(state, allCharges(state, `${today.slice(0, 4)}-01-01`, today, today)), [state, today]);
-  const loss = useMemo(() => (state.readonly ? 0 : stopLosses(state, today, { from: `${today.slice(0, 4)}-01-01`, to: today }).total), [state, today]);
+  const loss = useMemo(
+    () => (state.readonly ? emptyTotal() : stopLosses(state, today, { from: `${today.slice(0, 4)}-01-01`, to: today }).partial),
+    [state, today],
+  );
   const live = useMemo(
     () =>
       state.subscriptions
@@ -534,9 +537,9 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
             value={formatTotal(ytd, base, { direction: -1, compact: true, main: true })}
             note={
               <div className="stmt-paid-note">
-                {!state.readonly && loss !== 0 && (
-                  <button type="button" className="stmt-loss-note" onClick={openLosses} title={!Number.isFinite(loss) ? t('core.stop.fxMissing') : undefined}>
-                    {t('overview.stmt.loss')} <strong>{flow(-loss, base, { compact: true })}</strong>
+                {!state.readonly && (loss.value !== 0 || loss.incomplete) && (
+                  <button type="button" className="stmt-loss-note" onClick={openLosses} title={loss.incomplete ? totalNote(loss) : undefined}>
+                    {t('overview.stmt.loss')} <strong>{formatTotal(loss, base, { direction: -1, compact: true })}</strong>
                   </button>
                 )}
               </div>

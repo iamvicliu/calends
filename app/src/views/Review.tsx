@@ -29,12 +29,13 @@ interface Ctx {
   /** 所有格：「张三」/「Alex's」；没填名字时是「我」/「My」 */
   whose: string;
   ongoing: boolean;
-  m: (v: number, part?: FxTotal) => string;
+  m: (v: number, part?: FxTotal, average?: boolean) => string;
   /** 不显示金额：用占比、笔数、时长代替 */
   hide: boolean;
   /** 占这一年总花费的百分比 */
   pct: (v: number) => string;
   mrr: number;
+  mrrPartial?: FxTotal;
   saved: string;
   /** 这一年按支付方式分的花费 */
   byMethod: Array<{ id: string; name: string; sum: number; partial: FxTotal }>;
@@ -49,9 +50,9 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
   const [year, setYear] = useState(years[0]);
   const r = useMemo(() => yearReview(state, today, year), [state, today, year]);
   const tot = totals(state, today);
-  const saved = cancelSavings(state, today)
-    .items.filter((x) => x.since.startsWith(year))
-    .reduce((a, x) => a + x.saved, 0);
+  const savings = cancelSavings(state, today).items.filter((x) => x.since.startsWith(year));
+  const saved = savings.reduce((a, x) => a + x.saved, 0);
+  const savedPartial = sumTotals(savings.map((x) => x.partial));
   const pct = (v: number) =>
     !r.partial.total.incomplete && Number.isFinite(v) && Number.isFinite(r.total) ? `${r.total > 0 ? Math.round((v / r.total) * 100) : 0}%` : '—';
   const base = state.settings.baseCurrency;
@@ -95,11 +96,12 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
           year,
           whose: dn ? t('review.whose', { name: dn }) : t('review.whoseSelf'),
           ongoing: year === today.slice(0, 4),
-          m: (v, part) => (!hide && part?.incomplete ? formatTotal(part, base, { direction: 1 }) : m(v)),
+          m: (v, part, average) => (!hide && part?.incomplete ? formatTotal(part, base, { direction: 1, average }) : m(v)),
           hide,
           pct,
           mrr: tot.mrr,
-          saved: saved ? money(saved, base, { compact: true }) : '',
+          mrrPartial: tot.partial.mrr,
+          saved: savedPartial.incomplete ? formatTotal(savedPartial, base, { compact: true }) : saved ? money(saved, base, { compact: true }) : '',
           byMethod,
           today,
         };
@@ -220,7 +222,7 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
           {copyParts(
             hide
               ? t('review.poster.newEnded', { added: r.newSubs.length, ended: r.ended.length })
-              : t('review.poster.perDay', { amount: m(-r.perDay, scaleTotal(r.partial.perDay, -1)) }),
+              : t('review.poster.perDay', { amount: m(-r.perDay, scaleTotal(r.partial.perDay, -1), true) }),
           )}
         </span>
         <span>{location.host}</span>
@@ -230,8 +232,8 @@ function Poster({ r, year, whose, ongoing, m, hide, pct }: Ctx) {
 }
 
 /** 卡片：原来的深色年度回顾卡 */
-function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
-  const top = r.top[0]?.sum ?? 1;
+function Card({ r, year, whose, ongoing, m, mrr, mrrPartial, saved, hide, pct }: Ctx) {
+  const top = Math.max(1, ...r.top.map((x) => r.partial.bySub[x.sub.id].value));
   return (
     <div className="review">
       <div className="rv-head">
@@ -247,7 +249,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
           {copyParts(
             hide
               ? `${t('review.n.charges', { count: r.charges })}\n${t('review.n.currencies', { count: r.currencies })}`
-              : `${t('review.n.charges', { count: r.charges })}\n${t('review.card.perDay', { amount: m(-r.perDay, scaleTotal(r.partial.perDay, -1)) })}`,
+              : `${t('review.n.charges', { count: r.charges })}\n${t('review.card.perDay', { amount: m(-r.perDay, scaleTotal(r.partial.perDay, -1), true) })}`,
           )}
         </span>
       </div>
@@ -263,7 +265,7 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
                 <b>{hide ? pct(x.sum) : m(-x.sum, scaleTotal(r.partial.bySub[x.sub.id], -1))}</b>
               </div>
               <div className="rv-track">
-                <i style={{ width: `${(x.sum / top) * 100}%` }} />
+                <i style={{ width: `${(r.partial.bySub[x.sub.id].value / top) * 100}%` }} />
               </div>
             </div>
           </div>
@@ -305,7 +307,11 @@ function Card({ r, year, whose, ongoing, m, mrr, saved, hide, pct }: Ctx) {
         <Metric
           label={t('review.card.currencies')}
           value={t('review.card.currencyCount', { count: r.currencies })}
-          note={hide ? t('review.n.charges', { count: r.charges }) : t('review.card.nowMonthly', { amount: m(-mrr) })}
+          note={
+            hide
+              ? t('review.n.charges', { count: r.charges })
+              : t('review.card.nowMonthly', { amount: m(-mrr, mrrPartial ? scaleTotal(mrrPartial, -1) : undefined) })
+          }
         />
       </MetricCards>
       <div className="rv-foot">{location.host}</div>

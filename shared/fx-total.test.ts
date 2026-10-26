@@ -10,6 +10,7 @@ import {
   sumTotals,
   totalDifference,
   totalNote,
+  totalsNote,
   totalRatio,
 } from './fx-total.ts';
 import { FALLBACK_FX, totals, runwayFor } from './billing.ts';
@@ -122,4 +123,19 @@ test('wallet missing FX retains known balance and original debits without provin
   assert.equal(r.partial.current.value, 100);
   assert.equal(r.forecast[0].partial.unconverted.XCD, 27);
   assert.equal(r.forecast[0].balancePartial.value, 100);
+});
+
+test('one note retains different periods and deduplicates repeated derived measures', () => {
+  const month = amountTotal(27, 'XCD', NaN),
+    year = amountTotal(270, 'XCD', NaN);
+  const note = totalsNote([
+    ['Monthly', month],
+    ['Annual duplicate', month],
+    ['Paid this year', year],
+    ['Known', amountTotal(10, 'USD', 10)],
+  ]);
+  assert.match(note, /Monthly: XCD 27.00/);
+  assert.match(note, /Paid this year: XCD 270.00/);
+  assert.ok(!note.includes('Annual duplicate'));
+  assert.ok(!note.includes('Known'));
 });

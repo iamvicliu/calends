@@ -386,7 +386,20 @@ test('概览今年已付附注：只计今年停止的损失；零、全退和�
   assert.equal(scrolls, 1);
   assert.equal(withClass(render([current], true), 'stmt-loss-note').length, 0);
   const missing = render([phases.stopSubscription({ ...sub, currency: 'XYZ' }, today, 'cancel')]);
-  assert.equal(withClass(missing, 'stmt-loss-note')[0].props.title, t('core.stop.fxMissing'));
+  assert.equal(
+    withClass(missing, 'stmt-loss-note')[0].props.title,
+    fxTotals.totalNote(
+      metrics.stopLosses(
+        {
+          subscriptions: [phases.stopSubscription({ ...sub, currency: 'XYZ' }, today, 'cancel')],
+          methods: [],
+          settings: DEFAULT_SETTINGS,
+          fx: billing.FALLBACK_FX,
+        },
+        today,
+      ).partial,
+    ),
+  );
 });
 
 test('时间轴金额：宽段显示紧凑负金额，窄段仅保留悬停说明，停用半圆避让且公开隐藏', () => {

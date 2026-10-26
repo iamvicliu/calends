@@ -118,7 +118,13 @@ function Hero({ state, today }: { state: AppState; today: string }) {
             value={formatTotal(scaleTotal(current, 1 / DAYS_PER_MONTH), base, { direction: -1, main: true, average: true })}
           />
           <Metric label={t('report.hero.active')} value={tot.activeCount} note={totalNote(current) || undefined} />
-          {tot.recoverMrr > 1 && <Metric label={t('report.hero.recover')} value={signed(tot.recoverMrr)} valueClassName="gain" />}
+          {(tot.recoverMrr > 1 || tot.partial.recover.incomplete) && (
+            <Metric
+              label={t('report.hero.recover')}
+              value={formatTotal(tot.partial.recover, base, { direction: 1, compact: true, main: true })}
+              valueClassName="gain"
+            />
+          )}
         </MetricCards>
       </div>
       <div className="hero-r">

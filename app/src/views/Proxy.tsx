@@ -207,7 +207,7 @@ export function ProxyTable({
             { label: t('family.strip.profit'), sort: 'profit', num: true },
           ]}
         />
-        {sorted.map(({ s, list, ahead, st, stopped, next, charged, done, received, owed, diff, lastIn }) => {
+        {sorted.map(({ s, list, ahead, st, stopped, next, charged, done, received, diff, lastIn }) => {
           const [tone, label] = proxyStatus(st, list, ahead);
           const px = s.proxy!;
           return (
@@ -235,7 +235,9 @@ export function ProxyTable({
                   <small>—</small>
                 ) : (
                   <StatusPill tone={tone}>
-                    {tone === 'owe' ? t('family.pool.owedAmount', { amount: `≈ ${money(owed, base, { compact: true })}` }) : label}
+                    {tone === 'owe'
+                      ? t('family.pool.owedAmount', { amount: `≈ ${formatTotal(proxyTotals(list).partial.owed, base, { compact: true })}` })
+                      : label}
                   </StatusPill>
                 )}
               </span>

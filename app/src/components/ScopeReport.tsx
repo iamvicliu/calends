@@ -1,4 +1,4 @@
-import { formatTotal, scaleTotal, totalNote, type FxTotal } from '../../../shared/fx-total.ts';
+import { formatTotal, scaleTotal, totalNote, totalsNote, type FxTotal } from '../../../shared/fx-total.ts';
 import { CopyImageButton } from './CopyImageButton.tsx';
 import { copyParts } from './copy.tsx';
 import { numberFormat } from '../../../shared/intl.ts';
@@ -166,6 +166,15 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       </div>
     </div>
   );
+  const headlineNote = (block: Extract<Block, { type: 'headline' }>) =>
+    totalsNote([
+      [
+        t(block.mode === 'scope' ? 'scope.monthly' : block.mode === 'month' ? 'scope.monthTotal' : 'scope.totalSpent'),
+        block.partial?.mrr ?? block.partial?.total,
+      ],
+      [t('scope.yearPaid'), block.mode === 'scope' ? block.partial?.paid : block.mode === 'total' ? block.partial?.yearPaid : undefined],
+      [t('scope.includedLoss'), block.partial?.loss],
+    ]);
   const render = (block: Block, wide = false): ReactNode => {
     switch (block.type) {
       case 'headline':
@@ -177,7 +186,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 {block.partial?.total ? formatTotal(block.partial.total, base, { direction: -1, main: true }) : expense(block.total)}
               </div>
               <div className="hero-delta">
-                {block.partial?.total && totalNote(block.partial.total)}
+                {headlineNote(block)}
                 <span className="muted">{t('scope.totalSince', { date: cnDateFull(block.since) })}</span>
               </div>
               <MetricCards inline>
@@ -192,7 +201,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             {headlineHeading('scope.monthly', 'scope.mrrBasis')}
             <div className="hero-num num">{block.partial?.mrr ? formatTotal(block.partial.mrr, base, { direction: -1, main: true }) : expense(block.mrr)}</div>
             <div className="hero-delta">
-              {block.partial?.mrr && totalNote(block.partial.mrr)}
+              {headlineNote(block)}
               {delta(block.change)}
               <span className="muted">{t('scope.previousEnd')}</span>
             </div>
@@ -212,7 +221,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               {block.partial?.total ? formatTotal(block.partial.total, base, { direction: -1, main: true }) : expense(block.total)}
             </div>
             <div className="hero-delta">
-              {block.partial?.total && totalNote(block.partial.total)}
+              {headlineNote(block)}
               <span className="scope-comparison">
                 {delta(block.previous)}
                 <span className="muted">{t('scope.previousMonth')}</span>

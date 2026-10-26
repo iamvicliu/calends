@@ -80,3 +80,16 @@ export function formatTotal(total: FxTotal, currency: string, opts: TotalFormat 
     : money(total.value, currency, { compact: opts.compact });
   return !opts.main && total.incomplete && original ? `${base} + ${original}` : base;
 }
+
+/** One existing note slot can describe distinct measures without adding currencies across unlike periods. */
+export function totalsNote(rows: Array<[string, FxTotal | undefined]>): string {
+  const seen = new Set<string>();
+  const parts = rows.flatMap(([label, total]) => {
+    if (!total?.incomplete) return [];
+    const key = JSON.stringify(total.unconverted);
+    if (seen.has(key)) return [];
+    seen.add(key);
+    return [`${label}: ${formatUnconverted(total) || '—'}`];
+  });
+  return parts.length ? t('core.fxUnconverted', { amount: parts.join('\n') }) : '';
+}

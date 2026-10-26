@@ -1,4 +1,4 @@
-import { amountTotal, formatTotal, chargeTotal, emptyTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
+import { amountTotal, convertedTotal, formatTotal, chargeTotal, emptyTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
 // 把个人订阅当成一家「反向 SaaS 公司」来做财报：MRR 走势、月度变动、权责发生制、预付余值、退订省下的钱。
 // MRR 与退订省钱按当前汇率；历史现金、停用损失按发生日汇率。
 import {
@@ -612,7 +612,6 @@ export function insights(state: AppState, today: string): Insight[] {
   const base = state.settings.baseCurrency;
   // 代付是别人的订阅，不参与体检
   const live = state.subscriptions.filter((s) => !s.proxy && ['active', 'ending', 'trial'].includes(effectiveStatus(s, today)));
-  const fmt = (v: number) => money(v, base, { compact: true });
   const names = (ss: Subscription[]) => ss.map((s) => s.name).join(t('core.listSep'));
 
   // 1. 年付续费窗口：60 天内要自动续费的长周期订阅
@@ -622,12 +621,12 @@ export function insights(state: AppState, today: string): Insight[] {
     .filter((x) => x.n && diffDays(today, x.n) <= 60)
     .sort((a, b) => a.n!.localeCompare(b.n!));
   if (yearly.length) {
-    const sum = yearly.reduce((a, x) => a + toBaseAt(state, priceAt(x.s, x.n!), x.s.currency), 0);
+    const sum = sumTotals(yearly.map((x) => convertedTotal(state, priceAt(x.s, x.n!), x.s.currency)));
     out.push({
       id: 'yearly-window',
       tone: 'warn',
       title: t('core.insight.yearly.title', { count: yearly.length }),
-      body: t('core.insight.yearly.body', { sum: fmt(sum) }),
+      body: t('core.insight.yearly.body', { sum: formatTotal(sum, base, { compact: true }) }),
       subs: yearly.map((x) => x.s),
     });
   }
@@ -642,12 +641,12 @@ export function insights(state: AppState, today: string): Insight[] {
   }
   for (const [, g] of groups) {
     if (g.length < 2) continue;
-    const sum = g.reduce((a, s) => a + contributionOn(state, s, today), 0);
+    const sum = sumTotals(g.map((s) => contributionTotal(state, s, today)));
     out.push({
       id: `dup-${g[0].id}`,
       tone: 'info',
       title: t('core.insight.dup.title', { names: names(g) }),
-      body: t('core.insight.dup.body', { count: g.length, sum: fmt(sum) }),
+      body: t('core.insight.dup.body', { count: g.length, sum: formatTotal(sum, base, { compact: true }) }),
       subs: g,
     });
   }
