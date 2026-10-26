@@ -521,7 +521,8 @@ export function List({
             rows={rows}
             today={today}
             onOpen={onOpen}
-            title={t('scope.selectionTitle', { scope: reportScope || FILTERS().find(([k]) => k === filter)![1], count: rows.length })}
+            // 有搜索词时标题就是「DMIT 相关订阅」，订阅数在报告首卡里
+            title={q.trim() ? reportScope : t('scope.selectionTitle', { scope: reportScope || FILTERS().find(([k]) => k === filter)![1], count: rows.length })}
           />
         )}
       </div>

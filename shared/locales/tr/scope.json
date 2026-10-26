@@ -56,7 +56,7 @@
     "resume": "Yeniden başlatıldı"
   },
   "generate": "Rapor oluştur",
-  "search": "“{query}” araması",
+  "search": "{query} ile ilgili abonelikler",
   "selectionTitle": {
     "one": "{scope}\n{count} abonelik",
     "other": "{scope}\n{count} abonelik"

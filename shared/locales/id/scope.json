@@ -56,7 +56,7 @@
     "resume": "Dilanjutkan"
   },
   "generate": "Buat laporan",
-  "search": "Pencarian “{query}”",
+  "search": "Langganan terkait {query}",
   "selectionTitle": {
     "other": "{scope}\n{count} langganan"
   },

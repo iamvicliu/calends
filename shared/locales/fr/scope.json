@@ -56,7 +56,7 @@
     "resume": "Reprise"
   },
   "generate": "Générer le rapport",
-  "search": "Recherche « {query} »",
+  "search": "Abonnements {query}",
   "selectionTitle": {
     "one": "{scope}\n{count} abonnement",
     "other": "{scope}\n{count} abonnements",

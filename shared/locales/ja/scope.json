@@ -56,7 +56,7 @@
     "resume": "再開"
   },
   "generate": "レポートを生成",
-  "search": "「{query}」の検索",
+  "search": "{query} 関連のサブスク",
   "selectionTitle": {
     "other": "{scope}\n{count} 件のサブスクリプション"
   },

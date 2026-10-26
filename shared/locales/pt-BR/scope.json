@@ -56,7 +56,7 @@
     "resume": "Retomada"
   },
   "generate": "Gerar relatório",
-  "search": "Busca por “{query}”",
+  "search": "Assinaturas de {query}",
   "selectionTitle": {
     "one": "{scope}\n{count} assinatura",
     "other": "{scope}\n{count} assinaturas",

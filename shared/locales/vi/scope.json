@@ -56,7 +56,7 @@
     "resume": "Tiếp tục đăng ký"
   },
   "generate": "Tạo báo cáo",
-  "search": "Tìm kiếm “{query}”",
+  "search": "Gói đăng ký liên quan {query}",
   "selectionTitle": {
     "other": "{scope}\n{count} gói đăng ký"
   },
