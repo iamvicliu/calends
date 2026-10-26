@@ -40,6 +40,14 @@ export function memberFlowValue(state: AppState, p: { amount: number; currency: 
   return convertOn(p.amount, p.currency, to, p.date, state.fxHistory, state.fx);
 }
 
+/** 首期因为退出被截短时，截短后的这一期（覆盖到退出前一天、应收按截短算）；没截短返回 undefined */
+function firstPeriodCut(s: Subscription, m: ShareMember, collectCurrency: string) {
+  if (!m.left) return undefined;
+  const joined = memberSince(s, m);
+  const real = memberCollection(s, m, joined, collectCurrency);
+  return real.until < memberCollection(s, { ...m, left: undefined }, joined, collectCurrency).until ? real : undefined;
+}
+
 /** 清空退出日时一并清除退款，其他历史不动。 */
 export function updateMemberLeave(m: ShareMember, patch: Partial<ShareMember>): ShareMember {
   const next = { ...m, ...patch };
@@ -51,6 +59,7 @@ export function updateMemberLeave(m: ShareMember, patch: Partial<ShareMember>): 
  * 期初结清的期金额不详，不计入。默认用最早一笔未用收款的币种，跨币种按退出日汇总，parts 保留原币种明细；缺汇率返回 NaN
  */
 export function suggestedLeaveRefund(state: AppState, s: Subscription, m: ShareMember, currency?: string) {
+  const cut = firstPeriodCut(s, m, collectCurrencyOf(state.settings));
   // 按没退出算各期，才能对上退出日之后提前收了的期
   const parts = !m.left
     ? []
@@ -58,7 +67,15 @@ export function suggestedLeaveRefund(state: AppState, s: Subscription, m: ShareM
         if (p.status !== 'paid' || p.share == null || p.until < m.left!) return [];
         const unusedFrom = p.from > m.left! ? p.from : m.left!;
         const unusedDays = diffDays(unusedFrom, p.until) + 1;
-        return [{ from: p.from, until: p.until, unusedDays, amount: (p.share * unusedDays) / (diffDays(p.from, p.until) + 1), currency: p.receipt!.currency }];
+        let amount = (p.share * unusedDays) / (diffDays(p.from, p.until) + 1);
+        // 首期截到退出前一天、应收按截短的算：最多退多收的部分（按截短后的应收收的就不用退）
+        if (cut && p.from === cut.from) {
+          const ccy = p.receipt!.currency;
+          const used = cut.currency === ccy ? cut.amount : convertOn(cut.amount, cut.currency, ccy, m.left!, state.fxHistory, state.fx);
+          amount = Math.max(0, Math.min(amount, p.share - used));
+          if (amount < 0.005) return [];
+        }
+        return [{ from: p.from, until: p.until, unusedDays, amount, currency: p.receipt!.currency }];
       });
   const ccy = currency ?? parts[0]?.currency ?? m.feeCurrency ?? collectCurrencyOf(state.settings);
   const amount = parts.reduce((sum, p) => sum + convertOn(p.amount, p.currency, ccy, m.left!, state.fxHistory, state.fx), 0);
@@ -406,7 +423,14 @@ export function memberSegments(s: Subscription, m: ShareMember, today: string, s
   // 退出时已付到退出日之后、又没退钱：退出后到已付至的那段画成没用完
   const paid =
     m.left && !m.leaveRefund
-      ? memberLedger(s, { ...m, left: undefined }, today, s.currency, m.left).periods.filter((p) => p.status === 'paid' && p.until >= m.left!)
+      ? memberLedger(s, { ...m, left: undefined }, today, s.currency, m.left).periods.filter(
+          // 截到退出前一天的首期：只收了截短后应收的就没有「没用完」的部分（与退款建议同一口径）
+          (p) => {
+            if (p.status !== 'paid' || p.until < m.left!) return false;
+            const cut = firstPeriodCut(s, m, s.currency);
+            return !(cut && p.from === cut.from && p.receipt?.currency === cut.currency && (p.share ?? 0) - cut.amount < 0.005);
+          },
+        )
       : [];
   if (paid.length) {
     const from = [m.left!, start].sort().at(-1)!;

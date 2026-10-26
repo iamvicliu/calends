@@ -185,7 +185,7 @@ test('旧收款无覆盖起点时转成它覆盖的那一期，退出当日也�
       billEvery: 1,
       joined: '2026-01-10',
       left: '2026-01-31',
-      payments: [{ date: '2026-01-10', until: '2026-01-31', amount: 100, currency: 'JPY' }],
+      payments: [{ date: '2026-01-10', until: '2026-01-31', amount: 1000, currency: 'JPY' }],
     } as never,
   ];
   const s = migrateReceivables(raw, 'CNY');
@@ -194,8 +194,8 @@ test('旧收款无覆盖起点时转成它覆盖的那一期，退出当日也�
     m.receipts!.map((r) => r.periods),
     [['2026-01-10']],
   );
-  // 01-10 至 02-09 这一期，退出日 01-31 起 10 天没用：100 × 10 / 31
-  assert.equal(suggestedLeaveRefund(state, s, m).amount, 32);
+  // 01-10 至 02-09 这一期，退出日 01-31 起 10 天没用：1000 × 10 / 31，日元不带小数（多收的部分足够退这么多）
+  assert.equal(suggestedLeaveRefund(state, s, m).amount, 323);
   assert.equal(suggestedLeaveRefund(state, s, m).unusedDays, 10);
 });
 
@@ -420,4 +420,45 @@ test('订阅暂停后不再生成成员的应收期：格子、状态与待收�
   );
   assert.equal(memberUnpaidFrom(s, m), '2026-04-01');
   assert.equal(memberDues(s, '2026-06-10', 'CNY')[0].owed, 0);
+});
+
+test('首期内退出：按截短后的应收收过就不建议退款、也不画没用完；多收的部分照退', async () => {
+  const { suggestedLeaveRefund, memberSegments } = await import('./carpool.ts');
+  const base = (amount: number) => ({
+    id: 's',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 31,
+    currency: 'CNY',
+    start: '2026-01-01',
+    cycle: { unit: 'month' as const, every: 1 },
+    status: 'active' as const,
+    share: {
+      role: 'owner' as const,
+      seats: 3,
+      collectFrom: '2026-01-01',
+      members: [
+        {
+          id: 'm',
+          name: 'M',
+          fee: 31,
+          feeCurrency: 'CNY',
+          billEvery: 1,
+          joined: '2026-01-01',
+          left: '2026-01-11',
+          receipts: [{ id: 'r', date: '2026-01-01', amount, currency: 'CNY', periods: ['2026-01-01'] }],
+        },
+      ],
+    },
+  });
+  const state: AppState = { subscriptions: [], methods: [], settings: { ...DEFAULT_SETTINGS, baseCurrency: 'CNY' }, fx: FALLBACK_FX };
+  const exact = base(10);
+  assert.equal(suggestedLeaveRefund(state, exact, exact.share.members[0]).amount, 0);
+  assert.equal(
+    memberSegments(exact, exact.share.members[0], '2026-02-01', '2026-01-01', '2026-12-31').some((x) => x.kind === 'unused'),
+    false,
+  );
+  const full = base(31);
+  assert.equal(suggestedLeaveRefund(state, full, full.share.members[0]).amount, 21);
 });
