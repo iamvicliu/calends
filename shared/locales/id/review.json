@@ -70,6 +70,6 @@
     "head": "{year}\nPengeluaran langganan {whose}",
     "foot": "Ukuran lingkaran menunjukkan pengeluaran"
   },
-  "spendBasis": "Total pembayaran, termasuk talangan untuk anggota",
+  "spendBasis": "Kas bersih bagian saya, termasuk pengembalian dana",
   "stopLoss": "Kerugian tanpa pengembalian dana tahun ini: {amount}"
 }

@@ -64,6 +64,6 @@
     "head": "{year}\n{whose}的訂閱支出",
     "foot": "圓的大小表示支出金額"
   },
-  "spendBasis": "全額實付，含替成員墊付",
+  "spendBasis": "按我的份額統計淨現金，包含退款",
   "stopLoss": "這一年未退款損失 {amount}"
 }

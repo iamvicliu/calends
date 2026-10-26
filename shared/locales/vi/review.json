@@ -70,6 +70,6 @@
     "head": "{year}\nChi tiêu đăng ký của {whose}",
     "foot": "Kích thước vòng tròn thể hiện chi tiêu"
   },
-  "spendBasis": "Toàn bộ số tiền đã trả, gồm khoản ứng trước cho thành viên",
+  "spendBasis": "Dòng tiền ròng phần của tôi, gồm hoàn tiền",
   "stopLoss": "Tổn thất chưa hoàn tiền năm nay: {amount}"
 }

@@ -73,6 +73,6 @@
     "head": "{year}\n{whose} subscription spending",
     "foot": "Circle size represents spending"
   },
-  "spendBasis": "Full amount paid, including advances for members",
+  "spendBasis": "Net cash at my share, including refunds",
   "stopLoss": "Unrefunded loss this year: {amount}"
 }

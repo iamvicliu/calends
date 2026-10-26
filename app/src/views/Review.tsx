@@ -1,7 +1,7 @@
 import { paymentMethodGroups } from '../../../shared/payment-groups.ts';
 import { copyParts } from '../components/copy.tsx';
 import { useMemo, useState } from 'react';
-import { totals, chargeSources } from '../../../shared/billing.ts';
+import { totals, chargeSources, myShareFactor } from '../../../shared/billing.ts';
 import { money, monthLabel } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { chargeBaseOrNaN } from '../../../shared/fx.ts';
@@ -57,7 +57,7 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
     const from = `${year}-01-01`;
     const to = `${year}-12-31` < today ? `${year}-12-31` : today;
     return paymentMethodGroups(state.methods, allCharges(state, from, to, today).flatMap((c) =>
-      chargeSources(c).map((x) => ({ methodId: x.methodId, value: chargeBaseOrNaN(state, c) * x.share, item: c }))), t('review.unassigned'))
+      chargeSources(c).map((x) => ({ methodId: x.methodId, value: chargeBaseOrNaN(state, c) * myShareFactor(c.sub, c.date) * x.share, item: c }))), t('review.unassigned'))
       .map(({ id, name, sum }) => ({ id, name, sum })).sort((a, b) => sortValue(b.sum) - sortValue(a.sum));
   }, [state, today, year]);
   return (

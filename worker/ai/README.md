@@ -42,6 +42,8 @@ Tool results longer than 24,000 characters reach the model as valid JSON `{trunc
 
 **Deliberately unavailable:** authentication, passwords, Passkeys, sessions and session limits; MCP tokens and the AI access switch; private ICS tokens; AI provider configuration/keys; backups, restore, import/export, reset/migration and whole-ledger deletion; outbound notification channel addresses, configuration and secrets. Channel setup remains in the web UI; tools can only toggle an existing channel. FX fetching/backfill, notification sends/tests and chat archive management are operational/integration actions outside ledger editing. Private/public request paths and `maskForPublic` remain unchanged.
 
+`get_insights section=year_review` reports net cash at my share, including refunds and transfer cash; `charges` counts service debits only (no refunds or failed charges). Annual new/ended/longest lists exclude proxy subscriptions. Missing FX produces null amounts. This uses the same shared `yearReview()` as the web annual review.
+
 ## Adding or changing a tool
 
 1. Define it in the owning `read-tools.ts`, `subscription-tools.ts`, `share-tools.ts` or `ledger-tools.ts` module, then place it in the original order in `mcp-tools.ts`: a clear English description (it is the model's only documentation), a strict schema, `write`/`destructive`/`idempotent` flags, and a `dry_run` preview for writes.

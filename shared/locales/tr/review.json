@@ -73,6 +73,6 @@
     "head": "{year}\nAbonelik harcamaları: {whose}",
     "foot": "Daire büyüklüğü harcamayı gösterir"
   },
-  "spendBasis": "Üyeler adına yapılan avanslar dahil ödenen toplam tutar",
+  "spendBasis": "İadeler dahil payıma düşen net nakit",
   "stopLoss": "Bu yıl iade edilmeyen kayıp: {amount}"
 }

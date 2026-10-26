@@ -70,6 +70,6 @@
     "head": "{year}년\n{whose} 구독 지출",
     "foot": "원의 크기는 지출액을 나타냅니다"
   },
-  "spendBasis": "멤버 대신 낸 금액을 포함한 전체 결제액",
+  "spendBasis": "환불을 포함한 내 부담분의 순현금 지출",
   "stopLoss": "올해 미환불 손실: {amount}"
 }

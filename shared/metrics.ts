@@ -677,15 +677,15 @@ export interface YearReview {
   year: string;
   /** 当年停止的阶段截至 today 仍未退回的损失（我的份额、本位币） */
   stopLoss: number;
-  /** 当年扣款（含退款负数，全额而非我的份额，不含代付）加转让现金，本位币 */
+  /** 当年扣款（含退款负数、我的份额、不含代付）加转让现金，本位币 */
   total: number;
-  /** 当年扣款记录笔数：含退款与失败的扣款（与月报「不含退款、失败」的笔数口径不同） */
+  /** 当年服务扣款笔数，不含退款与失败 */
   charges: number;
   top: Array<{ sub: Subscription; sum: number }>;
   /** 这一年每个订阅花了多少，从多到少 */
   items: Array<{ sub: Subscription; sum: number }>;
   longest?: { sub: Subscription; days: number };
-  /** 当年开始、当年结束的订阅：含代付 */
+  /** 当年开始、当年结束的订阅：不含代付 */
   newSubs: Subscription[];
   ended: Subscription[];
   currencies: number;
@@ -702,7 +702,7 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
   const ccys = new Set<string>();
   let total = 0;
   for (const c of cs) {
-    const v = chargeValue(state, c);
+    const v = chargeBaseOrNaN(state, c) * myShareFactor(c.sub, c.date);
     total += v;
     ccys.add(c.currency);
     const r = bySub.get(c.sub.id) ?? { sub: c.sub, sum: 0 };
@@ -718,19 +718,19 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
     bySub.set(r.sub.id, e);
     byMonth.set(r.date.slice(0, 7), (byMonth.get(r.date.slice(0, 7)) ?? 0) + r.amount);
   }
-  const live = state.subscriptions.filter((s) => s.cycle.unit !== 'lifetime' && ['active', 'ending', 'paused'].includes(effectiveStatus(s, today)));
+  const live = state.subscriptions.filter((s) => !s.proxy && s.cycle.unit !== 'lifetime' && ['active', 'ending', 'paused'].includes(effectiveStatus(s, today)));
   const longest = live.map((s) => ({ sub: s, days: diffDays(s.start, today) })).sort((a, b) => b.days - a.days)[0];
   const busiest = [...byMonth.entries()].sort((a, b) => b[1] - a[1])[0];
   return {
     year,
     stopLoss: stopLosses(state, today, { from, to }).total,
     total,
-    charges: cs.length,
+    charges: cs.filter((c) => c.kind !== 'refund' && c.kind !== 'failed').length,
     top: [...bySub.values()].sort((a, b) => b.sum - a.sum).slice(0, 5),
     items: [...bySub.values()].sort((a, b) => b.sum - a.sum),
     longest,
-    newSubs: state.subscriptions.filter((s) => s.start.startsWith(year)),
-    ended: state.subscriptions.filter((s) => s.end?.startsWith(year) && s.end < today),
+    newSubs: state.subscriptions.filter((s) => !s.proxy && s.start.startsWith(year)),
+    ended: state.subscriptions.filter((s) => !s.proxy && s.end?.startsWith(year) && s.end < today),
     currencies: ccys.size,
     busiestMonth: busiest && { month: busiest[0], sum: busiest[1] },
     perDay: total / Math.max(1, diffDays(from, to) + 1),

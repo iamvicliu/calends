@@ -73,6 +73,6 @@
     "head": "{year}\nGasto {whose} en suscripciones",
     "foot": "El tamaño del círculo representa el gasto"
   },
-  "spendBasis": "Importe total pagado, incluidos los adelantos por los miembros",
+  "spendBasis": "Efectivo neto de mi parte, incluidos los reembolsos",
   "stopLoss": "Pérdida no reembolsada este año: {amount}"
 }

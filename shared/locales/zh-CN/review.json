@@ -64,6 +64,6 @@
     "head": "{year}\n{whose}的订阅支出",
     "foot": "圆的大小表示支出金额"
   },
-  "spendBasis": "全额实付，含替成员垫付",
+  "spendBasis": "按我的份额统计净现金，包含退款",
   "stopLoss": "这一年未退款损失 {amount}"
 }

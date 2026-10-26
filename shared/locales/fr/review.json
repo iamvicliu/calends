@@ -73,6 +73,6 @@
     "head": "{year}\nAbonnements {whose}",
     "foot": "La taille des cercles représente les dépenses"
   },
-  "spendBasis": "Montant total payé, avances pour les membres comprises",
+  "spendBasis": "Flux net pour ma part, remboursements inclus",
   "stopLoss": "Perte non remboursée cette année : {amount}"
 }

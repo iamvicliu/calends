@@ -46,7 +46,7 @@ export interface NetCost {
   currency: string;
   /** 服务商扣款（实扣、退款为负），同详情「累计」口径；有扣款缺汇率时为 NaN */
   service: number;
-  /** 至今的扣款记录笔数：含退款与失败的扣款 */
+  /** 至今的服务扣款笔数：不含退款与失败 */
   charges: number;
   /** 转入付出的钱、转出收回的钱（正数）；缺汇率时为 NaN */
   bought: number;
@@ -79,7 +79,7 @@ export function netCost(state: AppState, s: Subscription, today: string, to = st
   return {
     currency: to,
     service,
-    charges: history.length,
+    charges: history.filter((c) => c.kind !== 'refund' && c.kind !== 'failed').length,
     bought,
     sold,
     net,

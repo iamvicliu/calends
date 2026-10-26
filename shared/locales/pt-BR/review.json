@@ -73,6 +73,6 @@
     "head": "{year}\nGastos {whose} com assinaturas",
     "foot": "O tamanho dos círculos representa os gastos"
   },
-  "spendBasis": "Valor total pago, incluindo adiantamentos para membros",
+  "spendBasis": "Caixa líquido da minha parte, incluindo reembolsos",
   "stopLoss": "Perda não reembolsada neste ano: {amount}"
 }

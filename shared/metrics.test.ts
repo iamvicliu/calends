@@ -271,3 +271,18 @@ test('概览与月度变动报告比较上月末时包含相同的汇率影响',
   assert.equal(historical.to, 68);
   assert.equal(historical.from, 69);
 });
+
+test('annual review and net service counts exclude proxy, refund and failed rows and use my share', async () => {
+  const { yearReview } = await import('./metrics.ts');
+  const { netCost } = await import('./transfers.ts');
+  const s = sub({ start: '2026-10-01', price: 100, cycle: { unit: 'month', every: 1 }, share: { role: 'owner', seats: 4, since: '2026-10-01', members: [{ id: 'm', name: 'Fictional member', share: 25, joined: '2026-10-01' }] }, payments: [{ date: '2026-10-01', amount: 100 }, { date: '2026-10-05', amount: -20, kind: 'refund' }, { date: '2026-10-12', amount: 5, kind: 'failed' }] });
+  const proxy = sub({ start: '2026-10-01', end: '2026-10-10', status: 'cancelled', proxy: { forName: 'Fictional recipient' } });
+  const st = state([s, proxy]);
+  const r = yearReview(st, '2026-10-25');
+  assert.equal(r.charges, 1);
+  assert.equal(netCost(st, s, '2026-10-25').charges, 1);
+  assert.equal(r.total, 60);
+  assert.equal(r.items[0].sum, 60);
+  assert.deepEqual(r.newSubs.map((x) => x.id), [s.id]);
+  assert.equal(r.ended.length, 0);
+});

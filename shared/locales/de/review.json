@@ -73,6 +73,6 @@
     "head": "{year}\n{whose} Abo-Ausgaben",
     "foot": "Kreisgröße entspricht den Ausgaben"
   },
-  "spendBasis": "Vollständig gezahlter Betrag, einschließlich Auslagen für Mitglieder",
+  "spendBasis": "Nettozahlungen für meinen Anteil, einschließlich Erstattungen",
   "stopLoss": "Nicht erstatteter Verlust dieses Jahr: {amount}"
 }
