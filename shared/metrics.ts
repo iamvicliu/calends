@@ -697,7 +697,10 @@ export interface YearReview {
 export function yearReview(state: AppState, today: string, year = today.slice(0, 4)): YearReview {
   const from = `${year}-01-01`;
   const to = `${year}-12-31` < today ? `${year}-12-31` : today;
-  const cs = state.subscriptions.filter((s) => !s.proxy).flatMap((s) => chargesBetween(s, from, to, today));
+  const cs = state.subscriptions
+    .filter((s) => !s.proxy)
+    .flatMap((s) => chargesBetween(s, from, to, today))
+    .filter((c) => c.kind !== 'failed');
   const bySub = new Map<string, { sub: Subscription; sum: number }>();
   const byMonth = new Map<string, number>();
   const ccys = new Set<string>();

@@ -62,7 +62,7 @@ export interface NetCost {
 
 /** 生命周期净成本 = 服务付款 + 转入 − 转出；月均、日均按持有期摊（今天之后的转让不计） */
 export function netCost(state: AppState, s: Subscription, today: string, to = state.settings.baseCurrency): NetCost {
-  const history = chargesBetween(s, s.start, today, today);
+  const history = chargesBetween(s, s.start, today, today).filter((c) => c.kind !== 'failed');
   const service = history.reduce((a, c) => a + chargeBaseOrNaN(state, c, to), 0);
   let bought = 0;
   let sold = 0;

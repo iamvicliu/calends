@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { monthlyMine, totals } from './billing.ts';
-import { contributionOn, mrrOn, mrrSeries } from './metrics.ts';
+import { netCost } from './transfers.ts';
+import { contributionOn, mrrOn, mrrSeries, yearReview } from './metrics.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 test('missing monthly FX propagates through per-subscription, totals and historical MRR', () => {
@@ -57,4 +58,24 @@ test('proxy missing FX cannot make personal MRR incomplete', () => {
     fx: { base: 'USD', rates: { USD: 1 }, fetchedAt: '' },
   } as AppState;
   assert.equal(mrrOn(st, '2026-10-25'), 0);
+});
+
+test('failed charges with missing FX do not poison annual or service cash', () => {
+  const s = {
+    id: 'failed',
+    name: 'Fictional failed-only',
+    tags: [],
+    category: 'Test',
+    start: '2026-10-01',
+    price: 27,
+    currency: 'XCD',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    payments: [{ date: '2026-10-01', amount: 27, kind: 'failed' }],
+  } as Subscription;
+  const st = { subscriptions: [s], methods: [], settings: DEFAULT_SETTINGS, fx: { base: 'USD', rates: { USD: 1 }, fetchedAt: '' } } as AppState;
+  assert.equal(yearReview(st, '2026-10-25').total, 0);
+  assert.equal(yearReview(st, '2026-10-25').charges, 0);
+  assert.equal(netCost(st, s, '2026-10-25').service, 0);
+  assert.equal(netCost(st, s, '2026-10-25').incomplete, false);
 });
