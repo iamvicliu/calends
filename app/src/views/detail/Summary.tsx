@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { IconButton } from '../../components/ui.tsx';
 import { renewalDates } from '../../../../shared/billing.ts';
 import { addDays, billingPeriod, diffDays, effectiveStatus, memberAboard, phaseSubs } from '../../../../shared/billing.ts';
 import { cnDateAuto, cnDateFull } from '../../../../shared/format.ts';
@@ -61,6 +64,7 @@ export function PeriodBar({ sub, today }: { sub: Subscription; today: string }) 
 
 /** 详情：支付方式、订阅期间、账号、试用截止、付给谁与备注；金额、周期、分类、地区在标题，下次扣款在顶部四格 */
 export function Summary({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
+  const [masked, setMasked] = useState(true);
   const st = effectiveStatus(sub, today);
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   const live = !['ended', 'terminated', 'lifetime', 'paused'].includes(st);
@@ -78,9 +82,27 @@ export function Summary({ sub, state, today }: { sub: Subscription; state: AppSt
         {sub.account && (
           <Prop k={sub.category === presetCat('phone') ? t('editor.field.phone') : t('editor.field.account')}>
             {/* 点一下复制，登录时直接粘贴 */}
-            <button type="button" className="dt-copy" title={t('detail.copy')} onClick={() => void copyText(sub.account!, t('detail.copied'))}>
-              {sub.account}
-            </button>
+            <span className="icon-text">
+              <button
+                type="button"
+                className="dt-copy"
+                aria-label={t('detail.copy')}
+                title={t('detail.copy')}
+                onClick={() => void copyText(sub.account!, t('detail.copied'))}
+              >
+                <span data-private-account className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
+                  {sub.account}
+                </span>
+              </button>
+              <IconButton
+                data-snapshot-hide
+                aria-label={t(masked ? 'family.sheet.showPersonal' : 'family.sheet.hidePersonal')}
+                aria-pressed={masked}
+                onClick={() => setMasked(!masked)}
+              >
+                {masked ? <EyeOff size={17} /> : <Eye size={17} />}
+              </IconButton>
+            </span>
           </Prop>
         )}
         {/* 试用中顶部已写试用结束后的首次扣款，这里不再单列试用截止 */}

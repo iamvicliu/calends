@@ -1,3 +1,4 @@
+import { formatTotal, scaleTotal, totalNote, totalsNote, type FxTotal } from '../../../shared/fx-total.ts';
 import { CopyImageButton } from './CopyImageButton.tsx';
 import { copyParts } from './copy.tsx';
 import { numberFormat } from '../../../shared/intl.ts';
@@ -35,7 +36,11 @@ export function SpendingDelta({ value, base }: { value: Comparison; base: string
   return (
     <span className={`chip-d ${direction}`}>
       {copyParts(direction === 'up' ? '↑' : direction === 'down' ? '↓' : '')} {money(Math.abs(value.amount), base)}
-      {copyParts(value.percent != null && `\n${numberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(value.percent))}`)}
+      {copyParts(
+        value.percent != null &&
+          Number.isFinite(value.percent) &&
+          `\n${numberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(value.percent))}`,
+      )}
     </span>
   );
 }
@@ -98,11 +103,13 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             : true,
   );
   const losses = report.blocks.find((b) => b.type === 'losses');
-  const expense = (v: number) => flow(-v, base);
-  const income = (v: number) => flow(v, base);
-  const percent = (v: number) => numberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(v));
+  const expense = (v: number, part?: FxTotal) => (part ? formatTotal(part, base, { direction: -1 }) : flow(-v, base));
+  const income = (v: number, part?: FxTotal) => (part ? formatTotal(part, base, { direction: 1 }) : flow(v, base));
+  const percent = (v: number) => (Number.isFinite(v) ? numberFormat(intlLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(Math.abs(v)) : '—');
   const delta = (value: Comparison) => <SpendingDelta value={value} base={base} />;
-  const fact = (label: string, value: ReactNode) => <Metric label={label} value={value} />;
+  const fact = (label: string, value: ReactNode, part?: FxTotal, direction: 1 | -1 = -1) => (
+    <Metric label={label} value={part ? formatTotal(part, base, { direction, main: true, average: label === t('scope.average') }) : value} />
+  );
   const name = (sub: Subscription, meta?: ReactNode) => (
     <span className="scope-sub">
       <SubIcon sub={sub} size={24} proxied />
@@ -116,7 +123,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
     rows.map((r, i) => (
       <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
         {name(r.sub, cnDateAuto(r.date, today))}
-        <b className="num">{expense(r.amount)}</b>
+        <b className="num">{expense(r.amount, r.partial)}</b>
       </button>
     ));
   const eventLabel = (r: ReportEvent) => t(`scope.event.${r.kind === 'price' || r.kind === 'intro-end' ? (r.delta >= 0 ? 'increase' : 'decrease') : r.kind}`);
@@ -129,7 +136,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             {cnDateAuto(r.date, today)} <span className="copy-gap" aria-hidden="true" /> {eventLabel(r)}
           </>,
         )}
-        {r.delta !== 0 && delta({ amount: r.delta })}
+        {r.delta !== 0 && (Number.isFinite(r.delta) ? delta({ amount: r.delta }) : r.partial ? formatTotal(r.partial, base) : '—')}
       </button>
     ));
   const heading = (key: string, hint?: string, count?: number) => (
@@ -159,6 +166,15 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
       </div>
     </div>
   );
+  const headlineNote = (block: Extract<Block, { type: 'headline' }>) =>
+    totalsNote([
+      [
+        t(block.mode === 'scope' ? 'scope.monthly' : block.mode === 'month' ? 'scope.monthTotal' : 'scope.totalSpent'),
+        block.partial?.mrr ?? block.partial?.total,
+      ],
+      [t('scope.yearPaid'), block.mode === 'scope' ? block.partial?.paid : block.mode === 'total' ? block.partial?.yearPaid : undefined],
+      [t('scope.includedLoss'), block.partial?.loss],
+    ]);
   const render = (block: Block, wide = false): ReactNode => {
     switch (block.type) {
       case 'headline':
@@ -166,37 +182,46 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           return (
             <>
               {headlineHeading('scope.totalSpent', 'scope.totalBasis')}
-              <div className="hero-num num">{expense(block.total)}</div>
+              <div className="hero-num num">
+                {block.partial?.total ? formatTotal(block.partial.total, base, { direction: -1, main: true }) : expense(block.total)}
+              </div>
               <div className="hero-delta">
+                {headlineNote(block)}
                 <span className="muted">{t('scope.totalSince', { date: cnDateFull(block.since) })}</span>
               </div>
               <MetricCards inline>
                 {fact(t('scope.subsCount'), block.count)}
-                {block.count > 1 && fact(t('scope.average'), expense(block.average))}
-                {block.yearPaid !== 0 && fact(t('scope.yearPaid'), expense(block.yearPaid))}
+                {block.count > 1 && fact(t('scope.average'), expense(block.average), block.partial?.average)}
+                {block.yearPaid !== 0 && fact(t('scope.yearPaid'), expense(block.yearPaid), block.partial?.yearPaid)}
               </MetricCards>
             </>
           );
         return block.mode === 'scope' ? (
           <>
             {headlineHeading('scope.monthly', 'scope.mrrBasis')}
-            <div className="hero-num num">{expense(block.mrr)}</div>
+            <div className="hero-num num">{block.partial?.mrr ? formatTotal(block.partial.mrr, base, { direction: -1, main: true }) : expense(block.mrr)}</div>
             <div className="hero-delta">
+              {headlineNote(block)}
               {delta(block.change)}
               <span className="muted">{t('scope.previousEnd')}</span>
             </div>
             <MetricCards inline>
-              {fact(t('scope.annual'), expense(block.annual))}
+              {fact(t('scope.annual'), expense(block.annual), block.partial?.annual)}
               {fact(t('scope.active'), block.activeCount)}
-              {fact(t('scope.yearPaid'), expense(block.paid))}
-              {(block.loss > 0 || !Number.isFinite(block.loss)) && block.loss !== losses?.loss && fact(t('scope.includedLoss'), expense(block.loss))}
+              {fact(t('scope.yearPaid'), expense(block.paid), block.partial?.paid)}
+              {(block.loss > 0 || !Number.isFinite(block.loss)) &&
+                block.loss !== losses?.loss &&
+                fact(t('scope.includedLoss'), expense(block.loss), block.partial?.loss)}
             </MetricCards>
           </>
         ) : (
           <>
             {headlineHeading('scope.monthTotal', 'scope.cashBasis')}
-            <div className={`hero-num num ${block.total < 0 ? 'green' : ''}`}>{expense(block.total)}</div>
+            <div className={`hero-num num ${block.total < 0 ? 'green' : ''}`}>
+              {block.partial?.total ? formatTotal(block.partial.total, base, { direction: -1, main: true }) : expense(block.total)}
+            </div>
             <div className="hero-delta">
+              {headlineNote(block)}
               <span className="scope-comparison">
                 {delta(block.previous)}
                 <span className="muted">{t('scope.previousMonth')}</span>
@@ -209,8 +234,8 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               )}
             </div>
             <MetricCards inline>
-              {fact(t('scope.paid'), expense(block.paid))}
-              {fact(t('scope.pending'), expense(block.pending))}
+              {fact(t('scope.paid'), expense(block.paid), block.partial?.paid)}
+              {fact(t('scope.pending'), expense(block.pending), block.partial?.pending)}
               {fact(t('scope.count'), block.count)}
             </MetricCards>
           </>
@@ -221,13 +246,13 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             <>
               {heading('cash', 'cashWindow')}
               <BarLine
-                bars={block.rows.map((r) => r.cash)}
+                bars={block.rows.map((r) => r.partial.cash.value)}
                 line={[]}
                 future={block.rows.map((r) => r.projected)}
                 labels={block.rows.map((r) => monthLabel(r.month, { year: false }))}
                 tip={(i) => (
                   <>
-                    {monthLabel(block.rows[i].month)} <span className="copy-gap" aria-hidden="true" /> {expense(block.rows[i].cash)}
+                    {monthLabel(block.rows[i].month)} <span className="copy-gap" aria-hidden="true" /> {expense(block.rows[i].cash, block.rows[i].partial.cash)}
                     {copyParts(block.rows[i].projected && `\n${t('scope.forecast')}`)}
                   </>
                 )}
@@ -240,7 +265,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                       {monthLabel(r.month)}
                       {copyParts(r.projected && `\n${t('scope.forecast')}`)}
                     </span>
-                    <b className="num">{expense(r.cash)}</b>
+                    <b className="num">{expense(r.cash, r.partial.cash)}</b>
                   </div>
                 ))}
               </details>
@@ -360,11 +385,11 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                                 </span>
                               </span>
                               <b className="num">
-                                {expense(r.amount)} <span className="copy-gap" aria-hidden="true" /> {percent(r.share)}
+                                {expense(r.amount, r.partial)} <span className="copy-gap" aria-hidden="true" /> {percent(r.share)}
                               </b>
                             </div>
                             <div className="mv-bar">
-                              <i style={{ width: `${r.share * 100}%`, background: color }} />
+                              <i style={{ width: `${Number.isFinite(r.share) ? r.share * 100 : 0}%`, background: color }} />
                             </div>
                           </div>
                         );
@@ -392,7 +417,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                       <span className="scope-rank-amount">
                         {/* 只给前三名标名次：金、银、铜 */}
                         {wide && n < 3 && <span className={`scope-medal m${n + 1}`}>No.{n + 1}</span>}
-                        <b className="num">{expense(r.amount)}</b>
+                        <b className="num">{expense(r.amount, r.partial)}</b>
                       </span>
                     </button>
                   ));
@@ -411,7 +436,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('upcoming')}
-            {!monthly && block.rows.length > 1 && <p className="scope-note num">{expense(block.total)}</p>}
+            {!monthly && block.rows.length > 1 && <p className="scope-note num">{expense(block.total, block.partial?.total)}</p>}
             {chargeRows(upcomingRows(block.rows))}
           </>
         );
@@ -427,10 +452,10 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
           <>
             {heading('losses')}
             <MetricCards inline>
-              {block.rows.length > 1 && fact(t('scope.loss'), expense(block.loss))}
-              {block.refunds.length > 1 && fact(t('scope.refunded'), income(block.refunded))}
+              {block.rows.length > 1 && fact(t('scope.loss'), expense(block.loss, block.partial?.loss))}
+              {block.refunds.length > 1 && fact(t('scope.refunded'), income(block.refunded, block.partial?.refunded))}
             </MetricCards>
-            {block.incomplete && <p className="scope-note red">{t('scope.incomplete')}</p>}
+            {block.incomplete && <p className="scope-note red">{block.partial?.loss ? totalNote(block.partial.loss) : t('scope.incomplete')}</p>}
             {block.rows.map((r) => (
               <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.phaseIndex}`} onClick={() => onOpen(r.sub)}>
                 {name(
@@ -456,7 +481,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                     {cnDateAuto(r.date, today)} <span className="copy-gap" aria-hidden="true" /> {t('scope.refunded')}
                   </>,
                 )}
-                <b className="num green">{income(-r.amount)}</b>
+                <b className="num green">{income(-r.amount, r.partial ? scaleTotal(r.partial, -1) : undefined)}</b>
               </button>
             ))}
           </>
@@ -467,16 +492,18 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             {heading('sharing', 'sharingBasis')}
             {block.rows.length > 1 && (
               <MetricCards inline>
-                {block.received !== 0 && fact(t('scope.received'), income(block.received))}
-                {block.owed > 0 && fact(t('scope.owed'), income(block.owed))}
+                {block.received !== 0 && fact(t('scope.received'), income(block.received, block.partial?.received))}
+                {(block.owed > 0 || block.partial?.owed.incomplete) && fact(t('scope.owed'), income(block.owed, block.partial?.owed))}
               </MetricCards>
             )}
             {block.rows.map((r) => (
               <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
                 {name(r.sub)}
                 <span>
-                  {r.received !== 0 && <b className="num green">{t('scope.receivedAmount', { amount: income(r.received) })}</b>}
-                  {r.owed > 0 && <small className="num">{t('scope.owedAmount', { amount: income(r.owed) })}</small>}
+                  {r.received !== 0 && <b className="num green">{t('scope.receivedAmount', { amount: income(r.received, r.partial?.received) })}</b>}
+                  {(r.owed > 0 || r.partial?.owed.incomplete) && (
+                    <small className="num">{t('scope.owedAmount', { amount: income(r.owed, r.partial?.owed) })}</small>
+                  )}
                 </span>
               </button>
             ))}

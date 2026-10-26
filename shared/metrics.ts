@@ -1,3 +1,4 @@
+import { amountTotal, convertedTotal, formatTotal, chargeTotal, emptyTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
 // 把个人订阅当成一家「反向 SaaS 公司」来做财报：MRR 走势、月度变动、权责发生制、预付余值、退订省下的钱。
 // MRR 与退订省钱按当前汇率；历史现金、停用损失按发生日汇率。
 import {
@@ -45,6 +46,14 @@ export function contributionOn(state: AppState, s: Subscription, day: string, fx
   return toBaseOrNaN(state, monthlyGross(s, day), s.currency, fxDate) * myShareFactor(s, day);
 }
 
+/** The same contribution rules, retaining original phase currencies when FX is unavailable. */
+export function contributionTotal(state: AppState, s: Subscription, day: string, fxDate?: string): FxTotal {
+  if (s.phases?.length) return sumTotals(activePhases(s, day).map((v) => contributionTotal(state, v, day, fxDate)));
+  const amount = contributionOn({ ...state, settings: { ...state.settings, baseCurrency: s.currency } }, s, day, fxDate);
+  return amountTotal(amount, s.currency, contributionOn(state, s, day, fxDate));
+}
+export const mrrTotal = (state: AppState, day: string, fxDate?: string) => sumTotals(state.subscriptions.map((s) => contributionTotal(state, s, day, fxDate)));
+
 /** fxDate 缺省为当前汇率；传入则按该日汇率 */
 export function mrrOn(state: AppState, day: string, fxDate?: string): number {
   return state.subscriptions.reduce((a, s) => a + contributionOn(state, s, day, fxDate), 0);
@@ -67,6 +76,7 @@ export function mrrChangeSinceLastMonth(state: AppState, today: string): number 
 export interface MrrPoint {
   month: string; // YYYY-MM
   mrr: number;
+  partial: FxTotal;
 }
 
 /** 每月月末（当月为今天）的 MRR；historical 为 true 时按当月汇率，否则按当前汇率 */
@@ -75,12 +85,13 @@ export function mrrSeries(state: AppState, today: string, months: number, histor
   for (let i = months - 1; i >= 0; i--) {
     const m = addMonths(today.slice(0, 8) + '01', -i).slice(0, 7);
     const day = i === 0 ? today : monthEnd(m);
-    out.push({ month: m, mrr: mrrOn(state, day, historical && i > 0 ? day : undefined) });
+    out.push({ month: m, mrr: mrrOn(state, day, historical && i > 0 ? day : undefined), partial: mrrTotal(state, day, historical && i > 0 ? day : undefined) });
   }
   return out;
 }
 
 export interface Movement {
+  partial: { from: FxTotal; to: FxTotal };
   /** 期初 MRR（期初汇率） */
   from: number;
   /** 汇率变化带来的增减：期初的订阅组合按期末汇率重估 */
@@ -100,7 +111,17 @@ export interface Movement {
  * endFx 缺省（期末是今天）时用当前汇率。
  */
 export function movement(state: AppState, start: string, end: string, endFx?: string): Movement {
-  const r: Movement = { from: 0, fx: 0, to: 0, added: 0, expansion: 0, contraction: 0, churned: 0, items: [] };
+  const r: Movement = {
+    partial: { from: mrrTotal(state, start, start), to: mrrTotal(state, end, endFx) },
+    from: 0,
+    fx: 0,
+    to: 0,
+    added: 0,
+    expansion: 0,
+    contraction: 0,
+    churned: 0,
+    items: [],
+  };
   for (const s of state.subscriptions) {
     const a0 = contributionOn(state, s, start, start);
     const a = contributionOn(state, s, start, endFx);
@@ -109,7 +130,7 @@ export function movement(state: AppState, start: string, end: string, endFx?: st
     r.fx += a - a0;
     r.to += b;
     const d = b - a;
-    if (Math.abs(d) < 0.005) continue;
+    if (!Number.isFinite(d) || Math.abs(d) < 0.005) continue;
     const kind = a === 0 ? 'added' : b === 0 ? 'churned' : d > 0 ? 'expansion' : 'contraction';
     r[kind] += Math.abs(d);
     r.items.push({ sub: s, kind, delta: d });
@@ -121,6 +142,7 @@ export function movement(state: AppState, start: string, end: string, endFx?: st
 export type EventKind = 'start' | 'end' | 'price' | 'intro-end' | 'buy' | 'pause' | 'switch' | 'resume' | 'terminate';
 
 export interface LedgerEvent {
+  partial?: FxTotal;
   date: string;
   sub: Subscription;
   kind: EventKind;
@@ -133,7 +155,7 @@ export interface LedgerEvent {
 function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[] {
   const out: LedgerEvent[] = [];
   if (s.cycle.unit === 'lifetime') {
-    if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'buy', delta: toBaseAt(state, s.price, s.currency) });
+    if (s.start <= today) out.push({ date: s.start, sub: s, kind: 'buy', delta: toBaseOrNaN(state, s.price, s.currency) });
     return out;
   }
   const after = (d: string) => contributionOn(state, s, d);
@@ -142,7 +164,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       date: s.start,
       sub: s,
       kind: 'start',
-      delta: after(s.start) || after(addDays(s.start, 1)) || toBaseAt(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.start),
+      delta: after(s.start) || after(addDays(s.start, 1)) || toBaseOrNaN(state, (s.price * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.start),
     });
   const hist = (s.priceHistory ?? []).slice().sort((a, b) => a.from.localeCompare(b.from));
   for (let i = 1; i < hist.length; i++) {
@@ -154,7 +176,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       date: hist[i].from,
       sub: s,
       kind: 'price',
-      delta: toBaseAt(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, hist[i].from),
+      delta: toBaseOrNaN(state, ((cur - prev) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, hist[i].from),
       note: `${prev} → ${cur} ${s.currency}`,
     });
   }
@@ -163,7 +185,7 @@ function eventsOf(state: AppState, s: Subscription, today: string): LedgerEvent[
       date: s.intro.until,
       sub: s,
       kind: 'intro-end',
-      delta: toBaseAt(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until),
+      delta: toBaseOrNaN(state, ((s.price - s.intro.price) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.intro.until),
     });
   }
   if (s.stop && s.stop.date <= today)
@@ -230,6 +252,12 @@ export function events(state: AppState, today: string): LedgerEvent[] {
       }
     });
   }
+  for (const e of out) {
+    const native = eventsOf({ ...state, settings: { ...state.settings, baseCurrency: e.sub.currency } }, e.sub, today).find(
+      (x) => x.date === e.date && x.kind === e.kind,
+    );
+    e.partial = amountTotal(native?.delta ?? NaN, e.sub.currency, e.delta);
+  }
   return out.sort((a, b) => b.date.localeCompare(a.date));
 }
 
@@ -257,6 +285,7 @@ export interface CashAccrual {
   month: string;
   cash: number;
   accrual: number;
+  partial: { cash: FxTotal; accrual: FxTotal };
   projected: boolean;
 }
 
@@ -270,14 +299,18 @@ export function cashVsAccrual(state: AppState, today: string, back: number, fwd:
   const rows = new Map<string, CashAccrual>();
   for (let i = 0; i <= back + fwd; i++) {
     const m = addMonths(first, i).slice(0, 7);
-    rows.set(m, { month: m, cash: 0, accrual: 0, projected: m > today.slice(0, 7) });
+    rows.set(m, { month: m, cash: 0, accrual: 0, partial: { cash: emptyTotal(), accrual: emptyTotal() }, projected: m > today.slice(0, 7) });
   }
   // 往前多取一年，保证年付在窗口开头的摊销完整
   const charges = state.subscriptions.filter((s) => !s.proxy).flatMap((s) => chargesBetween(s, addMonths(first, -24), last, today));
   for (const c of charges) {
     const v = chargeValue(state, c) * myShareFactor(c.sub, c.date);
     const r = rows.get(c.date.slice(0, 7));
-    if (r) r.cash += v;
+    const part = scaleTotal(chargeTotal(state, c), myShareFactor(c.sub, c.date));
+    if (r) {
+      r.cash += v;
+      r.partial.cash = sumTotals([r.partial.cash, part]);
+    }
     if (c.sub.cycle.unit === 'lifetime') continue;
     const [a, b] = coverage(c);
     const days = Math.max(1, diffDays(a, b));
@@ -288,7 +321,10 @@ export function cashVsAccrual(state: AppState, today: string, back: number, fwd:
       const mEnd = addDays(monthEnd(cur.slice(0, 7)), 1);
       const segEnd = mEnd < b ? mEnd : b;
       const row = rows.get(cur.slice(0, 7));
-      if (row) row.accrual += perDay * diffDays(cur, segEnd);
+      if (row) {
+        row.accrual += perDay * diffDays(cur, segEnd);
+        row.partial.accrual = sumTotals([row.partial.accrual, scaleTotal(part, diffDays(cur, segEnd) / days)]);
+      }
       cur = segEnd;
     }
   }
@@ -360,7 +396,13 @@ export function stopLosses(state: AppState, today: string, range?: { from?: stri
     });
   }
   items.sort((a, b) => b.date.localeCompare(a.date) || b.lossBase - a.lossBase);
-  return { total: items.reduce((sum, i) => sum + i.lossBase, 0), byKind, items, incomplete: items.some((i) => i.fxMissing) };
+  return {
+    partial: sumTotals(items.map((i) => amountTotal(i.loss, i.currency, i.lossBase))),
+    total: items.reduce((sum, i) => sum + i.lossBase, 0),
+    byKind,
+    items,
+    incomplete: items.some((i) => i.fxMissing),
+  };
 }
 
 /** 预付余值：已经付了钱、但服务期还没用完的部分 */
@@ -371,15 +413,17 @@ export function prepaidValue(
   total: number;
   unusedTotal: number;
   unusedIncomplete: boolean;
+  partial: FxTotal;
   unusedItems: Array<{ sub: Subscription; value: number; until: string }>;
-  items: Array<{ sub: Subscription; value: number; until: string }>;
+  items: Array<{ sub: Subscription; value: number; until: string; partial: FxTotal }>;
 } {
-  const items: Array<{ sub: Subscription; value: number; until: string }> = [];
+  const items: Array<{ sub: Subscription; value: number; until: string; partial: FxTotal }> = [];
   const losses = stopLosses(state, today);
   const unusedItems = losses.items.map((i) => ({ sub: i.sub, value: i.lossBase, until: i.paidThrough }));
   for (const s of state.subscriptions) {
     // 按阶段各算各的：换区后旧区域预付的时长和新区域的一样都是余值
     let value = 0;
+    let partial = emptyTotal();
     let until = '';
     for (const p of phaseSubs(s)) {
       if (p.stop && p.stop.date <= today) continue;
@@ -390,30 +434,41 @@ export function prepaidValue(
       const [a, b] = coverage(last);
       const end = p.end && addDays(p.end, 1) < b ? addDays(p.end, 1) : b;
       if (end <= today) continue;
-      value += chargeValue(state, last) * myShareFactor(p, today) * (diffDays(today, end) / Math.max(1, diffDays(a, b)));
+      const factor = myShareFactor(p, today) * (diffDays(today, end) / Math.max(1, diffDays(a, b)));
+      value += chargeValue(state, last) * factor;
+      partial = sumTotals([partial, scaleTotal(chargeTotal(state, last), factor)]);
       if (end > until) until = end;
     }
-    if (value > 0.01) items.push({ sub: s, value, until });
+    if (value > 0.01 || partial.incomplete) items.push({ sub: s, value, until, partial });
   }
   items.sort((x, y) => y.value - x.value);
-  return { total: items.reduce((t, i) => t + i.value, 0), items, unusedTotal: losses.total, unusedIncomplete: losses.incomplete, unusedItems };
+  return {
+    partial: sumTotals(items.map((i) => i.partial)),
+    total: items.reduce((t, i) => t + i.value, 0),
+    items,
+    unusedTotal: losses.total,
+    unusedIncomplete: losses.incomplete,
+    unusedItems,
+  };
 }
 
 /** 退订省下的钱：如果没退，从退订到今天还要付多少 */
 export function cancelSavings(
   state: AppState,
   today: string,
-): { total: number; items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> } {
-  const items: Array<{ sub: Subscription; saved: number; since: string; monthly: number }> = [];
+): { total: number; partial: FxTotal; items: Array<{ sub: Subscription; saved: number; since: string; monthly: number; partial: FxTotal }> } {
+  const items: Array<{ sub: Subscription; saved: number; since: string; monthly: number; partial: FxTotal }> = [];
   for (const s of state.subscriptions) {
     if (s.proxy || s.cycle.unit === 'lifetime' || !s.end || s.end > today) continue;
     const monthly = toBaseAt(state, (priceAt(s, s.end) * MONTH) / cycleDays(s.cycle), s.currency) * myShareFactor(s, s.end);
     const since = s.stop ? s.stop.paidThrough : s.end;
     const saved = (monthly * Math.max(0, diffDays(since, today))) / MONTH;
-    if (saved > 0) items.push({ sub: s, saved, since, monthly });
+    const original = (((priceAt(s, s.end) * MONTH) / cycleDays(s.cycle)) * myShareFactor(s, s.end) * Math.max(0, diffDays(since, today))) / MONTH;
+    const partial = amountTotal(original, s.currency, toBaseOrNaN(state, original, s.currency));
+    if (saved > 0 || partial.incomplete) items.push({ sub: s, saved, since, monthly, partial });
   }
   items.sort((x, y) => y.saved - x.saved);
-  return { total: items.reduce((t, i) => t + i.saved, 0), items };
+  return { total: items.reduce((t, i) => t + i.saved, 0), partial: sumTotals(items.map((i) => i.partial)), items };
 }
 
 // ---------- 礼品卡充值计划 ----------
@@ -451,6 +506,8 @@ function pickCards(need: number, denoms: number[]): number[] {
 }
 
 export interface TopUp {
+  incomplete: boolean;
+  partial: { current: FxTotal; monthly: FxTotal; due: FxTotal; need: FxTotal };
   method: PaymentMethod;
   current: number;
   /** 撑满 horizon 所需充值（账户币种） */
@@ -486,7 +543,16 @@ export function topUpPlan(state: AppState, today: string, months = 6): TopUp[] {
     }
     const byCard = ['appstore', 'googleplay', 'giftcard', 'phone'].includes(m.kind);
     const denoms = DENOMS[m.currency] ?? [Math.pow(10, Math.max(1, Math.round(Math.log10(Math.max(10, need)))))];
+    const duePartial = sumTotals(r.forecast.filter((c) => c.date <= horizon).map((c) => c.partial));
+    const needPartial = sumTotals([duePartial, scaleTotal(r.partial.current, -1)]);
     out.push({
+      incomplete: r.incomplete,
+      partial: {
+        current: r.partial.current,
+        monthly: r.partial.monthlyDrain,
+        due: duePartial,
+        need: { ...needPartial, value: Math.max(0, needPartial.value), known: duePartial.known },
+      },
       method: m,
       current: r.current,
       need,
@@ -542,13 +608,12 @@ export function insights(state: AppState, today: string): Insight[] {
       id: 'unused',
       tone: 'warn',
       title: t('core.stop.lossTitle'),
-      body: unused.incomplete ? t('core.stop.fxMissing') : money(unused.total, state.settings.baseCurrency),
+      body: formatTotal(unused.partial, state.settings.baseCurrency),
       subs: [...new Map(unused.items.map((i) => [i.sub.id, i.sub])).values()],
     });
   const base = state.settings.baseCurrency;
   // 代付是别人的订阅，不参与体检
   const live = state.subscriptions.filter((s) => !s.proxy && ['active', 'ending', 'trial'].includes(effectiveStatus(s, today)));
-  const fmt = (v: number) => money(v, base, { compact: true });
   const names = (ss: Subscription[]) => ss.map((s) => s.name).join(t('core.listSep'));
 
   // 1. 年付续费窗口：60 天内要自动续费的长周期订阅
@@ -558,12 +623,12 @@ export function insights(state: AppState, today: string): Insight[] {
     .filter((x) => x.n && diffDays(today, x.n) <= 60)
     .sort((a, b) => a.n!.localeCompare(b.n!));
   if (yearly.length) {
-    const sum = yearly.reduce((a, x) => a + toBaseAt(state, priceAt(x.s, x.n!), x.s.currency), 0);
+    const sum = sumTotals(yearly.map((x) => convertedTotal(state, priceAt(x.s, x.n!), x.s.currency)));
     out.push({
       id: 'yearly-window',
       tone: 'warn',
       title: t('core.insight.yearly.title', { count: yearly.length }),
-      body: t('core.insight.yearly.body', { sum: fmt(sum) }),
+      body: t('core.insight.yearly.body', { sum: formatTotal(sum, base, { compact: true }) }),
       subs: yearly.map((x) => x.s),
     });
   }
@@ -578,12 +643,12 @@ export function insights(state: AppState, today: string): Insight[] {
   }
   for (const [, g] of groups) {
     if (g.length < 2) continue;
-    const sum = g.reduce((a, s) => a + contributionOn(state, s, today), 0);
+    const sum = sumTotals(g.map((s) => contributionTotal(state, s, today)));
     out.push({
       id: `dup-${g[0].id}`,
       tone: 'info',
       title: t('core.insight.dup.title', { names: names(g) }),
-      body: t('core.insight.dup.body', { count: g.length, sum: fmt(sum) }),
+      body: t('core.insight.dup.body', { count: g.length, sum: formatTotal(sum, base, { compact: true }) }),
       subs: g,
     });
   }
@@ -660,7 +725,7 @@ export function insights(state: AppState, today: string): Insight[] {
 
   // 8. 最贵的一天
   const perDay = live.map((s) => ({ s, v: contributionOn(state, s, today) / MONTH })).sort((a, b) => b.v - a.v)[0];
-  if (perDay && perDay.v > 0) {
+  if (perDay && perDay.v > 0 && Number.isFinite(total)) {
     out.push({
       id: 'top',
       tone: 'good',
@@ -675,6 +740,7 @@ export function insights(state: AppState, today: string): Insight[] {
 // ---------- 年度回顾 ----------
 
 export interface YearReview {
+  partial: { total: FxTotal; perDay: FxTotal; stopLoss: FxTotal; bySub: Record<string, FxTotal>; byMonth: Record<string, FxTotal> };
   year: string;
   /** 当年停止的阶段截至 today 仍未退回的损失（我的份额、本位币） */
   stopLoss: number;
@@ -705,7 +771,21 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
   const byMonth = new Map<string, number>();
   const ccys = new Set<string>();
   let total = 0;
+  const partial = {
+    total: emptyTotal(),
+    perDay: emptyTotal(),
+    stopLoss: stopLosses(state, today, { from, to }).partial,
+    bySub: {} as Record<string, FxTotal>,
+    byMonth: {} as Record<string, FxTotal>,
+  };
+  const note = (sub: Subscription, date: string, part: FxTotal) => {
+    partial.total = sumTotals([partial.total, part]);
+    partial.bySub[sub.id] = sumTotals([partial.bySub[sub.id] ?? emptyTotal(), part]);
+    const month = date.slice(0, 7);
+    partial.byMonth[month] = sumTotals([partial.byMonth[month] ?? emptyTotal(), part]);
+  };
   for (const c of cs) {
+    note(c.sub, c.date, scaleTotal(chargeTotal(state, c), myShareFactor(c.sub, c.date)));
     const v = chargeBaseOrNaN(state, c) * myShareFactor(c.sub, c.date);
     total += v;
     ccys.add(c.currency);
@@ -716,6 +796,7 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
   }
   // 转让是现金流：转入加、转出减，计入总额与各月，但不算扣款笔数和币种
   for (const r of transferRows(state, from, to, today)) {
+    note(r.sub, r.date, amountTotal(r.transfer.amount * (r.transfer.kind === 'buy' ? 1 : -1), r.transfer.currency, r.amount));
     total += r.amount;
     const e = bySub.get(r.sub.id) ?? { sub: r.sub, sum: 0 };
     e.sum += r.amount;
@@ -725,7 +806,9 @@ export function yearReview(state: AppState, today: string, year = today.slice(0,
   const live = state.subscriptions.filter((s) => !s.proxy && s.cycle.unit !== 'lifetime' && ['active', 'ending', 'paused'].includes(effectiveStatus(s, today)));
   const longest = live.map((s) => ({ sub: s, days: diffDays(s.start, today) })).sort((a, b) => b.days - a.days)[0];
   const busiest = [...byMonth.entries()].sort((a, b) => b[1] - a[1])[0];
+  partial.perDay = scaleTotal(partial.total, 1 / Math.max(1, diffDays(from, to) + 1));
   return {
+    partial,
     year,
     stopLoss: stopLosses(state, today, { from, to }).total,
     total,

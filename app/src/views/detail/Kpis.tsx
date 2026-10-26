@@ -1,3 +1,4 @@
+import { amountTotal, formatTotal, scaleTotal, totalNote } from '../../../../shared/fx-total.ts';
 import { DAYS_PER_MONTH } from '../../../../shared/billing.ts';
 import { copyParts } from '../../components/copy.tsx';
 import { isStopped } from '../../../../shared/billing.ts';
@@ -58,11 +59,11 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   // 订了不到一个月（或只有一笔）时，「实际每月」没有意义：改用标价折算的预计每月
   // An incomplete imported history cannot establish an average over the original service lifetime.
-  const young = !!sub.estimateFrom || active < 30 || (per.length < 2 && !transferred);
+  const young = !!sub.estimateFrom || active < 30 || (regular(history).length < 2 && !transferred);
   const perMonth = young
     ? toBase(state, monthlyGross(currentPhase(sub, today), today, state.fx), currentPhase(sub, today).currency)
     : total / Math.max(1, active / DAYS_PER_MONTH);
-  const perTrend = !young && per.length > 1 && per[0] > 0 ? per[per.length - 1] / per[0] - 1 : undefined;
+  const perTrend = !cost.incomplete && !young && per.length > 1 && per[0] > 0 ? per[per.length - 1] / per[0] - 1 : undefined;
   const duration =
     active < 1
       ? t('detail.kpi.startedToday')
@@ -73,10 +74,15 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
         : months
           ? t('detail.stats.months', { count: months })
           : t('detail.stats.days', { count: active });
-  const amount = (v: number) => (Number.isFinite(v) ? flow(-v, base, { compact: true }) : '—');
+  const cumulative = formatTotal(cost.partial, base, { direction: -1, compact: true, main: true });
   // 每月：买断按订了多久平摊，其余按实际（或刚开始时按标价预计）
   const monthly = lifetime ? total / Math.max(1, active / DAYS_PER_MONTH) : perMonth;
 
+  const monthlyPartial =
+    !lifetime && young
+      ? amountTotal(monthlyGross(currentPhase(sub, today), today, state.fx), currentPhase(sub, today).currency, perMonth)
+      : scaleTotal(cost.partial, 1 / Math.max(1, active / DAYS_PER_MONTH));
+  const monthlyAmount = formatTotal(monthlyPartial, base, { direction: -1, compact: true, main: true, average: true });
   const next = ['ended', 'terminated', 'lifetime', 'paused'].includes(st) ? undefined : detailForecast(sub, today).charges[0];
   const nextValue = next ? chargeBaseOrNaN(state, next, base) : NaN;
   // 停止的订阅由下方停止卡片写停止日，这里不再重复
@@ -101,7 +107,9 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
         <Metric
           label={st === 'trial' ? t('detail.renewal.afterTrial') : t('detail.ev.next')}
           value={cnDateAuto(next.date, today)}
-          note={copyParts([Number.isFinite(nextValue) ? flow(-nextValue, base) : '—', relDays(diffDays(today, next.date))].join('\n'))}
+          note={copyParts(
+            [Number.isFinite(nextValue) ? flow(-nextValue, base) : flow(-next.amount, next.currency), relDays(diffDays(today, next.date))].join('\n'),
+          )}
         />
       ) : ended ? (
         <Metric label={t('detail.field.endedOn')} value={cnDateAuto(sub.end!, today)} note={relDays(diffDays(today, sub.end!))} />
@@ -115,13 +123,15 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
       {(history.length !== 1 || transferred) && (
         <Metric
           label={transferred ? t(total < 0 ? 'detail.transfer.netGain' : 'detail.transfer.net') : t('detail.stats.spent')}
-          value={sub.estimateFrom && !history.length && !transferred ? '—' : amount(total)}
+          value={sub.estimateFrom && !history.length && !transferred ? '—' : cumulative}
           note={
-            sub.estimateFrom
-              ? t('settings.import.history')
-              : transferred
-                ? copyParts([t('detail.stats.count', { count: history.length }), t('detail.transfer.included')].join('\n'))
-                : t('detail.stats.count', { count: history.length })
+            cost.incomplete
+              ? totalNote(cost.partial)
+              : sub.estimateFrom
+                ? t('settings.import.history')
+                : transferred
+                  ? copyParts([t('detail.stats.count', { count: history.length }), t('detail.transfer.included')].join('\n'))
+                  : t('detail.stats.count', { count: history.length })
           }
         />
       )}
@@ -131,11 +141,19 @@ export function Kpis({ sub, state, today, history }: { sub: Subscription; state:
           undated || (sub.estimateFrom && lifetime && !history.length)
             ? '—'
             : lifetime
-              ? t('detail.kpi.perMonthValue', { amount: amount(monthly) })
-              : amount(monthly)
+              ? t('detail.kpi.perMonthValue', { amount: monthlyAmount })
+              : monthlyAmount
         }
         // 与其他格一样三行：折到每天多少；算不出来就不写这一行
-        note={!undated && Number.isFinite(monthly) ? t('detail.kpi.perDay', { amount: flow(-monthly / DAYS_PER_MONTH, base) }) : undefined}
+        note={
+          !undated
+            ? monthlyPartial.incomplete
+              ? `${totalNote(monthlyPartial)}\n${t('detail.kpi.perDay', { amount: formatTotal(scaleTotal(monthlyPartial, 1 / DAYS_PER_MONTH), base, { direction: -1, average: true }) })}`
+              : Number.isFinite(monthly)
+                ? t('detail.kpi.perDay', { amount: flow(-monthly / DAYS_PER_MONTH, base) })
+                : undefined
+            : undefined
+        }
         accessory={!lifetime && !undated && !transferred ? <Trend pct={perTrend} /> : undefined}
       />
     </MetricCards>

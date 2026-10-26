@@ -1,9 +1,10 @@
+import { dueTotal, convertedTotal, emptyTotal, sumTotals } from './fx-total.ts';
 import { memberCashFlows, memberFlowValue } from './carpool.ts';
 // 人：合租成员与代付对象的统一名册。
 // 成员、代付上存 personId 指向名册；原来的称呼、联系方式保留为镜像副本，老数据和只认副本的地方（提醒邮件、导出）照常工作。
 // 应收按人汇总时，直接复用合租（memberDues）与代付（proxyRows）各自的算法，只是换个维度加起来。
 import { collectCurrencyOf, effectiveStatus, fnv1a, isStopped, memberDues, memberAboard, memberLedger } from './billing.ts';
-import { toBaseAt } from './fx.ts';
+import { toBaseOrNaN } from './fx.ts';
 import { proxyRows, proxyTotals } from './proxy.ts';
 import { paidThrough } from './receivables.ts';
 import { PERSON_COLORS, type AppState, type Person, type PersonColor, type ShareMember, type Subscription } from './types.ts';
@@ -247,7 +248,7 @@ function shareItem(state: AppState, s: Subscription, m: ShareMember, today: stri
     kind: 'share',
     sub: s,
     member: m,
-    owed: d && !m.exempt ? (Number.isFinite(d.owed) ? toBaseAt(state, d.owed, d.currency) : NaN) : 0,
+    owed: d && !m.exempt ? (Number.isFinite(d.owed) ? toBaseOrNaN(state, d.owed, d.currency) : NaN) : 0,
     periodsOwed: d && !m.exempt ? d.periodsOwed : 0,
     received: flows.reduce((a, p) => a + memberFlowValue(state, p), 0),
     lastPaid: flows.filter((p) => p.kind === 'receipt').reduce<string | undefined>((a, p) => (!a || p.date > a ? p.date : a), undefined),
@@ -326,4 +327,19 @@ export function peopleListRows(
       if (!Number.isFinite(a[sort]) || !Number.isFinite(b[sort])) return Number(Number.isFinite(b[sort])) - Number(Number.isFinite(a[sort])) || byName(a, b);
       return (dir === 'asc' ? 1 : -1) * (a[sort] - b[sort]) || (b.lastPaid ?? '').localeCompare(a.lastPaid ?? '') || byName(a, b);
     });
+}
+
+/** Rebuild receivable display totals in the requested currency without losing original cash. */
+export function personAmounts(state: AppState, ledger: Pick<PersonLedger, 'items'>, today: string, to = state.settings.baseCurrency) {
+  const target = { ...state, settings: { ...state.settings, baseCurrency: to } };
+  const parts = ledger.items.map((i) => {
+    if (i.kind === 'proxy') return proxyTotals(proxyRows(target, i.sub, today)).partial;
+    const m = i.member!;
+    const due = memberDues(i.sub, today, collectCurrencyOf(state.settings), state).find((d) => d.member.id === m.id);
+    return {
+      owed: due && !m.exempt ? dueTotal(state, due, undefined, to) : emptyTotal(),
+      received: sumTotals(memberCashFlows(m).map((p) => convertedTotal(state, p.amount, p.currency, p.date, to))),
+    };
+  });
+  return { owed: sumTotals(parts.map((p) => p.owed)), received: sumTotals(parts.map((p) => p.received)) };
 }

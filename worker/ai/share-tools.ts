@@ -1,3 +1,4 @@
+import { dueTotal } from '../../shared/fx-total.ts';
 import { cycleLabel, memberDues, collectionAnchor, memberBillMonths, memberPeriods, memberAboard, uid } from '../../shared/billing.ts';
 import { setOpening } from '../../shared/receivables.ts';
 import {
@@ -28,7 +29,7 @@ import { drySchema, objectSchema as obj } from '../../shared/tool-schema.ts';
 import { validateCurrency } from '../../shared/ledger-edit.ts';
 import type { Tool } from './tool-kit.ts';
 import { state, findSub, findMember, findPerson, DATE, SUBREF, SUBREF_EXACT, commit, str, num, date, personTarget } from './tool-kit.ts';
-import { money, fin, collectionSummary, ruleOut, collectCcy } from './tool-views.ts';
+import { money, fin, collectionSummary, ruleOut, collectCcy, partialOut } from './tool-views.ts';
 
 export const get_carpool: Tool = {
   name: 'get_carpool',
@@ -62,6 +63,8 @@ export const get_carpool: Tool = {
             // 方向写清楚：i_pay = 我自己净掏的钱，i_earn = 收的比付的多（赚了）；两者至多一个大于 0
             // 缺汇率时对应数字为 null，incomplete 标出这一组不完整
             year: {
+              ...partialOut(book.partial.yearNet),
+              totals: { cost: partialOut(book.partial.yearCost), expected_income: partialOut(book.partial.yearIncome), net: partialOut(book.partial.yearNet) },
               cost: fin(book.yearCost),
               expected_income: fin(book.yearIncome),
               i_pay: fin(Math.max(0, book.yearNet)),
@@ -69,6 +72,8 @@ export const get_carpool: Tool = {
               incomplete: ![book.yearCost, book.yearIncome, book.yearNet].every(Number.isFinite),
             },
             to_date: {
+              ...partialOut(book.partial.net),
+              totals: { paid: partialOut(book.partial.paid), received: partialOut(book.partial.received), net: partialOut(book.partial.net) },
               paid: fin(book.paid),
               received: fin(book.received),
               i_pay: fin(Math.max(0, book.net)),
@@ -89,7 +94,7 @@ export const get_carpool: Tool = {
                 ...collectionSummary(st, s, m, d, today),
                 first_period: m.firstPeriod ?? 'prorate',
                 first_amount: m.firstAmount ?? null,
-                owed: d && d.periodsOwed > 0 ? money(st, d.owed, d.currency) : null,
+                owed: d && d.periodsOwed > 0 ? { ...money(st, d.owed, d.currency), ...partialOut(dueTotal(st, d)) } : null,
                 receipts: (m.receipts ?? []).length,
               };
             }),

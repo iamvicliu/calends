@@ -1,3 +1,5 @@
+import { dueTotal, formatTotal, sumTotals, totalNote } from '../../../shared/fx-total.ts';
+import { FxAmount } from '../components/FxAmount.tsx';
 import { currentPhase } from '../../../shared/billing.ts';
 import { copyParts } from '../components/copy.tsx';
 import { ShareAvatars } from '../components/ShareAvatars.tsx';
@@ -12,7 +14,7 @@ import { nextSort, usePhone } from '../components/LtHead.tsx';
 import { MemberSheet } from './Members.tsx';
 import { carLedger, carYear } from '../../../shared/carpool.ts';
 import { MetricCards, Metric, Cell, Group, Toolbar } from '../components/ui.tsx';
-import { Amount, Seg, useWidth } from '../components/inputs.tsx';
+import { Seg, useWidth } from '../components/inputs.tsx';
 import { Icon } from '../components/icons.tsx';
 import { NameLink, StatusPill, SubIcon } from '../components/marks.tsx';
 import { sortValue, toBase } from '../derive.ts';
@@ -100,12 +102,13 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
     (a, b) => Number(!live(a)) - Number(!live(b)) || (dir === 'asc' ? asc(a, b) : asc(b, a)) || nextOf(a).localeCompare(nextOf(b)),
   );
   const yearNet = owned.reduce((a, s) => a + books.get(s.id)!.yearNet, 0);
+  const yearNetPartial = sumTotals(owned.map((s) => books.get(s.id)!.partial.yearNet));
+  const yearIncomePartial = sumTotals(owned.map((s) => books.get(s.id)!.partial.yearIncome));
   // 第三格的小字：进行中的车上一共坐了几位成员、还空几个位置
   const seated = owned.reduce((a, s) => a + carpoolRoster(s, today).active.length, 0);
   const openSeats = owned.reduce((a, s) => a + carpoolRoster(s, today).vacancies, 0);
-  const yearIncome = owned.reduce((a, s) => a + books.get(s.id)!.yearIncome, 0);
   const owedAll = all.flatMap(duesOf).filter((d) => d.periodsOwed > 0);
-  const owedSum = owedTotal(owedAll);
+  const owedPartial = sumTotals(owedAll.map((d) => dueTotal(state, d, toBase(state, d.owed, d.currency))));
   const [convert, setConvert] = useState<Subscription | null>(null);
   const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; editId?: string } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
@@ -149,16 +152,20 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
         <MetricCards>
           <Metric
             label={yearNet < 0 ? t('family.pool.netGain') : t('family.pool.netCost')}
-            value={<Amount value={-yearNet} ccy={base} />}
+            value={<FxAmount total={yearNetPartial} direction={-1} ccy={base} />}
             valueStyle={{ color: yearNet < 0 ? 'var(--green)' : undefined }}
-            note={t('family.pool.yearIncome', { amount: flow(yearIncome, base, { compact: true }) })}
+            note={
+              yearNetPartial.incomplete
+                ? totalNote(yearNetPartial)
+                : t('family.pool.yearIncome', { amount: formatTotal(yearIncomePartial, base, { direction: 1, compact: true }) })
+            }
             noteStyle={{ color: 'var(--green)' }}
           />
           <Metric
             label={t('family.pool.owed')}
-            value={<Amount plain value={owedSum} ccy={base} />}
-            valueStyle={{ color: owedSum > 0 ? 'var(--orange)' : undefined }}
-            note={t('family.pool.owedSub', { count: owedAll.length })}
+            value={<FxAmount plain total={owedPartial} ccy={base} />}
+            valueStyle={{ color: owedPartial.value > 0 ? 'var(--orange)' : undefined }}
+            note={totalNote(owedPartial) || t('family.pool.owedSub', { count: owedAll.length })}
           />
           <Metric
             label={t('family.pool.count')}

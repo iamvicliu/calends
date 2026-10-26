@@ -221,7 +221,13 @@ test('年度回顾和范围按停止日含两端筛选，排除前年停止与�
   assert.equal(stopLosses(st, at, { from: '2026-12-31', to: '2026-12-31' }).total, 4);
   assert.equal(stopLosses(st, at, { from: '2027-01-01' }).total, 0);
   assert.equal(stopLosses(st, at).total, prepaidValue(st, at).unusedTotal);
-  assert.deepEqual(stopLosses({ ...st, subscriptions: [] }, at), { total: 0, byKind: { cancel: 0, terminate: 0 }, items: [], incomplete: false });
+  assert.deepEqual(stopLosses({ ...st, subscriptions: [] }, at), {
+    partial: { value: 0, incomplete: false, unconverted: {}, known: false },
+    total: 0,
+    byKind: { cancel: 0, terminate: 0 },
+    items: [],
+    incomplete: false,
+  });
 });
 
 test('缺少汇率保留原币损失并标记汇总不可用，不变成零损失或空明细', () => {

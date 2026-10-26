@@ -220,5 +220,7 @@
     "nextDue": "ngày thanh toán tiếp theo",
     "end": "ngày kết thúc"
   },
-  "fxIncomplete": "Thiếu tỷ giá nên không quy đổi được một số khoản; kết quả này chưa đầy đủ."
+  "fxIncomplete": "Thiếu tỷ giá nên không quy đổi được một số khoản; kết quả này chưa đầy đủ.",
+  "fxUnconverted": "Chưa quy đổi: {amount}",
+  "fxOther": "và {count} loại tiền khác"
 }

@@ -1,3 +1,4 @@
+import { amountTotal, convertedTotal, chargeTotal, scaleTotal, sumTotals, type FxTotal } from './fx-total.ts';
 import {
   LIFETIME_BILL_MONTHS,
   type AppState,
@@ -931,6 +932,13 @@ export function monthlyGross(s: Subscription, day?: string, fx: FxTable = FALLBA
   return (p * DAYS_PER_MONTH) / days;
 }
 
+/** monthlyGross's plan-price basis, retaining each concurrent phase's native currency. */
+export function monthlyPriceTotal(state: AppState, s: Subscription, day: string, to = state.settings.baseCurrency): FxTotal {
+  if (!s.phases?.length) return convertedTotal(state, monthlyGross(s, day), s.currency, undefined, to);
+  const cur = currentPhase(s, day);
+  return sumTotals([cur, ...activePhases(s, day).filter((v) => v.start !== cur.start)].map((v) => monthlyPriceTotal(state, v, day, to)));
+}
+
 /** 计入每月成本的阶段：day 当天在跑的各段（并行时都算），都不在跑时取最近的一段 */
 function billedPhases(s: Subscription, day: string): Subscription[] {
   const vs = activePhases(s, day);
@@ -958,7 +966,19 @@ function billedMonthly(state: AppState, s: Subscription, day: string, methodId?:
   return { gross, mine };
 }
 
+/** Monthly totals keep the billing/status and built-in current-FX fallback rules. */
+export function monthlyTotal(state: AppState, s: Subscription, day: string, methodId?: string, gross = false, to = state.settings.baseCurrency): FxTotal {
+  return sumTotals(
+    billedPhases(s, day)
+      .filter((v) => (methodId === undefined || v.methodId === methodId) && ['active', 'ending'].includes(effectiveStatus(v, day)))
+      .map((v) => {
+        const original = monthlyGross(v, day) * (gross ? 1 : myShareFactor(v, day));
+        return amountTotal(original, v.currency, convert(original, v.currency, to, state.fx));
+      }),
+  );
+}
 export interface Totals {
+  partial: { mrr: FxTotal; gross: FxTotal; recover: FxTotal };
   mrr: number; // 我承担的部分，正数，展示时加负号
   grossMrr: number;
   recoverMrr: number; // 合租每月回血
@@ -984,12 +1004,23 @@ export function totals(state: AppState, today: string): Totals {
     gross += m.gross;
     mrr += m.mine;
   }
-  return { mrr, grossMrr: gross, recoverMrr: gross - mrr, activeCount: count, incomplete: !Number.isFinite(mrr) || !Number.isFinite(gross) };
+  const eligible = state.subscriptions.filter((s) => !s.proxy && ['active', 'ending'].includes(effectiveStatus(s, today)));
+  const mine = sumTotals(eligible.map((s) => monthlyTotal(state, s, today)));
+  const full = sumTotals(eligible.map((s) => monthlyTotal(state, s, today, undefined, true)));
+  return {
+    partial: { mrr: mine, gross: full, recover: sumTotals([full, scaleTotal(mine, -1)]) },
+    mrr,
+    grossMrr: gross,
+    recoverMrr: gross - mrr,
+    activeCount: count,
+    incomplete: !Number.isFinite(mrr) || !Number.isFinite(gross),
+  };
 }
 
 // ---------- 余额续航 ----------
 
 export interface Runway {
+  partial: { current: FxTotal; monthlyDrain: FxTotal; topUp12m: FxTotal };
   method: PaymentMethod;
   /** 今天的估算余额（asOf 之后的扣款已扣除） */
   current: number;
@@ -1004,7 +1035,7 @@ export interface Runway {
   /** 有扣款或月消耗缺汇率：从那一笔起余额、充值额为 NaN，不跳过 */
   incomplete: boolean;
   /** 完整推演，供充值计划使用；明细单独截断 */
-  forecast: Array<Charge & { balanceAfter: number; amountInMethod: number }>;
+  forecast: Array<Charge & { balanceAfter: number; amountInMethod: number; partial: FxTotal; balancePartial: FxTotal }>;
   upcoming: Runway['forecast'];
 }
 
@@ -1032,13 +1063,18 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   let covered = 0;
   let current = bal;
   let incomplete = false;
+  let balancePartial = amountTotal(method.balance, method.currency, method.balance);
+  let currentPartial = balancePartial;
   for (const { c, share } of charges) {
     const entry = proxyCharges.get(c.sub.id)?.get(c.date);
     const settled = c.kind === 'failed' ? undefined : entry?.amount != null ? { amount: entry.amount, currency: entry.currency ?? c.currency } : c.settled;
     const amt = chargeBaseOrNaN(state, { ...c, settled }, method.currency) * share;
     // 缺汇率的扣款照样扣：余额从这里起不可知（NaN），而不是假装没扣
     if (!Number.isFinite(amt)) incomplete = true;
+    const partial = scaleTotal(chargeTotal(state, { ...c, settled }, method.currency), share);
+    balancePartial = sumTotals([balancePartial, scaleTotal(partial, -1)]);
     if (c.date <= today) {
+      currentPartial = balancePartial;
       bal -= amt;
       current = bal;
       continue;
@@ -1046,7 +1082,7 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
     if (!shortfall && bal - amt < -1e-9) shortfall = c;
     bal -= amt;
     if (!shortfall && Number.isFinite(bal)) covered++;
-    forecast.push({ ...c, balanceAfter: bal, amountInMethod: amt });
+    forecast.push({ ...c, balanceAfter: bal, amountInMethod: amt, partial, balancePartial });
   }
   const yearOut = addMonths(today, 12);
   const need12 = forecast.filter((c) => c.date <= yearOut).reduce((a, c) => a + c.amountInMethod, 0);
@@ -1057,6 +1093,15 @@ export function runwayFor(method: PaymentMethod, state: AppState, today: string,
   }
   if (!Number.isFinite(monthlyDrain)) incomplete = true;
   return {
+    partial: {
+      current: currentPartial,
+      monthlyDrain: sumTotals(
+        subs
+          .filter((s) => ['active', 'ending'].includes(effectiveStatus(s, today)))
+          .map((s) => amountTotal(monthlyGross(s, today), s.currency, convert(monthlyGross(s, today), s.currency, method.currency, state.fx))),
+      ),
+      topUp12m: sumTotals([sumTotals(forecast.filter((c) => c.date <= yearOut).map((c) => c.partial)), scaleTotal(currentPartial, -1)]),
+    },
     method,
     current,
     monthlyDrain,
@@ -1080,6 +1125,8 @@ export interface MemberDue {
   owed: number;
   currency: string;
   periodsOwed: number;
+  /** Native unpaid amounts when a fee-currency change cannot be consolidated. */
+  originals?: Record<string, number>;
 }
 
 export { LIFETIME_BILL_MONTHS };
@@ -1216,9 +1263,11 @@ export function memberDues(s: Subscription, today: string, collectCurrency: stri
     const until = m.left && m.left <= stop ? addDays(m.left, -1) : stop;
     let owed = 0;
     let periodsOwed = 0;
+    const originals: Record<string, number> = {};
     if (!m.exempt) {
       // 欠着的期：已经开始、没收也没免的；中间收过的期不算，可以不连续
       for (const period of memberLedger(s, m, until, collectCurrency).periods.filter((p) => p.status === 'due')) {
+        originals[period.currency] = (originals[period.currency] ?? 0) + period.due;
         if (period.due !== 0 && period.currency !== currency && !fxState) throw new Error('FX state required for member fee currency changes');
         owed +=
           period.due === 0 || period.currency === currency
@@ -1227,7 +1276,7 @@ export function memberDues(s: Subscription, today: string, collectCurrency: stri
         periodsOwed++;
       }
     }
-    return { sub: s, member: m, dueFor, owed: Math.round(owed * 100) / 100, currency, periodsOwed };
+    return { sub: s, member: m, dueFor, owed: Math.round(owed * 100) / 100, currency, periodsOwed, ...(!Number.isFinite(owed) ? { originals } : {}) };
   });
 }
 

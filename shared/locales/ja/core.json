@@ -220,5 +220,7 @@
     "nextDue": "次回支払日",
     "end": "終了日"
   },
-  "fxIncomplete": "為替レートがないため一部の金額を換算できず、この結果は不完全です。"
+  "fxIncomplete": "為替レートがないため一部の金額を換算できず、この結果は不完全です。",
+  "fxUnconverted": "未換算：{amount}",
+  "fxOther": "ほか {count} 通貨"
 }

@@ -1,5 +1,6 @@
+import * as fxTotals from './fx-total.ts';
 import { readUiSource } from '../scripts/ui-test-source.ts';
-import { metricComponents } from '../scripts/ui-test-components.ts';
+import { metricComponents, fxAmountComponent } from '../scripts/ui-test-components.ts';
 import * as transfers from './transfers.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -85,6 +86,8 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     ...gantt,
     ...metrics,
     ...fx,
+    ...fxTotals,
+    FxAmount: fxAmountComponent(extra.React ?? React, 'Amount'),
     getState: () => ({ methods: [], settings: DEFAULT_SETTINGS }),
     ...carpool,
     perBill: (key: string) => key,
@@ -385,7 +388,20 @@ test('概览今年已付附注：只计今年停止的损失；零、全退和�
   assert.equal(scrolls, 1);
   assert.equal(withClass(render([current], true), 'stmt-loss-note').length, 0);
   const missing = render([phases.stopSubscription({ ...sub, currency: 'XYZ' }, today, 'cancel')]);
-  assert.equal(withClass(missing, 'stmt-loss-note')[0].props.title, t('core.stop.fxMissing'));
+  assert.equal(
+    withClass(missing, 'stmt-loss-note')[0].props.title,
+    fxTotals.totalNote(
+      metrics.stopLosses(
+        {
+          subscriptions: [phases.stopSubscription({ ...sub, currency: 'XYZ' }, today, 'cancel')],
+          methods: [],
+          settings: DEFAULT_SETTINGS,
+          fx: billing.FALLBACK_FX,
+        },
+        today,
+      ).partial,
+    ),
+  );
 });
 
 test('时间轴金额：宽段显示紧凑负金额，窄段仅保留悬停说明，停用半圆避让且公开隐藏', () => {

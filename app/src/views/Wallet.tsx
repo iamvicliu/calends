@@ -1,3 +1,5 @@
+import { formatTotal, sumTotals, totalNote } from '../../../shared/fx-total.ts';
+import { FxAmount } from '../components/FxAmount.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { CARD_KINDS, CardFace, faceClass } from '../components/PayCardFace.tsx';
 import { base } from '../base.ts';
@@ -10,7 +12,7 @@ import {
   cycleLabel,
   diffDays,
   effectiveStatus,
-  monthlyMine,
+  monthlyTotal,
   runwayFor,
   uid,
   type Runway,
@@ -21,7 +23,7 @@ import { toBaseAt } from '../../../shared/fx.ts';
 import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type PaymentMethod, type Subscription, type TopUp } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { IconButton, Cell, Group, Toolbar } from '../components/ui.tsx';
-import { Amount, NumInput, MoneyInput, Seg, Toggle } from '../components/inputs.tsx';
+import { NumInput, MoneyInput, Seg, Toggle } from '../components/inputs.tsx';
 import { ask, Sheet } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
 import { MethodMark, NetworkMark, SubIcon } from '../components/marks.tsx';
@@ -41,7 +43,7 @@ function RunwayCard({ r, today, state, flat, detailsOnly }: { r: Runway; today: 
   const pair = useMoneyPair(state);
   const m = r.method;
   const daysLeft = r.runsOutOn ? diffDays(today, r.runsOutOn) : Infinity;
-  const pct = r.monthlyDrain <= 0 ? 0 : Math.min(100, (Math.min(daysLeft, 365) / 365) * 100);
+  const pct = r.incomplete || r.monthlyDrain <= 0 ? 0 : Math.min(100, (Math.min(daysLeft, 365) / 365) * 100);
   const tone = daysLeft <= 7 ? 'out' : daysLeft <= (m.lowRunwayDays ?? 30) ? 'low' : '';
   const bal = pair(r.current, m.currency, { plain: true });
   const body = (
@@ -52,14 +54,14 @@ function RunwayCard({ r, today, state, flat, detailsOnly }: { r: Runway; today: 
           <div style={{ fontWeight: 600 }}>{m.name}</div>
           {!detailsOnly && (
             <div className="muted" style={{ fontSize: 'var(--fs-1)' }}>
-              {t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })}
+              {t('wallet.runway.drain', { amount: formatTotal(r.partial.monthlyDrain, m.currency, { direction: -1, compact: true }) })}
             </div>
           )}
         </div>
         {!detailsOnly && (
           <div style={{ textAlign: 'right' }}>
-            <div className="rw-bal">{bal.main}</div>
-            {bal.alt && (
+            <div className="rw-bal">{r.partial.current.incomplete ? formatTotal(r.partial.current, m.currency) : bal.main}</div>
+            {!r.partial.current.incomplete && bal.alt && (
               <div className="soft" style={{ fontSize: 'var(--fs-1)' }}>
                 {bal.alt}
               </div>
@@ -79,8 +81,8 @@ function RunwayCard({ r, today, state, flat, detailsOnly }: { r: Runway; today: 
       </div>
       <div className="rw-note">
         {/* 缺汇率时月消耗、余额推演算不出：说明不完整，不说「够用」 */}
-        {!Number.isFinite(r.monthlyDrain) || !Number.isFinite(r.topUp12m) ? (
-          t('core.fxIncomplete')
+        {r.incomplete ? (
+          totalNote(r.partial.topUp12m)
         ) : r.monthlyDrain <= 0 ? (
           t('wallet.runway.noSubs')
         ) : r.shortfall && r.coveredCharges === 0 ? (
@@ -125,7 +127,7 @@ function projFoot(r: Runway, m: PaymentMethod): string | undefined {
 /** 卡面右下角的小字：设了余额的说还够扣几期，没设的显示卡号尾号 */
 function cardHint(m: PaymentMethod, r: Runway | undefined): string {
   if (r) {
-    if (!Number.isFinite(r.monthlyDrain) || !Number.isFinite(r.topUp12m)) return '—';
+    if (r.incomplete) return totalNote(r.partial.current.incomplete ? r.partial.current : r.partial.topUp12m);
     if (r.monthlyDrain <= 0) return t('wallet.card.noCharges');
     if (!r.shortfall) return t('wallet.card.enough');
     return r.coveredCharges ? t('wallet.card.periodsLeft', { count: r.coveredCharges }) : t('wallet.card.low');
@@ -222,20 +224,26 @@ export function Wallet({ state, today, onOpen }: { state: AppState; today: strin
                 // 按当前阶段归属支付方式（换区后新旧两段并行时，两张卡各算各的）；代付的钱不算我的支出
                 const liveHere = live.filter((s) => !s.proxy && [currentPhase(s, today), ...activePhases(s, today)].some((v) => v.methodId === m.id));
                 const r = runwayFor(m, state, today);
-                const monthly = liveHere.reduce((a, s) => a + monthlyMine(state, s, today, m.id), 0);
+                const monthly = sumTotals(liveHere.map((s) => monthlyTotal(state, s, today, m.id)));
                 return (
                   <SortableCard key={m.id} m={m} onOpen={() => setOpen(m.id)}>
                     <CardFace
                       m={m}
                       // 设了余额的账户主数字是余额，右下是每月扣多少、还能扣几期；没有余额的卡主数字是每月支出
                       label={r ? t('wallet.card.balance') : t('wallet.card.monthlySpend')}
-                      value={r ? <Amount plain value={r.current} ccy={m.currency} /> : <Amount value={-monthly} ccy={base} />}
+                      value={r ? <FxAmount plain total={r.partial.current} ccy={m.currency} /> : <FxAmount total={monthly} direction={-1} ccy={base} />}
                       right={
                         r && r.monthlyDrain > 0
-                          ? t('wallet.runway.drain', { amount: flow(-r.monthlyDrain, m.currency, { compact: true }) })
+                          ? t('wallet.runway.drain', { amount: formatTotal(r.partial.monthlyDrain, m.currency, { direction: -1, compact: true }) })
                           : t('wallet.card.subs', { count: liveHere.length })
                       }
-                      rightSub={r && r.monthlyDrain > 0 ? t('wallet.card.subs', { count: liveHere.length }) : cardHint(m, r)}
+                      rightSub={
+                        !r && monthly.incomplete
+                          ? totalNote(monthly)
+                          : r && r.monthlyDrain > 0
+                            ? t('wallet.card.subs', { count: liveHere.length })
+                            : cardHint(m, r)
+                      }
                     />
                   </SortableCard>
                 );
@@ -389,9 +397,9 @@ function MethodSheet({
                 }
                 onClick={() => onOpen(state.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub)}
               >
-                <span className={c.amountInMethod < 0 ? 'green' : undefined}>{flow(-c.amountInMethod, m.currency, { compact: true })}</span>
+                <span className={c.amountInMethod < 0 ? 'green' : undefined}>{formatTotal(c.partial, m.currency, { direction: -1, compact: true })}</span>
                 <b style={{ color: c.balanceAfter < 0 ? 'var(--red)' : 'var(--label)', fontWeight: 600, minWidth: 80 }}>
-                  {money(c.balanceAfter, m.currency, { compact: true })}
+                  {formatTotal(c.balancePartial, m.currency, { compact: true })}
                 </b>
               </Cell>
             ))}

@@ -1,3 +1,4 @@
+import { amountTotal, chargesTotal, formatTotal, sumTotals } from '../../../../shared/fx-total.ts';
 import { copyParts } from '../../components/copy.tsx';
 import { ChargeMethods, chargeMethodIds, currencyTotals, YearLedger, YearMethods } from '../../components/YearLedger.tsx';
 import { Plus } from 'lucide-react';
@@ -50,7 +51,7 @@ export function Transfers({ sub, state, onRow, onAdd }: { sub: Subscription; sta
           return {
             second: kind ? <span className={`dt-kind transfer ${kind}`}>{t(`detail.transfer.kind.${kind}`)}</span> : null,
             orig: copyParts(currencyTotals(ys, (r) => ({ currency: r.tr.currency, amount: -transferSign(r.tr) * r.tr.amount }), flow)),
-            base: Number.isFinite(total) ? flow(total, base) : '—',
+            base: formatTotal(sumTotals(ys.map((r) => amountTotal(-transferSign(r.tr) * r.tr.amount, r.tr.currency, r.v))), base, { direction: 1 }),
             baseClass: total > 0 ? 'dt-in' : undefined,
           };
         }}
@@ -126,7 +127,14 @@ export function Charges({
                   (sum, ccy) => orig(-sum, ccy),
                 ),
               ),
-              base: Number.isFinite(total) ? flow(-total, base) : '—',
+              base: formatTotal(
+                chargesTotal(
+                  state,
+                  ys.map((r) => r.c),
+                ),
+                base,
+                { direction: -1 },
+              ),
               baseClass: total < 0 ? 'dt-in' : undefined,
             };
           }}

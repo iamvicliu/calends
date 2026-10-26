@@ -79,12 +79,26 @@ export function Act({
 }
 
 /** 把详情复制成图片：和弹窗一样的圆角，圆角外透明；去掉顶部按钮 */
-export function detailImage(el: HTMLElement) {
+export async function detailImage(el: HTMLElement) {
   const sheet = el.closest<HTMLElement>('.sheet') ?? el;
-  return snapshot(el, {
-    radius: getComputedStyle(sheet).borderRadius,
-    filter: (n) => !(n instanceof Element && n.matches('.dt-actions, .dt-add')),
-  }).then((b) => b!);
+  const clone = el.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll<HTMLElement>('[data-private-account]').forEach((node) => {
+    node.classList.add('car-private');
+    node.setAttribute('aria-hidden', 'true');
+  });
+  Object.assign(clone.style, { position: 'fixed', left: '-100000px', top: '0', width: `${el.offsetWidth}px`, height: `${el.offsetHeight}px`, margin: '0' });
+  el.parentElement!.appendChild(clone);
+  try {
+    return (await snapshot(clone, {
+      radius: getComputedStyle(sheet).borderRadius,
+      width: el.offsetWidth,
+      height: el.offsetHeight,
+      style: { position: 'static', left: 'auto', top: 'auto' },
+      filter: (n) => !(n instanceof Element && n.matches('.dt-actions, .dt-add')),
+    }))!;
+  } finally {
+    clone.remove();
+  }
 }
 
 export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscription; state: AppState; today: string; onEdit: () => void; onClose: () => void }) {
@@ -159,7 +173,9 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
           }
         />
       )}
-      {sub.cycle.unit !== 'lifetime' && !isStopped(st) && <Act icon={<CircleStop size={15} />} label={t('core.stop.title')} onClick={() => setStopping(true)} />}
+      {sub.cycle.unit !== 'lifetime' && !isStopped(st) && (
+        <Act icon={<CircleStop size={15} />} label={t('core.stop.title')} onClick={() => setStopping(true)} />
+      )}
       {sub.stop?.kind === 'cancel' && (
         <Act icon={<Play size={15} />} label={t('core.stop.restore')} onClick={() => run(() => saveSub(reactivate(sub, today)), t('detail.toast.resumed'))} />
       )}
@@ -221,7 +237,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       <div className="dt-body dt-flow">
         <Kpis sub={sub} state={state} today={today} history={history} />
         {/* 指标下面：本期进度与属性（不加标题），然后是扣款走势、提醒和记录 */}
-        <Summary sub={sub} state={state} today={today} />
+        <Summary key={sub.id} sub={sub} state={state} today={today} />
         {!compact && <Timeline sub={sub} state={state} today={today} history={history} />}
         <Notices sub={sub} state={state} today={today} />
         {/* 合租比扣款记录重要，放在前面 */}

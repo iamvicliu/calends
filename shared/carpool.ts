@@ -1,3 +1,4 @@
+import { chargesTotal, convertedTotal, emptyTotal, scaleTotal, sumTotals } from './fx-total.ts';
 // 合租的账：一年的成本与预计收入、从开始合租起实际付出与收回；成员每次该收多少。
 // 后台合租页与 MCP / AI 助手共用，算出来的数一致。
 import {
@@ -95,7 +96,38 @@ export function carLedger(state: AppState, s: Subscription, today: string) {
   const since = s.share?.since ?? firstPay ?? firstJoin ?? s.start;
   const paid = chargesBetween(s, since, today, today).reduce((a, c) => a + chargeBaseOrNaN(state, c), 0);
   const received = members.flatMap(memberCashFlows).reduce((a, p) => a + memberFlowValue(state, p), 0);
+  const paidTotal = chargesTotal(state, chargesBetween(s, since, today, today));
+  const receivedTotal = sumTotals(members.flatMap(memberCashFlows).map((p) => convertedTotal(state, p.amount, p.currency, p.date)));
+  const yearCostTotal = convertedTotal(state, monthlyGross(cur, today) * 12, cur.currency);
+  const yearRefundTotal = sumTotals(
+    members.flatMap((m) =>
+      m.leaveRefund && m.leaveRefund.date.slice(0, 4) === today.slice(0, 4) && m.leaveRefund.date <= today
+        ? [convertedTotal(state, m.leaveRefund.amount, m.leaveRefund.currency, m.leaveRefund.date)]
+        : [],
+    ),
+  );
+  const yearIncomeTotal = sumTotals([
+    isStopped(effectiveStatus(s, today)) || cur.cycle.unit === 'lifetime'
+      ? emptyTotal()
+      : sumTotals(
+          members
+            .filter((m) => !m.exempt && memberAboard(m, today))
+            .map((m) => {
+              const rate = memberFee(state, s, m, today);
+              return convertedTotal(state, (rate.amount * 12) / memberBillMonths(s, m, today), rate.currency);
+            }),
+        ),
+    scaleTotal(yearRefundTotal, -1),
+  ]);
   return {
+    partial: {
+      paid: paidTotal,
+      received: receivedTotal,
+      net: sumTotals([paidTotal, scaleTotal(receivedTotal, -1)]),
+      yearCost: yearCostTotal,
+      yearIncome: yearIncomeTotal,
+      yearNet: sumTotals([yearCostTotal, scaleTotal(yearIncomeTotal, -1)]),
+    },
     hasRecords: members.some((m) => memberCashFlows(m).length > 0),
     yearCost,
     yearIncome,
@@ -130,7 +162,21 @@ export function carYear(state: AppState, s: Subscription, today: string) {
     )
     .reduce((a, v) => a + v, 0);
   const income = received + expected;
-  return { cost, income, net: income - cost };
+  const costTotal = chargesTotal(state, chargesBetween(s, `${y}-01-01`, `${y}-12-31`, today));
+  const incomeTotal = sumTotals([
+    ...members
+      .flatMap(memberCashFlows)
+      .filter((p) => p.date.slice(0, 4) === y && p.date <= today)
+      .map((p) => convertedTotal(state, p.amount, p.currency, p.date)),
+    ...members
+      .filter((m) => !m.exempt)
+      .flatMap((m) =>
+        memberLedger(s, m, today, ccy, `${y}-12-31`)
+          .periods.filter((p) => !isSettled(p) && p.from.slice(0, 4) === y)
+          .map((p) => convertedTotal(state, p.due, p.currency, p.from)),
+      ),
+  ]);
+  return { cost, income, net: income - cost, partial: { cost: costTotal, income: incomeTotal, net: sumTotals([incomeTotal, scaleTotal(costTotal, -1)]) } };
 }
 
 /** 订阅一期大约几个月，用来把「每期份额」换算成按月 / 季 / 年收的金额 */

@@ -1,3 +1,4 @@
+import { formatTotal, scaleTotal, totalNote } from '../../../../shared/fx-total.ts';
 import { copyParts } from '../../components/copy.tsx';
 import { PersonAvatar, personFor } from '../../components/PersonAvatar.tsx';
 import { useState } from 'react';
@@ -40,7 +41,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const stopped = isStopped(st);
   const next = nextCharge(live, addDays(today, 1));
   const method = state.methods.find((m) => m.id === live.methodId);
-  const { charged, done, received, open, diff, lastIn } = proxyTotals(list);
+  const { done, open, diff, lastIn, partial } = proxyTotals(list);
   // 表格的行：预收的期（还没扣款）在前，然后是已扣款的期，都按日期从新到旧
   const all = [...ahead, ...list];
   const cardCcy = list.find((r) => r.currency !== r.listCurrency)?.currency;
@@ -76,36 +77,43 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             {/* 弹窗里看的是明细：金额都写到分，不用简写 */}
             <Metric
               label={t('proxy.paidPeriods', { count: list.length })}
-              value={flow(-charged, base)}
-              note={list.length ? t('proxy.page.perPeriod', { amount: flow(-charged / list.length, base) }) : undefined}
+              value={formatTotal(partial.charged, base, { direction: -1, main: true })}
+              note={
+                totalNote(partial.charged) ||
+                (list.length
+                  ? t('proxy.page.perPeriod', { amount: formatTotal(scaleTotal(partial.charged, 1 / list.length), base, { direction: -1, average: true }) })
+                  : undefined)
+              }
             />
             <Metric
               label={t('proxy.received')}
-              value={flow(received, base)}
+              value={formatTotal(partial.received, base, { direction: 1, main: true })}
               valueClassName="green"
               note={
                 // 预收的期还没扣款，不计入已收回，在这里单独说一句
-                ahead.length
-                  ? t('proxy.page.prepaid', {
-                      count: ahead.length,
-                      amount: money(
-                        ahead.reduce((a, r) => a + r.receivedBase!, 0),
-                        base,
-                      ),
-                    })
-                  : lastIn
-                    ? t('proxy.page.lastIn', { date: cnDateFull(lastIn) })
-                    : t('proxy.page.noneIn')
+                partial.received.incomplete
+                  ? totalNote(partial.received)
+                  : ahead.length
+                    ? t('proxy.page.prepaid', {
+                        count: ahead.length,
+                        amount: formatTotal(proxyTotals(ahead).partial.received, base),
+                      })
+                    : lastIn
+                      ? t('proxy.page.lastIn', { date: cnDateFull(lastIn) })
+                      : t('proxy.page.noneIn')
               }
             />
             <OwedOrNet list={list} base={base} exact />
             {/* 还有待收时，已收各期的汇差单列；全部结清后第三格就是盈亏，不再重复 */}
-            {open.length > 0 && Math.abs(diff) >= 0.5 && (
+            {open.length > 0 && (Math.abs(diff) >= 0.5 || partial.diff.incomplete) && (
               <Metric
                 label={t('family.strip.profit')}
-                value={flow(diff, base)}
-                valueClassName={diff > 0 ? 'done' : 'loss'}
-                note={t('proxy.page.perPeriod', { amount: flow(diff / done.length, base) })}
+                value={formatTotal(partial.diff, base, { direction: 1, main: true })}
+                valueClassName={partial.diff.incomplete ? undefined : diff > 0 ? 'done' : 'loss'}
+                note={
+                  totalNote(partial.diff) ||
+                  t('proxy.page.perPeriod', { amount: formatTotal(scaleTotal(partial.diff, 1 / done.length), base, { direction: 1, average: true }) })
+                }
               />
             )}
           </MetricCards>
@@ -157,17 +165,14 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                   const d = settled.reduce((a, r) => a + r.receivedBase! - r.chargedBase, 0);
                   return {
                     second: ccys.size === 1 ? flow(-done.reduce((a, r) => a + r.charged, 0), done[0].currency) : '',
-                    extra: flow(-done.reduce((a, r) => a + r.chargedBase, 0), base),
-                    orig: (
-                      <span className="green">
-                        {flow(
-                          settled.reduce((a, r) => a + r.receivedBase!, 0),
-                          base,
-                        )}
-                      </span>
-                    ),
-                    base: settled.length ? (Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base)) : '—',
-                    baseClass: !settled.length || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
+                    extra: formatTotal(proxyTotals(done).partial.charged, base, { direction: -1 }),
+                    orig: <span className="green">{formatTotal(proxyTotals(settled).partial.received, base, { direction: 1 })}</span>,
+                    base: settled.length
+                      ? Math.abs(d) < 0.5
+                        ? t('proxy.table.even')
+                        : formatTotal(proxyTotals(settled).partial.diff, base, { direction: 1 })
+                      : '—',
+                    baseClass: !settled.length || !Number.isFinite(d) || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
                   };
                 }}
                 row={(r) => {
@@ -184,7 +189,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                     extra: flow(-r.chargedBase, base),
                     orig: r.receivedBase == null ? <em className="todo">{t('proxy.table.record')}</em> : <ReceivedCell r={r} base={base} brief />,
                     base: d == null ? '—' : Math.abs(d) < 0.5 ? t('proxy.table.even') : flow(d, base),
-                    baseClass: d == null || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
+                    baseClass: d == null || !Number.isFinite(d) || Math.abs(d) < 0.5 ? 'muted' : d > 0 ? 'gain' : 'loss',
                   };
                 }}
                 rowKey={(r) => r.date}
@@ -365,10 +370,12 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
           foot={
             diff == null || row.status === 'waived'
               ? undefined
-              : t(Math.abs(diff) < 0.5 ? 'proxy.entry.receivedEven' : diff > 0 ? 'proxy.entry.receivedMore' : 'proxy.entry.receivedLess', {
-                  amount: flow(row.receivedBase!, base),
-                  diff: money(Math.abs(diff), base),
-                })
+              : !Number.isFinite(diff)
+                ? t('core.fxIncomplete')
+                : t(Math.abs(diff) < 0.5 ? 'proxy.entry.receivedEven' : diff > 0 ? 'proxy.entry.receivedMore' : 'proxy.entry.receivedLess', {
+                    amount: flow(row.receivedBase!, base),
+                    diff: money(Math.abs(diff), base),
+                  })
           }
         >
           {rec ? (

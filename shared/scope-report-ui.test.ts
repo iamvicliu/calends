@@ -1,6 +1,7 @@
+import * as fxTotals from './fx-total.ts';
 import { readUiSource } from '../scripts/ui-test-source.ts';
 import * as phase2Icons from 'lucide-react';
-import { metricComponents } from '../scripts/ui-test-components.ts';
+import { metricComponents, fxAmountComponent } from '../scripts/ui-test-components.ts';
 import * as transfers from './transfers.ts';
 import * as listScope from './list-scope.ts';
 import { canUseSingleKey } from '../app/src/keyboard.ts';
@@ -71,6 +72,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
       createElement: (type: string | ((p: any) => unknown), props: Node['props'], ...children: unknown[]) =>
         typeof type === 'function' &&
         [
+          'FxAmount',
           'MetricCards',
           'Metric',
           'YearLedger',
@@ -94,6 +96,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...transfers,
     ...format,
     ...fx,
+    ...fxTotals,
     ...reports,
     ...carpool,
     statusOf: carpool.memberStatus,
@@ -189,6 +192,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     ...extra,
   };
   const components = { ...deps, ...metricComponents(deps.React) };
+  Object.assign(components, { FxAmount: fxAmountComponent(deps.React, 'Amount') });
   const exports = new Function(...Object.keys(components), `${result.code.replace(/export /g, '')}; return {${names}};`)(...Object.values(components));
   return {
     prefs,
@@ -358,7 +362,17 @@ test('report changes use unsigned spending direction and omit the current total 
     'Waterfall',
     {},
     {
-      monthMovement: () => ({ from: 100, to: 80, fx: 0, added: 0, expansion: 0, contraction: 0, churned: 20, items: [] }),
+      monthMovement: () => ({
+        partial: { from: fxTotals.amountTotal(100, 'USD', 100), to: fxTotals.amountTotal(80, 'USD', 80) },
+        from: 100,
+        to: 80,
+        fx: 0,
+        added: 0,
+        expansion: 0,
+        contraction: 0,
+        churned: 20,
+        items: [],
+      }),
     },
   );
   const nodes = r.render('Waterfall', { state: st, today, onOpen() {} });
@@ -378,7 +392,17 @@ test('report changes use unsigned spending direction and omit the current total 
     'Waterfall',
     {},
     {
-      monthMovement: () => ({ from: 100, to: 110, fx: 0, added: 30, expansion: 0, contraction: 0, churned: 20, items: [] }),
+      monthMovement: () => ({
+        partial: { from: fxTotals.amountTotal(100, 'USD', 100), to: fxTotals.amountTotal(80, 'USD', 80) },
+        from: 100,
+        to: 110,
+        fx: 0,
+        added: 30,
+        expansion: 0,
+        contraction: 0,
+        churned: 20,
+        items: [],
+      }),
     },
   );
   const mixedNodes = mixed.render('Waterfall', { state: st, today, onOpen() {} });
@@ -2652,8 +2676,183 @@ test('phase2 rendered ledger sections and assistant summaries retain their froze
     st,
     'USD',
   );
-  const normalized = JSON.parse(JSON.stringify(output, (_k, v) => (typeof v === 'function' ? '[handler]' : v)));
+  const normalized = JSON.parse(JSON.stringify(output, (_k, v) => (_k === 'partial' ? undefined : typeof v === 'function' ? '[handler]' : v)));
   const path = new URL('./fixtures/phase2-views.json', import.meta.url);
   if (process.env.CALENDS_UPDATE_FROZEN_VIEWS === '1') writeFileSync(path, JSON.stringify(normalized, null, 2) + '\n');
   assert.deepEqual(normalized, JSON.parse(readFileSync(path, 'utf8')));
+});
+
+test('detail accounts and phone numbers start masked, can be revealed, and copy the full stored value', async () => {
+  for (const [category, account] of [
+    ['Tools', 'fictional@example.invalid'],
+    ['phone', '+65 8123 4567'],
+  ]) {
+    const copied: string[] = [];
+    const state = { ...st, subscriptions: [] };
+    const sub: Subscription = {
+      id: 'private',
+      name: 'Fictional account',
+      category,
+      tags: [],
+      account,
+      price: 10,
+      currency: 'USD',
+      cycle: { unit: 'month', every: 1 },
+      start: '2026-01-01',
+      status: 'active',
+    };
+    const h = harness(
+      '../app/src/views/Detail.tsx',
+      'Summary',
+      {},
+      {
+        presetCat: () => 'phone',
+        detailHistoryEnd,
+        copyText: async (value: string) => {
+          copied.push(value);
+        },
+        Eye: 'Eye',
+        EyeOff: 'EyeOff',
+      },
+    );
+    let nodes = h.render('Summary', { sub, state, today });
+    const value = () => nodes.find((n) => Object.hasOwn(n.props, 'data-private-account'))!;
+    const toggle = () => nodes.find((n) => Object.hasOwn(n.props, 'aria-pressed'))!;
+    assert.equal(value().props.className, 'car-private');
+    assert.equal(toggle().props['aria-label'], 'family.sheet.showPersonal');
+    await nodes.find((n) => n.props.className === 'dt-copy')!.props.onClick();
+    assert.deepEqual(copied, [account]);
+    toggle().props.onClick();
+    nodes = h.render('Summary', { sub, state, today });
+    assert.equal(value().props.className, undefined);
+    assert.equal(toggle().props['aria-label'], 'family.sheet.hidePersonal');
+    toggle().props.onClick();
+    nodes = h.render('Summary', { sub, state, today });
+    assert.equal(value().props.className, 'car-private');
+  }
+});
+
+test('detail PNG masks only a clone and removes it after success or failure while the visible account stays revealed', async () => {
+  for (const failed of [false, true]) {
+    const classes = new Set<string>();
+    let appended = false,
+      removed = false;
+    const value = { classList: { add: (name: string) => classes.add(name) }, setAttribute() {} };
+    const clone = {
+      style: {},
+      querySelectorAll: () => [value],
+      remove: () => {
+        removed = true;
+      },
+    };
+    const source = {
+      offsetWidth: 700,
+      offsetHeight: 1200,
+      closest: () => ({}),
+      cloneNode: () => clone,
+      parentElement: {
+        appendChild: (node: unknown) => {
+          assert.equal(node, clone);
+          appended = true;
+        },
+      },
+    };
+    const image = { fictional: true };
+    const h = harness(
+      '../app/src/views/Detail.tsx',
+      'detailImage',
+      {},
+      {
+        getComputedStyle: () => ({ borderRadius: '16px' }),
+        snapshot: async (node: unknown) => {
+          assert.equal(node, clone);
+          assert.equal(appended, true);
+          assert.equal(classes.has('car-private'), true);
+          if (failed) throw Error('fictional PNG failure');
+          return image;
+        },
+      },
+    );
+    if (failed) await assert.rejects(h.call('detailImage', source), /fictional PNG failure/);
+    else assert.equal(await h.call('detailImage', source), image);
+    assert.equal(removed, true);
+    assert.ok(!('classList' in source), 'masking never mutates the visible source');
+  }
+});
+
+test('a complete original history with missing FX still uses actual monthly and daily averages', () => {
+  const sub: Subscription = {
+    id: 'native-average',
+    name: 'Fictional native average',
+    category: 'Tools',
+    tags: [],
+    price: 27,
+    currency: 'XCD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2025-11-25',
+    status: 'active',
+  };
+  const date = '2026-10-25';
+  const state = { ...st, subscriptions: [sub] };
+  const h = harness(
+    '../app/src/views/Detail.tsx',
+    'Kpis',
+    {},
+    {
+      detailForecast,
+      detailHistoryEnd,
+      toBase: (s: AppState, v: number, c: string) => fx.toBaseOrNaN(s, v, c),
+    },
+  );
+  const nodes = h.render('Kpis', { sub, state, today: date, history: billing.chargesBetween(sub, sub.start, date, date) });
+  const text = JSON.stringify(nodes);
+  assert.ok(text.includes('detail.stats.perMonth'));
+  assert.ok(!text.includes('detail.kpi.expectedMonthly'));
+  assert.ok(text.includes('XCD'));
+});
+
+test('incomplete proxy net keeps known receipt and native debit without assigning a profit or loss color', () => {
+  const sub: Subscription = {
+    id: 'native-proxy-net',
+    name: 'Fictional incomplete net',
+    category: 'Tools',
+    tags: [],
+    price: 27,
+    currency: 'XCD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-10-01',
+    status: 'active',
+    proxy: { forName: 'Fictional', receipts: [{ id: 'r', date: '2026-10-01', amount: 8, currency: 'USD', periods: ['2026-10-01'] }] },
+  };
+  const state = { ...st, subscriptions: [sub] };
+  const list = proxy.proxyRows(state, sub, today);
+  const h = harness('../app/src/views/Proxy.tsx', 'OwedOrNet');
+  const nodes = h.render('OwedOrNet', { list, base: 'USD' });
+  assert.ok(!nodes.some((n) => n.props.className === 'metric-value loss' || n.props.className === 'metric-value done'));
+  assert.ok(JSON.stringify(nodes).includes('core.fxUnconverted'));
+  assert.equal(proxy.proxyTotals(list).partial.diff.unconverted.XCD, -27);
+});
+
+test('全缺汇率的代付待收显示原币且不加约等号，完整折算仍保留估算标记', () => {
+  const h = harness('../app/src/views/Proxy.tsx', 'OwedOrNet');
+  const sub: Subscription = {
+    id: 'fx-owed',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 27,
+    currency: 'XCD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-10-01',
+    status: 'active',
+    proxy: { forName: 'Fictional' },
+  };
+  const state = { ...st, settings: { ...st.settings, baseCurrency: 'USD' }, subscriptions: [sub] };
+  const missing = JSON.stringify(h.render('OwedOrNet', { list: proxy.proxyRows(state, sub, today), base: 'USD' }).map((n) => n.children));
+  assert.match(missing, /XCD/);
+  assert.doesNotMatch(missing, /≈/);
+  const complete = JSON.stringify(
+    h.render('OwedOrNet', { list: proxy.proxyRows(state, { ...sub, currency: 'USD' }, today), base: 'USD' }).map((n) => n.children),
+  );
+  assert.match(complete, /≈/);
 });

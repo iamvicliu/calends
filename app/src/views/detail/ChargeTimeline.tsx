@@ -1,3 +1,4 @@
+import { amountTotal, chargesTotal, formatTotal, sumTotals } from '../../../../shared/fx-total.ts';
 import { copyParts } from '../../components/copy.tsx';
 import { chargeMethodId } from '../../../../shared/billing.ts';
 import { useState } from 'react';
@@ -128,7 +129,9 @@ export function Timeline({ sub, state, today, history }: { sub: Subscription; st
     ),
     aside: methodOf(state, v.methodId)?.name,
   }));
-  const planned = each.filter((r) => r.future).reduce((a, r) => a + r.v, 0);
+  const chartTotal = (list: Charge[]) =>
+    ccy === base ? chargesTotal(state, list, ccy) : sumTotals(list.map((c) => amountTotal(c.amount, c.currency, c.amount)));
+  const planned = chartTotal(each.filter((r) => r.future).map((r) => r.c));
 
   return (
     <Panel
@@ -163,7 +166,7 @@ export function Timeline({ sub, state, today, history }: { sub: Subscription; st
         tip={(idx, summed) => {
           // 汇总柱（太密时按月、季、年合计）：写起止日期、笔数与合计
           if (summed && idx.length > 1) {
-            const sum = idx.reduce((a, i) => a + rows[i].v, 0);
+            const sum = chartTotal(idx.map((i) => rows[i].c));
             return (
               <>
                 <div className="cc-tip-h">
@@ -174,14 +177,14 @@ export function Timeline({ sub, state, today, history }: { sub: Subscription; st
                 <div className="cc-tip-r">
                   <i className={rows[idx[0]].future ? 'k-f' : 'k-v'} />
                   <span>{t('detail.stats.count', { count: idx.length })}</span>
-                  <b>{Number.isFinite(sum) ? flow(-sum, ccy) : '—'}</b>
+                  <b>{formatTotal(sum, ccy, { direction: -1 })}</b>
                 </div>
               </>
             );
           }
           // 挨在一起的几笔（换方案、换卡、并行方案）：逐笔列出
           if (idx.length > 1) {
-            const sum = idx.reduce((a, i) => a + rows[i].v, 0);
+            const sum = chartTotal(idx.map((i) => rows[i].c));
             return (
               <>
                 <div className="cc-tip-h">
@@ -200,11 +203,11 @@ export function Timeline({ sub, state, today, history }: { sub: Subscription; st
                             .join('\n'),
                         )}
                       </span>
-                      <b>{Number.isFinite(r.v) ? flow(-r.v, ccy) : '—'}</b>
+                      <b>{formatTotal(chartTotal([r.c]), ccy, { direction: -1 })}</b>
                     </div>
                   );
                 })}
-                <div className="cc-tip-f">{Number.isFinite(sum) ? flow(-sum, ccy) : '—'}</div>
+                <div className="cc-tip-f">{formatTotal(sum, ccy, { direction: -1 })}</div>
               </>
             );
           }
@@ -222,7 +225,7 @@ export function Timeline({ sub, state, today, history }: { sub: Subscription; st
               <div className="cc-tip-r">
                 <i className={r.future ? 'k-f' : 'k-v'} />
                 <span>{r.future ? t('detail.timeline.planned') : t('detail.chart.perCharge')}</span>
-                <b>{Number.isFinite(r.v) ? flow(-r.v, ccy) : '—'}</b>
+                <b>{formatTotal(chartTotal([r.c]), ccy, { direction: -1 })}</b>
               </div>
               {r.full != null && (
                 <div className="cc-tip-r">
@@ -284,7 +287,7 @@ export function Timeline({ sub, state, today, history }: { sub: Subscription; st
           <span>
             <i className="k-f" />
             {t('detail.timeline.planned')}
-            {copyParts(t('detail.upcoming.total', { count: future.length, amount: Number.isFinite(planned) ? flow(-planned, ccy) : '—' }))}
+            {copyParts(t('detail.upcoming.total', { count: future.length, amount: formatTotal(planned, ccy, { direction: -1 }) }))}
           </span>
         )}
       </div>

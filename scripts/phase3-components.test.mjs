@@ -1,3 +1,4 @@
+import * as fxTotals from '../shared/fx-total.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { transformSync } from 'oxc-transform-react';
@@ -6,6 +7,7 @@ import { currentPhase } from '../shared/billing.ts';
 
 const React = { createElement: (type, props, ...children) => ({ type, props: { ...props, children } }), Fragment: 'fragment' };
 function component(file, name, deps) {
+  deps = { ...fxTotals, ...deps };
   const code = transformSync(name + '.tsx', extractUiFunction(new URL('../app/src/views/' + file, import.meta.url), name), {
     lang: 'tsx',
     jsx: { runtime: 'classic' },
@@ -25,7 +27,7 @@ test('proxy card price stays in the current phase when a future plan is schedule
     proxyAhead: noop,
     nextCharge: noop,
     addDays: noop,
-    proxyTotals: () => ({ charged: 0, received: 0 }),
+    proxyTotals: () => ({ charged: 0, received: 0, partial: { charged: fxTotals.emptyTotal(), received: fxTotals.emptyTotal() } }),
     effectiveStatus: () => 'active',
     isStopped: () => false,
     proxyStatus: () => ['', ''],
@@ -80,7 +82,7 @@ test('card and row badge rules distinguish empty owners, joined members and sche
 });
 
 test('incomplete annual totals keep finite receipt decoration and unavailable percentages', () => {
-  const r = { total: NaN, charges: 3, items: [], newSubs: [], ended: [] };
+  const r = { partial: { total: fxTotals.emptyTotal(), bySub: {}, byMonth: {} }, total: NaN, charges: 3, items: [], newSubs: [], ended: [] };
   const Receipt = component('Review.tsx', 'Receipt', {
     copyParts: (v) => v,
     t: String,
@@ -130,7 +132,7 @@ test('incomplete annual totals keep finite receipt decoration and unavailable pe
     useState: (v) => [v, () => {}],
     useMemo: (fn) => fn(),
     yearReview: () => r,
-    totals: () => ({ mrr: NaN }),
+    totals: () => ({ mrr: NaN, partial: { mrr: fxTotals.emptyTotal() } }),
     cancelSavings: () => ({ items: [] }),
     firstStart: () => '2026-01-01',
     paymentMethodGroups: () => [],
