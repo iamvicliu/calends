@@ -78,3 +78,73 @@ test('card and row badge rules distinguish empty owners, joined members and sche
   assert.ok(render({ testStatus: 'upcoming' }).includes('list.status.upcoming'));
   assert.ok(!render({ testStatus: 'upcoming', testUp: {} }).includes('list.status.upcoming'));
 });
+
+test('incomplete annual totals keep finite receipt decoration and unavailable percentages', () => {
+  const r = { total: NaN, charges: 3, items: [], newSubs: [], ended: [] };
+  const Receipt = component('Review.tsx', 'Receipt', {
+    copyParts: (v) => v,
+    t: String,
+    Line: 'line',
+    ReviewLoss: 'loss',
+    location: { host: 'fictional.invalid' },
+  });
+  const tree = Receipt({
+    r,
+    year: '2026',
+    whose: '',
+    ongoing: true,
+    m: (v) => (Number.isFinite(v) ? String(v) : '—'),
+    hide: false,
+    pct: () => '—',
+    byMethod: [],
+    today: '2026-10-25',
+  });
+  const nodes = [];
+  const walk = (n) => {
+    if (!n || typeof n !== 'object') return;
+    nodes.push(n);
+    for (const child of n.props?.children?.flat(Infinity) ?? []) walk(child);
+  };
+  walk(tree);
+  const bars = nodes.find((n) => n.props?.className === 'rp-bars');
+  assert.ok(bars.props.children.flat(Infinity).every((n) => Number.isFinite(n.props.style.width)));
+  for (const total of [-100, 0]) {
+    const other = Receipt({
+      r: { ...r, total },
+      year: '2026',
+      whose: '',
+      ongoing: true,
+      m: String,
+      hide: false,
+      pct: String,
+      byMethod: [],
+      today: '2026-10-25',
+    });
+    nodes.length = 0;
+    walk(other);
+    const code = nodes.find((n) => n.props?.className === 'rp-bars');
+    assert.ok(code.props.children.flat(Infinity).every((n) => n.props.style.width >= 1));
+  }
+
+  const Review = component('Review.tsx', 'Review', {
+    useState: (v) => [v, () => {}],
+    useMemo: (fn) => fn(),
+    yearReview: () => r,
+    totals: () => ({ mrr: NaN }),
+    cancelSavings: () => ({ items: [] }),
+    firstStart: () => '2026-01-01',
+    paymentMethodGroups: () => [],
+    allCharges: () => [],
+    t: String,
+    STYLES: () => [],
+    ShareSheet: 'share',
+    Seg: 'seg',
+    Receipt: 'receipt',
+    Poster: 'poster',
+    Card: 'card',
+    Stars: 'stars',
+  });
+  const shared = Review({ state: { methods: [], settings: { baseCurrency: 'USD' } }, today: '2026-10-25', onClose() {} });
+  const poster = shared.props.render('poster', { hide: true, m: String });
+  assert.equal(poster.props.pct(10), '—');
+});

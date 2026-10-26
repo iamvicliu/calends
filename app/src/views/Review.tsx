@@ -51,7 +51,7 @@ export function Review({ state, today, onClose }: { state: AppState; today: stri
   const saved = cancelSavings(state, today)
     .items.filter((x) => x.since.startsWith(year))
     .reduce((a, x) => a + x.saved, 0);
-  const pct = (v: number) => (Number.isFinite(v) ? `${r.total > 0 ? Math.round((v / r.total) * 100) : 0}%` : '—');
+  const pct = (v: number) => (Number.isFinite(v) && Number.isFinite(r.total) ? `${r.total > 0 ? Math.round((v / r.total) * 100) : 0}%` : '—');
   const base = state.settings.baseCurrency;
   const byMethod = useMemo(() => {
     const from = `${year}-01-01`;
@@ -125,7 +125,7 @@ function Receipt({ r, year, whose, ongoing, m, hide, pct, byMethod, today }: Ctx
   const items = r.items.slice(0, 12);
   const rest = r.items.slice(12);
   const restSum = rest.reduce((a, x) => a + x.sum, 0);
-  const bars = Array.from({ length: 52 }, (_, i) => 1 + ((Math.round(r.total) * 7 + r.charges * 13 + i * 31) % 4));
+  const bars = Array.from({ length: 52 }, (_, i) => 1 + ((Math.abs(Math.round(Number.isFinite(r.total) ? r.total : 0)) * 7 + r.charges * 13 + i * 31) % 4));
   const amt = (v: number) => (hide ? pct(v) : m(-v));
   const no = `${year}${String(r.charges).padStart(4, '0')}`;
   return (
