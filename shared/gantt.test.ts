@@ -29,6 +29,9 @@ test('时间窗口保留过去与未来空间，兼容月末、闰年和跨年',
   assert.deepEqual(gantt.ganttWindow('3y', '2026-10-21'), { start: '2024-04-21', end: '2027-04-21' });
   assert.deepEqual(gantt.ganttWindow('all', '2026-10-21', '2021-07-18'), { start: '2021-07-01', end: '2027-04-21' });
   assert.deepEqual(gantt.ganttWindow('all', '2026-10-21'), { start: '2026-10-01', end: '2027-04-21' });
+  // 「全部」刚好装下这一批：都已结束时停在最后那个月，不拉到今天
+  assert.deepEqual(gantt.ganttWindow('all', '2026-10-21', '2021-07-18', '2023-10-29'), { start: '2021-07-01', end: '2023-11-01' });
+  assert.deepEqual(gantt.ganttWindow('all', '2026-10-21', '2024-03-01', '2027-12-15'), { start: '2024-03-01', end: '2028-01-01' });
   assert.deepEqual(gantt.ganttWindow('3m', '2024-01-31'), { start: '2023-11-30', end: '2024-02-29' });
   for (const today of ['2024-02-29', '2025-01-31', '2026-08-31', '2026-12-31']) {
     for (const zoom of ['3m', '6m', '1y', '3y'] as const) {

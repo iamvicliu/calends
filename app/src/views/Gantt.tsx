@@ -178,7 +178,15 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
         ),
         gaps,
         first: segs[0].from,
-        last: segs.reduce((m, g) => (g.to > m ? g.to : m), segs[0].to),
+        // 实际画到的最晚日期：已付未用段末尾、进行中的下一期末尾（买断只有一个点）、或结束日；「全部」视图据此收尾
+        last: segs
+          .map((g) => {
+            const wasted = !state.readonly && g.v.stop && !transferredStop(g.v) ? (stopSummary(g.v, today)?.wastedDays ?? 0) : 0;
+            if (wasted > 0) return addDays(g.v.stop!.date, wasted);
+            if (!g.open) return g.to;
+            return g.v.cycle.unit === 'lifetime' ? g.from : ganttOpenEnd(g.v, today);
+          })
+          .reduce((m, d) => (d > m ? d : m)),
       };
     });
     // 每个订阅各占一行、互相独立；顺序跟随页面顶部的排序与筛选
@@ -215,7 +223,8 @@ export function Gantt({ rows: subs, state, today, onOpen }: { rows: Subscription
   }, [order]);
 
   const earliest = rows.reduce((m, r) => (r.first < m ? r.first : m), today);
-  const { start: baseStart, end: baseEnd } = ganttWindow(zoom, today, earliest);
+  const latest = rows.length ? rows.reduce((m, r) => (r.last > m ? r.last : m), rows[0].last) : today;
+  const { start: baseStart, end: baseEnd } = ganttWindow(zoom, today, earliest, latest);
   const offset = zoom === 'all' ? 0 : Math.round(pan);
   const start = addDays(baseStart, offset);
   const end = addDays(baseEnd, offset);

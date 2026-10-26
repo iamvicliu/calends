@@ -32,7 +32,8 @@ export function ganttLabelBounds(
 }
 
 /** 今天留在中偏右；短范围仍保留足够的未来空间。全部从最早一笔的月初开始。 */
-export function ganttWindow(zoom: GanttZoom, today: string, earliest = today): { start: string; end: string } {
+/** 「全部」刚好装下当前这一批：从最早开始的那个月，到最晚画到的日期所在月的月末 */
+export function ganttWindow(zoom: GanttZoom, today: string, earliest = today, latest?: string): { start: string; end: string } {
   switch (zoom) {
     case '3m':
       return { start: addMonths(today, -2), end: addMonths(today, 1) };
@@ -43,7 +44,7 @@ export function ganttWindow(zoom: GanttZoom, today: string, earliest = today): {
     case '3y':
       return { start: addMonths(today, -30), end: addMonths(today, 6) };
     case 'all':
-      return { start: `${earliest.slice(0, 7)}-01`, end: addMonths(today, 6) };
+      return { start: `${earliest.slice(0, 7)}-01`, end: latest ? addMonths(`${latest.slice(0, 7)}-01`, 1) : addMonths(today, 6) };
   }
 }
 
