@@ -32,8 +32,9 @@ export function PaymentSheet({
   edit?: { pay: Payment; index: number; phase?: string };
   onClose: () => void;
 }) {
-  const [date, setDate] = useState(edit?.pay.date ?? today);
-  const [kind, setKind] = useState<Kind>(edit?.pay.kind ?? 'charge');
+  const existingPay = edit?.pay;
+  const [date, setDate] = useState(existingPay?.date ?? today);
+  const [kind, setKind] = useState<Kind>(existingPay?.kind ?? 'charge');
   // 换区后新旧两段并行的日子：要选这笔记在哪一段（缺省为最晚开始的那段，修改时为原记录所在的段）
   const lanes = sub.phases?.length ? (kind === 'refund' ? phaseSubs(sub).filter((v) => v.start <= date) : activePhases(sub, date)) : [];
   const [lane, setLane] = useState(edit?.phase);
@@ -41,18 +42,18 @@ export function PaymentSheet({
   const pick = lanes.length > 1 ? phase.start : edit?.phase;
   const ccy = phase.currency;
   const [amount, setAmount] = useState(edit ? String(Math.abs(edit.pay.amount)) : String(phase.price));
-  const [settled, setSettled] = useState(edit?.pay.settled ? String(Math.abs(edit.pay.settled.amount)) : '');
-  const [settledCcy, setSettledCcy] = useState(edit?.pay.settled?.currency ?? 'USD');
-  const [note, setNote] = useState(edit?.pay.note ?? '');
+  const [settled, setSettled] = useState(existingPay?.settled ? String(Math.abs(existingPay.settled.amount)) : '');
+  const [settledCcy, setSettledCcy] = useState(existingPay?.settled?.currency ?? 'USD');
+  const [note, setNote] = useState(existingPay?.note ?? '');
   const sign = kind === 'refund' ? -1 : 1;
   // 支付方式：缺省为这一笔单独记的，否则是所属这一段的；换了卡时选只改这一笔，还是整段一起改
-  const [method, setMethod] = useState(edit?.pay.methodId ?? phase.methodId);
-  const changed = method !== (edit?.pay.methodId ?? phase.methodId);
+  const [method, setMethod] = useState(existingPay?.methodId ?? phase.methodId);
+  const changed = method !== (existingPay?.methodId ?? phase.methodId);
   const [scope, setScope] = useState<'one' | 'phase'>(phase.methodId ? 'one' : 'phase');
   const phaseCount = chargesBetween(phase, phase.start, today, today).length;
   // 资金拆分：一笔订单由几个来源合付；金额按订阅币种，合计等于本笔
   const [split, setSplit] = useState<Array<{ methodId?: string; amount: string }> | null>(
-    edit?.pay.funding?.length ? edit.pay.funding.map((f) => ({ methodId: f.methodId, amount: String(Math.abs(f.amount)) })) : null,
+    existingPay?.funding?.length ? existingPay.funding.map((f) => ({ methodId: f.methodId, amount: String(Math.abs(f.amount)) })) : null,
   );
   const splitSum = (split ?? []).reduce((a, x) => a + (Number(x.amount) || 0), 0);
   // 差额按这一段币种的小数位取整（日元等没有小数）
@@ -73,7 +74,7 @@ export function PaymentSheet({
       kind: kind === 'charge' ? undefined : kind,
       settled: settled !== '' && Number(settled) >= 0 ? { amount: sign * Number(settled), currency: settledCcy } : undefined,
       note: note.trim() || undefined,
-      methodId: split ? undefined : changed ? (scope === 'one' && method !== phase.methodId ? method : undefined) : edit?.pay.methodId,
+      methodId: split ? undefined : changed ? (scope === 'one' && method !== phase.methodId ? method : undefined) : existingPay?.methodId,
       // 只剩一个来源没填金额时，它补上差额；其余校验（来源不同、合计相等）由 savePayment 统一做
       // 没选来源也没填金额的空行直接忽略
       funding: split
