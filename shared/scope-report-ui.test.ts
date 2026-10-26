@@ -1957,6 +1957,8 @@ test('person avatar drafts remain unsaved until Save; server field order does no
     {
       ...people,
       PERSON_COLORS,
+      Act: 'Act',
+      Pencil: 'Pencil',
       Sheet: 'Sheet',
       ContactField: 'ContactField',
       contactText: () => '',

@@ -1,5 +1,7 @@
 import { popupOpen, sheetSubmitKey } from '../keyboard.ts';
 import { useRef, useState } from 'react';
+import { Pencil } from 'lucide-react';
+import { Act } from './Detail.tsx';
 import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { compressAvatar } from '../handoff.ts';
 import { flow, cnDateAuto, money } from '../../../shared/format.ts';
@@ -87,6 +89,7 @@ export function PersonSheet({
   const [entry, setEntry] = useState<{ s: Subscription; row: ReturnType<typeof proxyRows>[number] } | null>(null);
   const ro = !!state.readonly;
   const fileInput = useRef<HTMLInputElement>(null);
+  const profileName = useRef<HTMLInputElement>(null);
   const busyRef = useRef(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const uploadAvatar = async (file?: File) => {
@@ -155,7 +158,7 @@ export function PersonSheet({
     const s = live(i.sub);
     if (i.kind === 'share') {
       const m = s.share?.members.find((x) => x.id === i.member!.id);
-      if (m) setMember({ s, m });
+      if (m) setMember({ s, m, collect: false });
     } else setLedger(s);
   };
 
@@ -164,6 +167,19 @@ export function PersonSheet({
       narrow
       title={l.person.name}
       onClose={onClose}
+      actions={
+        stored && !ro ? (
+          <Act
+            primary
+            icon={<Pencil size={15} />}
+            label={t('detail.action.edit')}
+            onClick={() => {
+              profileName.current?.scrollIntoView({ block: 'center' });
+              profileName.current?.focus({ preventScroll: true });
+            }}
+          />
+        ) : undefined
+      }
       foot={
         stored && !ro ? (
           <>
@@ -317,13 +333,14 @@ export function PersonSheet({
                         ) : (
                           <button
                             type="button"
-                            className="pp-account-value text-ellipsis"
+                            className="pp-account-value icon-text"
                             disabled={ro || saving || !stored}
                             aria-label={`${i.sub.name}\n${t('family.member.editAccount')}`}
                             title={accountValue(i).trim() || t('family.member.accountEmpty')}
                             onClick={() => setEditingAccount(accountKey(i))}
                           >
-                            {accountValue(i).trim() || t('family.member.accountEmpty')}
+                            <span className="text-ellipsis">{accountValue(i).trim() || t('family.member.accountEmpty')}</span>
+                            {!ro && stored && <Pencil size={14} />}
                           </button>
                         )}
                         {accountValue(i).trim() && editingAccount !== accountKey(i) && (
@@ -375,7 +392,7 @@ export function PersonSheet({
         {stored && (
           <Group title={t('people.sheet.profile')} foot={refs > 1 ? t('people.sheet.syncFoot', { count: refs }) : undefined}>
             <Cell label={t('family.member.name')}>
-              <input value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
+              <input ref={profileName} value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
             </Cell>
             <Cell label={t('family.member.contact')}>
               <ContactField
