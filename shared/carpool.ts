@@ -375,9 +375,30 @@ export function followCarRule(state: AppState, s: Subscription, m: ShareMember, 
     ? plain
     : changeMemberFee(state, s, plain, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
   const day = nextCollectionDay(s, rule.billEvery, addDays(from, -1));
-  if (memberSince(s, next) >= day || (next.left && next.left <= day)) return next;
-  if (memberPeriods(s, next, day, s.currency).some((p) => p.from === day)) return next;
-  return { ...next, restarts: [...(next.restarts ?? []), day].sort() };
+  const aligned =
+    memberSince(s, next) >= day || (next.left && next.left <= day) || memberPeriods(s, next, day, s.currency).some((p) => p.from === day)
+      ? next
+      : { ...next, restarts: [...(next.restarts ?? []), day].sort() };
+  return dropReshaped(s, m, aligned);
+}
+
+/**
+ * 对齐后起止变了的期：没有金额的期初结清和免收不再盖住它（原来盖的是三个月，不能变成盖半年）；
+ * 实收的钱留在原来的期上，由用户自己调整
+ */
+export function dropReshaped(s: Subscription, before: ShareMember, after: ShareMember): ShareMember {
+  const keys = [...(before.receipts ?? []), ...(before.waivers ?? [])].flatMap((r) => r.periods);
+  if (!keys.length) return after;
+  const last = keys.sort().at(-1)!;
+  const span = (m: ShareMember) => new Map(memberPeriods(s, m, last, s.currency).map((p) => [p.key, p.until]));
+  const was = span(before);
+  const now = span(after);
+  const reshaped = (k: string) => was.has(k) && was.get(k) !== now.get(k);
+  if (!keys.some(reshaped)) return after;
+  const keep = <T extends { periods: string[] }>(r: T) => ({ ...r, periods: r.periods.filter((k) => !reshaped(k)) });
+  const receipts = after.receipts?.map((r) => (r.opening ? keep(r) : r)).filter((r) => r.periods.length);
+  const waivers = after.waivers?.map(keep).filter((w) => w.periods.length);
+  return { ...after, receipts: receipts?.length ? receipts : undefined, waivers: waivers?.length ? waivers : undefined };
 }
 
 /** 几期应收的合计：金额折成第一期的币种相加（收款表单按选中的期预填金额） */

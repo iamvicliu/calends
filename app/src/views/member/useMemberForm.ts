@@ -25,6 +25,7 @@ import {
   waiveExemptSpan,
   memberPaidThrough,
   nextCollectionDay,
+  dropReshaped,
 } from '../../../../shared/carpool.ts';
 
 import { t } from '../../../../shared/i18n.ts';
@@ -100,7 +101,11 @@ export function useMemberForm({
   const withFee = (m: ShareMember): ShareMember => {
     if (mode === 'exempt') return { ...m, exempt: true };
     const base = { ...m, exempt: undefined };
-    if (mode === 'follow') return isNew || initialMode !== 'follow' ? followCarRule(state, s, base, start, today) : { ...base, custom: undefined };
+    // 对齐车的节奏会改动期初结清、免收盖住的期，以账本里最新的记录为准
+    if (mode === 'follow')
+      return isNew || initialMode !== 'follow'
+        ? followCarRule(state, s, { ...base, receipts: member?.receipts, waivers: member?.waivers }, start, today)
+        : { ...base, custom: undefined };
     const custom = { ...base, custom: true as const };
     return feeEdited ? changeMemberFee(state, s, custom, { from: start, fee: fee.amount, currency: fee.currency, billEvery: fee.billEvery }, today) : custom;
   };
@@ -116,6 +121,7 @@ export function useMemberForm({
   const bridgeFull = bridgeAt ? memberRate(s, aligned, bridgeAt.from, collectCcy).amount : 0;
   const bridge = bridgeAt && bridgeAt.due < bridgeFull ? { ...bridgeAt, full: bridgeFull } : undefined;
   const [bridgeDue, setBridgeDue] = useState<number | undefined>(() => f.periodDues?.find((d) => d.from === bridgeAt?.from)?.amount);
+  const realigned = !isNew && mode === 'follow' && initialMode !== 'follow';
   const draft = (): ShareMember => {
     let m = aligned;
     if (bridge) {
@@ -124,7 +130,7 @@ export function useMemberForm({
       m = { ...m, periodDues: dues.length ? dues : undefined };
     }
     // 收款、免收以账本为准：收款表单另行保存
-    return { ...m, receipts: member?.receipts, waivers: member?.waivers };
+    return realigned ? m : { ...m, receipts: member?.receipts, waivers: member?.waivers };
   };
   const next = draft();
   const ledger = memberLedgerAhead(state, s, next, today);
@@ -202,7 +208,9 @@ export function useMemberForm({
         const stored = sh.members.find((x) => x.id === next.id);
         const base: ShareMember = { ...next, name: f.name.trim(), account: f.account?.trim() || undefined, personId: link.id };
         // 收款、免收以账本里最新的为准（期间可能在收款表单里记过），只叠加首笔收款
-        const opened = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
+        const latest = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
+        // 改回跟随车对齐了节奏：起止变了的期不再被期初结清、免收盖住
+        const opened = realigned && stored ? dropReshaped(current, stored, latest) : latest;
         const added: ShareMember =
           isNew && firstPay
             ? {

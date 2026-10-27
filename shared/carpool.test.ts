@@ -581,3 +581,23 @@ test('单独定价的期：对齐车的节奏截短的那期可以收整期，�
   // 不分摊时单独定价也不收
   assert.equal(memberPeriods(s, { ...own, exempt: true, periodDues: [{ from: '2026-10-20', amount: 44 }] }, '2027-02-01', 'CNY')[0].due, 0);
 });
+
+test('改回跟随车：起止变了的期不再被期初结清、免收盖住，实收不动', () => {
+  const s = ruleCar();
+  const own = {
+    id: 'e',
+    name: 'E',
+    share: 7.33,
+    fee: 44,
+    feeCurrency: 'CNY',
+    billEvery: 6,
+    joined: '2026-10-20',
+    restarts: ['2027-04-21'],
+    receipts: [{ id: 'o', date: '2026-10-20', amount: 0, currency: 'CNY', periods: ['2026-10-20', '2027-01-17'], opening: true }],
+  };
+  s.share!.members.push(own);
+  const m = followCarRule(state, s, own, today, today);
+  assert.deepEqual(m.receipts?.[0].periods, ['2026-10-20']);
+  const paid = { ...own, receipts: [{ ...own.receipts[0], amount: 44, opening: undefined }] };
+  assert.deepEqual(followCarRule(state, s, paid, today, today).receipts?.[0].periods, ['2026-10-20', '2027-01-17']);
+});
