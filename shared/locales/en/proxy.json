@@ -129,5 +129,6 @@
     "title": "Convert {name} to proxy payment",
     "saved": "Converted to proxy payment",
     "changed": "This subscription was changed or deleted. Reopen it and try again."
-  }
+  },
+  "stop": "Stop paying for them"
 }

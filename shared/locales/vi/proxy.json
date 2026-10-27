@@ -113,5 +113,6 @@
     "title": "Chuyển {name} sang thanh toán hộ",
     "saved": "Đã chuyển sang thanh toán hộ",
     "changed": "Gói đăng ký này đã bị thay đổi hoặc xóa. Hãy mở lại và thử lại."
-  }
+  },
+  "stop": "Ngừng trả hộ"
 }

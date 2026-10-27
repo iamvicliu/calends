@@ -16,7 +16,9 @@ import { MoneyInput, useSubmit } from '../../components/inputs.tsx';
 import { NameLink, PayBadge, StatusPill, SubIcon } from '../../components/marks.tsx';
 import { Sheet } from '../../components/overlays.tsx';
 import { ConfirmButton } from '../../components/ConfirmButton.tsx';
-import { Eye, EyeOff, Plus } from 'lucide-react';
+import { CircleStop, Eye, EyeOff, Plus } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { StopPanel } from '../../components/StopPanel.tsx';
 import { contactText } from '../../components/Contact.tsx';
 import { getState, saveSub } from '../../store.ts';
 import { run } from '../../toast.ts';
@@ -41,6 +43,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   const ahead = proxyAhead(state, live, today);
   const [edit, setEdit] = useState<Row | null>(null);
   const [adding, setAdding] = useState(false);
+  const [stopping, setStopping] = useState(false);
   const px = live.proxy!;
   const st = effectiveStatus(live, today);
   const stopped = isStopped(st);
@@ -242,8 +245,35 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               <div className="muted dt-import-note">{t('proxy.table.none')}</div>
             )}
           </Panel>
+          {/* 不用绕回订阅详情：在这里直接停止代付，与订阅详情是同一个停止面板 */}
+          {live.cycle.unit !== 'lifetime' && !stopped && (
+            <div className="dt-foot" data-snapshot-hide>
+              <button className="dt-btn" onClick={() => setStopping(true)}>
+                <CircleStop size={15} /> {t('proxy.stop')}
+              </button>
+            </div>
+          )}
         </div>
       </div>
+      {stopping &&
+        createPortal(
+          <Sheet title={t('proxy.stop')} narrow onClose={() => setStopping(false)}>
+            <StopPanel
+              sub={live}
+              today={today}
+              onApply={(next) =>
+                run(
+                  async () => {
+                    await saveSub(next);
+                    setStopping(false);
+                  },
+                  next.stop ? t('core.stop.stoppedDone') : next.end ? t('core.stop.nonrenewDone', { date: cnDateFull(next.end) }) : t('detail.toast.resumed'),
+                )
+              }
+            />
+          </Sheet>,
+          document.body,
+        )}
       {edit && <EntrySheet state={state} s={live} row={edit} onClose={() => setEdit(null)} />}
       {adding && <ReceiptSheet state={state} s={live} onClose={() => setAdding(false)} />}
     </DetailSheet>

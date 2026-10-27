@@ -129,5 +129,6 @@
     "title": "{name} in Zahlung für andere umwandeln",
     "saved": "In Zahlung für andere umgewandelt",
     "changed": "Dieses Abo wurde geändert oder gelöscht. Öffne es erneut und versuche es noch einmal."
-  }
+  },
+  "stop": "Stellvertretende Zahlung beenden"
 }

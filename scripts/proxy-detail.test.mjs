@@ -90,8 +90,12 @@ test('proxy privacy masks identity and notes, suppresses period tooltips, and re
     'Eye',
     'EyeOff',
     'CopyImageButton',
+    'CircleStop',
+    'StopPanel',
+    'Sheet',
   ])
     deps[name] = name;
+  deps.createPortal = (n) => n;
   const Ledger = compile('proxy/sheets.tsx', 'LedgerSheet', deps);
   const render = () => {
     cursor = 0;
@@ -107,6 +111,8 @@ test('proxy privacy masks identity and notes, suppresses period tooltips, and re
     });
   };
   let tree = render();
+  // 代付详情底部可直接停止代付，不必绕回订阅详情
+  assert.ok(nodes(tree, 'button').some((b) => React.Children.toArray(b.props.children).includes('proxy.stop')));
   let head = nodes(tree, 'DetailHead')[0];
   let facts = nodes(tree, 'Facts')[0];
   assert.equal(nodes(facts.props.items, 'PersonAvatar').length, 1);

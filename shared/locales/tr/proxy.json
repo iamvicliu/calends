@@ -117,5 +117,6 @@
     "title": "{name} aboneliğini başkası adına ödemeye dönüştür",
     "saved": "Başkası adına ödemeye dönüştürüldü",
     "changed": "Bu abonelik değiştirildi veya silindi. Yeniden açıp tekrar deneyin."
-  }
+  },
+  "stop": "Onun yerine ödemeyi durdur"
 }

@@ -129,5 +129,6 @@
     "title": "Convertir {name} en paiement pour un tiers",
     "saved": "Converti en paiement pour un tiers",
     "changed": "Cet abonnement a été modifié ou supprimé. Rouvrez-le et réessayez."
-  }
+  },
+  "stop": "Arrêter de payer pour cette personne"
 }

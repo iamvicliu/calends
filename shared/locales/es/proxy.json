@@ -129,5 +129,6 @@
     "title": "Convertir {name} en pago por otra persona",
     "saved": "Convertido en pago por otra persona",
     "changed": "Esta suscripción se ha modificado o eliminado. Vuelve a abrirla e inténtalo de nuevo."
-  }
+  },
+  "stop": "Dejar de pagar por esta persona"
 }
