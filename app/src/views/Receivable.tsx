@@ -164,6 +164,30 @@ export function ReceivableSheet({
     >
       <div className="stack">
         {head}
+        {/* 金额放在期列表之前：提前收多期时列表很长，放后面会被挤出视野 */}
+        <Group
+          title={mode === 'receipt' ? t('receivable.actual') : t('receivable.waiverGroup')}
+          foot={
+            mode === 'receipt' && picked.length > 0 && typed != null && Math.abs(amount - total.amount) > 0.004 && currency === total.currency
+              ? t('receivable.dueFoot', { amount: money(total.amount, total.currency) })
+              : undefined
+          }
+        >
+          <Cell label={mode === 'receipt' ? t('receivable.receivedOn') : t('receivable.waivedOn')}>
+            <DatePicker value={date} onChange={(v) => setDate(v ?? today)} />
+          </Cell>
+          {mode === 'receipt' && (
+            <Cell label={t('receivable.amount')}>
+              <span className="contact-field">
+                <NumInput className="num" ccy={currency} value={Number.isFinite(amount) ? amount : undefined} onValue={(n) => setAmount(n ?? 0)} />
+                <CurrencySelect value={currency} onChange={setCurrency} ariaLabel={t('receivable.currency')} />
+              </span>
+            </Cell>
+          )}
+          <Cell label={t('receivable.note')}>
+            <input value={note} placeholder={t('receivable.notePh')} onChange={(e) => setNote(e.target.value)} />
+          </Cell>
+        </Group>
         <Group title={t('receivable.periods')} foot={mode === 'waiver' ? t('receivable.waiverFoot') : keys.length > 1 ? t('receivable.splitFoot') : undefined}>
           {open.length === 0 && !lost.length && <div className="cell muted">{t('receivable.allSettled')}</div>}
           {lost.map((k) => (
@@ -192,29 +216,6 @@ export function ReceivableSheet({
               {t('receivable.more')}
             </button>
           )}
-        </Group>
-        <Group
-          title={mode === 'receipt' ? t('receivable.actual') : t('receivable.waiverGroup')}
-          foot={
-            mode === 'receipt' && picked.length > 0 && typed != null && Math.abs(amount - total.amount) > 0.004 && currency === total.currency
-              ? t('receivable.dueFoot', { amount: money(total.amount, total.currency) })
-              : undefined
-          }
-        >
-          <Cell label={mode === 'receipt' ? t('receivable.receivedOn') : t('receivable.waivedOn')}>
-            <DatePicker value={date} onChange={(v) => setDate(v ?? today)} />
-          </Cell>
-          {mode === 'receipt' && (
-            <Cell label={t('receivable.amount')}>
-              <span className="contact-field">
-                <NumInput className="num" ccy={currency} value={Number.isFinite(amount) ? amount : undefined} onValue={(n) => setAmount(n ?? 0)} />
-                <CurrencySelect value={currency} onChange={setCurrency} ariaLabel={t('receivable.currency')} />
-              </span>
-            </Cell>
-          )}
-          <Cell label={t('receivable.note')}>
-            <input value={note} placeholder={t('receivable.notePh')} onChange={(e) => setNote(e.target.value)} />
-          </Cell>
         </Group>
       </div>
     </Sheet>
