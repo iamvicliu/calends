@@ -49,5 +49,7 @@
     "year": "{year}",
     "quarter": "{year} Q{quarter}",
     "due": "Jumlah tagihan"
-  }
+  },
+  "batch": "{amount} dibagi {count} tagihan",
+  "splitEdit": "Saat disimpan, periode ini dipisahkan dari pembayaran asal; periode lain tetap."
 }

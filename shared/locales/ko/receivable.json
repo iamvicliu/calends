@@ -49,5 +49,7 @@
     "year": "{year}",
     "quarter": "{year} Q{quarter}",
     "due": "청구 금액"
-  }
+  },
+  "batch": "{amount}을 {count}회로 나눔",
+  "splitEdit": "저장하면 이 기간은 원래 입금에서 따로 분리되고, 나머지 기간은 그대로입니다."
 }

@@ -117,7 +117,14 @@ export function periodTipData(p: LedgerPeriod) {
     currency: p.currency,
     status: p.status,
     receipt: p.receipt
-      ? { date: p.receipt.date, amount: p.receipt.amount, currency: p.receipt.currency, count: p.receipt.periods.length, opening: !!p.receipt.opening }
+      ? {
+          date: p.receipt.date,
+          amount: p.receipt.amount,
+          share: p.share,
+          currency: p.receipt.currency,
+          count: p.receipt.periods.length,
+          opening: !!p.receipt.opening,
+        }
       : undefined,
     note: p.waiver?.note ?? p.receipt?.note,
   };

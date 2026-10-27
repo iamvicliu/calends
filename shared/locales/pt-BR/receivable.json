@@ -61,5 +61,10 @@
     "year": "{year}",
     "quarter": "{year} Q{quarter}",
     "due": "Valor devido"
-  }
+  },
+  "batch": {
+    "one": "{amount} para {count} pagamento",
+    "other": "{amount} dividido em {count} pagamentos"
+  },
+  "splitEdit": "Ao salvar, este período é separado do pagamento original; os demais continuam iguais."
 }

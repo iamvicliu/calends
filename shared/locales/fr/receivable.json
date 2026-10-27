@@ -61,5 +61,10 @@
     "year": "{year}",
     "quarter": "{year} Q{quarter}",
     "due": "Montant dû"
-  }
+  },
+  "batch": {
+    "one": "{amount} pour {count} paiement",
+    "other": "{amount} réparti sur {count} paiements"
+  },
+  "splitEdit": "À l’enregistrement, cette période est séparée du paiement d’origine ; les autres restent inchangées."
 }

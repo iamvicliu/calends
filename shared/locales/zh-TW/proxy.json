@@ -41,8 +41,7 @@
     "even": "持平",
     "none": "還沒有扣過款。",
     "title": "逐期明細",
-    "notCharged": "未扣款",
-    "batch": "一筆 {amount} 分 {count} 期"
+    "notCharged": "未扣款"
   },
   "entry": {
     "markedDue": "已改為待收",
@@ -62,8 +61,7 @@
     "receivedLess": "依收款當天匯率折合 {amount}，比實扣少 {diff}。",
     "notReceived": "未收",
     "receivedOn": "收到日期",
-    "notePlaceholder": "選填，例如 LINE Pay 轉帳",
-    "splitEdit": "儲存後這一期會從原來那筆裡單獨拆出，其餘期照舊。"
+    "notePlaceholder": "選填，例如 LINE Pay 轉帳"
   },
   "page": {
     "owedSub": "{count} 期未收，依扣款當天匯率",

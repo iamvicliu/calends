@@ -45,8 +45,7 @@
     "even": "Hòa",
     "none": "Chưa có khoản phí nào.",
     "title": "Chi tiết từng kỳ",
-    "notCharged": "Chưa trừ tiền",
-    "batch": "{amount} chia cho {count} kỳ"
+    "notCharged": "Chưa trừ tiền"
   },
   "entry": {
     "markedDue": "Đã đánh dấu chưa trả lại",
@@ -66,8 +65,7 @@
     "receivedLess": "{amount} theo tỷ giá ngày nhận, ít hơn khoản đã trừ {diff}.",
     "notReceived": "Chưa nhận",
     "receivedOn": "Ngày nhận",
-    "notePlaceholder": "Tùy chọn, VD: chuyển khoản ngân hàng",
-    "splitEdit": "Khi lưu, kỳ này được tách khỏi khoản ban đầu; các kỳ khác giữ nguyên."
+    "notePlaceholder": "Tùy chọn, VD: chuyển khoản ngân hàng"
   },
   "page": {
     "owedSub": {

@@ -49,5 +49,7 @@
     "year": "{year}年",
     "quarter": "{year}年第{quarter}季",
     "due": "請求額"
-  }
+  },
+  "batch": "{amount} を {count} 回分に按分",
+  "splitEdit": "保存するとこの期は元の入金から分けられ、他の期はそのままです。"
 }

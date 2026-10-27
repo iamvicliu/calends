@@ -49,5 +49,7 @@
     "year": "{year}",
     "quarter": "{year} Q{quarter}",
     "due": "Số tiền phải thu"
-  }
+  },
+  "batch": "{amount} chia cho {count} kỳ",
+  "splitEdit": "Khi lưu, kỳ này được tách khỏi khoản ban đầu; các kỳ khác giữ nguyên."
 }

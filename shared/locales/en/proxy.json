@@ -47,11 +47,7 @@
     "even": "Even",
     "none": "No charges yet.",
     "title": "Payments",
-    "notCharged": "Not charged yet",
-    "batch": {
-      "one": "{amount} for {count} payment",
-      "other": "{amount} split over {count} payments"
-    }
+    "notCharged": "Not charged yet"
   },
   "entry": {
     "markedDue": "Marked as due",
@@ -71,8 +67,7 @@
     "receivedLess": "{amount} at the receipt-date rate, {diff} less than charged.",
     "notReceived": "Not received",
     "receivedOn": "Date received",
-    "notePlaceholder": "Optional, e.g. bank transfer",
-    "splitEdit": "Saving splits this period out of the original payment; the other periods stay as they are."
+    "notePlaceholder": "Optional, e.g. bank transfer"
   },
   "page": {
     "owedSub": {

@@ -5002,6 +5002,28 @@ button.h-price-row:focus-visible {
 .member-pay {
   flex-wrap: wrap;
 }
+/* 编辑时输入框放在明细表的数值列里，右对齐、宽度跟其他值一致 */
+.period-pop .tip-table input {
+  width: 10em;
+  min-width: 0;
+  justify-self: end;
+  height: var(--ctl-h-md);
+  padding: 0 11px;
+  border: 0;
+  outline: 0;
+  border-radius: var(--radius-md);
+  background: var(--fill-2);
+  color: var(--label);
+  font: inherit;
+  font-size: var(--fs-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.period-pop-foot {
+  display: block;
+  margin-top: 8px;
+  color: var(--label-2);
+}
 .period-pop-actions {
   display: flex;
   align-items: center;

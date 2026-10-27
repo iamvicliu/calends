@@ -61,5 +61,10 @@
     "year": "{year}",
     "quarter": "{year} Q{quarter}",
     "due": "Importe a cobrar"
-  }
+  },
+  "batch": {
+    "one": "{amount} para {count} pago",
+    "other": "{amount} repartido en {count} pagos"
+  },
+  "splitEdit": "Al guardar, este periodo se separa del pago original; los demás no cambian."
 }

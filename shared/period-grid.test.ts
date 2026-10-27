@@ -134,9 +134,10 @@ test('周付每行13格、跨年仍保留每一期；日付与非整数月按年
   }
   assert.deepEqual(periodGrid([], '2026-01-01').rows, []);
 });
-test('提示保留原币应收、整笔实收、日期、抵扣期数及期初标记', () => {
+test('提示保留原币应收、这一期分到的实收、整笔金额、日期、抵扣期数及期初标记', () => {
   const p = schedule('2026-01-01', 1, 1)[0];
   p.receipt = { id: 'r', date: '2025-12-15', amount: 25, currency: 'USD', periods: [p.key, '2026-02-01'], note: 'Advance' };
+  p.share = 12.5;
   p.status = 'paid';
   assert.deepEqual(periodTipData(p), {
     from: p.from,
@@ -144,7 +145,7 @@ test('提示保留原币应收、整笔实收、日期、抵扣期数及期初�
     due: 10,
     currency: 'CNY',
     status: 'paid',
-    receipt: { date: '2025-12-15', amount: 25, currency: 'USD', count: 2, opening: false },
+    receipt: { date: '2025-12-15', amount: 25, share: 12.5, currency: 'USD', count: 2, opening: false },
     note: 'Advance',
   });
   p.receipt.opening = true;

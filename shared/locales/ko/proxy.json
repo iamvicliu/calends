@@ -45,8 +45,7 @@
     "even": "차액 없음",
     "none": "아직 결제가 없습니다.",
     "title": "회차별 내역",
-    "notCharged": "아직 결제 전",
-    "batch": "{amount}을 {count}회로 나눔"
+    "notCharged": "아직 결제 전"
   },
   "entry": {
     "markedDue": "미수로 표시했습니다",
@@ -66,8 +65,7 @@
     "receivedLess": "받은 날 환율 기준 {amount}, 결제 금액보다 {diff} 적습니다.",
     "notReceived": "받지 않음",
     "receivedOn": "받은 날짜",
-    "notePlaceholder": "선택 사항, 예: 계좌 이체",
-    "splitEdit": "저장하면 이 기간은 원래 입금에서 따로 분리되고, 나머지 기간은 그대로입니다."
+    "notePlaceholder": "선택 사항, 예: 계좌 이체"
   },
   "page": {
     "owedSub": {

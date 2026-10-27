@@ -61,5 +61,10 @@
     "year": "{year}",
     "quarter": "{year} Q{quarter}",
     "due": "Amount due"
-  }
+  },
+  "batch": {
+    "one": "{amount} for {count} payment",
+    "other": "{amount} split over {count} payments"
+  },
+  "splitEdit": "Saving splits this period out of the original payment; the other periods stay as they are."
 }

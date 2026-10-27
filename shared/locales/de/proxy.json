@@ -47,11 +47,7 @@
     "even": "Ausgeglichen",
     "none": "Noch keine Abbuchungen.",
     "title": "Zahlungen",
-    "notCharged": "Noch nicht abgebucht",
-    "batch": {
-      "one": "{amount} für {count} Zahlung",
-      "other": "{amount} auf {count} Zahlungen verteilt"
-    }
+    "notCharged": "Noch nicht abgebucht"
   },
   "entry": {
     "markedDue": "Als offen markiert",
@@ -71,8 +67,7 @@
     "receivedLess": "{amount} zum Kurs am Eingangstag, {diff} weniger als abgebucht.",
     "notReceived": "Nicht erhalten",
     "receivedOn": "Eingangsdatum",
-    "notePlaceholder": "Optional, z. B. Banküberweisung",
-    "splitEdit": "Beim Speichern wird dieser Zeitraum aus der ursprünglichen Zahlung herausgelöst; die übrigen bleiben unverändert."
+    "notePlaceholder": "Optional, z. B. Banküberweisung"
   },
   "page": {
     "owedSub": {

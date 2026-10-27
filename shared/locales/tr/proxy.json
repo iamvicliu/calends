@@ -47,8 +47,7 @@
     "even": "Eşit",
     "none": "Henüz ödeme yok.",
     "title": "Dönem dökümü",
-    "notCharged": "Henüz çekilmedi",
-    "batch": "{amount}, {count} ödemeye bölündü"
+    "notCharged": "Henüz çekilmedi"
   },
   "entry": {
     "markedDue": "Borç olarak işaretlendi",
@@ -68,8 +67,7 @@
     "receivedLess": "Alınma tarihindeki kurla {amount}, ödenenden {diff} az.",
     "notReceived": "Alınmadı",
     "receivedOn": "Alınma tarihi",
-    "notePlaceholder": "İsteğe bağlı, ör. banka havalesi",
-    "splitEdit": "Kaydedince bu dönem asıl ödemeden ayrılır; diğer dönemler aynı kalır."
+    "notePlaceholder": "İsteğe bağlı, ör. banka havalesi"
   },
   "page": {
     "owedSub": {

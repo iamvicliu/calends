@@ -474,7 +474,7 @@ export function MemberForm({
           </>
         )}
       </div>
-      {cell && <PeriodPop context={context} period={cell.period} anchor={cell.anchor} onClose={() => setCell(null)} />}
+      {cell && <PeriodPop key={cell.period.key} context={context} period={cell.period} anchor={cell.anchor} onClose={() => setCell(null)} />}
       {/* 记一笔、改某一笔：叠在成员表单上，存完回到这里，成员表单里没保存的修改不丢 */}
       {receipt !== null && member && (
         <ReceiptForm state={state} s={s} member={member} editId={receipt.edit} preset={receipt.preset} onOpenSub={onOpenSub} onDone={() => setReceipt(null)} />

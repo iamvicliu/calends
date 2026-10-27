@@ -45,8 +45,7 @@
     "even": "Impas",
     "none": "Belum ada tagihan.",
     "title": "Rincian per periode",
-    "notCharged": "Belum ditagih",
-    "batch": "{amount} dibagi {count} tagihan"
+    "notCharged": "Belum ditagih"
   },
   "entry": {
     "markedDue": "Ditandai tertunggak",
@@ -66,8 +65,7 @@
     "receivedLess": "{amount} dengan kurs tanggal terima, {diff} lebih sedikit dari tagihan.",
     "notReceived": "Belum diterima",
     "receivedOn": "Tanggal diterima",
-    "notePlaceholder": "Opsional, mis. transfer bank",
-    "splitEdit": "Saat disimpan, periode ini dipisahkan dari pembayaran asal; periode lain tetap."
+    "notePlaceholder": "Opsional, mis. transfer bank"
   },
   "page": {
     "owedSub": {

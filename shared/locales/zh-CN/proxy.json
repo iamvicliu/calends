@@ -41,8 +41,7 @@
     "even": "持平",
     "none": "还没有扣过款。",
     "title": "逐期明细",
-    "notCharged": "未扣款",
-    "batch": "一笔 {amount} 分 {count} 期"
+    "notCharged": "未扣款"
   },
   "entry": {
     "markedDue": "已改为待收",
@@ -62,8 +61,7 @@
     "receivedLess": "按收款当天汇率折合 {amount}，比实扣少 {diff}。",
     "notReceived": "未收",
     "receivedOn": "收到日期",
-    "notePlaceholder": "可选，如 微信转账",
-    "splitEdit": "保存后这一期会从原来那笔里单独拆出，其余期照旧。"
+    "notePlaceholder": "可选，如 微信转账"
   },
   "page": {
     "owedSub": "{count} 期未收，按扣款当天汇率",

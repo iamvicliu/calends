@@ -3446,13 +3446,27 @@ test('点开已收的格子弹出这一笔的明细，可改可删；没收的�
     buttons.map((n) => n.children.join('')),
     ['common.delete', 'detail.action.edit'],
   );
+  // 编辑：弹层不关，同一组字段原地变成输入框，按钮换成取消、保存
   buttons[1].props.onClick();
   let nodes = render();
+  const editing = nodes.find((n) => n.type === 'Pop')!;
+  assert.deepEqual(
+    all(editing)
+      .find((n) => n.type === 'TipTable')!
+      .props.rows.map((row: { value: { type?: string } }) => row.value?.type)
+      .filter(Boolean),
+    ['DatePicker', 'NumInput', 'input'],
+  );
+  assert.deepEqual(
+    all(editing)
+      .filter((n) => n.type === 'button' || n.type === 'ConfirmButton')
+      .map((n) => n.children.join('')),
+    ['common.delete', 'common.cancel', 'common.save'],
+  );
   assert.equal(
-    nodes.some((n) => n.type === 'Pop'),
+    nodes.some((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm'),
     false,
   );
-  assert.equal(nodes.find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!.props.editId, 'r');
   // 没收的一期：不弹明细，直接记这一期
   const r2 = harness(
     '../app/src/views/Members.tsx',

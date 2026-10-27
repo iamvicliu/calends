@@ -223,31 +223,109 @@ export function ReceivableSheet({
 }
 
 /** A period can occupy several months and several rows; all segments share one highlight. */
-/** 一期的明细：应收、实收、日期、覆盖几期、备注；悬停提示和点开的小弹窗共用 */
-export function PeriodTip({ p }: { p: LedgerPeriod }) {
+/**
+ * 改一期的收款（或免收）：日期、这一期分到的金额、备注。查看和编辑是同一组字段，点「编辑」后原地变成输入框；
+ * 一笔分几期时保存会把这一期拆出来（editRecordPeriod）。期初结清金额不详，只能删
+ */
+export function usePeriodEdit(p: LedgerPeriod) {
+  const r = p.receipt ?? p.waiver;
+  const [editing, setEditing] = useState(false);
+  const [date, setDate] = useState(r?.date ?? '');
+  const [amount, setAmount] = useState(p.share);
+  const [note, setNote] = useState(r?.note ?? '');
+  const editable = !!r && !p.receipt?.opening;
+  const cancel = () => {
+    setEditing(false);
+    setDate(r?.date ?? '');
+    setAmount(p.share);
+    setNote(r?.note ?? '');
+  };
+  return {
+    editing,
+    start: () => setEditing(true),
+    cancel,
+    editable,
+    dirty: editable && (date !== r.date || note.trim() !== (r.note ?? '') || (!!p.receipt && amount !== p.share)),
+    valid: !p.receipt || (amount != null && amount >= 0),
+    /** 一笔分几期：保存时这一期会单独拆出 */
+    splits: editable && r.periods.length > 1,
+    patch: { date, amount, note: note.trim() },
+    setDate,
+    setAmount,
+    setNote,
+  };
+}
+export type PeriodEdit = ReturnType<typeof usePeriodEdit>;
+
+/**
+ * 一期的明细字段：应收、收款/免收日期、这一期实收、一笔分几期、备注。悬停提示、成员表里点开的一格、代付每期弹窗都用这一份，
+ * 编辑态只是把可改的几项换成输入框，不多不少。onBatch 给了时「一笔分几期」可点，去改整笔（调整抵扣哪几期）
+ */
+export function periodFields(p: LedgerPeriod, { due = true, edit, onBatch }: { due?: boolean; edit?: PeriodEdit; onBatch?: () => void } = {}) {
   const data = periodTipData(p);
-  return (
-    <TipTable
-      head={[periodRange(p), t(`receivable.status.${p.status}`)]}
-      rows={[
-        { key: 'due', label: t('receivable.grid.due'), value: `${money(data.due, data.currency)} ${data.currency}` },
-        ...(data.receipt
-          ? data.receipt.opening
-            ? [{ key: 'opening', label: t('receivable.opening'), value: '' }]
-            : [
-                { key: 'date', label: t('receivable.receivedOn'), value: cnDateFull(data.receipt.date) },
-                {
-                  key: 'received',
-                  label: t('receivable.actual'),
-                  value: `${money(data.receipt.amount, data.receipt.currency)} ${data.receipt.currency}`,
-                },
-                { key: 'count', label: t('receivable.periods'), value: t('receivable.periodsCount', { count: data.receipt.count }) },
-              ]
-          : []),
-        ...(data.note ? [{ key: 'note', label: t('receivable.note'), value: data.note }] : []),
-      ]}
-    />
-  );
+  const e = edit?.editing ? edit : undefined;
+  const r = data.receipt;
+  const rec = p.receipt ?? p.waiver;
+  const batch = r && r.count > 1 ? t('receivable.batch', { amount: money(r.amount, r.currency), count: r.count }) : undefined;
+  return [
+    ...(due ? [{ key: 'due', label: t('receivable.grid.due'), value: `${money(data.due, data.currency)} ${data.currency}` }] : []),
+    ...(r?.opening
+      ? [{ key: 'opening', label: t('receivable.opening'), value: '' }]
+      : rec
+        ? [
+            {
+              key: 'date',
+              label: r ? t('receivable.receivedOn') : t('receivable.waivedOn'),
+              value: e ? <DatePicker value={e.patch.date} onChange={(v) => e.setDate(v ?? rec.date)} /> : cnDateFull(rec.date),
+            },
+            ...(r
+              ? [
+                  {
+                    key: 'received',
+                    label: t('receivable.actual'),
+                    value: e ? (
+                      <NumInput className="num" ccy={r.currency} value={e.patch.amount} onValue={e.setAmount} aria-label={t('receivable.actual')} />
+                    ) : (
+                      `${money(r.share ?? 0, r.currency)} ${r.currency}`
+                    ),
+                  },
+                ]
+              : []),
+            ...(batch
+              ? [
+                  {
+                    key: 'batch',
+                    label: t('receivable.periods'),
+                    value:
+                      onBatch && !e ? (
+                        <button type="button" className="btn plain" onClick={onBatch}>
+                          {batch}
+                        </button>
+                      ) : (
+                        batch
+                      ),
+                  },
+                ]
+              : []),
+            ...(e
+              ? [
+                  {
+                    key: 'note',
+                    label: t('receivable.note'),
+                    value: <input value={e.patch.note} placeholder={t('receivable.notePh')} onChange={(ev) => e.setNote(ev.currentTarget.value)} />,
+                  },
+                ]
+              : data.note
+                ? [{ key: 'note', label: t('receivable.note'), value: data.note }]
+                : []),
+          ]
+        : []),
+  ];
+}
+
+/** 一期的明细表：悬停提示和点开的小弹窗共用；传 edit 时可原地编辑 */
+export function PeriodTip({ p, edit, onBatch }: { p: LedgerPeriod; edit?: PeriodEdit; onBatch?: () => void }) {
+  return <TipTable head={[periodRange(p), t(`receivable.status.${p.status}`)]} rows={periodFields(p, { edit, onBatch })} />;
 }
 
 export function PeriodStrip({

@@ -49,5 +49,7 @@
     "year": "{year}年",
     "quarter": "{year}年第{quarter}季",
     "due": "應收金額"
-  }
+  },
+  "batch": "一筆 {amount} 分 {count} 期",
+  "splitEdit": "儲存後這一期會從原來那筆裡單獨拆出，其餘期照舊。"
 }

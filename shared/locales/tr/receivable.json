@@ -49,5 +49,7 @@
     "year": "{year}",
     "quarter": "{year} Q{quarter}",
     "due": "Ödenecek tutar"
-  }
+  },
+  "batch": "{amount}, {count} ödemeye bölündü",
+  "splitEdit": "Kaydedince bu dönem asıl ödemeden ayrılır; diğer dönemler aynı kalır."
 }

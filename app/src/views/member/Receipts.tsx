@@ -3,7 +3,7 @@ import { addDays } from '../../../../shared/billing.ts';
 import { cnDate, cnDateFull } from '../../../../shared/format.ts';
 
 import { paidThrough, type LedgerPeriod } from '../../../../shared/receivables.ts';
-import { isReceipt, periodRange, PeriodTip } from '../Receivable.tsx';
+import { isReceipt, periodRange, PeriodTip, usePeriodEdit } from '../Receivable.tsx';
 import { Pop } from '../../components/Pop.tsx';
 import { DatePicker } from '../../components/DatePicker.tsx';
 import { Cell, Group } from '../../components/ui.tsx';
@@ -65,7 +65,10 @@ export function FirstReceiptFields({ context }: { context: ReturnType<typeof use
   );
 }
 
-/** 点开一格：这一期的明细，下面改这笔、复制给其他成员、删掉（删后这几期回到未收） */
+/**
+ * 点开一格：这一期的明细，字段与悬停提示、代付每期弹窗相同。点「编辑」原地改日期、这一期的金额和备注；
+ * 点「一笔分几期」改整笔（调整抵扣哪几期）；也可复制给其他成员、删掉这一期（其余期照旧）
+ */
 export function PeriodPop({
   context,
   period: p,
@@ -77,12 +80,18 @@ export function PeriodPop({
   anchor: HTMLElement;
   onClose: () => void;
 }) {
-  const { setReceipt, others, copying, setCopying, startCopy, removeRecordPeriodOf } = context;
+  const { setReceipt, others, copying, setCopying, startCopy, removeRecordPeriodOf, editRecordPeriodOf } = context;
   const r = p.receipt ?? p.waiver!;
-  const opening = isReceipt(r) && r.opening;
+  const edit = usePeriodEdit(p);
+  const openWhole = () => {
+    onClose();
+    setCopying(null);
+    setReceipt({ edit: r.id });
+  };
   return (
     <Pop triggerRef={{ current: anchor }} label={periodRange(p)} className="period-pop" placement="bottom start" onClose={onClose}>
-      <PeriodTip p={p} />
+      <PeriodTip p={p} edit={edit} onBatch={edit.editable && isReceipt(r) ? openWhole : undefined} />
+      {edit.editing && edit.splits && <small className="period-pop-foot">{t('receivable.splitEdit')}</small>}
       {copying === r.id && isReceipt(r) ? (
         <CopyReceiptFields context={context} record={r} />
       ) : (
@@ -96,22 +105,35 @@ export function PeriodPop({
             {t('common.delete')}
           </ConfirmButton>
           <span className="grow" />
-          {isReceipt(r) && !opening && others.length > 0 && (
-            <button className="btn" onClick={() => startCopy(r)}>
-              {t('family.member.copyAria')}
-            </button>
-          )}
-          {!opening && (
-            <button
-              className="btn primary"
-              onClick={() => {
-                onClose();
-                setCopying(null);
-                setReceipt({ edit: r.id });
-              }}
-            >
-              {t('detail.action.edit')}
-            </button>
+          {edit.editing ? (
+            <>
+              <button className="btn" onClick={edit.cancel}>
+                {t('common.cancel')}
+              </button>
+              <button
+                className="btn primary"
+                disabled={!edit.dirty || !edit.valid}
+                onClick={() => {
+                  onClose();
+                  void editRecordPeriodOf(r.id, p, edit.patch);
+                }}
+              >
+                {t('common.save')}
+              </button>
+            </>
+          ) : (
+            <>
+              {isReceipt(r) && edit.editable && others.length > 0 && (
+                <button className="btn" onClick={() => startCopy(r)}>
+                  {t('family.member.copyAria')}
+                </button>
+              )}
+              {edit.editable && (
+                <button className="btn primary" onClick={edit.start}>
+                  {t('detail.action.edit')}
+                </button>
+              )}
+            </>
           )}
         </div>
       )}

@@ -47,11 +47,7 @@
     "even": "Zerado",
     "none": "Nenhuma cobrança ainda.",
     "title": "Pagamentos",
-    "notCharged": "Ainda não cobrado",
-    "batch": {
-      "one": "{amount} para {count} pagamento",
-      "other": "{amount} dividido em {count} pagamentos"
-    }
+    "notCharged": "Ainda não cobrado"
   },
   "entry": {
     "markedDue": "Marcado como pendente",
@@ -71,8 +67,7 @@
     "receivedLess": "{amount} pelo câmbio da data de recebimento, {diff} a menos que o cobrado.",
     "notReceived": "Não recebido",
     "receivedOn": "Data de recebimento",
-    "notePlaceholder": "Opcional, ex.: transferência bancária",
-    "splitEdit": "Ao salvar, este período é separado do pagamento original; os demais continuam iguais."
+    "notePlaceholder": "Opcional, ex.: transferência bancária"
   },
   "page": {
     "owedSub": {

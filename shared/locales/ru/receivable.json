@@ -69,5 +69,12 @@
     "year": "{year}",
     "quarter": "{year} Q{quarter}",
     "due": "Сумма к оплате"
-  }
+  },
+  "batch": {
+    "one": "{amount} за {count} списание",
+    "few": "{amount} на {count} списания",
+    "many": "{amount} на {count} списаний",
+    "other": "{amount} на {count} списания"
+  },
+  "splitEdit": "При сохранении этот период отделяется от исходного платежа; остальные не меняются."
 }

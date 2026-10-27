@@ -47,11 +47,7 @@
     "even": "Équilibré",
     "none": "Aucun prélèvement pour l’instant.",
     "title": "Paiements",
-    "notCharged": "Pas encore prélevé",
-    "batch": {
-      "one": "{amount} pour {count} paiement",
-      "other": "{amount} réparti sur {count} paiements"
-    }
+    "notCharged": "Pas encore prélevé"
   },
   "entry": {
     "markedDue": "Marqué comme dû",
@@ -71,8 +67,7 @@
     "receivedLess": "{amount} au taux du jour de réception, {diff} de moins que le prélèvement.",
     "notReceived": "Non reçu",
     "receivedOn": "Date de réception",
-    "notePlaceholder": "Facultatif, ex. virement bancaire",
-    "splitEdit": "À l’enregistrement, cette période est séparée du paiement d’origine ; les autres restent inchangées."
+    "notePlaceholder": "Facultatif, ex. virement bancaire"
   },
   "page": {
     "owedSub": {
