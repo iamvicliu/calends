@@ -66,11 +66,13 @@ export function Toolbar({
   sub,
   children,
   onAdd,
+  addLabel = t('ui.toolbar.add'),
 }: {
   title: ComponentChildren;
   sub?: ComponentChildren;
   children?: ComponentChildren;
   onAdd?: () => void;
+  addLabel?: string;
 }) {
   return (
     <header className="toolbar">
@@ -81,7 +83,7 @@ export function Toolbar({
         <h1>{copyParts(title)}</h1>
         {sub && <div className="tb-sub">{copyParts(sub)}</div>}
       </div>
-      <IconButton className="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={onAdd ?? (() => window.dispatchEvent(new Event('ledger:add')))}>
+      <IconButton className="sb-btn tb-trail" aria-label={addLabel} onClick={onAdd ?? (() => window.dispatchEvent(new Event('ledger:add')))}>
         <Icon name="compose" />
       </IconButton>
       <div className="tb-actions">{children}</div>

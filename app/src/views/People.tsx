@@ -8,7 +8,7 @@ import { SortControl } from '../components/SortControl.tsx';
 import { isMarked, nextSort, usePhone } from '../components/LtHead.tsx';
 import { personLink, peopleLedger, peopleListRows, type PeopleSort, type PersonLedger } from '../../../shared/people.ts';
 import { type AppState, type Person, type Subscription } from '../../../shared/types.ts';
-import { Cell, Group, MetricCards, Metric, Toolbar } from '../components/ui.tsx';
+import { Cell, Group, IconButton, MetricCards, Metric, Toolbar } from '../components/ui.tsx';
 import { Amount, Seg, useSubmit } from '../components/inputs.tsx';
 import { Sheet } from '../components/overlays.tsx';
 import { getState, savePerson } from '../store.ts';
@@ -62,8 +62,8 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   return (
     <>
       {/* 筛选与「合租」页同位置：工具栏右上角 */}
-      {/* 右上角 + 在人员页单独新建人员，不是新建订阅 */}
-      <Toolbar title={t('family.pool.title')} onAdd={() => setAdding(true)}>
+      {/* 右上角 + 单独新建人员；侧栏「新建」只建订阅，所以桌面上始终显示 */}
+      <Toolbar title={t('family.pool.title')} onAdd={() => setAdding(true)} addLabel={t('people.pick.new')}>
         {book.length > 0 && (
           <Seg
             small
@@ -88,6 +88,11 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
           />
         )}
         <FamilyTabs tab="people" />
+        {!state.readonly && (
+          <IconButton className="accent d-only" onClick={() => setAdding(true)} aria-label={t('people.pick.new')}>
+            <Icon name="plus" />
+          </IconButton>
+        )}
         {/* 与合租页一样右上角最后是卡片 / 列表切换；人员只有列表，卡片不可选 */}
         {!phone && (
           <Seg

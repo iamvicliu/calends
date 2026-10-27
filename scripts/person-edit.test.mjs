@@ -134,12 +134,32 @@ test('family people tab opens the shared detail with the profile form on top and
     isMarked: () => false,
     PEOPLE_DIR: { owed: 'desc', received: 'desc', lastPaid: 'desc', name: 'asc' },
   };
-  for (const name of ['Toolbar', 'Seg', 'FamilyTabs', 'MetricCards', 'Metric', 'Amount', 'PersonRow', 'PersonSheet', 'MemberSheet']) deps[name] = name;
+  for (const name of [
+    'Toolbar',
+    'Seg',
+    'FamilyTabs',
+    'MetricCards',
+    'Metric',
+    'Amount',
+    'PersonRow',
+    'PersonSheet',
+    'MemberSheet',
+    'IconButton',
+    'Icon',
+    'NewPersonSheet',
+  ])
+    deps[name] = name;
   const PeopleView = component('People.tsx', 'PeopleView', deps);
   const list = () => {
     listHooks.reset();
     return PeopleView({ state: h.state(), today: '2026-10-26', onOpen() {} });
   };
+  // 桌面右上角与手机标题栏的 + 都是新建人员，而不是新建订阅
+  const add = nodes(list(), (n) => n.type === 'IconButton' && n.props['aria-label'] === 'people.pick.new')[0];
+  assert.equal(add.props['aria-label'], 'people.pick.new');
+  assert.equal(nodes(list(), (n) => n.type === 'Toolbar')[0].props.addLabel, 'people.pick.new');
+  add.props.onClick();
+  assert.equal(nodes(list(), (n) => n.type === 'NewPersonSheet').length, 1);
   const row = nodes(list(), (n) => n.type === 'PersonRow')[0];
   row.props.onClick();
   assert.equal(nodes(list(), (n) => n.type === 'PersonSheet')[0].props.l.person.id, 'p');
