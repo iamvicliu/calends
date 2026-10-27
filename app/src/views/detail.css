@@ -1126,8 +1126,21 @@
 .dt-period {
   --fill-c: var(--chart-ink);
 }
+/* 我发起的合租：订阅周期与收费周期左右并排；日期放不下时到期日折到下一行靠右 */
+.dt-period-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.dt-period-pair .dt-period-ends {
+  flex-wrap: wrap;
+  row-gap: 0;
+}
+.dt-period-pair .dt-period-ends span:last-child {
+  margin-left: auto;
+}
 /* 下面有属性时才隔开；属性为空时整栏隐藏，不留空白 */
-.dt-period + .dt-about-grid {
+:is(.dt-period, .dt-period-pair) + .dt-about-grid {
   margin-top: 18px;
 }
 .dt-period.trial {

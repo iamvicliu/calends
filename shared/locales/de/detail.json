@@ -179,7 +179,9 @@
     "paid": "Aktuelle Periode",
     "trial": "Testphase",
     "bonus": "Bonuszeitraum",
-    "since": "Seit {date}"
+    "since": "Seit {date}",
+    "sub": "Abo",
+    "collect": "Einzug"
   },
   "transfer": {
     "title": "Übertragungen",

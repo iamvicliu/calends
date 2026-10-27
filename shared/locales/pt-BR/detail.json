@@ -179,7 +179,9 @@
     "paid": "Período atual",
     "trial": "Teste",
     "bonus": "Período bônus",
-    "since": "Desde {date}"
+    "since": "Desde {date}",
+    "sub": "Assinatura",
+    "collect": "Cobrança"
   },
   "transfer": {
     "title": "Transferências",

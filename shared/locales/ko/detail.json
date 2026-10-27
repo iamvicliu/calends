@@ -164,7 +164,9 @@
     "paid": "이번 주기",
     "trial": "체험 기간",
     "bonus": "보너스 기간",
-    "since": "{date}부터"
+    "since": "{date}부터",
+    "sub": "구독 주기",
+    "collect": "수금 주기"
   },
   "transfer": {
     "title": "양도",

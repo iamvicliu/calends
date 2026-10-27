@@ -223,7 +223,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       <div className="dt-body dt-flow">
         <Kpis sub={sub} state={state} today={today} history={history} />
         {/* 指标下面：本期进度与属性（不加标题），然后是扣款走势、提醒和记录 */}
-        <Summary key={sub.id} sub={sub} today={today} />
+        <Summary key={sub.id} sub={sub} state={state} today={today} />
         {!compact && <Timeline sub={sub} state={state} today={today} history={history} />}
         <Notices sub={sub} state={state} today={today} />
         {/* 合租比扣款记录重要，放在前面 */}

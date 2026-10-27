@@ -179,7 +179,9 @@
     "paid": "This period",
     "trial": "Trial",
     "bonus": "Bonus period",
-    "since": "Since {date}"
+    "since": "Since {date}",
+    "sub": "Subscription",
+    "collect": "Collection"
   },
   "transfer": {
     "title": "Transfers",

@@ -13,6 +13,7 @@ import {
   carYear,
   periodsTotal,
   nextCollectionDay,
+  collectionPeriod,
   memberCashFlows,
   updateMemberLeave,
 } from './carpool.ts';
@@ -357,6 +358,13 @@ test('下期收款日：按车的收款节奏取今天之后的下一次；当�
   assert.equal(nextCollectionDay(plan, 6, '2026-11-01'), '2027-05-01');
   assert.equal(nextCollectionDay(plan, 1, '2026-10-25'), '2026-11-01');
   assert.equal(nextCollectionDay(plan, 12, '2025-10-01'), '2025-11-01');
+});
+
+test('本期收款期：从上一次收款日起到下一次收款日，收款日当天开始新一期', () => {
+  const plan = sub({ share: { role: 'owner', seats: 6, collectFrom: '2025-11-01', members: [] } });
+  assert.deepEqual(collectionPeriod(plan, 6, '2026-10-25'), { from: '2026-05-01', next: '2026-11-01' });
+  assert.deepEqual(collectionPeriod(plan, 6, '2026-11-01'), { from: '2026-11-01', next: '2027-05-01' });
+  assert.deepEqual(collectionPeriod(plan, 1, '2026-10-25'), { from: '2026-10-01', next: '2026-11-01' });
 });
 
 test('改车的收款日：已有成员的历史各期与已收的期不重切，从新收款日起按新节奏；新成员按新日子对齐', async () => {

@@ -152,7 +152,9 @@
     "paid": "本期",
     "trial": "試用期",
     "bonus": "贈送期",
-    "since": "{date}起"
+    "since": "{date}起",
+    "sub": "訂閱週期",
+    "collect": "收費週期"
   },
   "transfer": {
     "title": "轉讓收付",

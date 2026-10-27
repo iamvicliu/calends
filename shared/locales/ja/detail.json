@@ -164,7 +164,9 @@
     "paid": "今期",
     "trial": "トライアル",
     "bonus": "特典期間",
-    "since": "{date}から"
+    "since": "{date}から",
+    "sub": "サブスク期間",
+    "collect": "集金期間"
   },
   "transfer": {
     "title": "譲渡",

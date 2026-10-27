@@ -179,7 +179,9 @@
     "paid": "Periodo actual",
     "trial": "Prueba",
     "bonus": "Periodo de regalo",
-    "since": "Desde {date}"
+    "since": "Desde {date}",
+    "sub": "Suscripción",
+    "collect": "Cobro"
   },
   "transfer": {
     "title": "Traspasos",

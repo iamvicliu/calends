@@ -164,7 +164,9 @@
     "paid": "Periode ini",
     "trial": "Uji coba",
     "bonus": "Periode bonus",
-    "since": "Sejak {date}"
+    "since": "Sejak {date}",
+    "sub": "Langganan",
+    "collect": "Penagihan"
   },
   "transfer": {
     "title": "Pengalihan",

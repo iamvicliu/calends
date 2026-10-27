@@ -170,7 +170,9 @@
     "paid": "Bu dönem",
     "trial": "Deneme",
     "bonus": "Hediye dönemi",
-    "since": "{date} tarihinden beri"
+    "since": "{date} tarihinden beri",
+    "sub": "Abonelik",
+    "collect": "Tahsilat"
   },
   "transfer": {
     "title": "Devirler",

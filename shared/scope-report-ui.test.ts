@@ -2956,6 +2956,30 @@ test('detail leaves the account to the editor and renders notes in a bottom pane
   assert.deepEqual(harness('../app/src/views/Detail.tsx', 'NoteBlock', {}, {}).render('NoteBlock', { sub: { ...sub, notes: undefined } }), []);
 });
 
+test('owner carpool detail shows the subscription and collection periods side by side', () => {
+  const sub: Subscription = {
+    id: 'car',
+    name: 'Fictional family plan',
+    category: 'Tools',
+    tags: [],
+    price: 120,
+    currency: 'USD',
+    cycle: { unit: 'year', every: 1 },
+    start: '2026-03-01',
+    status: 'active',
+    share: { role: 'owner', seats: 4, collectFrom: '2026-03-01', rule: { billEvery: 1, fee: 10, currency: 'USD' }, members: [] },
+  };
+  const state = { ...st, subscriptions: [sub] };
+  const h = harness('../app/src/views/Detail.tsx', 'Summary', {}, { detailHistoryEnd });
+  const nodes = h.render('Summary', { sub, state, today });
+  const pair = nodes.find((n) => n.props.className === 'dt-period-pair');
+  assert.ok(pair);
+  assert.ok(nodes.some((n) => n.props.split === true));
+  const collect = nodes.find((n) => n.props.title === 'detail.period.collect')!;
+  assert.deepEqual([collect.props.from, collect.props.end], ['2026-10-01', '2026-11-01']);
+  assert.ok(!h.render('Summary', { sub: { ...sub, share: undefined }, state, today }).some((n) => n.props.className === 'dt-period-pair'));
+});
+
 test('detail PNG delegates privacy and cleanup to the shared renderer and excludes only actions', async () => {
   for (const failed of [false, true]) {
     const source = { closest: () => ({}) };

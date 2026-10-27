@@ -179,7 +179,9 @@
     "paid": "Période en cours",
     "trial": "Essai",
     "bonus": "Période offerte",
-    "since": "Depuis le {date}"
+    "since": "Depuis le {date}",
+    "sub": "Abonnement",
+    "collect": "Encaissement"
   },
   "transfer": {
     "title": "Cessions",

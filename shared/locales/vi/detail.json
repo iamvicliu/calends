@@ -164,7 +164,9 @@
     "paid": "Kỳ hiện tại",
     "trial": "Dùng thử",
     "bonus": "Thời gian tặng",
-    "since": "Từ {date}"
+    "since": "Từ {date}",
+    "sub": "Kỳ đăng ký",
+    "collect": "Kỳ thu tiền"
   },
   "transfer": {
     "title": "Chuyển nhượng",

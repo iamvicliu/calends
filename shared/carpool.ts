@@ -445,12 +445,17 @@ export function periodsTotal(state: AppState, periods: Period[]) {
  * 收费规则里的「下期收款日」：新标准从这天起执行，改这个日期就是把全车的收款节奏挪到这天
  */
 export function nextCollectionDay(s: Subscription, billEvery: number, today: string): string {
+  return collectionPeriod(s, billEvery, today).next;
+}
+
+/** 今天所在的收款期：从上一次收款日起，到下一次收款日前一天；详情「本期」里与订阅周期并排 */
+export function collectionPeriod(s: Subscription, billEvery: number, today: string): { from: string; next: string } {
   const anchor = collectionAnchor(s);
   const every = Math.max(1, billEvery);
   let k = Math.ceil(((Number(today.slice(0, 4)) - Number(anchor.slice(0, 4))) * 12 + Number(today.slice(5, 7)) - Number(anchor.slice(5, 7))) / every) - 1;
   while (addMonths(anchor, k * every) > today) k--;
   while (addMonths(anchor, k * every) <= today) k++;
-  return addMonths(anchor, k * every);
+  return { from: addMonths(anchor, (k - 1) * every), next: addMonths(anchor, k * every) };
 }
 
 import { addDays, memberUnpaidFrom, memberCollection, memberDues } from './billing.ts';
