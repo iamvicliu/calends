@@ -5,7 +5,7 @@
 // 测评文章配图。官网首页自带的图标和页头 logo 才是这家服务真正在用的图，
 // 所以先用网页搜索定位官网，再从官网自己的 HTML 里取图，最后才用图片搜索兜底。
 import { getKv, putKv } from '../store.ts';
-import { isPublicHttpUrl } from '../url-guard.ts';
+import { fetchPublic, isPublicHttpsUrl } from '../url-guard.ts';
 import type { Env } from '../env.ts';
 
 export interface LogoHit {
@@ -44,8 +44,8 @@ async function cachedIndex<T>(env: Env, key: string, url: string): Promise<T | u
     const res = await fetch(url, { cf: { cacheTtl: INDEX_TTL, cacheEverything: true } });
     if (!res.ok) return cached?.data;
     const data = (await res.json()) as T;
-    // 索引变了才写回，避免每分钟都产生一次 KV 写
-    if (!cached || JSON.stringify(cached.data) !== JSON.stringify(data)) await putKv(env, key, { at: now, data });
+    // 走到这里说明缓存已过期（或没有），内容没变也要写回，刷新时间戳，否则之后每次搜索都会重新下载
+    await putKv(env, key, { at: now, data });
     return data;
   } catch {
     // 拉取失败时退回旧索引，总比没有结果好
@@ -145,18 +145,41 @@ function decodeEntities(s: string): string {
     .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
 }
 
+/** 只读响应体的前 max 字节就停止下载，避免超大页面占满内存和流量 */
+async function readCapped(res: Response, max: number): Promise<Uint8Array> {
+  const reader = res.body?.getReader();
+  if (!reader) return new Uint8Array();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (total < max) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    total += value.length;
+  }
+  await reader.cancel().catch(() => undefined);
+  const out = new Uint8Array(Math.min(total, max));
+  let at = 0;
+  for (const c of chunks) {
+    const part = c.subarray(0, out.length - at);
+    out.set(part, at);
+    at += part.length;
+    if (at >= out.length) break;
+  }
+  return out;
+}
+
 async function fetchText(url: string): Promise<string> {
   try {
-    const res = await fetch(url, {
+    // 官网地址可能来自用户输入的域名：只抓公网 https，跳转的每一跳也检查
+    const res = await fetchPublic(url, {
       headers: { 'user-agent': UA, 'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8' },
       cf: { cacheTtl: 3600, cacheEverything: true },
-      redirect: 'follow',
     });
-    if (!res.ok) return '';
+    if (!res?.ok) return '';
     const type = res.headers.get('content-type') ?? '';
     if (!/text\/html|application\/xhtml/i.test(type)) return '';
-    const body = await res.text();
-    return body.slice(0, MAX_HTML);
+    return new TextDecoder().decode(await readCapped(res, MAX_HTML));
   } catch {
     return '';
   }
@@ -220,7 +243,7 @@ function iconsFromHtml(html: string, base: string, q: string): Candidate[] {
     if (!v || v.startsWith('data:')) return null;
     try {
       const full = new URL(v, base).toString();
-      if (!isPublicHttpUrl(full)) return null;
+      if (!isPublicHttpsUrl(full)) return null;
       return NOT_LOGO_HOST.test(new URL(full).hostname) ? null : full;
     } catch {
       return null;
@@ -307,9 +330,10 @@ function iconsFromHtml(html: string, base: string, q: string): Candidate[] {
  */
 async function probeSize(url: string): Promise<{ w: number; h: number } | null> {
   try {
-    const res = await fetch(url, { headers: { 'user-agent': UA, range: 'bytes=0-2047' } });
-    if (!res.ok) return null;
-    const buf = new Uint8Array((await res.arrayBuffer()).slice(0, 2048));
+    const res = await fetchPublic(url, { headers: { 'user-agent': UA, range: 'bytes=0-2047' } });
+    if (!res?.ok) return null;
+    // 服务器不一定认 Range，所以自己只读前 2KB
+    const buf = await readCapped(res, 2048);
     const dv = new DataView(buf.buffer);
     // PNG：IHDR 里的宽高（大端）
     if (buf[0] === 0x89 && buf[1] === 0x50 && buf.length >= 24) return { w: dv.getUint32(16), h: dv.getUint32(20) };

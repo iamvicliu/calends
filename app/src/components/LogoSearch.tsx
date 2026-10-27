@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { t } from '../../../shared/i18n.ts';
 import { api } from '../store.ts';
 import { base } from '../base.ts';
-import { Icon, IconButton } from './ui.tsx';
+import { Icon } from './icons.tsx';
+import { IconButton } from './ui.tsx';
 
 interface LogoHit {
   url: string;
@@ -114,8 +115,8 @@ export function LogoSearch({ value, onPick }: { value: string; onPick: (url: str
                         aria-label={h.name}
                         title={h.name}
                         onClick={() => {
-                          // 外链图片经同源代理，画进分享图时不会污染 canvas
-                          onPick(/^https?:/.test(h.url) ? `/api/img?u=${encodeURIComponent(h.url)}` : h.url);
+                          // 存原始地址：公开页没有登录态，读不了 /api/img；分享图和取色会在渲染时自己走代理
+                          onPick(h.url);
                           setOpen(false);
                         }}
                       >
