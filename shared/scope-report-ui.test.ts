@@ -893,7 +893,7 @@ test('scope composition uses category colors for both marks and bars and exports
   assert.ok(nodes.some((n) => n.type === 'MethodMark' && n.props.m === method && n.props.proxied));
 });
 
-test('退订与停用只给汇总，不列损失明细', () => {
+test('退订与停用：每笔未退款损失一行，损失合计只出现一次', () => {
   const sub: Subscription = {
     id: 's',
     name: 'Stopped',
@@ -910,8 +910,8 @@ test('退订与停用只给汇总，不列损失明细', () => {
   const r = harness('../app/src/views/Report.tsx', 'StopsCard', {}, { tipProps: () => ({}) });
   for (const count of [0, 1, 2]) {
     const state = { ...st, subscriptions: Array.from({ length: count }, (_, i) => ({ ...sub, id: String(i) })) };
-    const nodes = r.render('StopsCard', { state, today });
-    assert.equal(nodes.filter((n) => n.props.className === 'stop-row').length, 0);
+    const nodes = r.render('StopsCard', { state, today, onOpen: () => {} });
+    assert.equal(nodes.filter((n) => n.props.className === 'stop-row').length, count);
     assert.equal(nodes.filter((n) => n.children.includes('report.stops.loss')).length, 1);
   }
 });

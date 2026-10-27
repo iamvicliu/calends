@@ -2043,11 +2043,81 @@ select.btn {
   font-size: var(--fs-1);
   line-height: 1.5;
 }
+.stop-info small,
+.stop-amount small {
+  display: block;
+  color: var(--label-2);
+  font-size: var(--fs-1);
+  line-height: 1.5;
+}
+.stop-list-title {
+  margin: 20px 0 6px;
+  font-size: var(--fs-2);
+  font-weight: 600;
+}
+.stop-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--sep);
+  background: none;
+  padding: 12px 0;
+  text-align: left;
+}
+.stop-row:last-child {
+  border-bottom: 0;
+}
+.stop-row:hover {
+  background: var(--fill-2);
+}
+.stop-info {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.stop-info > b {
+  font-size: var(--fs-2);
+}
+.stop-amount {
+  min-width: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.stop-amount > b {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0 4px;
+}
+.stop-amount > b > span {
+  white-space: nowrap;
+}
+.stop-amount .stop-days {
+  color: var(--label-2);
+  font-size: var(--fs-1);
+  font-weight: 400;
+  align-self: center;
+}
+.stop-amount > b {
+  font-size: var(--fs-2);
+}
 .review-loss {
   font-size: var(--fs-1);
   line-height: 1.5;
   margin-top: 8px;
   overflow-wrap: anywhere;
+}
+@media (max-width: 680px) {
+  .stop-row {
+    gap: 8px;
+    grid-template-columns: 32px minmax(0, 1fr) minmax(0, auto);
+  }
+  .stop-amount > b {
+    font-size: var(--fs-2);
+  }
 }
 .barline {
   position: relative;

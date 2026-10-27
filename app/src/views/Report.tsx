@@ -62,7 +62,7 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
           <Waterfall state={state} today={today} onOpen={onOpen} />
           <Checkup state={state} today={today} onOpen={onOpen} />
         </div>
-        <StopsCard state={state} today={today} />
+        <StopsCard state={state} today={today} onOpen={onOpen} />
         <div className="grid g-2 report-bottom">
           <TopUps state={state} today={today} />
           <Changelog state={state} today={today} onOpen={onOpen} base={base} />
@@ -405,12 +405,14 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   );
 }
 
-/** 未退款损失，截至今天、全部历史。报告只放汇总，逐条明细在订阅详情与订阅页里看 */
-function StopsCard({ state, today }: { state: AppState; today: string }) {
+/** 未退款损失，截至今天、全部历史。明细先放 5 条，其余折叠 */
+function StopsCard({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const losses = useMemo(() => stopLosses(state, today), [state, today]);
   const stops = useMemo(() => stopHistory(state, today), [state, today]);
   const count = (kind: 'cancel' | 'terminate') => stops.filter((i) => i.kind === kind).length;
+  const [all, setAll] = useState(false);
+  const shown = all ? losses.items : losses.items.slice(0, 5);
   return (
     <div className="card stop-report copy-card" data-copy-card id="report-stops">
       <div className="copy-corner">
@@ -432,6 +434,44 @@ function StopsCard({ state, today }: { state: AppState; today: string }) {
         {count('terminate') > 0 && <Metric label={t('core.stop.terminate')} value={count('terminate')} />}
       </MetricCards>
       {losses.incomplete && <p className="stop-basis red">{totalNote(losses.partial)}</p>}
+      {/* 没有未退款损失时，上面的指标已写 ¥0，不再放一个空的明细区块 */}
+      {losses.items.length > 0 && (
+        <>
+          <h4 className="stop-list-title">{t('report.stops.details')}</h4>
+          <div className="stop-list" data-snapshot-list data-snapshot-total={losses.items.length}>
+            {shown.map((i) => (
+              <button key={`${i.sub.id}-${i.phaseIndex}`} className="stop-row" data-snapshot-keep onClick={() => onOpen(i.sub)}>
+                <SubIcon sub={i.sub} size={32} />
+                <span className="stop-info">
+                  <b>{i.sub.name}</b>
+                  <small>
+                    {cnDate(i.date)} <span className="copy-gap" aria-hidden="true" />{' '}
+                    {i.kind === 'terminate' ? t('core.stop.terminate') : t('report.stops.cancel')}
+                    {copyParts(i.reason ? `\n${i.reason}` : '')}
+                  </small>
+                  <small style={i.refunded > 0 ? { color: 'var(--green)' } : undefined}>
+                    {i.refundStatus === 'none' ? t('core.stop.refundNo') : t('core.stop.partial', { money: flow(i.refunded, i.currency) })}
+                  </small>
+                </span>
+                <span className="stop-amount">
+                  <b className="red">
+                    <span className="stop-days">
+                      {t('core.stop.lossDays', { count: i.wastedDays })} <span className="copy-gap" aria-hidden="true" />{' '}
+                    </span>
+                    <span>{flow(-i.lossBase, base)}</span>
+                  </b>
+                  {i.currency !== base && <small>{flow(-i.loss, i.currency)}</small>}
+                </span>
+              </button>
+            ))}
+          </div>
+          {losses.items.length > 5 && (
+            <button className="btn plain" style={{ marginTop: 6 }} onClick={() => setAll(!all)}>
+              {all ? t('report.checkup.less') : t('report.checkup.more', { count: losses.items.length - 5 })}
+            </button>
+          )}
+        </>
+      )}
     </div>
   );
 }
