@@ -9,7 +9,6 @@ import { run } from '../../toast.ts';
 import { linkPerson } from '../person-fields.tsx';
 
 import {
-  periodsTotal,
   carRule,
   followCarRule,
   followsCar,
@@ -42,6 +41,7 @@ export function useMemberForm({
   member,
   initialReceipt,
   onClose,
+  onAdded,
 }: {
   memberDialog: typeof import('../Members.tsx').MemberSheet;
   state: AppState;
@@ -50,6 +50,8 @@ export function useMemberForm({
   /** 打开时就叠上的收款表单：欠款时记一笔，从某笔收款进来时改那一笔 */
   initialReceipt?: { edit?: string; preset?: string[] } | null;
   onClose: () => void;
+  /** 新成员存好后要接着记收款：交给 MemberSheet 换成这个成员并叠上收款表单 */
+  onAdded?: (id: string) => void;
 }) {
   const today = todayIn(state.settings.timezone);
   const isNew = !member;
@@ -132,16 +134,8 @@ export function useMemberForm({
   const next = draft();
   const ledger = memberLedgerAhead(state, s, next, today);
 
-  // 新成员可以顺手记首笔收款：从首期起按期数预填，金额、币种、日期都能改
-  const [firstPay, setFirstPay] = useState(false);
-  const [firstPeriods, setFirstPeriods] = useState(1);
-  const firstOpen = ledger.periods.filter((p) => !isSettled(p));
-  const firstKeys = firstOpen.slice(0, firstPeriods).map((p) => p.key);
-  const suggested = { date: today, ...periodsTotal(state, firstOpen.slice(0, firstPeriods)) };
-  const [payEdit, setPayEdit] = useState<{ date?: string; amount?: number; currency?: string; note?: string }>({});
-  const pay = { ...suggested, ...payEdit };
-  const payInvalid = !Number.isFinite(pay.amount) || pay.amount < 0 || !firstKeys.length;
-  const firstUntil = firstOpen[Math.min(firstPeriods, firstOpen.length) - 1]?.until;
+  // 新成员：勾上就在保存后接着打开收款表单，与之后记收款是同一个表单
+  const [collectAfter, setCollectAfter] = useState(false);
 
   const first = memberCollection(s, f, f.joined ?? s.share?.since ?? s.start, collectCcy);
   // 同一个人还出现在别的合租、代付里：已关联名册里的人，称呼、联系方式只读，改人员资料去人员详情
@@ -207,24 +201,12 @@ export function useMemberForm({
         const sh = current.share!;
         const stored = sh.members.find((x) => x.id === next.id);
         const base: ShareMember = { ...next, name: f.name.trim(), account: f.account?.trim() || undefined, personId: link.id };
-        // 收款、免收以账本里最新的为准（期间可能在收款表单里记过），只叠加首笔收款
+        // 收款、免收以账本里最新的为准（期间可能在收款表单里记过）
         const latest = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
         // 改回跟随车对齐了节奏：起止变了的期不再被期初结清、免收盖住
         const opened = realigned && stored ? dropReshaped(current, stored, latest) : latest;
-        const added: ShareMember =
-          isNew && firstPay
-            ? {
-                ...opened,
-                ...putRecord(
-                  opened,
-                  'receipt',
-                  { id: uid(), date: pay.date, amount: pay.amount, currency: pay.currency, periods: firstKeys, ...(pay.note ? { note: pay.note } : {}) },
-                  memberLedgerAhead(state, current, opened, today).periods,
-                ),
-              }
-            : opened;
         // 取消不分摊：生效日之前没结清的期记成免收，不补收不分摊那段时间
-        const out = !isNew && member?.exempt && !added.exempt ? waiveExemptSpan(current, added, feeFrom, today, collectCcy) : added;
+        const out = !isNew && member?.exempt && !opened.exempt ? waiveExemptSpan(current, opened, feeFrom, today, collectCcy) : opened;
         await saveSub({
           ...current,
           share: {
@@ -234,7 +216,8 @@ export function useMemberForm({
           },
         });
         if (link.after) await savePerson(link.after);
-        onClose();
+        if (isNew && collectAfter && !out.exempt && onAdded) onAdded(out.id);
+        else onClose();
       },
       isNew ? t('family.member.added') : t('family.member.saved'),
     );
@@ -275,18 +258,8 @@ export function useMemberForm({
     draft,
     next,
     ledger,
-    firstPay,
-    setFirstPay,
-    firstPeriods,
-    setFirstPeriods,
-    firstOpen,
-    firstKeys,
-    suggested,
-    payEdit,
-    setPayEdit,
-    pay,
-    payInvalid,
-    firstUntil,
+    collectAfter,
+    setCollectAfter,
     first,
     linked,
     profile,

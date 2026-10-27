@@ -89,7 +89,6 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
           'FeeRuleFields',
           'ReceivableSheet',
           'PeriodStrip',
-          'FirstReceiptFields',
           'PeriodPop',
           'PeriodTip',
           'CopyReceiptFields',

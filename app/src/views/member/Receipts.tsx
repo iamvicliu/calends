@@ -1,69 +1,15 @@
 import { ConfirmButton } from '../../components/ConfirmButton.tsx';
-import { addDays } from '../../../../shared/billing.ts';
-import { cnDate, cnDateFull } from '../../../../shared/format.ts';
+import { cnDate } from '../../../../shared/format.ts';
 
 import { paidThrough, type LedgerPeriod } from '../../../../shared/receivables.ts';
 import { isReceipt, periodRange, PeriodTip, usePeriodEdit } from '../Receivable.tsx';
 import { Pop } from '../../components/Pop.tsx';
-import { DatePicker } from '../../components/DatePicker.tsx';
-import { Cell, Group } from '../../components/ui.tsx';
-import { NumInput, Stepper, Toggle } from '../../components/inputs.tsx';
 
-import { CurrencySelect } from '../../components/Picker.tsx';
 import { t } from '../../../../shared/i18n.ts';
 
 import { memberLedgerAhead } from '../MemberReceipt.tsx';
 
 import type { useMemberForm } from './useMemberForm.ts';
-
-export function FirstReceiptFields({ context }: { context: ReturnType<typeof useMemberForm> }) {
-  const { today, once, val, firstPay, setFirstPay, firstPeriods, setFirstPeriods, firstOpen, payEdit, setPayEdit, pay, firstUntil } = context;
-  return (
-    <Group
-      title={t('family.member.firstPay')}
-      foot={firstPay && !once && firstUntil ? t('family.collect.next', { date: cnDateFull(addDays(firstUntil, 1)) }) : undefined}
-    >
-      <Cell label={t('family.member.firstPayToggle')}>
-        <Toggle checked={firstPay} onChange={setFirstPay} />
-      </Cell>
-      {firstPay && (
-        <>
-          <Cell label={t('family.member.receivedOn')}>
-            <DatePicker value={pay.date} onChange={(v) => setPayEdit({ ...payEdit, date: v ?? today })} />
-          </Cell>
-          <Cell label={t('family.member.amount')}>
-            <span className="contact-field">
-              <NumInput className="num" ccy={pay.currency} value={pay.amount} onValue={(n) => setPayEdit({ ...payEdit, amount: n ?? 0 })} />
-              <CurrencySelect value={pay.currency} onChange={(c) => setPayEdit({ ...payEdit, currency: c })} ariaLabel={t('family.member.currency')} />
-            </span>
-          </Cell>
-          {!once && (
-            <>
-              <Cell label={t('family.collect.periods')}>
-                <Stepper
-                  label={t('family.collect.periods')}
-                  value={firstPeriods}
-                  min={1}
-                  max={Math.max(1, Math.min(24, firstOpen.length))}
-                  unit={(n) => t('family.collect.periodUnit', { count: n })}
-                  onChange={setFirstPeriods}
-                />
-              </Cell>
-              {firstUntil && (
-                <Cell label={t('family.collect.until')}>
-                  <span>{cnDateFull(firstUntil)}</span>
-                </Cell>
-              )}
-            </>
-          )}
-          <Cell label={t('family.member.note')}>
-            <input value={pay.note ?? ''} placeholder={t('family.member.notePh')} onChange={(e) => setPayEdit({ ...payEdit, note: val(e) || undefined })} />
-          </Cell>
-        </>
-      )}
-    </Group>
-  );
-}
 
 /**
  * 点开一格：这一期的明细，字段与悬停提示、代付每期弹窗相同。点「编辑」原地改日期、这一期的金额和备注；

@@ -1,6 +1,6 @@
 import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { useMemberForm, refundInvalid } from './member/useMemberForm.ts';
-import { FirstReceiptFields, PeriodPop } from './member/Receipts.tsx';
+import { PeriodPop } from './member/Receipts.tsx';
 
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
 import { useState } from 'react';
@@ -13,7 +13,7 @@ import { DatePicker } from '../components/DatePicker.tsx';
 import { Cell, Group } from '../components/ui.tsx';
 import { Sheet } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
-import { NumInput, Seg } from '../components/inputs.tsx';
+import { NumInput, Seg, Toggle } from '../components/inputs.tsx';
 import { getState, saveSub } from '../store.ts';
 import { run } from '../toast.ts';
 
@@ -104,9 +104,9 @@ export function PersonNameField({
 }
 
 /**
- * 成员表单（新增与编辑同一个）：是谁 → 座位 → 收费 → 收款。
+ * 成员表单（新增与编辑同一个、同一顺序）：是谁 → 收款 → 收费 → 座位。
  * 人员本身的称呼、联系方式属于人员，已关联时在人员详情里改；这里是「这个人在这辆车上的座位」。
- * 新增时可以顺手记首笔收款，大部分情况一次填完。
+ * 新增时可勾「保存后记收款」，存好后接着打开与之后记收款相同的收款表单。
  */
 export function MemberForm({
   memberDialog,
@@ -116,6 +116,7 @@ export function MemberForm({
   initialReceipt,
   onOpenSub,
   onClose,
+  onAdded,
 }: {
   memberDialog: typeof import('./Members.tsx').MemberSheet;
   state: AppState;
@@ -126,8 +127,10 @@ export function MemberForm({
   /** 收款表单顶部「查看详情」 */
   onOpenSub?: () => void;
   onClose: () => void;
+  /** 新成员存好后接着记收款（见 MemberSheet） */
+  onAdded?: (id: string) => void;
 }) {
-  const context = useMemberForm({ memberDialog, state, s, member, initialReceipt, onClose });
+  const context = useMemberForm({ memberDialog, state, s, member, initialReceipt, onClose, onAdded });
   // 已有成员：资料、座位、收费收在「编辑资料」里，默认收起；不分摊的成员没有收款可看，直接展开
   // 收费：建成员时就定好，之后很少改，已有成员默认收起；不分摊的成员没有收款一块，收费直接展开
   const [feeOpen, setFeeOpen] = useState(() => !!member?.exempt);
@@ -156,8 +159,8 @@ export function MemberForm({
     setBridgeDue,
     next,
     ledger,
-    firstPay,
-    payInvalid,
+    collectAfter,
+    setCollectAfter,
     first,
     linked,
     profile,
@@ -206,7 +209,7 @@ export function MemberForm({
   // 是谁：新增和已有成员都放最前面
   const whoGroup = (
     <>
-      {/* 一、是谁：新建或从人员里选；已关联的人只读，资料在人员详情里改 */}
+      {/* 是谁：新建或从人员里选；已关联的人只读，资料在人员详情里改 */}
       <Group
         title={t('family.member.group')}
         action={
@@ -250,44 +253,52 @@ export function MemberForm({
   );
   const seatGroup = (
     <>
-      {/* 二、座位：哪天上车、首期怎么算、哪天下车 */}
+      {/* 座位：哪天上车、首期怎么算、哪天下车。已有成员的加入日期、时长只展示；退出日期是记下车的唯一入口 */}
       <Group title={t('family.member.seatGroup')}>
         <Cell label={t('family.member.joined')}>
-          <DatePicker
-            value={f.joined}
-            clearable
-            placeholder={s.share?.since ? t('family.member.joinedPh', { date: cnDateFull(s.share.since) }) : t('family.member.notSet')}
-            onChange={(v) => up({ joined: v })}
-          />
+          {isNew ? (
+            <DatePicker
+              value={f.joined}
+              clearable
+              placeholder={s.share?.since ? t('family.member.joinedPh', { date: cnDateFull(s.share.since) }) : t('family.member.notSet')}
+              onChange={(v) => up({ joined: v })}
+            />
+          ) : (
+            cnDateFull(joinedOn)
+          )}
         </Cell>
         {!isNew && tenure && (
           <Cell label={t('family.member.tenure')}>
             <span className="muted">{tenure}</span>
           </Cell>
         )}
-        {first.partial && mode !== 'exempt' && bridge?.from !== first.from && !ledger.periods.some((p) => p.key === first.from && p.status === 'paid') && (
-          <>
-            {/* 首期起止写在「首期方式」标签下面；折算出的金额是首期金额的占位，不再单独一行提示 */}
-            <Cell label={t('family.member.firstPeriod')} sub={`${cnDate(first.from)} – ${cnDate(first.until)}`}>
-              <Picker
-                value={f.firstPeriod ?? 'prorate'}
-                onChange={(v) => up({ firstPeriod: v as ShareMember['firstPeriod'], firstAmount: undefined })}
-                options={['prorate', 'full', 'free'].map((value) => ({ value, label: t(`family.member.firstMode.${value}`) }))}
-              />
-            </Cell>
-            {f.firstPeriod !== 'free' && (
-              <Cell label={t('family.member.firstAmount')}>
-                <NumInput
-                  ccy={first.currency}
-                  className="num"
-                  value={f.firstAmount}
-                  placeholder={String(first.amount)}
-                  onValue={(n) => up({ firstAmount: n })}
+        {isNew &&
+          first.partial &&
+          mode !== 'exempt' &&
+          bridge?.from !== first.from &&
+          !ledger.periods.some((p) => p.key === first.from && p.status === 'paid') && (
+            <>
+              {/* 首期起止写在「首期方式」标签下面；折算出的金额是首期金额的占位，不再单独一行提示 */}
+              <Cell label={t('family.member.firstPeriod')} sub={`${cnDate(first.from)} – ${cnDate(first.until)}`}>
+                <Picker
+                  value={f.firstPeriod ?? 'prorate'}
+                  onChange={(v) => up({ firstPeriod: v as ShareMember['firstPeriod'], firstAmount: undefined })}
+                  options={['prorate', 'full', 'free'].map((value) => ({ value, label: t(`family.member.firstMode.${value}`) }))}
                 />
               </Cell>
-            )}
-          </>
-        )}
+              {f.firstPeriod !== 'free' && (
+                <Cell label={t('family.member.firstAmount')}>
+                  <NumInput
+                    ccy={first.currency}
+                    className="num"
+                    value={f.firstAmount}
+                    placeholder={String(first.amount)}
+                    onValue={(n) => up({ firstAmount: n })}
+                  />
+                </Cell>
+              )}
+            </>
+          )}
         {/* 来源这类说明属于人员（人员资料里的备注）；只给已经填过的旧数据留着，可改可清空 */}
         {member?.source && (
           <Cell label={t('family.member.source')}>
@@ -300,7 +311,7 @@ export function MemberForm({
   );
   const feeGroup = (
     <>
-      {/* 三、收费：跟随车 / 自定义 / 不分摊；已有成员改了才问从哪天生效 */}
+      {/* 收费：跟随车 / 自定义 / 不分摊；已有成员改了才问从哪天生效 */}
       <Group title={t('family.member.feeGroup')} foot={rateChanged ? t('family.collect.feeHelp') : undefined}>
         <div className="cell">
           <Seg
@@ -388,11 +399,7 @@ export function MemberForm({
           <button className="btn" onClick={onClose}>
             {t('family.member.cancel')}
           </button>
-          <button
-            className="btn primary"
-            disabled={busy || !f.name.trim() || refundInvalid(s, next) || (isNew && firstPay && payInvalid)}
-            onClick={() => void submit(save)}
-          >
+          <button className="btn primary" disabled={busy || !f.name.trim() || refundInvalid(s, next)} onClick={() => void submit(save)}>
             {isNew ? t('family.member.add') : t('family.member.save')}
           </button>
         </>
@@ -402,15 +409,21 @@ export function MemberForm({
         {isNew ? (
           <>
             {whoGroup}
-            {seatGroup}
+            {/* 收款：与已有成员同一位置；勾上则存好后接着打开收款表单 */}
+            {mode !== 'exempt' && (
+              <Group title={t('receivable.modeReceipt')}>
+                <Cell label={t('family.member.firstPayToggle')}>
+                  <Toggle checked={collectAfter} onChange={setCollectAfter} />
+                </Cell>
+              </Group>
+            )}
             {feeGroup}
-            {mode !== 'exempt' && <FirstReceiptFields context={context} />}
+            {seatGroup}
           </>
         ) : (
           <>
-            {/* 一、是谁 */}
             {whoGroup}
-            {/* 二、收款：一格一期，点已收的格子看明细；已付至和记一笔跟在下面；欠款默认勾欠的期，结清了默认勾下一期（预收） */}
+            {/* 收款：一格一期，点已收的格子看明细；已付至和记一笔跟在下面；欠款默认勾欠的期，结清了默认勾下一期（预收） */}
             {mode !== 'exempt' && (
               <Group
                 title={t('receivable.modeReceipt')}
@@ -465,12 +478,7 @@ export function MemberForm({
             )}
             {/* 收费：标题旁「编辑收费信息」点开，紧跟在收款下面 */}
             {feeOpen && feeGroup}
-            {/* 三、座位：加入日期、加入时长只展示；退出日期是记下车的唯一入口，先保留可改（退出流程另议） */}
-            <Group title={t('family.member.seatGroup')}>
-              <Cell label={t('family.member.joined')}>{cnDateFull(joinedOn)}</Cell>
-              {tenure && <Cell label={t('family.member.tenure')}>{tenure}</Cell>}
-              <MemberLeaveFields state={state} s={s} member={f} onChange={up} />
-            </Group>
+            {seatGroup}
           </>
         )}
       </div>
