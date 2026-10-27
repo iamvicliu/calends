@@ -212,8 +212,10 @@ export function TipTable({
 }) {
   return (
     <div className="tip-table">
-      <b>{head[0]}</b>
-      <b className="num">{head[1]}</b>
+      <div className="tip-head">
+        <b>{head[0]}</b>
+        <b className="num">{head[1]}</b>
+      </div>
       {rows.map((r) => (
         <Fragment key={r.key}>
           <span>{r.label}</span>
