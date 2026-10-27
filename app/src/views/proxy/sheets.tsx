@@ -158,15 +158,16 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                 head={[t('proxy.table.date'), t('proxy.table.charged'), t('proxy.table.received'), t('proxy.table.diff')]}
                 extraHead={t('proxy.table.cost')}
                 yearCells={(ys) => {
-                  // 小计只算已经扣款的期：预收的期还没扣，不计入已代付与盈亏（与上方指标卡一致）
+                  // 实扣、成本、差额只算已经扣款的期：预收的期还没扣，不计入已代付与盈亏（与上方指标卡一致）；收回按实际收到的钱，预收的也算
                   const done = ys.filter((r) => r.date <= today);
                   const ccys = new Set(done.map((r) => r.currency));
                   const settled = done.filter((r) => r.receivedBase != null);
+                  const received = ys.filter((r) => r.receivedBase != null);
                   const d = settled.reduce((a, r) => a + r.receivedBase! - r.chargedBase, 0);
                   return {
                     second: ccys.size === 1 ? flow(-done.reduce((a, r) => a + r.charged, 0), done[0].currency) : '',
                     extra: formatTotal(proxyTotals(done).partial.charged, base, { direction: -1 }),
-                    orig: <span className="green">{formatTotal(proxyTotals(settled).partial.received, base, { direction: 1 })}</span>,
+                    orig: <span className="green">{formatTotal(proxyTotals(received).partial.received, base, { direction: 1 })}</span>,
                     base: settled.length
                       ? Math.abs(d) < 0.5
                         ? t('proxy.table.even')
