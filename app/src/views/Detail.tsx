@@ -83,7 +83,7 @@ export async function detailImage(el: HTMLElement) {
   const sheet = el.closest<HTMLElement>('.sheet') ?? el;
   return (await snapshot(el, {
     radius: getComputedStyle(sheet).borderRadius,
-    filter: (node) => !node.matches('.dt-actions, .dt-add'),
+    filter: (node) => !node.matches('.dt-actions, .dt-add, .dt-note .dt-link'),
   }))!;
 }
 

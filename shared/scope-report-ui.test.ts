@@ -88,6 +88,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
           'YearLedger',
           'FeeRuleFields',
           'ReceivableSheet',
+          'PeriodPair',
           'PeriodStrip',
           'PeriodPop',
           'PeriodTip',
@@ -2931,7 +2932,7 @@ test('phase2 rendered ledger sections and assistant summaries retain their froze
   assert.deepEqual(normalized, JSON.parse(readFileSync(path, 'utf8')));
 });
 
-test('detail leaves the account to the editor and renders notes in a bottom panel hidden from PNG', () => {
+test('detail leaves the account to the editor; the bottom notes panel can be masked and then leaves the PNG', () => {
   const state = { ...st, subscriptions: [] };
   const sub: Subscription = {
     id: 'private',
@@ -2950,9 +2951,21 @@ test('detail leaves the account to the editor and renders notes in a bottom pane
   const summary = h.render('Summary', { sub, state, today });
   assert.ok(!JSON.stringify(summary.map((n) => n.props.children ?? null)).includes(sub.account!));
   assert.ok(!JSON.stringify(summary.map((n) => n.props.text ?? null)).includes(sub.notes!));
-  const note = harness('../app/src/views/Detail.tsx', 'NoteBlock', {}, {}).render('NoteBlock', { sub });
-  assert.equal(note[0].props['data-snapshot-hide'], true);
+  const nh = harness('../app/src/views/Detail.tsx', 'NoteBlock', {}, { Eye: 'Eye', EyeOff: 'EyeOff' });
+  let note = nh.render('NoteBlock', { sub });
+  // 默认显示，随图片导出；小眼睛自身不进图片
+  assert.equal(note[0].props['data-snapshot-hide'], undefined);
   assert.ok(note.some((n) => n.props.text === sub.notes));
+  const eye = () => note.find((n) => n.props.aside)!.props.aside;
+  assert.equal(eye().props['data-snapshot-hide'], true);
+  assert.equal(eye().props['aria-label'], 'family.sheet.hidePersonal');
+  eye().props.onClick();
+  note = nh.render('NoteBlock', { sub });
+  // 打码后正文不在页面里，整块不进图片
+  assert.equal(note[0].props['data-snapshot-hide'], true);
+  assert.ok(!note.some((n) => n.props.text === sub.notes));
+  assert.ok(!JSON.stringify(note.map((n) => n.props.children ?? null)).includes(sub.notes!));
+  assert.equal(eye().props['aria-label'], 'family.sheet.showPersonal');
   assert.deepEqual(harness('../app/src/views/Detail.tsx', 'NoteBlock', {}, {}).render('NoteBlock', { sub: { ...sub, notes: undefined } }), []);
 });
 

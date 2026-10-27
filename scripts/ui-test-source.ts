@@ -12,6 +12,7 @@ const groups: Record<string, string[]> = {
     'app/src/views/detail/ChargeTimeline.tsx',
     'app/src/views/detail/Events.tsx',
     'app/src/views/detail/Notices.tsx',
+    'app/src/views/detail/Periods.tsx',
     'app/src/views/detail/Summary.tsx',
   ],
   'app/src/views/Carpool.tsx': [

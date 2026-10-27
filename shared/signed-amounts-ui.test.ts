@@ -524,7 +524,12 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
     Trend: empty,
     toBase: (_s: AppState, n: number) => n,
   });
-  const Summary = load(file, 'Summary', extractUiFunction(new URL(file, import.meta.url), 'Summary'), { ...deps, cnDateAuto, Note: empty });
+  const Summary = load(file, 'Summary', extractUiFunction(new URL(file, import.meta.url), 'Summary'), {
+    ...deps,
+    cnDateAuto,
+    Note: empty,
+    collectNow: () => undefined,
+  });
   const Charges = load(file, 'Charges', extractUiFunction(new URL(file, import.meta.url), 'Charges'), {
     ...deps,
     Seg: empty,

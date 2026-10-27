@@ -1333,6 +1333,38 @@
 .dt-note-panel .dt-note > svg {
   display: none;
 }
+.dt-note-eye {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--label-2);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--duration) var(--ease);
+}
+.dt-note-eye:hover {
+  background: var(--fill);
+  color: var(--label);
+}
+/* 平时不显示，悬停备注卡或键盘聚焦时出现；打码后常驻；触屏没有悬停，一直显示 */
+.dt-note-panel:hover .dt-note-eye,
+.dt-note-panel.masked .dt-note-eye,
+.dt-note-eye:focus-visible {
+  opacity: 1;
+}
+@media (hover: none) {
+  .dt-note-eye {
+    opacity: 1;
+  }
+}
+.dt-note-mask {
+  margin: 0;
+  line-height: 1.6;
+}
 
 /* 合租弹窗：成员卡片没有标题，表格顶到卡片上沿 */
 .dt-panel.dt-share.car-members-panel {
