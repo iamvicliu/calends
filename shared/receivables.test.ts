@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { memberCashFlows } from './carpool.ts';
 import { memberLedger, memberDues } from './billing.ts';
-import { paidThrough, putRecord, removeRecord, resolveKey, setOpening, settle, type Period } from './receivables.ts';
+import { paidThrough, putRecord, removeRecord, removeRecordPeriod, resolveKey, setOpening, settle, type Period } from './receivables.ts';
 import { migrateReceivables } from './receivables-legacy.ts';
 import type { ShareMember, Subscription } from './types.ts';
 
@@ -43,6 +43,31 @@ test('写入校验：期不能为空、重复、不存在或已被占用；改�
   assert.deepEqual([moved.receipts.length, moved.waivers.length], [0, 1]);
   assert.deepEqual(removeRecord(next, 'b').waivers, []);
   assert.throws(() => removeRecord(next, 'missing'), /invalidTarget/);
+});
+
+test('每期弹窗里删一期：同一笔的其余期照旧、金额扣掉这一期分到的；只剩一期时整笔删掉', () => {
+  const r = {
+    receipts: [
+      { id: 'r', date: '2026-01-05', amount: 100, currency: 'CNY', periods: ['2026-02-01', '2026-03-01', '2026-04-01'] },
+      { id: 'opening', date: '2026-01-01', amount: 0, currency: 'CNY', periods: ['2026-01-01'], opening: true },
+    ],
+    waivers: [],
+  };
+  const third = settle(periods, r, '2026-01-15').periods[2];
+  assert.equal(third.share, 33.33);
+  const next = removeRecordPeriod(r, 'r', third, periods);
+  assert.deepEqual(next.receipts[0].periods, ['2026-02-01', '2026-04-01']);
+  assert.equal(next.receipts[0].amount, 66.67);
+  assert.deepEqual(
+    settle(periods, next, '2026-01-15').periods.map((x) => x.status),
+    ['paid', 'paid', 'upcoming', 'paid'],
+  );
+  // 期初结清只剩这一期：整笔删掉
+  assert.deepEqual(
+    removeRecordPeriod(next, 'opening', periods[0], periods).receipts.map((x) => x.id),
+    ['r'],
+  );
+  assert.throws(() => removeRecordPeriod(next, 'r', third, periods), /invalidTarget/);
 });
 
 test('条款改过、期重新切过时，旧记录按落在哪一期对上，不会变成欠款', () => {

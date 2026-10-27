@@ -77,7 +77,7 @@ export function PeriodPop({
   anchor: HTMLElement;
   onClose: () => void;
 }) {
-  const { setReceipt, others, copying, setCopying, startCopy, removeRecordById } = context;
+  const { setReceipt, others, copying, setCopying, startCopy, removeRecordPeriodOf } = context;
   const r = p.receipt ?? p.waiver!;
   const opening = isReceipt(r) && r.opening;
   return (
@@ -90,7 +90,7 @@ export function PeriodPop({
           <ConfirmButton
             onConfirm={() => {
               onClose();
-              void removeRecordById(r.id);
+              void removeRecordPeriodOf(r.id, p);
             }}
           >
             {t('common.delete')}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { todayIn, uid, addDays, memberBillMonths, memberCollection, memberRate, collectionAnchor, collectCurrencyOf } from '../../../../shared/billing.ts';
 import type { AppState, Receipt, ShareMember, Subscription } from '../../../../shared/types.ts';
-import { isSettled, putRecord, removeRecord, resolveKey, setOpening } from '../../../../shared/receivables.ts';
+import { isSettled, putRecord, removeRecordPeriod, resolveKey, type LedgerPeriod } from '../../../../shared/receivables.ts';
 
 import { useSubmit } from '../../components/inputs.tsx';
 import { getState, savePerson, saveSub } from '../../store.ts';
@@ -190,8 +190,9 @@ export function useMemberForm({
       t('family.member.copied', { count: targets.length }),
     );
   };
-  const removeRecordById = (id: string) =>
-    run(() => saveReceivable(s, f.id, id === 'opening' ? setOpening(member!, [], undefined) : removeRecord(member!, id)), t('receivable.toastRemoved'));
+  // 每期弹窗里删：只去掉这一期，同一笔的其余期照旧
+  const removeRecordPeriodOf = (id: string, period: LedgerPeriod) =>
+    run(() => saveReceivable(s, f.id, removeRecordPeriod(member!, id, period, ledger.periods)), t('receivable.toastRemoved'));
 
   const [busy, submit] = useSubmit();
   const save = () =>
@@ -301,7 +302,7 @@ export function useMemberForm({
     copyable,
     startCopy,
     copyTo,
-    removeRecordById,
+    removeRecordPeriodOf,
     busy,
     submit,
     save,

@@ -7,7 +7,7 @@ import { flow, cnDate, cnDateFull, money } from '../../../../shared/format.ts';
 import { toBaseOrNaN } from '../../../../shared/fx.ts';
 import type { AppState, Receipt, Subscription, Waiver } from '../../../../shared/types.ts';
 import { recordProxyCharge } from '../../../../shared/receivable-edit.ts';
-import { removeRecord } from '../../../../shared/receivables.ts';
+import { removeRecordPeriod } from '../../../../shared/receivables.ts';
 import { ReceivableSheet } from '../Receivable.tsx';
 import { DetailHead, DetailSheet, Facts, Note, Panel, Prop } from '../../components/DetailKit.tsx';
 import { YearLedger } from '../../components/YearLedger.tsx';
@@ -320,13 +320,14 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       await saveSub(after);
       onClose();
     }, t('proxy.entry.saved'));
-  // 删掉这笔记录：一笔分几期时这几期一起回到待收
+  // 只把这一期从记录里去掉：一笔分几期时其余期照旧，金额扣掉这一期分到的
   const remove = () =>
     rec &&
     submit(() =>
       run(async () => {
         const current = getState().subscriptions.find((x) => x.id === s.id) ?? live;
-        await saveSub({ ...current, proxy: { ...current.proxy!, ...removeRecord(current.proxy!, rec.id) } });
+        const periods = proxyLedger(current, today).periods;
+        await saveSub({ ...current, proxy: { ...current.proxy!, ...removeRecordPeriod(current.proxy!, rec.id, row, periods) } });
         onClose();
       }, t('receivable.toastRemoved')),
     );

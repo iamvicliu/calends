@@ -150,6 +150,26 @@ export function removeRecord(r: Receivable, id: string): Required<Receivable> {
 }
 
 /**
+ * 从一笔分几期的记录里只去掉某一期（每期弹窗里的删除）：这一期回到待收，其余期照旧；
+ * 收款同时扣掉分到这一期的金额（share，与表格上显示的同一个数）。只剩这一期时整笔删掉
+ */
+export function removeRecordPeriod(r: Receivable, id: string, period: Pick<LedgerPeriod, 'key' | 'share'>, periods: Period[]): Required<Receivable> {
+  const rec = [...(r.receipts ?? []), ...(r.waivers ?? [])].find((x) => x.id === id);
+  const hit = rec?.periods.filter((k) => resolveKey(periods, k) === period.key) ?? [];
+  if (!rec || !hit.length) throw new Error(t('mcp.error.invalidTarget'));
+  if (hit.length === rec.periods.length) return removeRecord(r, id);
+  const rest = rec.periods.filter((k) => !hit.includes(k));
+  const receipts = (r.receipts ?? []).map((x) => {
+    if (x.id !== id) return x;
+    if (x.opening || period.share == null) return { ...x, periods: rest };
+    const unit = 10 ** currencyDecimals(x.currency);
+    return { ...x, periods: rest, amount: Math.round((x.amount - period.share) * unit) / unit };
+  });
+  const waivers = (r.waivers ?? []).map((x) => (x.id === id ? { ...x, periods: rest } : x));
+  return { receipts, waivers };
+}
+
+/**
  * 期初结清：开始记账前就收清了的期（金额不详，不计入收到的钱）。until 及之前、没被别的记录占用的期都算进来；
  * 原来的期初结清整笔替换，until 为空则去掉
  */
