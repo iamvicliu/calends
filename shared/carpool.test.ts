@@ -610,7 +610,7 @@ test('改回跟随车：起止变了的期不再被期初结清、免收盖住�
   assert.deepEqual(followCarRule(state, s, paid, today, today).receipts?.[0].periods, ['2026-10-20', '2027-01-17']);
 });
 
-test('合租表格与成员弹窗网格同一口径：预收的未开始期画成未到，之后的不画', async () => {
+test('合租表格与成员弹窗网格同一口径：预收的未开始期画成已收，再画下一期未收的', async () => {
   const { memberSegments } = await import('./carpool.ts');
   const { periodGrid, periodCellKind } = await import('./period-grid.ts');
   const { memberLedger } = await import('./billing.ts');
@@ -648,7 +648,7 @@ test('合租表格与成员弹窗网格同一口径：预收的未开始期画�
   const cells = periodGrid(memberLedger(s, m, today, 'CNY', '2026-12-31').periods, today)
     .rows.flatMap((r) => r.segments)
     .map((x) => `${x.period.from}:${periodCellKind(x.period, today).replace('upcoming', 'future')}`);
-  assert.deepEqual(segments, ['2026-01-01:paid', '2026-02-01:paid', '2026-03-01:future']);
+  assert.deepEqual(segments, ['2026-01-01:paid', '2026-02-01:paid', '2026-03-01:paid', '2026-04-01:paid', '2026-05-01:paid', '2026-06-01:future']);
   assert.deepEqual([...new Set(cells)], segments);
 });
 

@@ -85,7 +85,7 @@ test('最后一期用结束月；无下一期信息时仍保留实际覆盖', ()
     [[6, 4]],
   );
 });
-test('提前预收两期只展示下一期；中间两期欠款、免收和免费保持各自状态', () => {
+test('提前预收的各期都展示、再多一期未收的；中间两期欠款、免收和免费保持各自状态', () => {
   const periods = schedule('2024-01-01', 1, 38);
   periods[0].due = 0;
   const keys = periods.filter((_, i) => ![0, 8, 9, 10].includes(i)).map((p) => p.key);
@@ -98,7 +98,24 @@ test('提前预收两期只展示下一期；中间两期欠款、免收和免�
     '2026-10-26',
   ).periods;
   const shown = visibleStripPeriods(ledger, '2026-10-26');
-  assert.equal(shown.at(-1)?.from, '2026-11-01');
+  // 预收的未来各期都画出来；全部预收完就没有下一期未收的
+  assert.equal(shown.at(-1)?.from, '2027-02-01');
+  assert.equal(shown.at(-1)?.status, 'paid');
+  // 后面还有没收的期时，只多画第一期
+  const more = settle(
+    schedule('2024-01-01', 1, 40),
+    { receipts: [{ id: 'r', date: '2026-10-01', amount: 340, currency: 'CNY', periods: keys }] },
+    '2026-10-26',
+  ).periods;
+  assert.deepEqual(
+    visibleStripPeriods(more, '2026-10-26')
+      .slice(-2)
+      .map((p) => [p.from, p.status]),
+    [
+      ['2027-02-01', 'paid'],
+      ['2027-03-01', 'upcoming'],
+    ],
+  );
   assert.deepEqual(
     shown.slice(8, 11).map((p) => p.status),
     ['due', 'due', 'waived'],

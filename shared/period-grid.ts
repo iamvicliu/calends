@@ -1,5 +1,5 @@
 import { addDays, addMonths, diffDays } from './billing.ts';
-import type { LedgerPeriod } from './receivables.ts';
+import { isSettled, type LedgerPeriod } from './receivables.ts';
 
 export type PeriodGridMode = 'months' | 'weeks' | 'periods';
 export interface PeriodSegment {
@@ -34,16 +34,16 @@ export function periodGridMode(periods: LedgerPeriod[]): PeriodGridMode {
   return 'periods';
 }
 
-/** All started periods plus only the immediately following one, even when later periods are prepaid. */
+/** All started periods, prepaid future periods, then the first future period still to collect. */
 export function visibleStripPeriods(periods: LedgerPeriod[], today: string): LedgerPeriod[] {
   const sorted = [...periods].sort((a, b) => a.from.localeCompare(b.from));
-  const next = sorted.findIndex((p) => p.from > today);
+  const next = sorted.findIndex((p) => p.from > today && !isSettled(p));
   return next < 0 ? sorted : sorted.slice(0, next + 1);
 }
 
-/** How a period cell is drawn; the member sheet strip and the shared-plan table both use this. Periods not yet started draw as upcoming even when prepaid. */
+/** How a period cell is drawn; the member sheet strip and the shared-plan table both use this. Prepaid future periods draw as settled. */
 export function periodCellKind(p: LedgerPeriod, today: string): LedgerPeriod['status'] {
-  return p.from > today ? 'upcoming' : p.status;
+  return p.from > today && !isSettled(p) ? 'upcoming' : p.status;
 }
 
 /** Pure presentation: keeps dates, dues and receipt allocation untouched. */

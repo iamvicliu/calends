@@ -502,7 +502,7 @@ export function memberSegments(s: Subscription, m: ShareMember, today: string, s
     if (a <= b) out.push({ from: a, until: b, kind });
   };
   const { periods } = memberLedger(s, m, today, s.currency, end);
-  // 与成员弹窗的期数网格同一口径：已开始的各期加下一期，没开始的一律画成未到
+  // 与成员弹窗的期数网格同一口径：已开始的各期、预收的未来各期，再加下一期未收的
   for (const p of visibleStripPeriods(periods, today)) {
     if (p.until < start || p.from > end) continue;
     const kind = periodCellKind(p, today);
