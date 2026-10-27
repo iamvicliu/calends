@@ -9016,8 +9016,11 @@ img.mm-flag {
 .card-h > .seg {
   flex-shrink: 0;
 }
+/* 只占文字宽度：点名字旁的空白不打开订阅，长名仍截断 */
 .name-link {
-  display: block;
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
 }
 
 .pk-btn > span:not(.pk-ico) {
