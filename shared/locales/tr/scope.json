@@ -79,6 +79,7 @@
     "stopped": "Durdurulan",
     "averageDuration": "Ortalama süre",
     "omitted": "Toplam harcamaya göre ilk 12; {count} abonelik daha",
-    "cashWindow": "Bu ay dahil 12 ay; bugüne kadarki harcamalar, iadeler düşülmüş."
+    "cashWindow": "Bu ay dahil 12 ay; bugüne kadarki harcamalar, iadeler düşülmüş.",
+    "stoppedMonthly": "Durdurmadan önce aylık"
   }
 }

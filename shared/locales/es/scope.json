@@ -79,6 +79,7 @@
     "stopped": "Finalizadas",
     "averageDuration": "Duración media",
     "omitted": "Las 12 con mayor gasto total; {count} más",
-    "cashWindow": "12 meses hasta este mes; gasto hasta hoy, menos reembolsos."
+    "cashWindow": "12 meses hasta este mes; gasto hasta hoy, menos reembolsos.",
+    "stoppedMonthly": "Mensual antes de detener"
   }
 }

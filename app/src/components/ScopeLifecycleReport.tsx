@@ -53,8 +53,8 @@ export function ScopeLifecycleReport({
             note={totalNote(data.spent) || undefined}
           />
           <Metric
-            label={t('scope.monthly')}
-            value={data.activeCount ? (mrr ? amount(mrr) : flow(0, base)) : '—'}
+            label={t(data.activeCount || !data.stoppedCount ? 'scope.monthly' : 'scope.lifecycle.stoppedMonthly')}
+            value={data.activeCount ? (mrr ? amount(mrr) : flow(0, base)) : data.stoppedCount ? amount(data.stoppedMonthly) : '—'}
             note={
               data.activeCount && head?.mode === 'scope'
                 ? `${t('scope.previousEnd')} / ${flow(-head.change.amount, base)}`

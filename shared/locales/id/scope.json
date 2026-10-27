@@ -78,6 +78,7 @@
     "stopped": "Berhenti",
     "averageDuration": "Durasi rata-rata",
     "omitted": "12 pengeluaran total tertinggi; {count} lainnya",
-    "cashWindow": "12 bulan hingga bulan ini; pengeluaran hingga hari ini dikurangi pengembalian dana."
+    "cashWindow": "12 bulan hingga bulan ini; pengeluaran hingga hari ini dikurangi pengembalian dana.",
+    "stoppedMonthly": "Bulanan sebelum dihentikan"
   }
 }

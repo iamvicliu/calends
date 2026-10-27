@@ -80,6 +80,8 @@ export interface ScopeLifecycle {
   averageDays: number;
   activeCount: number;
   stoppedCount: number;
+  /** Monthly cost of the stopped subscriptions on their last billed day; shown when nothing in the selection is still billing. */
+  stoppedMonthly: FxTotal;
   terminatedCount: number;
   loss: FxTotal;
   terminationLoss: FxTotal;
@@ -299,7 +301,17 @@ export function scopeReport(state: AppState, subs: readonly Subscription[], toda
   const stops = stopHistory(scoped, today);
   const spentBySub = scoped.subscriptions.map((sub) => ({ sub, total: rowTotal(rows.filter((r) => r.sub.id === sub.id)) }));
   spentBySub.sort((a, b) => b.total.value - a.total.value || a.sub.id.localeCompare(b.sub.id));
-  const stoppedCount = scoped.subscriptions.filter((s) => isStopped(effectiveStatus(s, today))).length;
+  const stopped = scoped.subscriptions.filter((s) => isStopped(effectiveStatus(s, today)));
+  const stoppedCount = stopped.length;
+  const stoppedMonthly = sumTotals(
+    stopped.map((s) => {
+      const last = phaseSubs(s)
+        .filter((p) => p.start <= today)
+        .at(-1);
+      const until = last?.stop ? addDays(last.stop.date, -1) : (last?.end ?? today);
+      return contributionTotal(scoped, s, until < today ? until : today);
+    }),
+  );
   const lifecycle: ScopeLifecycle = {
     spent: rowTotal(rows),
     averageDays: scoped.subscriptions.length
@@ -313,6 +325,7 @@ export function scopeReport(state: AppState, subs: readonly Subscription[], toda
       : 0,
     activeCount: totals(scoped, today).activeCount,
     stoppedCount,
+    stoppedMonthly,
     terminatedCount: stops.filter((s) => s.kind === 'terminate').length,
     loss: stopLosses(scoped, today).partial,
     terminationLoss: sumTotals(stops.filter((s) => s.kind === 'terminate').map((s) => amountTotal(s.loss, s.currency, s.lossBase))),

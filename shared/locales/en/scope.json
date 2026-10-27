@@ -82,6 +82,7 @@
     "stopped": "Stopped",
     "averageDuration": "Average duration",
     "omitted": "Top 12 by lifetime spending; {count} more subscriptions",
-    "cashWindow": "12 months through this month; cash paid through today, net of refunds."
+    "cashWindow": "12 months through this month; cash paid through today, net of refunds.",
+    "stoppedMonthly": "Monthly before stopping"
   }
 }

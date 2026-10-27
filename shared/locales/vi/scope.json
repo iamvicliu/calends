@@ -78,6 +78,7 @@
     "stopped": "Đã dừng",
     "averageDuration": "Thời gian trung bình",
     "omitted": "12 đăng ký chi nhiều nhất; còn {count} đăng ký",
-    "cashWindow": "12 tháng đến tháng này; chi đến hôm nay, trừ hoàn tiền."
+    "cashWindow": "12 tháng đến tháng này; chi đến hôm nay, trừ hoàn tiền.",
+    "stoppedMonthly": "Hằng tháng trước khi dừng"
   }
 }

@@ -80,6 +80,7 @@
     "stopped": "Arrêtés",
     "averageDuration": "Durée moyenne",
     "omitted": "Les 12 dépenses cumulées les plus élevées; {count} autres",
-    "cashWindow": "12 mois jusqu’au mois actuel ; dépenses à ce jour, remboursements déduits."
+    "cashWindow": "12 mois jusqu’au mois actuel ; dépenses à ce jour, remboursements déduits.",
+    "stoppedMonthly": "Mensuel avant l’arrêt"
   }
 }

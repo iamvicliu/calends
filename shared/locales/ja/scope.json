@@ -78,6 +78,7 @@
     "stopped": "停止済み",
     "averageDuration": "平均利用期間",
     "omitted": "累計支出の上位12件; 他{count}件",
-    "cashWindow": "今月までの12か月。今日までの支出から返金を差し引きます。"
+    "cashWindow": "今月までの12か月。今日までの支出から返金を差し引きます。",
+    "stoppedMonthly": "停止前の月額"
   }
 }

@@ -78,6 +78,7 @@
     "stopped": "已停止",
     "averageDuration": "平均持續",
     "omitted": "依累計花費顯示前 12 個; 其餘 {count} 個訂閱",
-    "cashWindow": "截至本月的 12 個月，僅計今天前的花費，扣除退款。"
+    "cashWindow": "截至本月的 12 個月，僅計今天前的花費，扣除退款。",
+    "stoppedMonthly": "停用前每月"
   }
 }

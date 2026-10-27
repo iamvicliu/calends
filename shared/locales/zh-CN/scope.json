@@ -78,6 +78,7 @@
     "stopped": "已停止",
     "averageDuration": "平均持续",
     "omitted": "按累计花费展示前 12 个; 其余 {count} 个订阅",
-    "cashWindow": "截至本月的 12 个月，仅计今天前的花费，扣除退款。"
+    "cashWindow": "截至本月的 12 个月，仅计今天前的花费，扣除退款。",
+    "stoppedMonthly": "停用前每月"
   }
 }

@@ -79,6 +79,7 @@
     "stopped": "Beendet",
     "averageDuration": "Durchschnittliche Dauer",
     "omitted": "Top 12 nach Gesamtausgaben; {count} weitere Abos",
-    "cashWindow": "12 Monate bis diesen Monat; Ausgaben bis heute abzüglich Erstattungen."
+    "cashWindow": "12 Monate bis diesen Monat; Ausgaben bis heute abzüglich Erstattungen.",
+    "stoppedMonthly": "Monatlich vor dem Beenden"
   }
 }

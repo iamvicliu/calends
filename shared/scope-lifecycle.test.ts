@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { scopeFixtures, SCOPE_TODAY as today } from '../scripts/scope-report-fixtures.ts';
-import { chargesBetween, myShareFactor, diffDays } from './billing.ts';
+import { addDays, chargesBetween, myShareFactor, diffDays } from './billing.ts';
 import { chargeTotal, scaleTotal, sumTotals } from './fx-total.ts';
-import { stopHistory, stopLosses } from './metrics.ts';
+import { contributionTotal, stopHistory, stopLosses } from './metrics.ts';
 import { monthReport, scopeReport } from './scope-report.ts';
 import { scopeReportOut } from '../worker/ai/report-tools.ts';
 
@@ -43,7 +43,14 @@ test('seven fictional Kiro subscriptions retain all six provider stops including
 });
 
 test('all stopped, no provider stops, a single subscription and empty selection retain finite lifecycle facts', () => {
-  assert.equal(scopeReport(data.stopped, data.stopped.subscriptions, today).lifecycle!.activeCount, 0);
+  const stopped = scopeReport(data.stopped, data.stopped.subscriptions, today).lifecycle!;
+  assert.equal(stopped.activeCount, 0);
+  // 全部停用时给出停用前的月成本，不显示成「—」
+  const lastMonthly = sumTotals(
+    data.stopped.subscriptions.map((s) => contributionTotal(data.stopped, s, s.stop ? addDays(s.stop.date, -1) : (s.end ?? today))),
+  );
+  assert.ok(stopped.stoppedMonthly.value > 0);
+  assert.deepEqual(stopped.stoppedMonthly, lastMonthly);
   const ordinary = scopeReport(data.ordinary, data.ordinary.subscriptions, today).lifecycle!;
   assert.equal(ordinary.terminatedCount, 0);
   assert.equal(ordinary.stoppedCount, 1);
