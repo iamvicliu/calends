@@ -2231,9 +2231,6 @@ select.btn {
 }
 
 /* 月度变动与体检各按内容高度，不把短卡拉成整行高。 */
-.report-pair {
-  align-items: start;
-}
 /* 报告底部：桌面高度由充值计划决定，日志只显示放得下的完整条目。 */
 .report-bottom {
   align-items: stretch;

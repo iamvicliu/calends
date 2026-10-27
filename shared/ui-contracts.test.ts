@@ -270,7 +270,7 @@ test('9/17. 所有语言区分报告全额实付与年度我的份额，并说�
 });
 
 test('报告损失明细可打开原订阅；四种年度分享在非零且未隐藏时展示损失', async () => {
-  const { stopLosses, yearReview } = await import('./metrics.ts');
+  const { stopHistory, stopLosses, yearReview } = await import('./metrics.ts');
   const { stopSubscription } = await import('./phases.ts');
   const { cnDate, flow, money } = await import('./format.ts');
   const { flatten, setLocale, t } = await import('./i18n.ts');
@@ -307,6 +307,7 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     flow,
     cnDate,
     useMemo: (f: () => unknown) => f(),
+    stopHistory,
     stopLosses,
     tipProps: () => ({}),
     SubIcon: 'SubIcon',
@@ -354,6 +355,12 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     const empty = StopsCard({ state: { ...st, subscriptions: [] }, today });
     assert.ok(text(empty).includes(t('report.stops.loss')));
     assert.ok(!text(empty).includes(t('report.stops.cancel')));
+    // 次数算全部停用，不只是有未退款损失的：只有一次无损失的我取消也要显示
+    // 9 月 5 日开始的月付在 10 月 4 日（当期最后一天）取消，没有损失
+    const noLoss = { ...st, subscriptions: [stopSubscription({ ...original, id: 'no-loss', start: '2026-09-05' }, '2026-10-04', 'cancel')] };
+    const onlyCancel = StopsCard({ state: noLoss, today });
+    assert.equal(stopLosses(noLoss, today).items.length, 0);
+    assert.ok(text(onlyCancel).includes(t('report.stops.cancel')));
     const unknown = stopSubscription({ ...original, currency: 'XYZ' }, today, 'terminate');
     const unknownTree = StopsCard({ state: { ...st, subscriptions: [unknown] }, today });
     assert.ok(text(unknownTree).includes(fxTotals.totalNote(stopLosses({ ...st, subscriptions: [unknown] }, today).partial)));

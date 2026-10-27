@@ -20,6 +20,7 @@ import {
   monthMovement,
   mrrSeries,
   prepaidValue,
+  stopHistory,
   stopLosses,
   topUpPlan,
   type EventKind,
@@ -57,7 +58,7 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
         {/* 先看钱的全貌（现金与真实成本、钱花在哪），再看本月变动与体检 */}
         <CashCard state={state} today={today} />
         <Composition state={state} today={today} onOpen={onOpen} />
-        <div className="grid g-2 report-pair">
+        <div className="grid g-2">
           <Waterfall state={state} today={today} onOpen={onOpen} />
           <Checkup state={state} today={today} onOpen={onOpen} />
         </div>
@@ -76,8 +77,11 @@ function Hero({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const [range, setRange] = useState<'12' | '36' | 'all'>('36');
   const [hist, setHist] = useState(true);
-  // 区间早于账本第一笔数据时从那个月画起，不画前面的零线；不足 13 个月时 yearAgo 为空、不显示，不会变成 0
-  const months = chartMonths(firstStart(state, today), today, range === 'all' ? undefined : Number(range));
+  // 图表不早于账本第一笔数据；比账本还长的区间画出来和「全部」一样，不给这个选项，只剩一档时整组不显示
+  const span = chartMonths(firstStart(state, today), today);
+  const ranges = (['12', '36', 'all'] as const).filter((r) => r === 'all' || Number(r) < span);
+  const shown = ranges.includes(range) ? range : 'all';
+  const months = shown === 'all' ? span : Number(shown);
   const series = useMemo(() => mrrSeries(state, today, months, hist), [state, today, months, hist]);
   const tot = totals(state, today);
   const current = series[series.length - 1].partial;
@@ -130,16 +134,14 @@ function Hero({ state, today }: { state: AppState; today: string }) {
               ['c', t('report.hero.fxNow')],
             ]}
           />
-          <Seg
-            small
-            value={range}
-            onChange={setRange}
-            options={[
-              ['12', t('report.hero.range1')],
-              ['36', t('report.hero.range3')],
-              ['all', t('report.hero.rangeAll')],
-            ]}
-          />
+          {ranges.length > 1 && (
+            <Seg
+              small
+              value={shown}
+              onChange={setRange}
+              options={ranges.map((r) => [r, t(r === '12' ? 'report.hero.range1' : r === '36' ? 'report.hero.range3' : 'report.hero.rangeAll')])}
+            />
+          )}
         </div>
         <AreaChart
           values={series.map((p) => p.partial.value)}
@@ -314,8 +316,10 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
 function CashCard({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   // 往回最多 2 年，但不早于账本第一笔数据所在月
+  // 预测月数不超过已有的月数，账本短时不让未来的空柱占满整张图
   const back = chartMonths(firstStart(state, today), today, 24) - 1;
-  const rows = useMemo(() => cashVsAccrual(state, today, back, 12), [state, today, back]);
+  const ahead = Math.min(12, Math.max(3, back + 1));
+  const rows = useMemo(() => cashVsAccrual(state, today, back, ahead), [state, today, back, ahead]);
   const pv = useMemo(() => prepaidValue(state, today), [state, today]);
   const next90 = chargesTotal(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
   const peak = rows.filter((r) => r.projected).sort((a, b) => b.cash - a.cash)[0];
@@ -405,7 +409,8 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
 function StopsCard({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const losses = useMemo(() => stopLosses(state, today), [state, today]);
-  const count = (kind: 'cancel' | 'terminate') => losses.items.filter((i) => i.kind === kind).length;
+  const stops = useMemo(() => stopHistory(state, today), [state, today]);
+  const count = (kind: 'cancel' | 'terminate') => stops.filter((i) => i.kind === kind).length;
   return (
     <div className="card stop-report copy-card" data-copy-card id="report-stops">
       <div className="copy-corner">
