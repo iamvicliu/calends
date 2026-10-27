@@ -42,7 +42,7 @@ export function MemberRows({
   state: AppState;
   s: Subscription;
   today: string;
-  onMember: (m: ShareMember, collect?: boolean) => void;
+  onMember: (m: ShareMember) => void;
   /** 只列一部分成员（合租弹窗里按收费周期分组时用） */
   only?: (m: ShareMember) => boolean;
   /** 合租详情里在每人下方画时间条（与宽屏表格一致） */
@@ -231,7 +231,7 @@ export function MemberTable({
   state: AppState;
   s: Subscription;
   today: string;
-  onMember: (m?: ShareMember, collect?: boolean) => void;
+  onMember: (m?: ShareMember) => void;
   win: ReturnType<typeof carpoolTimeline>;
   expanded: boolean;
   masked: boolean;
@@ -494,7 +494,7 @@ export function CarMembers({
   state: AppState;
   s: Subscription;
   today: string;
-  onMember: (m?: ShareMember, collect?: boolean) => void;
+  onMember: (m?: ShareMember) => void;
   masked?: boolean;
   billEvery: number;
 }) {

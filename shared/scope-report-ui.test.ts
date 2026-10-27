@@ -2685,7 +2685,7 @@ test('代付结清后第三格显示盈亏而不是「已结清」，未结清�
   assert.doesNotMatch(text(owed), /family\.strip\.profit/);
 });
 
-test('所有入口打开同一个成员弹窗：欠款或明确收款时收款表单自动叠在上面，其余只开弹窗；记下这笔推进已付至', async () => {
+test('所有入口打开同一个成员弹窗：欠款也不自动叠收款表单，点某笔收款才直接改那一笔；记下这笔推进已付至', async () => {
   const opening = (...periods: string[]) => [{ id: 'o', date: '2025-01-17', amount: 0, currency: 'CNY', periods, opening: true }];
   // 收了第一期，之后都欠着
   const member = { id: 'm', name: 'Member', share: 7, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2025-01-17', receipts: opening('2025-01-17') };
@@ -2727,7 +2727,7 @@ test('所有入口打开同一个成员弹窗：欠款或明确收款时收款�
     },
   );
   // 每次换一个新的渲染器：入口只在打开时决定一次
-  const route = (props: { member?: typeof member; collect?: boolean }) => {
+  const route = (props: { member?: typeof member; editId?: string }) => {
     const plan = props.member ? { ...sub, share: { ...sub.share!, members: [props.member] } } : sub;
     const [node] = harness('../app/src/views/Members.tsx', 'MemberSheet', {}, { ...carpool, todayIn: () => today }).render('MemberSheet', {
       state: st,
@@ -2738,10 +2738,10 @@ test('所有入口打开同一个成员弹窗：欠款或明确收款时收款�
     return [(node.type as Function).name, JSON.stringify(node.props.initialReceipt ?? null)];
   };
 
-  // 同一个弹窗；欠款（或明确要收款）时打开就叠上收款表单，已结清的只开弹窗
-  assert.deepEqual(route({ member }), ['MemberForm', '{}']);
+  // 同一个弹窗；欠款也只开弹窗，收款由弹窗里的「记收款」发起；从某笔收款进来才直接改那一笔
+  assert.deepEqual(route({ member }), ['MemberForm', 'null']);
   assert.deepEqual(route({ member: settled }), ['MemberForm', 'null']);
-  assert.deepEqual(route({ member: settled, collect: true }), ['MemberForm', '{}']);
+  assert.deepEqual(route({ member, editId: 'o' }), ['MemberForm', '{"edit":"o"}']);
   assert.deepEqual(route({}), ['MemberForm', 'null']);
   const nodes = r.render('ReceiptForm', { state: st, s: sub, member, onDone: () => (closed = true) });
   const record = all(nodes.find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'button' && n.children.includes('receivable.record'))!;

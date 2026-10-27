@@ -99,7 +99,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
   const [share, setShare] = useState(false);
   // 合租弹窗：从详情的合租区点进去，看收了多少、付了多少；成员资料再叠一层
   const [car, setCar] = useState(false);
-  const [member, setMember] = useState<{ m?: ShareMember; collect?: boolean } | null>(null);
+  const [member, setMember] = useState<{ m?: ShareMember } | null>(null);
   const [transfer, setTransfer] = useState<{ index?: number } | null>(null);
   const root = useRef<HTMLDivElement>(null);
 
@@ -227,7 +227,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         {!compact && <Timeline sub={sub} state={state} today={today} history={history} />}
         <Notices sub={sub} state={state} today={today} />
         {/* 合租比扣款记录重要，放在前面 */}
-        <ShareCard sub={sub} state={state} today={today} onCar={() => setCar(true)} onMember={(m, collect) => setMember({ m, collect })} />
+        <ShareCard sub={sub} state={state} today={today} onCar={() => setCar(true)} onMember={(m) => setMember({ m })} />
         {charges}
         <Transfers sub={sub} state={state} onRow={(index) => setTransfer({ index })} onAdd={() => setTransfer({})} />
         {events}
@@ -264,11 +264,11 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
             book={carLedger(state, sub, today)}
             onClose={() => setCar(false)}
             onOpenSub={() => setCar(false)}
-            onMember={(m, collect) => setMember({ m, collect })}
+            onMember={(m) => setMember({ m })}
           />,
           document.body,
         )}
-      {member && createPortal(<MemberSheet state={state} s={sub} member={member.m} collect={member.collect} onClose={() => setMember(null)} />, document.body)}
+      {member && createPortal(<MemberSheet state={state} s={sub} member={member.m} onClose={() => setMember(null)} />, document.body)}
       {transfer &&
         createPortal(
           <TransferSheet

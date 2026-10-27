@@ -60,7 +60,7 @@ export function CarSheet({
   book: ReturnType<typeof carLedger>;
   onClose: () => void;
   onOpenSub: () => void;
-  onMember: (m?: ShareMember, collect?: boolean) => void;
+  onMember: (m?: ShareMember) => void;
   /** 收款表点某一笔：直接编辑这笔收款 */
   onPayment?: (m: ShareMember, receiptId: string) => void;
 }) {

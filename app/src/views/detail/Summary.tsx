@@ -136,7 +136,7 @@ export function ShareCard({
   state: AppState;
   today: string;
   onCar: () => void;
-  onMember: (m?: ShareMember, collect?: boolean) => void;
+  onMember: (m?: ShareMember) => void;
 }) {
   const share = sub.share;
   if (share?.role !== 'owner') return null;

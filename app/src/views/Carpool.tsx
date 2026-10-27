@@ -110,7 +110,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
   const owedAll = all.flatMap(duesOf).filter((d) => d.periodsOwed > 0);
   const owedPartial = sumTotals(owedAll.map((d) => dueTotal(state, d, toBase(state, d.owed, d.currency))));
   const [convert, setConvert] = useState<Subscription | null>(null);
-  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; collect?: boolean; editId?: string } | null>(null);
+  const [member, setMember] = useState<{ s: Subscription; m?: ShareMember; editId?: string } | null>(null);
   // 点开的那辆车：只存 id，弹窗里总读最新数据（收款后立即更新）
   const [sheet, setSheet] = useState<string | null>(null);
   const sheetSub = sheet ? state.subscriptions.find((x) => x.id === sheet) : undefined;
@@ -276,7 +276,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                               <Icon name="plus" /> {t('family.pool.addMemberSeats', { count: free })}
                             </button>
                           )}
-                          <MemberRows state={state} s={s} today={today} onMember={(m, c) => setMember({ s, m, collect: c })} />
+                          <MemberRows state={state} s={s} today={today} onMember={(m) => setMember({ s, m })} />
                         </>
                       )}
                     </div>
@@ -345,7 +345,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
               setSheet(null);
               onOpen(sheetSub);
             }}
-            onMember={(m, c) => setMember({ s: sheetSub, m, collect: c })}
+            onMember={(m) => setMember({ s: sheetSub, m })}
             onPayment={(m, editId) => setMember({ s: sheetSub, m, editId })}
           />
         )}
@@ -355,7 +355,6 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
             state={state}
             s={state.subscriptions.find((x) => x.id === member.s.id) ?? member.s}
             member={member.m}
-            collect={member.collect}
             editId={member.editId}
             onClose={() => setMember(null)}
             onOpenSub={() => {

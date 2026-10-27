@@ -161,14 +161,13 @@ test('family people tab opens the shared detail with the profile form on top and
   assert.equal(nodes(tree.props.foot, (n) => n.props.className === 'btn primary')[0].props.disabled, true);
 });
 
-test('person car row explicitly opens member editing even when collection is overdue', () => {
+test('person car row opens member editing without a receipt form even when collection is overdue', () => {
   const h = harness();
   let tree = h.render();
   nodes(tree, (n) => n.type === 'button' && String(n.props.className).includes('pp-head'))[0].props.onClick();
   tree = h.render();
   const dialog = nodes(tree, (n) => n.type === 'MemberDialog')[0];
-  assert.equal(dialog.props.collect, false);
-  const render = (collect, editId) => {
+  const render = (editId) => {
     const hooksForMember = hooks();
     const MemberSheet = component('Members.tsx', 'MemberSheet', {
       ...hooksForMember,
@@ -177,17 +176,15 @@ test('person car row explicitly opens member editing even when collection is ove
       MemberForm: 'MemberForm',
       ReceiptForm: 'ReceiptForm',
     });
-    return MemberSheet({ ...dialog.props, collect, editId });
+    return MemberSheet({ ...dialog.props, editId });
   };
-  // 一律打开同一个成员弹窗；是否叠上收款表单由 initialReceipt 决定
-  const open = (collect, editId) => {
-    const node = render(collect, editId);
+  // 一律打开同一个成员弹窗；只有从某笔收款进来才叠上那一笔
+  const open = (editId) => {
+    const node = render(editId);
     return [node.type, JSON.stringify(node.props.initialReceipt ?? null)];
   };
-  assert.deepEqual(open(false), ['MemberForm', 'null']);
-  assert.deepEqual(open(undefined), ['MemberForm', '{}']);
-  assert.deepEqual(open(true), ['MemberForm', '{}']);
-  assert.deepEqual(open(false, 'existing-receipt'), ['MemberForm', '{"edit":"existing-receipt"}']);
+  assert.deepEqual(open(), ['MemberForm', 'null']);
+  assert.deepEqual(open('existing-receipt'), ['MemberForm', '{"edit":"existing-receipt"}']);
 });
 
 test('linked-member and proxy profile entry uses the same current person detail; read-only has no Edit action', () => {

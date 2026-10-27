@@ -76,7 +76,7 @@ export function PersonSheet({
   const dirty = !!stored && profile(stored) !== profile(f);
   const refs = l.person.id ? refsFor(state.subscriptions, l.person.id).length : l.items.length;
   const others = (state.people ?? []).filter((p) => p.id !== l.person.id).sort((a, b) => a.name.localeCompare(b.name));
-  const [member, setMember] = useState<{ s: Subscription; m: ShareMember; collect?: boolean } | null>(null);
+  const [member, setMember] = useState<{ s: Subscription; m: ShareMember } | null>(null);
   const [ledger, setLedger] = useState<Subscription | null>(null);
   const ro = !!state.readonly;
   const fileInput = useRef<HTMLInputElement>(null);
@@ -117,7 +117,7 @@ export function PersonSheet({
     const s = live(i.sub);
     if (i.kind === 'share') {
       const m = s.share?.members.find((x) => x.id === i.member!.id);
-      if (m) setMember({ s, m, collect: false });
+      if (m) setMember({ s, m });
     } else setLedger(s);
   };
 
@@ -333,7 +333,6 @@ export function PersonSheet({
           state={state}
           s={live(member.s)}
           member={live(member.s).share?.members.find((x) => x.id === member.m.id) ?? member.m}
-          collect={member.collect}
           onClose={() => setMember(null)}
         />
       )}
