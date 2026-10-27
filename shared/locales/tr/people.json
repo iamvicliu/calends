@@ -77,7 +77,6 @@
     "change": "Avatarı değiştir",
     "help": "PNG, JPEG veya WebP görselini tıklayın, bırakın veya yapıştırın (en fazla 8 MB).",
     "remove": "Avatarı kaldır",
-    "removeConfirm": "Bu avatar kaldırılsın mı? Uygulamak için kaydedin.",
     "fallbackColor": "Yedek renk"
   },
   "list": {

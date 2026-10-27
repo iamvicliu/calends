@@ -77,7 +77,6 @@
     "change": "Change avatar",
     "help": "Click, drop or paste a PNG, JPEG or WebP image (up to 8 MB).",
     "remove": "Remove avatar",
-    "removeConfirm": "Remove this avatar? Save to apply.",
     "fallbackColor": "Fallback color"
   },
   "list": {

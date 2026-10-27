@@ -77,7 +77,6 @@
     "change": "Alterar avatar",
     "help": "Clique, arraste ou cole uma imagem PNG, JPEG ou WebP (até 8 MB).",
     "remove": "Remover avatar",
-    "removeConfirm": "Remover este avatar? Salve para aplicar.",
     "fallbackColor": "Cor alternativa"
   },
   "list": {

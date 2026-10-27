@@ -177,16 +177,9 @@ export function PersonSheet({
                 />
               )}
               {!ro && f.avatar && (
-                <button
-                  type="button"
-                  className="btn plain"
-                  disabled={avatarBusy}
-                  onClick={async () => {
-                    if (await ask(t('people.avatar.removeConfirm'))) setF((current) => ({ ...current, avatar: undefined }));
-                  }}
-                >
+                <ConfirmButton disabled={avatarBusy} onConfirm={() => setF((current) => ({ ...current, avatar: undefined }))}>
                   {t('people.avatar.remove')}
-                </button>
+                </ConfirmButton>
               )}
               {ro ? (
                 <PersonAvatar p={f} size={32} />

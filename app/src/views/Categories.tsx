@@ -273,9 +273,11 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
               </Cell>
             )}
             {n && !deleting ? (
-              <button className="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => setDeleting(true)}>
-                {t('settings.cat.delete')}
-              </button>
+              <div className="cell" style={{ justifyContent: 'center' }}>
+                <button className="btn confirm-btn" onClick={() => setDeleting(true)}>
+                  {t('settings.cat.delete')}
+                </button>
+              </div>
             ) : (
               <div className="cell" style={{ justifyContent: 'center' }}>
                 <ConfirmButton hint={n ? t('settings.cat.moveTo', { count: n }) : undefined} onConfirm={remove}>

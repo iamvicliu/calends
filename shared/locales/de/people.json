@@ -77,7 +77,6 @@
     "change": "Profilbild ändern",
     "help": "PNG, JPEG oder WebP anklicken, ablegen oder einfügen (bis 8 MB).",
     "remove": "Profilbild entfernen",
-    "removeConfirm": "Dieses Profilbild entfernen? Zum Anwenden speichern.",
     "fallbackColor": "Ersatzfarbe"
   },
   "list": {

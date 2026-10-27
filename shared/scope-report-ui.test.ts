@@ -2028,8 +2028,8 @@ test('person avatar drafts remain unsaved until Save; server field order does no
   await save().props.onClick();
   assert.equal(writes, 1);
   assert.equal(save().props.disabled, true);
-  const remove = render().find((n) => n.type === 'button' && n.children.includes('people.avatar.remove'))!;
-  await remove.props.onClick();
+  const remove = render().find((n) => n.type === 'ConfirmButton' && n.children.includes('people.avatar.remove'))!;
+  await remove.props.onConfirm();
   assert.equal(writes, 1);
   assert.equal(save().props.disabled, false);
   await save().props.onClick();

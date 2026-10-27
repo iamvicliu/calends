@@ -661,7 +661,7 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
         <>
           {!isNew &&
             (methodReferences(state, m.id).length ? (
-              <button className="btn danger" onClick={() => setDeleting(true)}>
+              <button className="btn confirm-btn" onClick={() => setDeleting(true)}>
                 {t('wallet.editor.delete')}
               </button>
             ) : (

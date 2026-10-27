@@ -62,7 +62,6 @@
     "change": "更換頭像",
     "help": "點擊、拖放或貼上 PNG、JPEG、WebP 圖片（最大 8 MB）。",
     "remove": "移除頭像",
-    "removeConfirm": "移除這個頭像？儲存後生效。",
     "fallbackColor": "備用顏色"
   },
   "list": {
