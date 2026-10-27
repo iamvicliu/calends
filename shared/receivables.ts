@@ -1,6 +1,7 @@
 // 应收账：按期记账。合租成员和代付共用一套规则——
 // 每一期是一笔应收（由条款推算，不存储）；每笔收款、免收写明抵扣哪几期；每期的状态由此推算。
 // 期可以不连续地收（第 1、3、5 期收了，第 2、4 期仍欠），也可以提前收还没到期的期。
+import { currencyDecimals } from './format.ts';
 import { t } from './i18n.ts';
 import type { Receipt, Waiver } from './types.ts';
 
@@ -46,7 +47,17 @@ export function receiptShares(receipt: Receipt, periods: Map<string, Period>): M
   const known = listed.filter((p): p is Period => !!p);
   const total = known.reduce((a, p) => a + p.due, 0);
   const proportional = known.length === listed.length && total > 0 && known.every((p) => p.currency === known[0].currency);
-  return new Map(receipt.periods.map((k, i) => [k, proportional ? (receipt.amount * listed[i]!.due) / total : receipt.amount / receipt.periods.length]));
+  if (!receipt.periods.length) return new Map();
+  const weights = receipt.periods.map((_, i) => (proportional ? listed[i]!.due : 1));
+  const sum = weights.reduce((a, w) => a + w, 0);
+  // 按收款币种的最小单位分：先各取整，差的几分按余数从大到小补上，合计正好等于实收
+  const unit = 10 ** currencyDecimals(receipt.currency);
+  const cents = Math.round(receipt.amount * unit);
+  const raw = weights.map((w) => (cents * w) / sum);
+  const out = raw.map(Math.floor);
+  const order = raw.map((r, i) => [r - Math.floor(r), i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]);
+  for (let left = cents - out.reduce((a, c) => a + c, 0), j = 0; left > 0; left--, j++) out[order[j % order.length][1]]++;
+  return new Map(receipt.periods.map((k, i) => [k, out[i] / unit]));
 }
 
 /**

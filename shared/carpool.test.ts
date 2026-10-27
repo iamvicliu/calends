@@ -643,3 +643,12 @@ test('合租表格与成员弹窗网格同一口径：预收的未开始期画�
   assert.deepEqual(segments, ['2026-01-01:paid', '2026-02-01:paid', '2026-03-01:future']);
   assert.deepEqual([...new Set(cells)], segments);
 });
+
+test('一笔收款分到各期按最小单位取整，合计等于实收', async () => {
+  const { receiptShares } = await import('./receivables.ts');
+  const periods = new Map(['a', 'b', 'c'].map((k) => [k, { key: k, from: k, until: k, due: 100, currency: 'CNY' }]));
+  const shares = receiptShares({ id: 'r', date: '2026-01-01', amount: 100, currency: 'CNY', periods: ['a', 'b', 'c'] }, periods);
+  assert.deepEqual([...shares.values()], [33.34, 33.33, 33.33]);
+  const yen = receiptShares({ id: 'r', date: '2026-01-01', amount: 7000, currency: 'JPY', periods: ['a', 'b', 'c'] }, periods);
+  assert.deepEqual([...yen.values()], [2334, 2333, 2333]);
+});
