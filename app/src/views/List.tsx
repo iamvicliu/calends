@@ -339,7 +339,8 @@ export function List({
                   tabIndex={0}
                   onClick={() => onOpen(s)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
+                    // 里面的铅笔按钮自己处理回车和空格，不能被外层当成「打开详情」
+                    if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
                       e.preventDefault();
                       onOpen(s);
                     }
@@ -450,7 +451,8 @@ export function List({
                     tabIndex={0}
                     onClick={() => onOpen(s)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
+                      // 里面的铅笔按钮自己处理回车和空格，不能被外层当成「打开详情」
+                      if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
                         e.preventDefault();
                         onOpen(s);
                       }

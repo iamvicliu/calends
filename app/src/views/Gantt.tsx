@@ -152,6 +152,8 @@ export function Gantt({
       ? minW
       : Math.min(maxW, Math.max(minW, liveW ?? (savedW ? Number(savedW) : bounds.default)));
   const iconOnly = !compact && (portrait || labelW <= minW);
+  // 铅笔 22px + 间距 8px，再给名称留一点：名称列只比下限（图标 + 内边距）宽一点时放不下，直接不显示，免得挤坏图标
+  const canEdit = !!onEdit && !state.readonly && !iconOnly && labelW - minW >= 54;
   const resizeFrom = useRef<{ x: number; w: number } | null>(null);
   const onResizeDown = (e: React.PointerEvent<HTMLElement>) => {
     e.stopPropagation();
@@ -552,14 +554,14 @@ export function Gantt({
                     <SubIcon sub={r.s} size={20} proxied={compact} />
                   </span>
                   {!iconOnly && <TailName className="gt-name" name={r.s.name} />}
-                  {onEdit && !state.readonly && (
+                  {canEdit && (
                     <IconButton
                       className="gt-edit"
                       aria-label={t('list.edit')}
                       title={t('list.edit')}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onEdit(r.s);
+                        onEdit?.(r.s);
                       }}
                     >
                       <Icon name="edit" size={13} />

@@ -602,7 +602,8 @@ function App() {
     if (state?.readonly) return;
     setDrawer(false);
     setViewId(null);
-    setBackTo(s.id);
+    // 不记返回目标：Editor 关闭时有 backTo 就会重新打开详情，而这里要直接回到列表
+    setBackTo(null);
     setEditing(s);
   };
   const add = () => {
