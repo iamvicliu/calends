@@ -73,6 +73,15 @@ export function mrrChangeSinceLastMonth(state: AppState, today: string): number 
   return change.to - change.from;
 }
 
+/**
+ * 图表从哪个月画起：最多 range 个月（缺省为全部），但不早于账本第一笔数据所在月，至少 2 个月。
+ * 选「3 年」而账本才半年时，不再在前面画两年多的零线。按自然月精确计数。
+ */
+export function chartMonths(first: string, today: string, range?: number): number {
+  const span = (Number(today.slice(0, 4)) - Number(first.slice(0, 4))) * 12 + Number(today.slice(5, 7)) - Number(first.slice(5, 7)) + 1;
+  return Math.max(2, Math.min(range ?? span, span));
+}
+
 export interface MrrPoint {
   month: string; // YYYY-MM
   mrr: number;

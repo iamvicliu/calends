@@ -1923,12 +1923,6 @@ select.btn {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.area-x span:first-child {
-  transform: none;
-}
-.area-x span:last-child {
-  transform: translateX(-100%);
-}
 
 /* 瀑布 */
 .wf {

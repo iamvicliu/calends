@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FALLBACK_FX } from './billing.ts';
-import { cancelSavings, cashVsAccrual, events, monthMovement, mrrChangeSinceLastMonth, movement, mrrOn, prepaidValue, topUpPlan } from './metrics.ts';
+import { cancelSavings, cashVsAccrual, chartMonths, events, monthMovement, mrrChangeSinceLastMonth, movement, mrrOn, prepaidValue, topUpPlan } from './metrics.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const sub = (o: Partial<Subscription>): Subscription => ({
@@ -298,4 +298,18 @@ test('annual review and net service counts exclude proxy, refund and failed rows
     [s.id],
   );
   assert.equal(r.ended.length, 0);
+});
+
+test('图表区间不早于账本第一笔数据所在月，至少 2 个月', () => {
+  // 账本从 2026-05 开始，选 3 年也只画 2026-05..2026-10
+  assert.equal(chartMonths('2026-05-20', '2026-10-27', 36), 6);
+  assert.equal(chartMonths('2026-05-20', '2026-10-27'), 6);
+  // 数据比区间长时按区间
+  assert.equal(chartMonths('2020-01-01', '2026-10-27', 36), 36);
+  assert.equal(chartMonths('2020-01-01', '2026-10-27'), 82);
+  // 跨年按自然月计：2025-10 到 2026-10 共 13 个月，含一年前的点，月中日期不多算一个月
+  assert.equal(chartMonths('2025-10-31', '2026-10-27', 36), 13);
+  assert.equal(chartMonths('2025-10-01', '2026-10-01', 36), 13);
+  // 本月才开始的账本也保留 2 个月
+  assert.equal(chartMonths('2026-10-27', '2026-10-27', 36), 2);
 });
