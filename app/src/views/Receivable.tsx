@@ -6,7 +6,8 @@ import { cnDate, cnDateFull, currencyDecimals, flow, money } from '../../../shar
 import { t } from '../../../shared/i18n.ts';
 import { periodCellKind, periodGrid, periodTipData, type PeriodGridMode } from '../../../shared/period-grid.ts';
 import { isSettled, putRecord, removeRecord, resolveKey, resolvedPeriods, type LedgerPeriod, type Receivable } from '../../../shared/receivables.ts';
-import type { AppState, Receipt, Waiver } from '../../../shared/types.ts';
+import type { AppState, Person, Receipt, Waiver } from '../../../shared/types.ts';
+import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
 import { Sheet, tipProps, tipSet, TipTable } from '../components/overlays.tsx';
@@ -35,7 +36,7 @@ export const isReceipt = (r: Receipt | Waiver | undefined): r is Receipt => !!r 
  */
 export function ReceivableSheet({
   state,
-  title,
+  person,
   head,
   ledger,
   record,
@@ -47,8 +48,9 @@ export function ReceivableSheet({
   defaultCurrency,
 }: {
   state: AppState;
-  title: ReactNode;
-  /** 表单顶部：是谁、哪辆车、收费标准 */
+  /** 向谁收：表单最上面单独一块 */
+  person: Pick<Person, 'name' | 'color' | 'id' | 'avatar'>;
+  /** 人下面：哪辆车、收费标准 */
   head?: ReactNode;
   /** 这笔账的各期，至少算到 through；往后要提前收时传更晚的日子再算 */
   ledger: (through: string) => LedgerPeriod[];
@@ -134,7 +136,7 @@ export function ReceivableSheet({
   return (
     <Sheet
       narrow
-      title={title}
+      title={t(edit ? 'receivable.actions.update' : 'receivable.actions.record')}
       onClose={onDone}
       foot={
         <>
@@ -163,6 +165,10 @@ export function ReceivableSheet({
       }
     >
       <div className="stack">
+        <div className="collect-sub">
+          <PersonAvatar p={person} size={32} />
+          <b className="collect-sub-name">{person.name}</b>
+        </div>
         {head}
         {/* 金额放在期列表之前：提前收多期时列表很长，放后面会被挤出视野 */}
         <Group

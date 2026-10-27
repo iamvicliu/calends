@@ -329,12 +329,7 @@ export function ReceiptSheet({
     <ReceivableSheet
       state={state}
       today={today}
-      title={
-        <span className="icon-text">
-          <PersonAvatar p={personFor(state, px.personId, px.forName)} size={24} />
-          {px.forName || t('proxy.unset')}
-        </span>
-      }
+      person={{ ...personFor(state, px.personId, px.forName), name: px.forName || t('proxy.unset') }}
       ledger={(through) => proxyLedger(s, today, through).periods}
       record={px}
       edit={edit}

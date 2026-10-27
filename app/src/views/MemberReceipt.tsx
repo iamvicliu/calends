@@ -1,4 +1,4 @@
-import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
+import { personFor } from '../components/PersonAvatar.tsx';
 import { addMonths, cycleLabel, todayIn, memberBillMonths, memberLedger, collectionAnchor, collectCurrencyOf } from '../../../shared/billing.ts';
 import { money } from '../../../shared/format.ts';
 import type { AppState, ShareMember, Subscription } from '../../../shared/types.ts';
@@ -53,12 +53,7 @@ export function ReceiptForm({
     <ReceivableSheet
       state={state}
       today={today}
-      title={
-        <span className="icon-text">
-          <PersonAvatar p={personFor(state, m.personId, m.name)} size={24} />
-          {name}
-        </span>
-      }
+      person={{ ...personFor(state, m.personId, m.name), name }}
       head={
         <>
           {/* 从合租页进来时标明是哪辆车：同一个人可能在好几辆车上 */}
