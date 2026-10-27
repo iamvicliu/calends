@@ -62,8 +62,13 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   return (
     <>
       {/* 筛选与「合租」页同位置：工具栏右上角 */}
-      {/* 右上角 + 单独新建人员；侧栏「新建」只建订阅，所以桌面上始终显示 */}
+      {/* 右上角 + 单独新建人员，放在筛选左侧；侧栏「新建」只建订阅，所以桌面上始终显示 */}
       <Toolbar title={t('family.pool.title')} onAdd={() => setAdding(true)} addLabel={t('people.pick.new')}>
+        {!state.readonly && (
+          <IconButton className="accent d-only" onClick={() => setAdding(true)} aria-label={t('people.pick.new')}>
+            <Icon name="plus" />
+          </IconButton>
+        )}
         {book.length > 0 && (
           <Seg
             small
@@ -88,11 +93,6 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
           />
         )}
         <FamilyTabs tab="people" />
-        {!state.readonly && (
-          <IconButton className="accent d-only" onClick={() => setAdding(true)} aria-label={t('people.pick.new')}>
-            <Icon name="plus" />
-          </IconButton>
-        )}
         {/* 与合租页一样右上角最后是卡片 / 列表切换；人员只有列表，卡片不可选 */}
         {!phone && (
           <Seg
