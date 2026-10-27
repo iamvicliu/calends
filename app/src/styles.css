@@ -5026,6 +5026,10 @@ button.h-price-row:focus-visible {
 .dp-pop.period-pop:not(.mobile) {
   width: 340px;
 }
+/* 金额链接与输入框比文字高，标签与之居中对齐 */
+.period-pop .tip-table {
+  align-items: center;
+}
 .period-pop .tip-table .num {
   justify-self: end;
   max-width: 100%;
