@@ -309,11 +309,11 @@ export function Assistant({ state, today, onOpen }: { state: AppState; today: st
       <Toolbar title={t('assistant.title')}>
         <span className="as-tb">
           {!empty && (
-            <IconButton onClick={reset} title={t('assistant.new')} aria-label={t('assistant.new')}>
+            <IconButton onClick={reset} tip={t('assistant.new')} aria-label={t('assistant.new')}>
               <SquarePen size={16} />
             </IconButton>
           )}
-          <IconButton onClick={() => setSetup(true)} title={t('assistant.settings')} aria-label={t('assistant.settings')}>
+          <IconButton onClick={() => setSetup(true)} tip={t('assistant.settings')} aria-label={t('assistant.settings')}>
             <Settings2 size={16} />
           </IconButton>
         </span>
@@ -545,7 +545,7 @@ export function BotMessage(props: {
                 <Copy size={14} />
               </IconButton>
             )}
-            <IconButton onClick={props.onRetry} title={t('assistant.regenerate')} aria-label={t('assistant.regenerate')}>
+            <IconButton onClick={props.onRetry} tip={t('assistant.regenerate')} aria-label={t('assistant.regenerate')}>
               <RotateCcw size={14} />
             </IconButton>
           </div>
@@ -820,13 +820,13 @@ export function Composer({
             {model === 'deepseek-flash' ? 'DeepSeek V4.1 Flash' : (model ?? 'DeepSeek')}
           </button>
           {onReset && (
-            <IconButton className="as-icon m-only" onClick={onReset} title={t('assistant.new')} aria-label={t('assistant.new')}>
+            <IconButton className="as-icon m-only" onClick={onReset} tip={t('assistant.new')} aria-label={t('assistant.new')}>
               <SquarePen size={16} />
             </IconButton>
           )}
           <span className="grow" />
           {busy ? (
-            <IconButton className="as-send accent stop" onClick={onStop} title={t('assistant.stop')} aria-label={t('assistant.stop')}>
+            <IconButton className="as-send accent stop" onClick={onStop} tip={t('assistant.stop')} aria-label={t('assistant.stop')}>
               <Square size={13} fill="currentColor" />
             </IconButton>
           ) : (

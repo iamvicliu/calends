@@ -21,7 +21,7 @@ export function SortControl<T extends string>({
   return (
     <>
       <Picker variant="btn" value={value} onChange={onSort} ariaLabel={t('list.sort.label')} options={options} />
-      <IconButton type="button" onClick={() => onDir(dir === 'asc' ? 'desc' : 'asc')} aria-label={label} title={label}>
+      <IconButton type="button" onClick={() => onDir(dir === 'asc' ? 'desc' : 'asc')} aria-label={label} tip={label}>
         <Icon name={dir === 'asc' ? 'sort-asc' : 'sort-desc'} />
       </IconButton>
     </>

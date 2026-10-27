@@ -1,6 +1,7 @@
 import { copyParts } from './copy.tsx';
 import './ui.css';
 import type { ReactNode as ComponentChildren, CSSProperties, HTMLAttributes, JSX } from 'react';
+import { Button as AriaButton, Tooltip, TooltipTrigger } from 'react-aria-components';
 import { Children } from 'react';
 import { t } from '../../../shared/i18n.ts';
 import { Icon } from './icons.tsx';
@@ -111,9 +112,30 @@ export function CardTitle({
   );
 }
 
-/** 所有圆形图标操作共用命中区域和状态；尺寸由 CSS 按视口统一。 */
-export function IconButton({ className = '', type = 'button', ...props }: JSX.IntrinsicElements['button'] & { 'aria-label': string }) {
-  return <button {...props} type={type} className={`icon-btn ${className}`} />;
+/**
+ * 悬停说明的统一延迟：原生 title 要等约 1 秒，这里统一成 300ms。
+ * 所有带说明的按钮（含 Hint）共用这两个常量，避免不同按钮快慢不一。
+ */
+export const TIP_DELAY = 300;
+export const TIP_CLOSE_DELAY = 100;
+
+/**
+ * 所有圆形图标操作共用命中区域和状态；尺寸由 CSS 按视口统一。
+ * tip：悬停说明，比原生 title 快得多（原生要等约 1 秒）；不传则不加提示层。
+ */
+export function IconButton({ className = '', type = 'button', tip, ...props }: JSX.IntrinsicElements['button'] & { 'aria-label': string; tip?: string }) {
+  if (!tip) return <button {...props} type={type} className={`icon-btn ${className}`} />;
+  // 与 Hint 同一套：React Aria 靠 AriaButton 接管 ref 与 aria-describedby。
+  // 原生 button 的 onFocus 签名与 AriaButton 的 FocusEvent 不同，这里剔除后单独转发
+  const { onFocus, onBlur, ...rest } = props as typeof props & { onFocus?: unknown; onBlur?: unknown };
+  return (
+    <TooltipTrigger delay={TIP_DELAY} closeDelay={TIP_CLOSE_DELAY}>
+      <AriaButton {...(rest as object)} type={type} className={`icon-btn ${className}`} onFocus={onFocus as never} onBlur={onBlur as never} />
+      <Tooltip className="ui-tip" placement="bottom" offset={6} containerPadding={8}>
+        {tip}
+      </Tooltip>
+    </TooltipTrigger>
+  );
 }
 
 /** iOS 分组列表 */

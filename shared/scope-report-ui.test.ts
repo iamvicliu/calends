@@ -1164,7 +1164,7 @@ test('report layout keeps compact composition, five distinct upcoming rows and a
     });
   const nodes = render(reports.monthReport(state, '2026-10', today));
   const minimize = nodes.find((n) => n.props['aria-label'] === 'scope.minimize')!;
-  assert.equal(minimize.props.title, 'scope.minimize');
+  assert.equal(minimize.props.tip, 'scope.minimize');
   assert.ok(all(minimize).some((n) => n.type === 'Minimize2'));
   minimize.props.onClick();
   assert.equal(toggles, 1);

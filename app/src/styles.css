@@ -244,6 +244,10 @@ a {
   flex-wrap: nowrap;
   margin-left: auto;
 }
+/* 排序方式按内容宽度撑开，不被压缩：文案被截成「按下次扣…」就看不出在按什么排 */
+.tb-actions > .pk-btn.btn {
+  flex-shrink: 0;
+}
 .page {
   padding: 24px 28px 48px;
   flex: 1;
@@ -3926,6 +3930,10 @@ button.h-price-row:focus-visible {
   gap: 4px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+/* 有悬停铅笔时给右上角让出位置：铅笔是绝对定位的，不让位置就会压在「合租」这类角标上 */
+.scard:has(.sc-edit) .sc-flags {
+  padding-right: 26px;
 }
 .sc-name {
   font-size: var(--fs-2);

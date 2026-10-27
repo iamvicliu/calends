@@ -558,7 +558,7 @@ export function Gantt({
                     <IconButton
                       className="gt-edit"
                       aria-label={t('list.edit')}
-                      title={t('list.edit')}
+                      tip={t('list.edit')}
                       onClick={(e) => {
                         e.stopPropagation();
                         onEdit?.(r.s);

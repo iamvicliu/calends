@@ -30,7 +30,7 @@ export function CopyImageButton({ render, hover = false, disabled = false }: { r
     <IconButton
       className={hover ? 'copy-image copy-hover' : 'copy-image'}
       aria-label={t('detail.action.copyImage')}
-      title={t('detail.action.copyImage')}
+      tip={t('detail.action.copyImage')}
       data-snapshot-hide
       disabled={busy || disabled}
       onClick={(event) => {

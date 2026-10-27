@@ -63,19 +63,22 @@ export function Act({
     </>
   );
   const cls = `${round ? 'icon-btn dt-round' : 'btn dt-act'} ${primary ? 'primary' : ''}`;
-  return href ? (
-    <a className={cls} href={href} target="_blank" rel="noreferrer" title={label} aria-label={label}>
+  // 圆形按钮只有图标，用 tip 悬停即出；带文字的胶囊本身已有文案，保留原生 title 不额外加层。
+  // 链接是 <a>，套不了 IconButton，圆形的也保留原生 title，不然悬停什么说明都没有
+  const body = href ? (
+    <a className={cls} href={href} target="_blank" rel="noreferrer" aria-label={label} title={label}>
       {inner}
     </a>
   ) : round ? (
-    <IconButton className="dt-round" onClick={onClick} title={label} aria-label={label}>
-      {inner}
+    <IconButton className="dt-round" onClick={onClick} aria-label={label} tip={label}>
+      <i className="dt-act-i">{icon}</i>
     </IconButton>
   ) : (
     <button className={cls} onClick={onClick} title={label} aria-label={label}>
       {inner}
     </button>
   );
+  return body;
 }
 
 /** 把详情复制成图片：和弹窗一样的圆角，圆角外透明；去掉顶部按钮 */

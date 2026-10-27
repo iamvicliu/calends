@@ -288,7 +288,7 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
                     </a>
                   ))}
                   {(i.subs ?? []).slice(0, 6).map((s) => (
-                    <IconButton className="sub-shortcut" data-snapshot-keep key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
+                    <IconButton className="sub-shortcut" data-snapshot-keep key={s.id} onClick={() => onOpen(s)} tip={s.name} aria-label={s.name}>
                       <SubIcon sub={s} size={22} />
                     </IconButton>
                   ))}

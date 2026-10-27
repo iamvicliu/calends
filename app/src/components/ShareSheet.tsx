@@ -70,7 +70,7 @@ export function ShareSheet<S extends string>({
       onClose={onClose}
       actions={
         <>
-          <IconButton aria-label={t('share.sheet.download')} title={t('share.sheet.download')} disabled={busy} onClick={download}>
+          <IconButton aria-label={t('share.sheet.download')} tip={t('share.sheet.download')} disabled={busy} onClick={download}>
             <Icon name="download" />
           </IconButton>
           <CopyImageButton render={render3x} disabled={busy} />

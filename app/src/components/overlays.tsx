@@ -9,7 +9,7 @@ import { createContext, Fragment, useEffect, useEffectEvent, useLayoutEffect, us
 import { t } from '../../../shared/i18n.ts';
 import { Toaster } from 'sonner';
 import { Icon } from './icons.tsx';
-import { IconButton } from './ui.tsx';
+import { IconButton, TIP_CLOSE_DELAY, TIP_DELAY } from './ui.tsx';
 import { Cell } from './ui.tsx';
 
 // ---------- 弹层 ----------
@@ -271,17 +271,33 @@ export function tipProps(html: () => ComponentChildren) {
   return { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide };
 }
 
-/** 说明可悬停、键盘聚焦或点按；React Aria 负责 portal、翻转、视口边界和 Escape。 */
+/**
+ * 说明可悬停、键盘聚焦或点按；React Aria 负责 portal、翻转、视口边界和 Escape。
+ * 受控模式下 delay 不生效（onHoverStart 直接 setOpen 会立刻弹出），
+ * 所以悬停延时自己计时；点按和聚焦则立即显示。
+ */
 export function Hint({ text }: { text: string }) {
   const [open, setOpen] = useState(false);
+  const timer = useRef(0);
+  const cancel = () => window.clearTimeout(timer.current);
+  useEffect(() => cancel, []);
   return (
-    <TooltipTrigger isOpen={open} onOpenChange={setOpen} shouldCloseOnPress={false} delay={150} closeDelay={100}>
+    <TooltipTrigger isOpen={open} onOpenChange={setOpen} shouldCloseOnPress={false} delay={TIP_DELAY} closeDelay={TIP_CLOSE_DELAY}>
       <AriaButton
         className="icon-btn hint"
         aria-label={text}
-        onHoverStart={() => setOpen(true)}
-        onHoverEnd={() => setOpen(false)}
-        onPress={() => setOpen(true)}
+        onHoverStart={() => {
+          cancel();
+          timer.current = window.setTimeout(() => setOpen(true), TIP_DELAY);
+        }}
+        onHoverEnd={() => {
+          cancel();
+          setOpen(false);
+        }}
+        onPress={() => {
+          cancel();
+          setOpen(true);
+        }}
       >
         <Icon name="info" />
       </AriaButton>

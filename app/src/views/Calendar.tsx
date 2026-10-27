@@ -158,7 +158,7 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
             ['year', t('calendar.mode.year')],
           ]}
         />
-        <IconButton aria-label={t('calendar.prev')} title={`${t('calendar.prev')} ←`} onClick={() => shift(-1)}>
+        <IconButton aria-label={t('calendar.prev')} tip={`${t('calendar.prev')} ←`} onClick={() => shift(-1)}>
           <Icon name="left" />
         </IconButton>
         <button
@@ -170,11 +170,11 @@ export function Calendar({ state, today, onOpen, onIcs }: { state: AppState; tod
         >
           {t('calendar.today')}
         </button>
-        <IconButton aria-label={t('calendar.next')} title={`${t('calendar.next')} →`} onClick={() => shift(1)}>
+        <IconButton aria-label={t('calendar.next')} tip={`${t('calendar.next')} →`} onClick={() => shift(1)}>
           <Icon name="right" />
         </IconButton>
         {!state.readonly && (
-          <IconButton onClick={onIcs} title={t('calendar.ics')} aria-label={t('calendar.ics')}>
+          <IconButton onClick={onIcs} tip={t('calendar.ics')} aria-label={t('calendar.ics')}>
             <Icon name="share" />
           </IconButton>
         )}
@@ -490,7 +490,7 @@ function MiniReport({ report, base, today, onExpand }: { report: ReturnType<type
         <CardTitle as="span" hint={t('scope.cashBasis')}>
           {t('scope.monthTotal')}
         </CardTitle>
-        <IconButton type="button" className="cal-expand" aria-label={t('calendar.expandReport')} title={t('calendar.expandReport')} onClick={onExpand}>
+        <IconButton type="button" className="cal-expand" aria-label={t('calendar.expandReport')} tip={t('calendar.expandReport')} onClick={onExpand}>
           <Maximize2 size={15} />
         </IconButton>
       </div>

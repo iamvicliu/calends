@@ -171,7 +171,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         <IconButton
           type="button"
 
-          title={t(monthly ? 'scope.minimize' : 'scope.collapse')}
+          tip={t(monthly ? 'scope.minimize' : 'scope.collapse')}
           aria-expanded={expanded}
           aria-controls={id}
           aria-label={t(monthly ? 'scope.minimize' : 'scope.collapse')}

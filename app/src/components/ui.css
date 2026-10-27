@@ -140,6 +140,22 @@
   line-height: 1.5;
 }
 
+/* 图标按钮的短说明：与 info-tip 同一套外观，单行短字为主 */
+.ui-tip {
+  z-index: 100;
+  max-width: min(280px, calc(100vw - 16px));
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  color: var(--label);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--fs-1);
+  font-weight: 400;
+  line-height: 1.4;
+  /* 提示文字可能是用户填的长名称：允许换行，不然文字会画到框外 */
+  overflow-wrap: anywhere;
+}
+
 /* 行尾「编辑 + 删除」：删除第一次点击向左伸展成长条（宽度 = 两个按钮 + 间距），显示「确认 ✓」；再点才删除 */
 .row-actions {
   position: relative;
