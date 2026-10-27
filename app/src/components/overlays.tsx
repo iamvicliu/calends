@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { tooltipPosition } from './tooltip-position.ts';
 import type { ReactNode as ComponentChildren } from 'react';
 import { Button as AriaButton, Tooltip, TooltipTrigger, Dialog, Heading, Modal, ModalOverlay } from 'react-aria-components';
-import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { t } from '../../../shared/i18n.ts';
 import { Toaster } from 'sonner';
 import { Icon } from './icons.tsx';
@@ -13,11 +13,19 @@ import { IconButton } from './ui.tsx';
 import { Cell } from './ui.tsx';
 
 // ---------- 弹层 ----------
-/** 打开中的弹窗，后开的在上面 */
-export const openSheets: object[] = [];
+/** 打开中的弹窗，按打开顺序（seq 在首次渲染时取，父弹窗先于里面嵌的子弹窗），后开的在上面 */
+export const openSheets: Array<{ seq: number }> = [];
+let sheetSeq = 0;
+const sheetListeners = new Set<() => void>();
+const subscribeSheets = (f: () => void) => {
+  sheetListeners.add(f);
+  return () => sheetListeners.delete(f);
+};
+const sheetsChanged = () => sheetListeners.forEach((f) => f());
 
 /**
  * 弹窗（react-aria Modal）：宽屏居中，窄屏贴底。点遮罩、按 Esc 关闭，多层叠放时只关最上面那层；
+ * 同一时刻只露出最上面一层（页面 + 一个弹窗，不叠成一摞）：下面的弹窗隐藏但保留状态，上面那层左上角带「返回」，关掉即回到下面那层。
  * 打开期间焦点留在弹窗里、背景不滚动，关闭后焦点回到打开它的按钮。
  * 没有标题（bare）时用 label 作为读屏名称。
  */
@@ -36,9 +44,17 @@ export function Sheet(props: {
   const dialog = useRef<HTMLDivElement>(null);
   // 兜底：焦点不在弹窗里（如落在 body 上）时 react-aria 收不到 Esc，这里替最上面那层关掉
   const close = useEffectEvent(() => props.onClose());
+  const [me] = useState(() => ({ seq: ++sheetSeq }));
+  // 「第几层/共几层」：下面的层隐藏，上面的层带返回
+  const [index, count] = useSyncExternalStore(subscribeSheets, () => `${openSheets.indexOf(me)}/${openSheets.length}`)
+    .split('/')
+    .map(Number);
+  const covered = index >= 0 && index < count - 1;
+  const nested = index > 0;
   useEffect(() => {
-    const me = {};
-    openSheets.push(me);
+    const at = openSheets.findIndex((x) => x.seq > me.seq);
+    openSheets.splice(at < 0 ? openSheets.length : at, 0, me);
+    sheetsChanged();
     const onKey = (e: KeyboardEvent) => {
       if (openSheets[openSheets.length - 1] !== me) return;
       if (e.key === 'Escape' && e.target === document.body) close();
@@ -47,11 +63,12 @@ export function Sheet(props: {
     document.addEventListener('keydown', onKey, true);
     return () => {
       openSheets.splice(openSheets.indexOf(me), 1);
+      sheetsChanged();
       document.removeEventListener('keydown', onKey, true);
     };
   }, []);
   return (
-    <ModalOverlay className="scrim" isOpen isDismissable onOpenChange={(o) => !o && props.onClose()}>
+    <ModalOverlay className={`scrim${covered ? ' covered' : ''}`} isOpen isDismissable onOpenChange={(o) => !o && props.onClose()}>
       <Modal className={`sheet ${props.narrow ? 'narrow' : ''} ${props.bare ? 'bare' : ''}`}>
         <Dialog ref={dialog} className="sheet-dlg" aria-label={props.bare ? props.label : undefined}>
           <div className="grabber" />
@@ -59,6 +76,11 @@ export function Sheet(props: {
             props.header
           ) : (
             <div className={`sheet-head ${props.bare ? 'bare-head' : ''}`} data-snapshot-hide>
+              {nested && (
+                <IconButton className="sheet-back" onClick={props.onClose} aria-label={t('common.back')}>
+                  <Icon name="left" />
+                </IconButton>
+              )}
               {!props.bare && (
                 <Heading slot="title" level={3} className="ui-title">
                   <span className="ui-title-text">{copyParts(props.title)}</span>
@@ -66,9 +88,11 @@ export function Sheet(props: {
               )}
               <div className="sheet-head-actions">
                 {props.actions}
-                <IconButton onClick={props.onClose} aria-label={t('ui.close')}>
-                  <Icon name="x" />
-                </IconButton>
+                {!nested && (
+                  <IconButton onClick={props.onClose} aria-label={t('ui.close')}>
+                    <Icon name="x" />
+                  </IconButton>
+                )}
               </div>
             </div>
           )}

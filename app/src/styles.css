@@ -1482,6 +1482,17 @@ a {
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
+/* 叠在别的弹窗上时左侧是「返回」，没有关闭 */
+.sheet-head:has(> .sheet-back) {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.sheet-back {
+  margin-left: -6px;
+}
+/* 被上一层盖住的弹窗不显示（状态保留），同一时刻只露出一层 */
+.scrim.covered {
+  visibility: hidden;
+}
 .sheet-head h3 {
   margin: 0;
   font-size: var(--fs-3);
