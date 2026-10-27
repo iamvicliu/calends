@@ -346,6 +346,8 @@ export function periodFields(
 }
 
 /** 一期的明细表：悬停提示和点开的小弹窗共用；传 edit 时可原地编辑 */
+const STATUS_TONE: Partial<Record<LedgerPeriod['status'], string>> = { paid: 'green', due: 'orange' };
+
 export function PeriodTip({
   p,
   edit,
@@ -359,7 +361,18 @@ export function PeriodTip({
   dueInput?: ReactNode;
   onDue?: () => void;
 }) {
-  return <TipTable head={[periodRange(p), t(`receivable.status.${p.status}`)]} rows={periodFields(p, { edit, onBatch, dueInput, onDue })} />;
+  // 状态是紧跟标题的小标签，不孤零零地挂在右上角
+  return (
+    <TipTable
+      head={[
+        periodRange(p),
+        <span key="status" className={`badge ${STATUS_TONE[p.status] ?? ''}`}>
+          {t(`receivable.status.${p.status}`)}
+        </span>,
+      ]}
+      rows={periodFields(p, { edit, onBatch, dueInput, onDue })}
+    />
+  );
 }
 
 export function PeriodStrip({

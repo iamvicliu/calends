@@ -1606,12 +1606,21 @@ a {
 .tip-table b {
   font-weight: 600;
 }
-/* 表头横跨两列，长日期不撑宽标签列 */
+/* 表头横跨两列，长日期不撑宽标签列；与下面的字段隔一条细线 */
 .tip-head {
   grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
   gap: 16px;
+  margin-bottom: 6px;
+  padding-bottom: 8px;
+  border-bottom: var(--hairline) solid var(--sep);
+}
+/* 状态标签紧跟标题 */
+.tip-head:has(.badge) {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
 }
 .tip-table span:not(.num) {
   color: var(--label-2);
@@ -5023,16 +5032,38 @@ button.h-price-row:focus-visible {
   flex-wrap: wrap;
 }
 /* 编辑时输入框放在明细表的数值列里，右对齐、宽度跟其他值一致 */
+/* 点开的一期分三区：标题与状态、字段、按钮，区与区之间一条细线 */
 .dp-pop.period-pop:not(.mobile) {
   width: 340px;
+  padding: 14px 16px 16px;
 }
-/* 金额链接与输入框比文字高，标签与之居中对齐 */
 .period-pop .tip-table {
   align-items: center;
+  row-gap: 4px;
+  font-size: var(--fs-2);
 }
-.period-pop .tip-table .num {
+.period-pop .tip-head {
+  padding-bottom: 12px;
+}
+.period-pop .tip-head > b:first-child {
+  font-size: var(--fs-3);
+}
+/* 每行一样高：带链接或输入框的行不比纯文字行高，字段等距 */
+.period-pop .tip-table > span {
+  display: flex;
+  align-items: center;
+  min-height: var(--ctl-h-md);
+}
+.period-pop .tip-table > .num {
+  justify-content: flex-end;
   justify-self: end;
   max-width: 100%;
+}
+/* 可点的金额、分期只是一段字，去掉按钮内边距，与其他值右边对齐 */
+.period-pop .tip-table .btn.plain {
+  height: auto;
+  padding: 0;
+  text-align: right;
 }
 .period-pop .tip-table input {
   width: 100%;
@@ -5059,6 +5090,8 @@ button.h-price-row:focus-visible {
   align-items: center;
   gap: 8px;
   margin-top: 12px;
+  padding-top: 14px;
+  border-top: var(--hairline) solid var(--sep);
 }
 .copy-pay {
   flex-basis: 100%;
