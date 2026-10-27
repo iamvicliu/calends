@@ -3,7 +3,7 @@ import { copyParts } from '../../components/copy.tsx';
 import { PersonAvatar, personFor } from '../../components/PersonAvatar.tsx';
 import { useRef, useState } from 'react';
 import { addDays, cycleLabel, effectiveStatus, nextCharge, todayIn, isStopped, uid } from '../../../../shared/billing.ts';
-import { flow, cnDate, cnDateFull, money } from '../../../../shared/format.ts';
+import { flow, cnDate, cnDateFull, currencyDecimals, money } from '../../../../shared/format.ts';
 import { toBaseOrNaN } from '../../../../shared/fx.ts';
 import type { AppState, Receipt, Subscription, Waiver } from '../../../../shared/types.ts';
 import { recordProxyCharge } from '../../../../shared/receivable-edit.ts';
@@ -341,6 +341,18 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
   const charged0 = row.charge?.amount != null ? String(row.charge.amount) : '';
   const [charged, setCharged] = useState(charged0);
   const [chargedCcy, setChargedCcy] = useState(row.charge?.currency ?? row.listCurrency);
+  // 卡币种与原价不同：按扣款当天汇率把原价折成卡币种，作建议值
+  const suggest = (ccy: string) => {
+    const n = toBaseOrNaN(state, row.list, row.listCurrency, row.date, ccy);
+    const unit = 10 ** currencyDecimals(ccy);
+    return Number.isFinite(n) ? Math.round(n * unit) / unit : undefined;
+  };
+  // 换币种时，没填或还是上一个建议值就换成新币种的建议值；换回原价币种则留空（按原价）
+  const changeCcy = (ccy: string) => {
+    const prev = suggest(chargedCcy);
+    if (charged === '' || (prev != null && Number(charged) === prev)) setCharged(ccy === row.listCurrency ? '' : String(suggest(ccy) ?? ''));
+    setChargedCcy(ccy);
+  };
   const chargedN = charged === '' ? row.list : Number(charged);
   // 缺汇率时为 NaN：差额显示「—」，不按 0 算出假的盈亏
   const chargedBase = toBaseOrNaN(state, chargedN, charged === '' ? row.listCurrency : chargedCcy, row.date);
@@ -437,7 +449,16 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
         {/* 卡上实扣：已扣的点编辑后可修正；还没到扣款日的只写按原价预计 */}
         <Group
           title={t('proxy.table.charged')}
-          foot={future ? undefined : t('proxy.entry.chargedFoot', { amount: flow(-chargedBase, base), list: money(row.list, row.listCurrency) })}
+          foot={
+            future
+              ? undefined
+              : [
+                  (charged === '' ? row.listCurrency : chargedCcy) !== base && t('proxy.entry.chargedRate', { amount: money(chargedBase, base) }),
+                  editing && t('proxy.entry.chargedBlank', { list: money(row.list, row.listCurrency) }),
+                ]
+                  .filter(Boolean)
+                  .join('\n') || undefined
+          }
         >
           {future ? (
             <Cell label={t('proxy.entry.amount')}>
@@ -447,20 +468,19 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
               </span>
             </Cell>
           ) : editing ? (
-            <>
-              <Cell label={t('proxy.entry.amount')}>
+            <Cell label={t('proxy.entry.amount')}>
+              {/* 金额与币种同一行：数字在前、币种选择在后，与收款表单一致 */}
+              <span className="contact-field">
                 <MoneyInput
                   ccy={chargedCcy}
                   className="num"
                   value={charged}
-                  placeholder={String(row.list)}
+                  placeholder={String(chargedCcy === row.listCurrency ? row.list : (suggest(chargedCcy) ?? ''))}
                   onChange={(ev) => setCharged((ev.target as HTMLInputElement).value)}
                 />
-              </Cell>
-              <Cell label={t('proxy.entry.currency')}>
-                <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
-              </Cell>
-            </>
+                <CurrencySelect value={chargedCcy} onChange={changeCcy} ariaLabel={t('proxy.entry.currency')} />
+              </span>
+            </Cell>
           ) : (
             <Cell label={t('proxy.entry.amount')}>
               <span className="num">{flow(-chargedN, charged === '' ? row.listCurrency : chargedCcy)}</span>
