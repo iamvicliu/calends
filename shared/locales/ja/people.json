@@ -10,7 +10,7 @@
     "received": "受取累計",
     "receivedSub": "共有プランと立て替えの合計",
     "count": "人数",
-    "countSub": "共有 {share}\n立て替え {proxy}"
+    "countSub": "共有 {share}、立て替え {proxy}"
   },
   "empty": {
     "title": "まだ誰もいません",

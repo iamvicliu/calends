@@ -13,7 +13,7 @@
     "received": "Total reçu",
     "receivedSub": "Abonnements partagés et paiements pour d’autres",
     "count": "Personnes",
-    "countSub": "Partages : {share}\nPayé pour : {proxy}"
+    "countSub": "Partages : {share}, Payé pour : {proxy}"
   },
   "empty": {
     "title": "Personne pour l’instant",

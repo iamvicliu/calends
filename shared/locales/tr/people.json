@@ -13,7 +13,7 @@
     "received": "Toplam alınan",
     "receivedSub": "Ortak planlar ve başkaları için ödemeler",
     "count": "Kişi",
-    "countSub": "Ortak: {share}\nBaşkası için: {proxy}"
+    "countSub": "Ortak: {share}, Başkası için: {proxy}"
   },
   "empty": {
     "title": "Henüz kimse yok",

@@ -10,7 +10,7 @@
     "received": "누적 입금액",
     "receivedSub": "공유 플랜과 대신 결제 합계",
     "count": "인원",
-    "countSub": "공유 {share}\n대신 결제 {proxy}"
+    "countSub": "공유 {share}, 대신 결제 {proxy}"
   },
   "empty": {
     "title": "아직 사람이 없어요",

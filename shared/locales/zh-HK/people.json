@@ -5,12 +5,12 @@
   },
   "stat": {
     "owed": "待收",
-    "owedSub": "{count} 人欠款",
+    "owedSub": "{count} 人待收",
     "allSettled": "都已結清",
     "received": "累計已收",
     "receivedSub": "共享與代付合計",
     "count": "人數",
-    "countSub": "共享 {share}\n代付 {proxy}"
+    "countSub": "共享 {share}，代付 {proxy}"
   },
   "empty": {
     "title": "還未有人",

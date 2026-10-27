@@ -13,7 +13,7 @@
     "received": "Total received",
     "receivedSub": "Shared plans and paid-for, combined",
     "count": "People",
-    "countSub": "Shared plans: {share}\nPaid for: {proxy}"
+    "countSub": "Shared plans: {share}, Paid for: {proxy}"
   },
   "empty": {
     "title": "No people yet",
