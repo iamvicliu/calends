@@ -4412,32 +4412,21 @@ button.h-price-row:focus-visible {
   color: var(--white-a12);
   box-shadow: none;
 }
-/* 就地二次确认的删除按钮：点一下伸出问号、转红底，再点才执行 */
+/* 就地二次确认的删除按钮：平时红框红字透明底，点一下转实心红底并改为「确认删除？」，再点才执行 */
 .btn.confirm-btn {
-  gap: 0;
+  background: transparent;
+  color: var(--red);
+  box-shadow: inset 0 0 0 1px var(--red);
   transition:
     background var(--duration) var(--ease),
     color var(--duration) var(--ease);
 }
-.confirm-btn .confirm-q {
-  display: inline-flex;
-  width: 0;
-  overflow: hidden;
-  opacity: 0;
-  transition:
-    width var(--duration) var(--ease),
-    margin var(--duration) var(--ease),
-    opacity var(--duration) var(--ease);
+.btn.confirm-btn:hover {
+  background: var(--red-3);
 }
-.confirm-btn.armed .confirm-q {
-  width: 15px;
-  margin-right: 6px;
-  opacity: 1;
-}
-@media (prefers-reduced-motion: reduce) {
-  .confirm-btn .confirm-q {
-    transition: none;
-  }
+.btn.confirm-btn.armed {
+  background: var(--red-9);
+  color: var(--white-a12);
 }
 /* 停止面板：结束日正好是扣款日时的提醒 */
 .stop-warn {

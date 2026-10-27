@@ -2,6 +2,7 @@
   "save": "Enregistrer",
   "cancel": "Annuler",
   "confirm": "Confirmer",
+  "confirmDelete": "Confirmer la suppression ?",
   "confirmTitle": "Confirmer ?",
   "delete": "Supprimer",
   "done": "OK",

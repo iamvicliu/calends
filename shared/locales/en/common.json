@@ -2,6 +2,7 @@
   "save": "Save",
   "cancel": "Cancel",
   "confirm": "Confirm",
+  "confirmDelete": "Confirm delete?",
   "confirmTitle": "Are you sure?",
   "delete": "Delete",
   "done": "Done",

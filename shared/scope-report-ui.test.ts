@@ -2268,14 +2268,16 @@ test('成员、人员和渠道胶囊确认后删除，成员删除保留其他�
   );
 });
 
-test('弹窗底部删除就地确认：第一次点伸出问号转红底，失焦收回，再点才执行', () => {
+test('弹窗底部删除就地确认：第一次点转红底并改为「确认删除？」，失焦收回，再点才执行', () => {
   let done = 0;
-  const r = harness('../app/src/components/ConfirmButton.tsx', 'ConfirmButton', {}, { CircleHelp: 'CircleHelp', useEffect() {} });
+  const r = harness('../app/src/components/ConfirmButton.tsx', 'ConfirmButton', {}, { useEffect() {} });
   const button = () => r.render('ConfirmButton', { children: 'common.delete', onConfirm: () => done++ }).find((n) => n.type === 'button')!;
-  assert.match(button().props.className, /danger-soft/);
+  assert.doesNotMatch(button().props.className, /armed|danger-solid/);
   button().props.onClick();
   assert.equal(done, 0);
   assert.match(button().props.className, /armed/);
+  assert.match(JSON.stringify(button().children), /common\.confirmDelete/);
+  assert.doesNotMatch(JSON.stringify(button().children), /common\.delete"/);
   button().props.onBlur();
   assert.doesNotMatch(button().props.className, /armed/);
   button().props.onClick();

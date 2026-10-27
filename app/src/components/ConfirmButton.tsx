@@ -1,10 +1,9 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { CircleHelp } from 'lucide-react';
 import { t } from '../../../shared/i18n.ts';
 
 /**
  * 弹窗底部的删除类按钮，就地二次确认、不再叠一层确认弹窗：
- * 第一次点，胶囊向前伸出一个问号并转成红底；再点一次才执行。失焦、按 Esc 或 4 秒不操作就收回。
+ * 平时是红框红字的透明胶囊；第一次点转成实心红底、文字换成「确认删除？」，再点一次才执行。失焦、按 Esc 或 4 秒不操作就收回。
  */
 export function ConfirmButton({
   children,
@@ -27,9 +26,9 @@ export function ConfirmButton({
   return (
     <button
       type="button"
-      className={`btn confirm-btn ${armed ? 'danger-solid armed' : 'danger-soft'}`}
+      className={`btn confirm-btn${armed ? ' armed' : ''}`}
       disabled={disabled}
-      aria-label={armed ? `${t('common.confirm')} ${typeof children === 'string' ? children : ''}${hint ? `, ${hint}` : ''}` : undefined}
+      aria-label={armed && hint ? `${t('common.confirmDelete')} ${hint}` : undefined}
       title={armed ? hint : undefined}
       onClick={() => {
         if (!armed) return setArmed(true);
@@ -44,10 +43,7 @@ export function ConfirmButton({
         }
       }}
     >
-      <span className="confirm-q" aria-hidden>
-        <CircleHelp size={15} strokeWidth={2.2} />
-      </span>
-      {children}
+      {armed ? t('common.confirmDelete') : children}
     </button>
   );
 }
