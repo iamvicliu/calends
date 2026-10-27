@@ -246,9 +246,11 @@ export function Stepper({
       <input
         inputMode="numeric"
         aria-label={label}
+        // 按上限位数定宽：席位只到两位数，不留四位数的空白，数字和单位在两个按钮间居中
+        style={{ width: `${String(max).length}ch` }}
         value={draft ?? String(value)}
         onChange={(e) => {
-          const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+          const raw = e.target.value.replace(/\D/g, '').slice(0, String(max).length);
           setDraft(raw);
           if (raw) onChange(clamp(Number(raw)));
         }}
