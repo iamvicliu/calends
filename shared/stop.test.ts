@@ -1193,3 +1193,16 @@ test('MCP 成员生效日调价：预览、保存、备份、默认收款和独�
     f.db.close();
   }
 });
+
+test('duplicate check skips deliberate multi-account subscriptions and names the group once', () => {
+  const sub = (id: string, account?: string) => base({ id, name: `Claude Pro · ${id}`, account, start: '2026-09-01' });
+  const st = (subs: Subscription[]): AppState => ({ subscriptions: subs, methods: [], settings: { ...DEFAULT_SETTINGS }, fx: FALLBACK_FX });
+  const dups = (subs: Subscription[]) => insights(st(subs), today).filter((i) => i.id.startsWith('dup-'));
+  assert.equal(dups([sub('01', 'a@example.com'), sub('02', 'b@example.com'), sub('03', 'c@example.com')]).length, 0);
+  const same = dups([sub('01', 'A@example.com'), sub('02', 'a@example.com '), sub('03', 'b@example.com')]);
+  assert.equal(same.length, 1);
+  assert.equal(same[0].subs!.length, 2);
+  assert.ok(same[0].title.startsWith('Claude Pro '), same[0].title);
+  assert.ok(!same[0].title.includes('· 01'), same[0].title);
+  assert.equal(dups([sub('01'), sub('02')]).length, 1);
+});

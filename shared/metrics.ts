@@ -584,6 +584,23 @@ export interface Insight {
 }
 
 /** 去掉地区、平台、序号等修饰，用来识别重复订阅 */
+/** 一组同名订阅的共同名字，按词截断：「Claude Pro · 02」「Claude Pro · 03」→「Claude Pro」。没有共同部分时返回空串 */
+export function sharedName(subs: Subscription[]): string {
+  const all = subs.map((s) => s.name.trim());
+  let head = all.reduce((a, b) => {
+    let i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i]) i++;
+    return a.slice(0, i);
+  });
+  const sep = /[\s·•|/:#_\-–—]/u;
+  // 截在词中间（下一个字符不是分隔符）就退回到上一个分隔符
+  if (all.some((n) => n.length > head.length && !sep.test(n[head.length]) && !sep.test(head.at(-1) ?? ' '))) {
+    const cut = Math.max(...[...head].map((c, i) => (sep.test(c) ? i : -1)));
+    head = cut >= 0 ? head.slice(0, cut) : '';
+  }
+  return head.replace(/[\s·•|/:#_\-–—]+$/u, '').trim();
+}
+
 function baseName(name: string): string {
   return name
     .toLowerCase()
@@ -637,11 +654,12 @@ export function insights(state: AppState, today: string): Insight[] {
     });
   }
 
-  // 2. 疑似重复：同名、同币种、价格相近才算。合租的车各收各的钱，Plus / Pro 这种不同档位也是有意为之，都不提示
+  // 2. 疑似重复：同名、同币种、价格相近、同一账号才算。合租的车各收各的钱，Plus / Pro 这种不同档位、
+  // 填了不同账号的多开也是有意为之，都不提示；没填账号的同名订阅仍视为可能重复
   const groups = new Map<string, Subscription[]>();
   for (const s of live) {
     if (s.share) continue;
-    const k = `${baseName(s.name)}|${s.currency}|${Math.round(Math.log(Math.max(1, s.price)) * 4)}`;
+    const k = `${baseName(s.name)}|${s.currency}|${Math.round(Math.log(Math.max(1, s.price)) * 4)}|${(s.account ?? '').trim().toLowerCase()}`;
     if (k.split('|')[0].length < 2) continue;
     groups.set(k, [...(groups.get(k) ?? []), s]);
   }
@@ -651,7 +669,7 @@ export function insights(state: AppState, today: string): Insight[] {
     out.push({
       id: `dup-${g[0].id}`,
       tone: 'info',
-      title: t('core.insight.dup.title', { names: names(g) }),
+      title: t('core.insight.dup.title', { names: sharedName(g) || names(g) }),
       body: t('core.insight.dup.body', { count: g.length, sum: formatTotal(sum, base, { compact: true }) }),
       subs: g,
     });
