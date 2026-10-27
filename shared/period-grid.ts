@@ -41,6 +41,11 @@ export function visibleStripPeriods(periods: LedgerPeriod[], today: string): Led
   return next < 0 ? sorted : sorted.slice(0, next + 1);
 }
 
+/** How a period cell is drawn; the member sheet strip and the shared-plan table both use this. Periods not yet started draw as upcoming even when prepaid. */
+export function periodCellKind(p: LedgerPeriod, today: string): LedgerPeriod['status'] {
+  return p.from > today ? 'upcoming' : p.status;
+}
+
 /** Pure presentation: keeps dates, dues and receipt allocation untouched. */
 export function periodGrid(periods: LedgerPeriod[], today: string, mode = periodGridMode(periods)) {
   const all = [...periods].sort((a, b) => a.from.localeCompare(b.from));

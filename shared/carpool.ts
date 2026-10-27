@@ -423,6 +423,7 @@ export function nextCollectionDay(s: Subscription, billEvery: number, today: str
 }
 
 import { addDays, memberUnpaidFrom, memberCollection, memberDues } from './billing.ts';
+import { periodCellKind, visibleStripPeriods } from './period-grid.ts';
 
 /** 成员一行的收款状态：逾期几天 / 待收 / 已结清，合租表格和收费弹窗共用 */
 export function memberStatus(state: AppState, s: Subscription, m: ShareMember, today: string) {
@@ -465,15 +466,11 @@ export function memberSegments(s: Subscription, m: ShareMember, today: string, s
     if (a <= b) out.push({ from: a, until: b, kind });
   };
   const { periods } = memberLedger(s, m, today, s.currency, end);
-  let future = false;
-  for (const p of periods) {
+  // 与成员弹窗的期数网格同一口径：已开始的各期加下一期，没开始的一律画成未到
+  for (const p of visibleStripPeriods(periods, today)) {
     if (p.until < start || p.from > end) continue;
-    if (p.status === 'upcoming') {
-      // 还没到期的只画下一期
-      if (future) continue;
-      future = true;
-    }
-    push(p.from, p.until, p.status === 'paid' ? 'paid' : p.status === 'due' ? 'due' : p.status === 'upcoming' ? 'future' : 'waived');
+    const kind = periodCellKind(p, today);
+    push(p.from, p.until, kind === 'paid' ? 'paid' : kind === 'due' ? 'due' : kind === 'upcoming' ? 'future' : 'waived');
   }
   // 退出时已付到退出日之后、又没退钱：退出后到已付至的那段画成没用完
   const paid =

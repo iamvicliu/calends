@@ -601,3 +601,45 @@ test('改回跟随车：起止变了的期不再被期初结清、免收盖住�
   const paid = { ...own, receipts: [{ ...own.receipts[0], amount: 44, opening: undefined }] };
   assert.deepEqual(followCarRule(state, s, paid, today, today).receipts?.[0].periods, ['2026-10-20', '2027-01-17']);
 });
+
+test('合租表格与成员弹窗网格同一口径：预收的未开始期画成未到，之后的不画', async () => {
+  const { memberSegments } = await import('./carpool.ts');
+  const { periodGrid, periodCellKind } = await import('./period-grid.ts');
+  const { memberLedger } = await import('./billing.ts');
+  const s = {
+    id: 's',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 30,
+    currency: 'CNY',
+    start: '2026-01-01',
+    cycle: { unit: 'month' as const, every: 1 },
+    status: 'active' as const,
+    share: {
+      role: 'owner' as const,
+      seats: 2,
+      collectFrom: '2026-01-01',
+      members: [
+        {
+          id: 'm',
+          name: 'M',
+          fee: 10,
+          feeCurrency: 'CNY',
+          joined: '2026-01-01',
+          receipts: [
+            { id: 'r', date: '2026-01-01', amount: 50, currency: 'CNY', periods: ['2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01'] },
+          ],
+        },
+      ],
+    },
+  } as unknown as Subscription;
+  const m = s.share!.members[0];
+  const today = '2026-02-10';
+  const segments = memberSegments(s, m, today, '2026-01-01', '2026-12-31').map((x) => `${x.from}:${x.kind}`);
+  const cells = periodGrid(memberLedger(s, m, today, 'CNY', '2026-12-31').periods, today)
+    .rows.flatMap((r) => r.segments)
+    .map((x) => `${x.period.from}:${periodCellKind(x.period, today).replace('upcoming', 'future')}`);
+  assert.deepEqual(segments, ['2026-01-01:paid', '2026-02-01:paid', '2026-03-01:future']);
+  assert.deepEqual([...new Set(cells)], segments);
+});

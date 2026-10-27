@@ -4,7 +4,7 @@ import { periodsTotal } from '../../../shared/carpool.ts';
 import { convertOn } from '../../../shared/fx.ts';
 import { cnDate, cnDateFull, currencyDecimals, flow, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
-import { periodGrid, periodTipData, type PeriodGridMode } from '../../../shared/period-grid.ts';
+import { periodCellKind, periodGrid, periodTipData, type PeriodGridMode } from '../../../shared/period-grid.ts';
 import { isSettled, putRecord, removeRecord, resolveKey, resolvedPeriods, type LedgerPeriod, type Receivable } from '../../../shared/receivables.ts';
 import type { AppState, Receipt, Waiver } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -292,7 +292,7 @@ export function PeriodStrip({
                   key={p.key}
                   type="button"
                   role="listitem"
-                  className={`rv-cell ${p.from > today ? 'upcoming' : p.status} ${active === p.key ? 'active' : ''}`}
+                  className={`rv-cell ${periodCellKind(p, today)} ${active === p.key ? 'active' : ''}`}
                   data-start={seg.start}
                   data-end={seg.end}
                   style={{ gridColumn: seg.tracks ? `${seg.track! + 1} / span ${seg.tracks}` : `${seg.column + 1} / span ${seg.span}` }}
