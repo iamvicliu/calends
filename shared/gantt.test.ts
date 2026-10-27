@@ -22,24 +22,25 @@ test('名称列上下限包含实际内边距、图标与间距，默认随短�
   assert.deepEqual(gantt.ganttLabelBounds(35, 600, { ...style, paddingLeft: 12 }), { min: 44, max: 87, default: 87 });
 });
 
-test('时间窗口保留过去与未来空间，兼容月末、闰年和跨年', () => {
-  assert.deepEqual(gantt.ganttWindow('3m', '2026-10-21'), { start: '2026-08-21', end: '2026-11-21' });
-  assert.deepEqual(gantt.ganttWindow('6m', '2026-10-21'), { start: '2026-06-06', end: '2026-12-06' });
-  assert.deepEqual(gantt.ganttWindow('1y', '2026-10-21'), { start: '2026-01-21', end: '2027-01-21' });
-  assert.deepEqual(gantt.ganttWindow('3y', '2026-10-21'), { start: '2024-04-21', end: '2027-04-21' });
+test('时间窗口以过去为主、未来只留余量，兼容月末、闰年和跨年', () => {
+  // 固定范围只给未来留一点余量，今天线靠右
+  assert.deepEqual(gantt.ganttWindow('3m', '2026-10-21'), { start: '2026-07-28', end: '2026-10-28' });
+  assert.deepEqual(gantt.ganttWindow('6m', '2026-10-21'), { start: '2026-04-30', end: '2026-10-31' });
+  assert.deepEqual(gantt.ganttWindow('1y', '2026-10-21'), { start: '2025-11-05', end: '2026-11-05' });
+  assert.deepEqual(gantt.ganttWindow('3y', '2026-10-21'), { start: '2023-12-05', end: '2026-12-05' });
   assert.deepEqual(gantt.ganttWindow('all', '2026-10-21', '2021-07-18'), { start: '2021-07-01', end: '2027-04-21' });
   assert.deepEqual(gantt.ganttWindow('all', '2026-10-21'), { start: '2026-10-01', end: '2027-04-21' });
   // 「全部」刚好装下这一批：都已结束时停在最后那个月，不拉到今天
   assert.deepEqual(gantt.ganttWindow('all', '2026-10-21', '2021-07-18', '2023-10-29'), { start: '2021-07-01', end: '2023-11-01' });
   // 有进行中的：只到今天（约 2% 余量，至少 7 天），不展开未来
   assert.deepEqual(gantt.ganttWindow('all', '2026-10-21', '2024-03-01', '2027-12-15'), { start: '2024-03-01', end: '2026-11-09' });
-  assert.deepEqual(gantt.ganttWindow('3m', '2024-01-31'), { start: '2023-11-30', end: '2024-02-29' });
+  assert.deepEqual(gantt.ganttWindow('3m', '2024-01-31'), { start: '2023-11-07', end: '2024-02-07' });
   for (const today of ['2024-02-29', '2025-01-31', '2026-08-31', '2026-12-31']) {
     for (const zoom of ['3m', '6m', '1y', '3y'] as const) {
       const { start, end } = gantt.ganttWindow(zoom, today);
       for (const d of [start, end]) assert.equal(billing.addDays(d, 0), d);
       const ratio = billing.diffDays(start, today) / billing.diffDays(start, end);
-      assert.ok(ratio > 0.6 && ratio < 0.88, `${zoom} ${today}: ${ratio}`);
+      assert.ok(ratio > 0.9 && ratio < 0.99, `${zoom} ${today}: ${ratio}`);
     }
     const half = gantt.ganttWindow('6m', today);
     assert.ok(billing.diffDays(half.start, half.end) >= 181 && billing.diffDays(half.start, half.end) <= 184);
