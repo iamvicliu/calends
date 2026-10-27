@@ -232,7 +232,7 @@ export function TipTable({
   rows,
 }: {
   head: [ComponentChildren, ComponentChildren];
-  rows: Array<{ key: string; label: ComponentChildren; value: ComponentChildren }>;
+  rows: Array<{ key: string; label: ComponentChildren; value: ComponentChildren; wide?: boolean }>;
 }) {
   return (
     <div className="tip-table">
@@ -240,12 +240,20 @@ export function TipTable({
         <b>{head[0]}</b>
         <b className="num">{head[1]}</b>
       </div>
-      {rows.map((r) => (
-        <Fragment key={r.key}>
-          <span>{r.label}</span>
-          <span className="num">{r.value}</span>
-        </Fragment>
-      ))}
+      {rows.map((r) =>
+        // 长文字（备注）放不下时整段换到字段名下面一行，不挤在字段名右边
+        r.wide ? (
+          <div key={r.key} className="tip-wide">
+            <span>{r.label}</span>
+            <span className="num">{r.value}</span>
+          </div>
+        ) : (
+          <Fragment key={r.key}>
+            <span>{r.label}</span>
+            <span className="num">{r.value}</span>
+          </Fragment>
+        ),
+      )}
     </div>
   );
 }

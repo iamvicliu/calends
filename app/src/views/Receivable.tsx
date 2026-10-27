@@ -338,7 +338,7 @@ export function periodFields(
                   },
                 ]
               : data.note
-                ? [{ key: 'note', label: t('receivable.note'), value: data.note }]
+                ? [{ key: 'note', label: t('receivable.note'), value: data.note, wide: true }]
                 : []),
           ]
         : []),

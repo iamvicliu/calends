@@ -1622,6 +1622,26 @@ a {
   align-items: center;
   gap: 8px;
 }
+/* 标签是 span，会被下面「字段名灰字」的规则盖成灰色，这里写回状态色 */
+.tip-table .tip-head .badge.green {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 18%, transparent);
+}
+.tip-table .tip-head .badge.orange {
+  color: var(--orange);
+  background: color-mix(in srgb, var(--orange) 18%, transparent);
+}
+/* 一行放得下就与其他值一样靠右；放不下整段换到字段名下面，从左写起 */
+.tip-wide {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 16px;
+}
+.tip-wide > .num {
+  margin-left: auto;
+  text-align: left;
+}
 .tip-table span:not(.num) {
   color: var(--label-2);
 }
@@ -5042,7 +5062,9 @@ button.h-price-row:focus-visible {
   row-gap: 4px;
   font-size: var(--fs-2);
 }
+/* 点开看或编辑时状态放右上角；悬停提示里仍紧跟标题 */
 .period-pop .tip-head {
+  justify-content: space-between;
   padding-bottom: 12px;
 }
 .period-pop .tip-head > b:first-child {
@@ -5058,6 +5080,21 @@ button.h-price-row:focus-visible {
   justify-content: flex-end;
   justify-self: end;
   max-width: 100%;
+}
+.period-pop .tip-wide {
+  align-items: center;
+  padding: 6px 0;
+}
+/* 编辑时日期框与输入框同宽：所在格撑满数值列 */
+.period-pop .tip-table > .num:has(input, .dp) {
+  justify-self: stretch;
+}
+.period-pop .tip-table .dp,
+.period-pop .tip-table .dp-btn {
+  width: 100%;
+}
+.period-pop .tip-table .dp-btn {
+  justify-content: flex-end;
 }
 /* 可点的金额、分期只是一段字，去掉按钮内边距，与其他值右边对齐 */
 .period-pop .tip-table .btn.plain {
