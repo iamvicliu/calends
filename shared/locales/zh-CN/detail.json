@@ -25,6 +25,7 @@
     "paused": "已暂停，不再推算后续扣款",
     "imageCopied": "已复制图片"
   },
+  "snapshotRest": "其余 {count} 条",
   "history": "历程",
   "field": {
     "amount": "金额",

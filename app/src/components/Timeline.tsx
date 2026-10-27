@@ -291,6 +291,7 @@ export function Timeline({
                   <button
                     key={`day-${date}`}
                     type="button"
+                    data-snapshot-keep
                     className={`tl-icon tl-day ${date < today ? 'past' : ''} ${tip?.g === g ? 'on' : ''}`}
                     style={style}
                     aria-label={[md(date), g.total, ...g.items.map((i) => `${i.name} ${i.amount}`)].filter(Boolean).join('\n')}
@@ -310,6 +311,7 @@ export function Timeline({
                 <button
                   key={it.key}
                   type="button"
+                  data-snapshot-keep
                   className={`tl-icon copy-tooltip ${date < today ? 'past' : ''}`}
                   style={style}
                   data-tip={`${md(date)}\n${it.name}\n${it.amount}`}

@@ -25,6 +25,7 @@
     "paused": "Pausada. Cobranças futuras não serão previstas",
     "imageCopied": "Imagem copiada"
   },
+  "snapshotRest": "mais {count}",
   "history": "Histórico",
   "field": {
     "amount": "Valor",

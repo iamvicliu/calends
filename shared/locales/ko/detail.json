@@ -25,6 +25,7 @@
     "paused": "일시 정지했습니다. 앞으로의 결제는 예측에 포함되지 않습니다",
     "imageCopied": "이미지를 복사했습니다"
   },
+  "snapshotRest": "외 {count}건",
   "history": "기록",
   "field": {
     "amount": "금액",

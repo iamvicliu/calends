@@ -1,6 +1,8 @@
 import { toBlob } from 'html-to-image';
+import { t } from '../../shared/i18n.ts';
 import { base } from './base.ts';
 import { renderSnapshotCharts } from './snapshot-render.tsx';
+import './components/copy.css';
 
 // 截图在独立的 SVG 里渲染，用不到页面加载的网络字体：把 Google Fonts 的字体转成 data URL 内嵌（只取一次）
 let fonts: Promise<string> | undefined;
@@ -39,7 +41,32 @@ function inlineSvg(el: HTMLElement) {
 /** Desktop detail width; independent of the caller's viewport and disclosure controls. */
 export const SNAPSHOT_WIDTH = 760;
 
+/** Card exports drop every control; content rendered as a button opts back in with data-snapshot-keep. */
+const CONTROLS = 'button, [role="button"], .btn, .icon-btn, .seg, details';
+/** Rows kept from a data-snapshot-list before the remainder collapses into one muted line. */
+export const SNAPSHOT_LIST_ROWS = 5;
+
+/** Cap marked lists: data-snapshot-list may name the row selector, data-snapshot-total the full count. */
+function capLists(root: HTMLElement) {
+  root.querySelectorAll<HTMLElement>('[data-snapshot-list]').forEach((list) => {
+    // A bare JSX attribute renders as "true": every child is a row.
+    const selector = list.dataset.snapshotList;
+    const children = [...list.children];
+    const rows = selector && selector !== 'true' ? children.filter((child) => child.matches(selector)) : children;
+    const kept = Math.min(rows.length, SNAPSHOT_LIST_ROWS);
+    const rest = Math.max(rows.length, Number(list.dataset.snapshotTotal) || 0) - kept;
+    if (rest <= 0 || !kept) return;
+    children.slice(children.indexOf(rows[kept - 1]) + 1).forEach((child) => child.remove());
+    const more = list.ownerDocument.createElement('p');
+    more.className = 'snapshot-more';
+    more.textContent = t('detail.snapshotRest', { count: rest });
+    list.insertAdjacentElement('afterend', more);
+  });
+}
+
 type SnapshotOptions = {
+  /** Card export: single column, no controls, long lists capped. */
+  card?: boolean;
   radius?: string;
   width?: number;
   pixelRatio?: number;
@@ -60,6 +87,7 @@ export async function snapshot(el: HTMLElement, opts: SnapshotOptions = {}) {
     const doc = frame.contentDocument!;
     for (const attr of document.documentElement.attributes) doc.documentElement.setAttribute(attr.name, attr.value);
     for (const attr of document.body.attributes) doc.body.setAttribute(attr.name, attr.value);
+    if (opts.card) doc.documentElement.setAttribute('data-snapshot', 'card');
     // Keep media queries desktop-sized and named ancestor containers intact. Only the
     // copied wrappers lose their page positioning, padding and viewport height caps.
     const styles = [...document.querySelectorAll('style, link[rel="stylesheet"]')].map((node) => {
@@ -123,7 +151,11 @@ export async function snapshot(el: HTMLElement, opts: SnapshotOptions = {}) {
     disposeCharts = rendered.dispose;
     Object.assign(clone.style, exportStyle);
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-    const allowed = (node: HTMLElement) => !node.hasAttribute('data-snapshot-hide') && !node.matches('.hint') && (opts.filter?.(node) ?? true);
+    const allowed = (node: HTMLElement) =>
+      !node.hasAttribute('data-snapshot-hide') &&
+      !node.matches('.hint') &&
+      !(opts.card && node.matches(CONTROLS) && !node.hasAttribute('data-snapshot-keep')) &&
+      (opts.filter?.(node) ?? true);
     // Remove before measuring, so notes and action rows leave no reserved space.
     clone.querySelectorAll<HTMLElement>('*').forEach((node) => {
       if (!allowed(node)) node.remove();
@@ -132,6 +164,7 @@ export async function snapshot(el: HTMLElement, opts: SnapshotOptions = {}) {
         node.style.transition = 'none';
       }
     });
+    if (opts.card) capLists(clone);
     const images = [...clone.querySelectorAll<HTMLImageElement>('img')];
     images.forEach((image) => {
       image.loading = 'eager';
@@ -169,6 +202,7 @@ export async function snapshotCard(source: HTMLElement) {
   const style = getComputedStyle(source);
   const sourceNodes = [source, ...source.querySelectorAll<HTMLElement>('*')];
   return snapshot(source, {
+    card: true,
     radius: style.borderRadius === '0px' ? 'var(--radius-lg)' : style.borderRadius,
     style: { backgroundColor: style.backgroundColor === 'rgba(0, 0, 0, 0)' ? style.getPropertyValue('--bg') : style.backgroundColor },
     prepare: (_clone, copies) => {
@@ -184,6 +218,6 @@ export async function snapshotCard(source: HTMLElement) {
         });
       });
     },
-    filter: (node) => !node.matches('.seg, .hint, .tl-home, .log-actions, .copy-controls > :not(.copy-hover)'),
+    filter: (node) => !node.matches('.tl-home, .log-actions, .copy-controls > :not(.copy-hover)'),
   });
 }

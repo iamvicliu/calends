@@ -241,7 +241,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
           </div>
         )}
         {mv.items.slice(0, 4).map((it) => (
-          <button key={it.sub.id} className="wf-item" onClick={() => onOpen(it.sub)}>
+          <button key={it.sub.id} className="wf-item" data-snapshot-keep onClick={() => onOpen(it.sub)}>
             <SubIcon sub={it.sub} size={24} />
             <span className="wf-name">{it.sub.name}</span>
             <em>{kindLabel(it.kind)}</em>
@@ -273,7 +273,7 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
           <span className="meta">{t('report.checkup.warn', { count: list.filter((i) => i.tone === 'warn').length })}</span>
         </div>
       </div>
-      <div className="insights">
+      <div className="insights" data-snapshot-list data-snapshot-total={list.length}>
         {shown.map((i) => (
           <div key={i.id} className={`insight ${i.tone}`}>
             <i className="dot" />
@@ -283,12 +283,12 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
               {!!(i.subs?.length || i.methods?.length) && (
                 <div className="ins-subs">
                   {i.methods?.map((m) => (
-                    <a className="icon-btn sub-shortcut" key={m.id} href={appPath('/wallet')} title={m.name} aria-label={m.name}>
+                    <a className="icon-btn sub-shortcut" data-snapshot-keep key={m.id} href={appPath('/wallet')} title={m.name} aria-label={m.name}>
                       <MethodMark m={m} size={22} />
                     </a>
                   ))}
                   {(i.subs ?? []).slice(0, 6).map((s) => (
-                    <IconButton className="sub-shortcut" key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
+                    <IconButton className="sub-shortcut" data-snapshot-keep key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
                       <SubIcon sub={s} size={22} />
                     </IconButton>
                   ))}
@@ -616,7 +616,7 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
           <span className="meta">{t('report.log.decisions', { count: list.length })}</span>
         </div>
       </div>
-      <div className="log" ref={log}>
+      <div className="log" ref={log} data-snapshot-list=".log-item" data-snapshot-total={list.length}>
         {list.slice(0, n).map((e, i) => {
           const yr = e.date.slice(0, 4);
           const showYear = i === 0 || list[i - 1].date.slice(0, 4) !== yr;
@@ -627,7 +627,7 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
           return (
             <Fragment key={e.sub.id + e.kind + e.date + i}>
               {showYear && <div className="log-year">{yr}</div>}
-              <button className="log-item" onClick={() => onOpen(e.sub)}>
+              <button className="log-item" data-snapshot-keep onClick={() => onOpen(e.sub)}>
                 <span className="log-date num">{e.date.slice(5).replace('-', '/')}</span>
                 <i className={`log-dot ${neutral ? '' : up ? 'up' : 'down'}`} />
                 <SubIcon sub={e.sub} size={24} />

@@ -25,6 +25,7 @@
     "paused": "一時停止しました。今後の請求は予測に含まれません",
     "imageCopied": "画像をコピーしました"
   },
+  "snapshotRest": "ほか {count} 件",
   "history": "履歴",
   "field": {
     "amount": "金額",

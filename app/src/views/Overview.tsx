@@ -236,6 +236,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
         {cats.map(([k]) => (
           <button
             key={k}
+            data-snapshot-keep
             className={`lc ${hidden.includes(k) ? 'off' : ''}`}
             onClick={() => setHidden(hidden.includes(k) ? hidden.filter((x) => x !== k) : [...hidden, k])}
           >
@@ -272,14 +273,14 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
             {copyParts(sel === curKey && selTotal > selPaid ? t('overview.spending.paid', { amount: flow(-selPaid, base, { compact: true }) }) : '')}
           </div>
         </div>
-        <div className="sel-items">
+        <div className="sel-items" data-snapshot-list=".sel-item" data-snapshot-total={items.length}>
           {items.length === 0 && (
             <span className="muted" style={{ fontSize: 'var(--fs-2)' }}>
               {t('overview.spending.empty')}
             </span>
           )}
           {items.slice(0, 12).map((e) => (
-            <button key={e.sub.id} className="sel-item" onClick={() => onOpen(e.sub)}>
+            <button key={e.sub.id} className="sel-item" data-snapshot-keep onClick={() => onOpen(e.sub)}>
               <SubIcon sub={e.sub} size={22} />
               <TailName className="si-name" style={{ opacity: e.proj && !isFuture ? 0.6 : 1 }} name={e.sub.name} after={e.n > 1 ? ` ×${e.n}` : ''} />
               <b>
@@ -438,12 +439,12 @@ function Tips({ state, today, onOpen }: { state: AppState; today: string; onOpen
           {!!(i.subs?.length || i.methods?.length) && (
             <div className="ins-subs" style={{ '--n': (i.methods?.length ?? 0) + Math.min(12, i.subs?.length ?? 0) } as CSSProperties}>
               {i.methods?.map((m) => (
-                <a className="icon-btn sub-shortcut" key={m.id} href={appPath('/wallet')} title={m.name} aria-label={m.name}>
+                <a className="icon-btn sub-shortcut" data-snapshot-keep key={m.id} href={appPath('/wallet')} title={m.name} aria-label={m.name}>
                   <MethodMark m={m} size={22} />
                 </a>
               ))}
               {(i.subs ?? []).slice(0, 12).map((s) => (
-                <IconButton className="sub-shortcut" key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
+                <IconButton className="sub-shortcut" data-snapshot-keep key={s.id} onClick={() => onOpen(s)} title={s.name} aria-label={s.name}>
                   <SubIcon sub={s} size={22} />
                 </IconButton>
               ))}
@@ -545,7 +546,13 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
             note={
               <div className="stmt-paid-note">
                 {!state.readonly && (loss.value !== 0 || loss.incomplete) && (
-                  <button type="button" className="stmt-loss-note" onClick={openLosses} title={loss.incomplete ? totalNote(loss) : undefined}>
+                  <button
+                    type="button"
+                    className="stmt-loss-note"
+                    data-snapshot-keep
+                    onClick={openLosses}
+                    title={loss.incomplete ? totalNote(loss) : undefined}
+                  >
                     {t('overview.stmt.loss')} <strong>{formatTotal(loss, base, { direction: -1, compact: true })}</strong>
                   </button>
                 )}
@@ -590,6 +597,7 @@ function Statement({ state, today, onOpen }: { state: AppState; today: string; o
               return (
                 <button
                   key={s.id}
+                  data-snapshot-keep
                   className={`star ${hover === b.i ? 'on' : ''}`}
                   style={
                     {
