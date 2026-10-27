@@ -144,6 +144,8 @@
     },
     "firstPeriod": "Erster Zeitraum",
     "firstAmount": "Betrag im ersten Zeitraum",
+    "bridge": "Übergangszeitraum",
+    "bridgeAmount": "Betrag Übergang",
     "firstMode": {
       "prorate": "Tageweise anteilig",
       "full": "Voller Zeitraum",

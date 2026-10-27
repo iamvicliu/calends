@@ -135,6 +135,8 @@
     },
     "firstPeriod": "首期方式",
     "firstAmount": "首期金额",
+    "bridge": "过渡期",
+    "bridgeAmount": "过渡期金额",
     "firstMode": {
       "prorate": "按天折算",
       "full": "收整期",

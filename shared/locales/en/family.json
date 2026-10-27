@@ -144,6 +144,8 @@
     },
     "firstPeriod": "First period",
     "firstAmount": "First-period amount",
+    "bridge": "Transition period",
+    "bridgeAmount": "Transition amount",
     "firstMode": {
       "prorate": "Prorated daily",
       "full": "Full period",

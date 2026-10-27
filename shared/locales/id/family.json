@@ -141,6 +141,8 @@
     },
     "firstPeriod": "Periode pertama",
     "firstAmount": "Jumlah periode pertama",
+    "bridge": "Periode transisi",
+    "bridgeAmount": "Jumlah periode transisi",
     "firstMode": {
       "prorate": "Prorata harian",
       "full": "Periode penuh",

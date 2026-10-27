@@ -173,6 +173,8 @@ export function subError(s: Subscription): string | undefined {
     }
     if (m.firstPeriod != null && !['prorate', 'full', 'free'].includes(m.firstPeriod)) return t('mcp.error.invalidFirstPeriod');
     if (m.firstAmount != null && (!Number.isFinite(m.firstAmount) || m.firstAmount < 0)) return t('core.subError.price');
+    if (m.periodDues != null && (!Array.isArray(m.periodDues) || !m.periodDues.every((d) => validDay(d.from) && Number.isFinite(d.amount) && d.amount >= 0)))
+      return t('mcp.error.invalidInput', { field: 'periodDues' });
     const records = receivableError(m);
     if (records) return records;
     if (m.restarts != null && (!Array.isArray(m.restarts) || !m.restarts.every(validDay))) return t('mcp.error.invalidInput', { field: 'restarts' });
@@ -1261,6 +1263,8 @@ export function memberCollection(s: Subscription, m: ShareMember, from: string, 
         ? 0
         : (m.firstAmount ?? (mode === 'full' ? amount : (amount * Math.max(0, diffDays(from, until) + 1)) / (diffDays(first.from, first.until) + 1)));
   }
+  const fixed = m.periodDues?.find((d) => d.from === from);
+  if (fixed) amount = fixed.amount;
   const end = shareLastDay(s);
   if (m.exempt || until < from || (m.left && from >= m.left) || (end && from > end)) amount = 0;
   return { from, until, next: addDays(until, 1) > from ? addDays(until, 1) : next, amount: Math.round(amount * 100) / 100, currency: rate.currency, partial };

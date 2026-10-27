@@ -141,6 +141,8 @@
     },
     "firstPeriod": "初回の請求方法",
     "firstAmount": "初回の金額",
+    "bridge": "移行期間",
+    "bridgeAmount": "移行期間の金額",
     "firstMode": {
       "prorate": "日割り",
       "full": "全期間分",

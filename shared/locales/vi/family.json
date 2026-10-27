@@ -141,6 +141,8 @@
     },
     "firstPeriod": "Kỳ đầu",
     "firstAmount": "Số tiền kỳ đầu",
+    "bridge": "Kỳ chuyển tiếp",
+    "bridgeAmount": "Số tiền kỳ chuyển tiếp",
     "firstMode": {
       "prorate": "Tính theo ngày",
       "full": "Thu trọn kỳ",

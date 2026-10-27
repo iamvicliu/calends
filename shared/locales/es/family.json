@@ -144,6 +144,8 @@
     },
     "firstPeriod": "Primer período",
     "firstAmount": "Importe del primer período",
+    "bridge": "Periodo de transición",
+    "bridgeAmount": "Importe de transición",
     "firstMode": {
       "prorate": "Prorrateo diario",
       "full": "Período completo",

@@ -105,6 +105,7 @@ const member = record(
     feeHistory: list(record({ from: day, fee: positive, currency: text, billEvery: positive, share: amount }, ['from', 'fee', 'currency', 'billEvery'])),
     firstPeriod: { type: 'string', enum: ['prorate', 'full', 'free'] },
     firstAmount: positive,
+    periodDues: list(record({ from: day, amount: positive }, ['from', 'amount'])),
     restarts: list(day),
     anchor: day,
     receipts: list(receipt),

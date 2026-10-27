@@ -150,6 +150,9 @@ export function MemberForm({
     feeFrom,
     setFeeFrom,
     rateChanged,
+    bridge,
+    bridgeDue,
+    setBridgeDue,
     next,
     ledger,
     firstPay,
@@ -261,7 +264,7 @@ export function MemberForm({
             <span className="muted">{tenure}</span>
           </Cell>
         )}
-        {first.partial && mode !== 'exempt' && !ledger.periods.some((p) => p.key === first.from && p.status === 'paid') && (
+        {first.partial && mode !== 'exempt' && bridge?.from !== first.from && !ledger.periods.some((p) => p.key === first.from && p.status === 'paid') && (
           <>
             {/* 首期起止写在「首期方式」标签下面；折算出的金额是首期金额的占位，不再单独一行提示 */}
             <Cell label={t('family.member.firstPeriod')} sub={`${cnDate(first.from)} – ${cnDate(first.until)}`}>
@@ -321,9 +324,26 @@ export function MemberForm({
           />
         )}
         {rateChanged && (
-          <Cell label={t('family.collect.feeFrom')}>
-            <DatePicker value={feeFrom} onChange={(v) => v && setFeeFrom(v)} />
-          </Cell>
+          <>
+            <Cell label={t('family.collect.feeFrom')}>
+              <DatePicker value={feeFrom} onChange={(v) => v && setFeeFrom(v)} />
+            </Cell>
+            {/* 改回跟随车时收款日对齐车的节奏：之前截短的那期缺省按天折算，可收整期或改金额 */}
+            {bridge && (
+              <>
+                <Cell label={t('family.member.bridge')} sub={`${cnDate(bridge.from)} – ${cnDate(bridge.until)}`}>
+                  <Picker
+                    value={bridgeDue === bridge.full ? 'full' : 'prorate'}
+                    onChange={(v) => setBridgeDue(v === 'full' ? bridge.full : undefined)}
+                    options={['prorate', 'full'].map((value) => ({ value, label: t(`family.member.firstMode.${value}`) }))}
+                  />
+                </Cell>
+                <Cell label={t('family.member.bridgeAmount')}>
+                  <NumInput ccy={bridge.currency} className="num" value={bridgeDue} placeholder={String(bridge.due)} onValue={(n) => setBridgeDue(n)} />
+                </Cell>
+              </>
+            )}
+          </>
         )}
         {/* 调价记录：今天生效的那条就是上面的「收费」，不再重复列出 */}
         {(member?.feeHistory ?? [])

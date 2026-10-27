@@ -96,6 +96,8 @@ export interface ShareMember {
   firstPeriod?: 'prorate' | 'full' | 'free';
   /** 首期应收自定义金额（收费币种）；缺省按 firstPeriod 计算 */
   firstAmount?: number;
+  /** 单独定价的期（期起始日 → 应收，收费币种），比如对齐车的节奏时截短的那期仍收整期；优先于首期方式与按天折算 */
+  periodDues?: { from: string; amount: number }[];
   /** 收款节奏重新起算的日子：这天起新的一期，之前那期截到前一天（按天折算） */
   restarts?: string[];
   /** 加入期对齐用的收款基准日：车改过收款日后，已有成员留着原来的基准，历史各期不重切（缺省用车的基准日） */

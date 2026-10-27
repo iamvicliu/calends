@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { todayIn, uid, memberBillMonths, memberCollection, collectionAnchor, collectCurrencyOf } from '../../../../shared/billing.ts';
+import { todayIn, uid, addDays, memberBillMonths, memberCollection, memberRate, collectionAnchor, collectCurrencyOf } from '../../../../shared/billing.ts';
 import { cnDateFull } from '../../../../shared/format.ts';
 import type { AppState, Receipt, ShareMember, Subscription } from '../../../../shared/types.ts';
 import { isSettled, putRecord, removeRecord, resolveKey, setOpening } from '../../../../shared/receivables.ts';
@@ -24,6 +24,7 @@ import {
   memberFlowValue,
   waiveExemptSpan,
   memberPaidThrough,
+  nextCollectionDay,
 } from '../../../../shared/carpool.ts';
 
 import { t } from '../../../../shared/i18n.ts';
@@ -105,8 +106,23 @@ export function useMemberForm({
   };
   const rateChanged = !isNew && mode !== 'exempt' && (mode === 'follow' ? initialMode !== 'follow' : initialMode !== 'custom' || feeEdited);
 
+  // 已有成员改回跟随车：收款日对齐车的节奏，车的下一个收款日前那期（过渡期）不满一整期时缺省按天折算，
+  // 可以改收整期或自定义金额，存成这一期的单独定价
+  const aligned = withFee(f);
+  const alignDay = !isNew && mode === 'follow' && initialMode !== 'follow' ? nextCollectionDay(s, rule.billEvery, addDays(start, -1)) : undefined;
+  const bridgeAt = alignDay
+    ? memberLedgerAhead(state, s, { ...aligned, periodDues: undefined }, today).periods.find((p) => p.until === addDays(alignDay, -1))
+    : undefined;
+  const bridgeFull = bridgeAt ? memberRate(s, aligned, bridgeAt.from, collectCcy).amount : 0;
+  const bridge = bridgeAt && bridgeAt.due < bridgeFull ? { ...bridgeAt, full: bridgeFull } : undefined;
+  const [bridgeDue, setBridgeDue] = useState<number | undefined>(() => f.periodDues?.find((d) => d.from === bridgeAt?.from)?.amount);
   const draft = (): ShareMember => {
-    const m = withFee(f);
+    let m = aligned;
+    if (bridge) {
+      const rest = (m.periodDues ?? []).filter((d) => d.from !== bridge.from);
+      const dues = bridgeDue == null ? rest : [...rest, { from: bridge.from, amount: bridgeDue }].sort((a, b) => a.from.localeCompare(b.from));
+      m = { ...m, periodDues: dues.length ? dues : undefined };
+    }
     // 收款、免收以账本为准：收款表单另行保存
     return { ...m, receipts: member?.receipts, waivers: member?.waivers };
   };
@@ -245,6 +261,9 @@ export function useMemberForm({
     start,
     withFee,
     rateChanged,
+    bridge,
+    bridgeDue,
+    setBridgeDue,
     draft,
     next,
     ledger,

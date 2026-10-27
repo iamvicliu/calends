@@ -141,6 +141,8 @@
     },
     "firstPeriod": "첫 기간 청구 방식",
     "firstAmount": "첫 기간 금액",
+    "bridge": "전환 기간",
+    "bridgeAmount": "전환 기간 금액",
     "firstMode": {
       "prorate": "일할 계산",
       "full": "전체 기간 요금",

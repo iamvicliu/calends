@@ -144,6 +144,8 @@
     },
     "firstPeriod": "Primeiro período",
     "firstAmount": "Valor do primeiro período",
+    "bridge": "Período de transição",
+    "bridgeAmount": "Valor da transição",
     "firstMode": {
       "prorate": "Proporcional por dia",
       "full": "Período completo",

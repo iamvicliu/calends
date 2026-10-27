@@ -563,3 +563,21 @@ test('已退出且提前收了的成员：已付至按收的钱覆盖到哪天�
   assert.equal(memberPaidThrough(s, m, '2026-03-10', 'CNY'), '2026-06-30');
   assert.equal(memberPaidThrough(s, { ...m, receipts: [] }, '2026-03-10', 'CNY'), undefined);
 });
+
+test('单独定价的期：对齐车的节奏截短的那期可以收整期，其余期不受影响', () => {
+  const s = ruleCar();
+  const own = { id: 'e', name: 'E', share: 7.33, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2026-10-20' };
+  s.share!.members.push(own);
+  const prorated = memberPeriods(s, own, '2027-02-01', 'CNY');
+  assert.ok(prorated[0].due < 44);
+  const fixed = memberPeriods(s, { ...own, periodDues: [{ from: '2026-10-20', amount: 44 }] }, '2027-02-01', 'CNY');
+  assert.deepEqual(
+    fixed.map((p) => [p.from, p.due]),
+    [
+      ['2026-10-20', 44],
+      ['2027-01-17', 44],
+    ],
+  );
+  // 不分摊时单独定价也不收
+  assert.equal(memberPeriods(s, { ...own, exempt: true, periodDues: [{ from: '2026-10-20', amount: 44 }] }, '2027-02-01', 'CNY')[0].due, 0);
+});

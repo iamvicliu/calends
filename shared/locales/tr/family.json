@@ -144,6 +144,8 @@
     },
     "firstPeriod": "İlk dönem",
     "firstAmount": "İlk dönem tutarı",
+    "bridge": "Geçiş dönemi",
+    "bridgeAmount": "Geçiş tutarı",
     "firstMode": {
       "prorate": "Günlük orantılı",
       "full": "Tam dönem",
