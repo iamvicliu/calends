@@ -121,6 +121,40 @@ test('成员改回跟随车：去掉自定义标记，并从生效日起套用�
   assert.equal(memberRate(s, m, '2026-12-01', 'CNY').billEvery, 6);
 });
 
+test('成员自己另起了收款日：不算跟随车，改回跟随车后收款日回到车的节奏', () => {
+  const s = ruleCar();
+  const own = { id: 'e', name: 'E', share: 7.33, fee: 44, feeCurrency: 'CNY', billEvery: 6, joined: '2026-10-20', restarts: ['2027-04-21'] };
+  s.share!.members.push(own);
+  assert.equal(followsCar(state, s, own, today), false);
+  const m = followCarRule(state, s, own, today, today);
+  assert.equal(m.restarts, undefined);
+  assert.equal(followsCar(state, s, m, today), true);
+  assert.deepEqual(
+    memberPeriods(s, m, '2027-08-01', 'CNY').map((p) => p.from),
+    ['2026-10-20', '2027-01-17', '2027-07-17'],
+  );
+});
+
+test('成员按月、每月 5 号收：改回跟随车后从车的下一个收款日重起，之前的期不动', () => {
+  const s = ruleCar();
+  const own = {
+    id: 'e',
+    name: 'E',
+    share: 1.22,
+    fee: 7,
+    feeCurrency: 'CNY',
+    billEvery: 1,
+    joined: '2026-02-17',
+    restarts: ['2026-03-05'],
+    custom: true as const,
+  };
+  s.share!.members.push(own);
+  const m = followCarRule(state, s, own, today, today);
+  assert.deepEqual(m.restarts, ['2026-03-05', '2027-01-17']);
+  const starts = memberPeriods(s, m, '2027-08-01', 'CNY').map((p) => p.from);
+  assert.deepEqual(starts.slice(-5), ['2026-09-05', '2026-10-05', '2026-11-05', '2027-01-17', '2027-07-17']);
+});
+
 test('老车第一次存规则时，与规则不一致的成员标为自定义，之后不会被误当成跟随车', () => {
   const s = ruleCar();
   s.share!.members[2] = { ...s.share!.members[2], custom: undefined };

@@ -299,9 +299,17 @@ export function carRule(state: AppState, s: Subscription, today: string): CarRul
   return { billEvery: months, fee: Math.round(fee * 100) / 100, currency: ccy };
 }
 
-/** 成员是否跟随车的规则：没标自定义、要分摊；老数据未存规则时，收费与规则一致才算跟随 */
+/** 车的收款日：从基准日起每隔 billEvery 个月一次；day 是不是其中一天 */
+const onCarRhythm = (s: Subscription, billEvery: number, day: string) => nextCollectionDay(s, billEvery, addDays(day, -1)) === day;
+
+/** 成员今天之后另起的收款节奏（restarts）不在车的收款日上：成员按自己的日子收 */
+function offCarRhythm(s: Subscription, m: ShareMember, today: string): boolean {
+  return (m.restarts ?? []).some((r) => r > today && !onCarRhythm(s, memberBillMonths(s, m, r), r));
+}
+
+/** 成员是否跟随车的规则：没标自定义、要分摊、收款日跟车走；老数据未存规则时，收费与规则一致才算跟随 */
 export function followsCar(state: AppState, s: Subscription, m: ShareMember, today: string): boolean {
-  if (m.custom || m.exempt) return false;
+  if (m.custom || m.exempt || offCarRhythm(s, m, today)) return false;
   if (s.share?.rule) return true;
   const r = memberRate(s, m, today, collectCurrencyOf(state.settings));
   return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, carRule(state, s, today));
@@ -354,14 +362,22 @@ export function applyCarRule(state: AppState, s: Subscription, rule: CarRule, fr
   return { ...s, share: { ...s.share, rule, members } };
 }
 
-/** 成员改回跟随车：从生效日起套用车的规则 */
+/**
+ * 成员改回跟随车：从生效日起套用车的规则，收款日也回到车的节奏——去掉生效日之后成员自己另起的节奏，
+ * 生效日后车的第一个收款日不是成员的期起点时从那天重起（那一期按天折算），历史各期不动
+ */
 export function followCarRule(state: AppState, s: Subscription, m: ShareMember, from: string, today: string): ShareMember {
   const rule = carRule(state, s, today);
   const r = memberRate(s, m, from, collectCurrencyOf(state.settings));
-  const next = { ...m, custom: undefined };
-  return sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)
-    ? next
-    : changeMemberFee(state, s, next, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
+  const restarts = (m.restarts ?? []).filter((d) => d <= from || onCarRhythm(s, rule.billEvery, d));
+  const plain = { ...m, custom: undefined, restarts: restarts.length ? restarts : undefined };
+  const next = sameRule({ billEvery: r.billEvery, fee: r.amount, currency: r.currency }, rule)
+    ? plain
+    : changeMemberFee(state, s, plain, { from, fee: rule.fee, currency: rule.currency, billEvery: rule.billEvery }, today);
+  const day = nextCollectionDay(s, rule.billEvery, addDays(from, -1));
+  if (memberSince(s, next) >= day || (next.left && next.left <= day)) return next;
+  if (memberPeriods(s, next, day, s.currency).some((p) => p.from === day)) return next;
+  return { ...next, restarts: [...(next.restarts ?? []), day].sort() };
 }
 
 /** 几期应收的合计：金额折成第一期的币种相加（收款表单按选中的期预填金额） */
