@@ -1385,9 +1385,11 @@
   margin-left: 4px;
   color: var(--label-3);
 }
-/* 年份行高度固定（同表头）：第二列不论是支付方式胶囊还是成员头像，三张表（扣款、收款、付款）一样高 */
+/* 年份行高度固定（表头的九成，约 40px）：第二列不论是支付方式胶囊还是成员头像，三张表（扣款、收款、付款）一样高；多币种折行时再长高 */
 .dt-ledger .ld-year {
-  min-height: var(--table-row-h);
+  min-height: calc(var(--table-row-h) * 0.9);
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 .dt-ledger .dt-ava-stack > .pp-ava {
   width: 22px !important;
