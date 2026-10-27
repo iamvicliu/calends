@@ -23,7 +23,7 @@
   "paidPeriods": {
     "other": "{count}回立て替え"
   },
-  "received": "返済済み",
+  "received": "受取済み",
   "owed": "未回収",
   "settled": "精算済み",
   "detailTitle": "立て替え",
@@ -39,8 +39,8 @@
     "receivedOn": "{date} 受取",
     "date": "請求日",
     "charged": "請求額",
-    "received": "返済額",
-    "diff": "差額",
+    "received": "受取済み",
+    "diff": "損益",
     "record": "記録",
     "even": "差額なし",
     "none": "まだ請求はありません。",
@@ -64,7 +64,7 @@
     "receivedMore": "受領日のレートで{amount}、請求額より{diff}多くなっています。",
     "receivedLess": "受領日のレートで{amount}、請求額より{diff}少なくなっています。",
     "notReceived": "未受領",
-    "receivedOn": "受領日",
+    "receivedOn": "受取日",
     "notePlaceholder": "任意（例：銀行振込）"
   },
   "page": {
@@ -74,12 +74,12 @@
     "subs": {
       "other": "{count}件のサブスク"
     },
-    "diffSub": "返済済み請求の為替差・手数料による差額",
+    "diffSub": "受取済みの請求における為替と手数料による損益",
     "emptyTitle": "立て替えはまだありません",
     "emptyBody": "サブスクリプションを作成または編集し、「利用者」で「立て替え」を選んで支払う相手を入力します。",
     "liveNext": "進行中 {count} 件、次回 {date}",
     "lastIn": "最終受取 {date}",
-    "noneIn": "まだ受け取りなし",
+    "noneIn": "まだ受け取りはありません",
     "diffAvg": "回収 {count} 期、1 期あたり平均 {amount}",
     "perPeriod": "1 期あたり平均 {amount}",
     "owedRate": "請求日のレート",
@@ -90,14 +90,14 @@
   "lastIn": "最終 {date}",
   "prepaidTo": "{date} まで前受け済み",
   "receipt": {
-    "add": "入金を記録",
-    "title": "入金を記録",
+    "add": "受取を記録",
+    "title": "受取を記録",
     "covers": "対象",
     "from": "開始回",
     "periods": "回数",
     "owedTag": "引き落とし済み・未回収",
     "coversFootOne": "{from} の 1 回分です。",
-    "coversFootMany": "{from}〜{to} の {count} 回分（回収済みの回はスキップ）。金額は均等に按分し、損益は回ごとに計算します。",
+    "coversFootMany": "{from}〜{to} の {count} 回分（受取済みの回はスキップ）。金額は均等に按分し、損益は回ごとに計算します。",
     "total": "受取金額",
     "perFoot": "1 回あたり {per}。",
     "baseFoot": "受取日のレートで {amount}。",

@@ -7,7 +7,7 @@
     "owed": "Piutang",
     "owedSub": "{count} orang berutang",
     "allSettled": "Semua lunas",
-    "received": "Terkumpul sejauh ini",
+    "received": "Total diterima",
     "receivedSub": "Paket bersama dan talangan",
     "count": "Orang",
     "countSub": "Paket bersama: {share}\nTalangan: {proxy}"
@@ -33,7 +33,7 @@
   },
   "sheet": {
     "owed": "Piutang",
-    "received": "Sudah dibayar",
+    "received": "Total diterima",
     "last": "Pembayaran terakhir",
     "in": "Ikut {count} paket",
     "inEmpty": "Tidak ada di paket bersama atau talangan mana pun. Bisa dihapus.",

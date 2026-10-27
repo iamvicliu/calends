@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "Payé {amount}",
-    "receiptHint": "Quand un membre paie, touchez « Encaisser » à côté de son nom",
+    "receiptHint": "Quand un membre paie, ouvrez sa fiche et touchez « Enregistrer un paiement »",
     "tabIn": "Reçu {count}",
     "tabOut": "Payé {count}",
     "chargeDate": "Prélevé le",
@@ -180,8 +180,8 @@
       "none": "Aucun partage ne correspond"
     },
     "title": "Abonnements partagés",
-    "netGain": "Gain net par an",
-    "netCost": "Coût net par an",
+    "netGain": "Bénéfice/perte du forfait partagé par an",
+    "netCost": "Bénéfice/perte du forfait partagé par an",
     "yearIncome": "Les membres paient {amount}/an",
     "owed": "À encaisser",
     "owedSub": {
@@ -267,7 +267,7 @@
     "cost": "Coût / an",
     "income": "Revenu / an",
     "loss": "Perte / an",
-    "profit": "Bénéfice / an",
+    "profit": "Bénéfice/perte par an",
     "since": "Depuis {month}",
     "actual": "Payé {paid}\nReçu {received}\n{result}",
     "gain": "+{amount}",
@@ -285,7 +285,7 @@
     "viewSub": "Voir les détails",
     "period": "Période",
     "due": "Dû pour cette période",
-    "actual": "Paiement reçu",
+    "actual": "Montant reçu",
     "nextPeriod": "Période suivante",
     "adjustPaid": "Ajuster",
     "periodPaid": "Payé",
@@ -320,7 +320,7 @@
     "backCollect": "Enregistrer un paiement"
   },
   "strip": {
-    "yearNet": "Net par an",
+    "yearNet": "Bénéfice/perte par an",
     "costIncome": "Coût {cost}\nRecettes {income}",
     "noneOwed": "Personne ne doit rien",
     "since": "Depuis le {date}",
@@ -334,7 +334,7 @@
     "due": "Dû",
     "future": "Période suivante",
     "unused": "Payé, inutilisé",
-    "waived": "Abandonné"
+    "waived": "Remis"
   },
   "refund": {
     "title": "Remboursement au départ",

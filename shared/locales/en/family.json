@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "Paid {amount}",
-    "receiptHint": "When a member pays you, tap “Collect” next to them",
+    "receiptHint": "When a member pays you, open their details and tap “Record payment”",
     "tabIn": "Received {count}",
     "tabOut": "Paid {count}",
     "chargeDate": "Charged on",
@@ -180,8 +180,8 @@
       "none": "No shared plans match"
     },
     "title": "Shared plans",
-    "netGain": "Net gain per year",
-    "netCost": "Net cost per year",
+    "netGain": "Shared plan profit per year",
+    "netCost": "Shared plan profit per year",
     "yearIncome": "Members pay {amount}/yr",
     "owed": "To collect",
     "owedSub": {
@@ -267,7 +267,7 @@
     "cost": "Cost / yr",
     "income": "Income / yr",
     "loss": "Loss / yr",
-    "profit": "Profit / yr",
+    "profit": "Profit per year",
     "since": "Since {month}",
     "actual": "Paid {paid}\nReceived {received}\n{result}",
     "gain": "Up {amount}",
@@ -285,7 +285,7 @@
     "viewSub": "View details",
     "period": "Period",
     "due": "Due this period",
-    "actual": "Payment received",
+    "actual": "Amount received",
     "nextPeriod": "Next period",
     "adjustPaid": "Adjust",
     "periodPaid": "Paid",
@@ -323,7 +323,7 @@
     "backCollect": "Record payment"
   },
   "strip": {
-    "yearNet": "Net per year",
+    "yearNet": "Profit per year",
     "costIncome": "Cost {cost}\nIncome {income}",
     "noneOwed": "Nobody owes",
     "since": "Since {date}",

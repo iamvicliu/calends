@@ -18,7 +18,7 @@
   "modeWaiver": "Remise",
   "record": "Enregistrer un paiement",
   "waive": "Remettre des paiements",
-  "actual": "Reçu",
+  "actual": "Montant reçu",
   "waiverGroup": "Remise",
   "receivedOn": "Reçu le",
   "waivedOn": "Convenu le",
@@ -53,7 +53,7 @@
     "paid": "Payé",
     "waived": "Remis",
     "free": "Gratuit",
-    "due": "Impayé",
+    "due": "À recevoir",
     "upcoming": "Pas encore dû",
     "this": "Ce paiement"
   },

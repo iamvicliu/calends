@@ -9,7 +9,7 @@
   "modeWaiver": "Bebaskan",
   "record": "Catat pembayaran",
   "waive": "Bebaskan periode",
-  "actual": "Diterima",
+  "actual": "Jumlah diterima",
   "waiverGroup": "Pembebasan",
   "receivedOn": "Tanggal diterima",
   "waivedOn": "Tanggal disepakati",
@@ -41,7 +41,7 @@
     "paid": "Lunas",
     "waived": "Dibebaskan",
     "free": "Gratis",
-    "due": "Belum dibayar",
+    "due": "Menunggu pembayaran",
     "upcoming": "Belum jatuh tempo",
     "this": "Pembayaran ini"
   },

@@ -10,7 +10,7 @@
       "other": "{count} people owe"
     },
     "allSettled": "Everyone's settled",
-    "received": "Collected so far",
+    "received": "Total received",
     "receivedSub": "Shared plans and paid-for, combined",
     "count": "People",
     "countSub": "Shared plans: {share}\nPaid for: {proxy}"
@@ -42,7 +42,7 @@
   },
   "sheet": {
     "owed": "Owed",
-    "received": "Paid so far",
+    "received": "Total received",
     "last": "Last payment",
     "in": {
       "one": "In {count} plan",

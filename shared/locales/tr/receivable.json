@@ -9,7 +9,7 @@
   "modeWaiver": "Bağışla",
   "record": "Ödeme kaydet",
   "waive": "Dönemleri bağışla",
-  "actual": "Alınan",
+  "actual": "Alınan tutar",
   "waiverGroup": "Bağış",
   "receivedOn": "Alındığı tarih",
   "waivedOn": "Anlaşma tarihi",
@@ -41,7 +41,7 @@
     "paid": "Ödendi",
     "waived": "Bağışlandı",
     "free": "Ücretsiz",
-    "due": "Ödenmedi",
+    "due": "Tahsil edilecek",
     "upcoming": "Vadesi gelmedi",
     "this": "Bu ödeme"
   },

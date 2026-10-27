@@ -10,7 +10,7 @@
       "other": "{count} kişi borçlu"
     },
     "allSettled": "Herkes ödeşti",
-    "received": "Şimdiye kadar tahsil",
+    "received": "Toplam alınan",
     "receivedSub": "Ortak planlar ve başkaları için ödemeler",
     "count": "Kişi",
     "countSub": "Ortak: {share}\nBaşkası için: {proxy}"
@@ -42,7 +42,7 @@
   },
   "sheet": {
     "owed": "Alacak",
-    "received": "Şimdiye kadar ödenen",
+    "received": "Toplam alınan",
     "last": "Son ödeme",
     "in": {
       "one": "{count} planda",

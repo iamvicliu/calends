@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "Bezahlt {amount}",
-    "receiptHint": "Wenn jemand zahlt, tippe neben dem Mitglied auf „Kassieren“",
+    "receiptHint": "Wenn ein Mitglied zahlt, öffne seine Details und tippe auf „Zahlung erfassen“",
     "tabIn": "Erhalten {count}",
     "tabOut": "Bezahlt {count}",
     "chargeDate": "Abgebucht am",
@@ -180,8 +180,8 @@
       "none": "Keine passenden Gruppen"
     },
     "title": "Geteilte Abos",
-    "netGain": "Nettogewinn pro Jahr",
-    "netCost": "Nettokosten pro Jahr",
+    "netGain": "Gewinn/Verlust des gemeinsamen Abos pro Jahr",
+    "netCost": "Gewinn/Verlust des gemeinsamen Abos pro Jahr",
     "yearIncome": "Mitglieder zahlen {amount}/Jahr",
     "owed": "Einzufordern",
     "owedSub": {
@@ -267,7 +267,7 @@
     "cost": "Kosten / Jahr",
     "income": "Einnahmen / Jahr",
     "loss": "Verlust / Jahr",
-    "profit": "Gewinn / Jahr",
+    "profit": "Gewinn/Verlust pro Jahr",
     "since": "Seit {month}",
     "actual": "Gezahlt {paid}\nErhalten {received}\n{result}",
     "gain": "Plus {amount}",
@@ -285,7 +285,7 @@
     "viewSub": "Details ansehen",
     "period": "Zeitraum",
     "due": "Fällig in diesem Zeitraum",
-    "actual": "Erhaltene Zahlung",
+    "actual": "Erhaltener Betrag",
     "nextPeriod": "Nächster Zeitraum",
     "adjustPaid": "Anpassen",
     "periodPaid": "Bezahlt",
@@ -320,7 +320,7 @@
     "backCollect": "Zahlung erfassen"
   },
   "strip": {
-    "yearNet": "Netto pro Jahr",
+    "yearNet": "Gewinn/Verlust pro Jahr",
     "costIncome": "Kosten {cost}\nEinnahmen {income}",
     "noneOwed": "Niemand im Rückstand",
     "since": "Seit {date}",
@@ -344,7 +344,7 @@
   },
   "sort": {
     "owed": "Offener Betrag",
-    "received": "Bisher erhalten",
+    "received": "Insgesamt erhalten",
     "lastPaid": "Letzte Zahlung"
   }
 }

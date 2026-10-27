@@ -18,7 +18,7 @@
   "modeWaiver": "Condonar",
   "record": "Registrar cobro",
   "waive": "Condonar pagos",
-  "actual": "Recibido",
+  "actual": "Importe recibido",
   "waiverGroup": "Condonación",
   "receivedOn": "Recibido el",
   "waivedOn": "Acordado el",
@@ -53,7 +53,7 @@
     "paid": "Pagado",
     "waived": "Condonado",
     "free": "Gratis",
-    "due": "Sin pagar",
+    "due": "Pendiente",
     "upcoming": "Aún no vence",
     "this": "Este cobro"
   },

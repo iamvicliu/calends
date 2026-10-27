@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "Ödenen {amount}",
-    "receiptHint": "Biri ödediğinde üyenin yanındaki “Tahsil et”e dokunun",
+    "receiptHint": "Üye ödeme yaptığında bilgilerini açıp “Ödeme kaydet”e dokunun",
     "tabIn": "Alınan {count}",
     "tabOut": "Ödenen {count}",
     "chargeDate": "Ödeme günü",
@@ -128,18 +128,18 @@
       "m12": "Ödeme dönemine göre ayarlanır; düzenlenebilir",
       "custom": "Ödeme dönemine göre ayarlanır; düzenlenebilir"
     },
-    "receivedOn": "Alınma tarihi",
+    "receivedOn": "Alındığı tarih",
     "note": "Not",
     "notePh": "İsteğe bağlı, ör. USDT transferi",
     "record": "Kaydet",
     "recordBtn": {
-      "m1": "Ödemeyi kaydet ({fee}/ay)",
-      "m3": "Ödemeyi kaydet ({fee}/çeyrek)",
-      "m6": "Ödemeyi kaydet (6 ayda bir {fee})",
-      "m12": "Ödemeyi kaydet ({fee}/yıl)",
+      "m1": "Ödeme kaydet ({fee}/ay)",
+      "m3": "Ödeme kaydet ({fee}/çeyrek)",
+      "m6": "Ödeme kaydet (6 ayda bir {fee})",
+      "m12": "Ödeme kaydet ({fee}/yıl)",
       "custom": {
-        "one": "Ödemeyi kaydet ({count} ayda bir {fee})",
-        "other": "Ödemeyi kaydet ({count} ayda bir {fee})"
+        "one": "Ödeme kaydet ({count} ayda bir {fee})",
+        "other": "Ödeme kaydet ({count} ayda bir {fee})"
       }
     },
     "firstPeriod": "İlk dönem",
@@ -180,8 +180,8 @@
       "none": "Eşleşen ortak plan yok"
     },
     "title": "Ortak planlar",
-    "netGain": "Yıllık net kazanç",
-    "netCost": "Yıllık net maliyet",
+    "netGain": "Ortak planın yıllık kâr/zararı",
+    "netCost": "Ortak planın yıllık kâr/zararı",
     "yearIncome": "Üyeler yılda {amount} ödüyor",
     "owed": "Tahsil edilecek",
     "owedSub": {
@@ -264,7 +264,7 @@
     "cost": "Maliyet / yıl",
     "income": "Gelir / yıl",
     "loss": "Zarar / yıl",
-    "profit": "Kâr / yıl",
+    "profit": "Yıllık kâr/zarar",
     "since": "{month} itibarıyla",
     "actual": "Ödenen {paid}\nAlınan {received}\n{result}",
     "gain": "{amount} kârda",
@@ -282,7 +282,7 @@
     "viewSub": "Ayrıntıları gör",
     "period": "Dönem",
     "due": "Bu dönem alınacak",
-    "actual": "Alınan ödeme",
+    "actual": "Alınan tutar",
     "nextPeriod": "Sonraki dönem",
     "adjustPaid": "Düzenle",
     "periodPaid": "Ödendi",
@@ -311,7 +311,7 @@
     "backCollect": "Ödeme kaydet"
   },
   "strip": {
-    "yearNet": "Yıllık net",
+    "yearNet": "Yıllık kâr/zarar",
     "costIncome": "Maliyet {cost}\nGelir {income}",
     "noneOwed": "Borcu olan yok",
     "since": "{date} itibarıyla",
@@ -325,7 +325,7 @@
     "due": "Bekleyen",
     "future": "Sonraki dönem",
     "unused": "Ödendi, kullanılmadı",
-    "waived": "Affedildi"
+    "waived": "Bağışlandı"
   },
   "refund": {
     "title": "Ayrılma iadesi",

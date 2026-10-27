@@ -7,7 +7,7 @@
     "owed": "Cần thu",
     "owedSub": "{count} người còn nợ",
     "allSettled": "Đã thu đủ",
-    "received": "Đã thu đến nay",
+    "received": "Tổng đã nhận",
     "receivedSub": "Gói chia sẻ và trả hộ",
     "count": "Số người",
     "countSub": "Gói chia sẻ: {share}\nTrả hộ: {proxy}"
@@ -33,7 +33,7 @@
   },
   "sheet": {
     "owed": "Còn nợ",
-    "received": "Đã trả đến nay",
+    "received": "Tổng đã nhận",
     "last": "Lần trả gần nhất",
     "in": "Tham gia {count} gói",
     "inEmpty": "Không có trong gói chia sẻ hay khoản trả hộ nào. Có thể xoá.",

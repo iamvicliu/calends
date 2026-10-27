@@ -18,7 +18,7 @@
   "modeWaiver": "Dispensar",
   "record": "Registrar recebimento",
   "waive": "Dispensar pagamentos",
-  "actual": "Recebido",
+  "actual": "Valor recebido",
   "waiverGroup": "Dispensa",
   "receivedOn": "Recebido em",
   "waivedOn": "Combinado em",
@@ -53,7 +53,7 @@
     "paid": "Pago",
     "waived": "Dispensado",
     "free": "Grátis",
-    "due": "Não pago",
+    "due": "A receber",
     "upcoming": "A vencer",
     "this": "Este recebimento"
   },

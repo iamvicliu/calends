@@ -7,7 +7,7 @@
     "owed": "未回収",
     "owedSub": "{count} 人が未払い",
     "allSettled": "全員精算済み",
-    "received": "これまでの回収額",
+    "received": "受取累計",
     "receivedSub": "共有プランと立て替えの合計",
     "count": "人数",
     "countSub": "共有 {share}\n立て替え {proxy}"
@@ -33,7 +33,7 @@
   },
   "sheet": {
     "owed": "未回収",
-    "received": "これまでの入金",
+    "received": "受取累計",
     "last": "最終入金",
     "in": "{count} 件に参加",
     "inEmpty": "共有にも立て替えにも含まれていません。削除できます。",

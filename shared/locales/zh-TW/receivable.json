@@ -9,7 +9,7 @@
   "modeWaiver": "免收",
   "record": "記收款",
   "waive": "免收這幾期",
-  "actual": "實際收到",
+  "actual": "實收",
   "waiverGroup": "免收",
   "receivedOn": "收款日期",
   "waivedOn": "約定日期",
@@ -41,7 +41,7 @@
     "paid": "已收",
     "waived": "已免收",
     "free": "免費",
-    "due": "未付款",
+    "due": "待收",
     "upcoming": "未到期",
     "this": "本筆"
   },

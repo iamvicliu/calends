@@ -10,7 +10,7 @@
       "other": "{count} pessoas devem"
     },
     "allSettled": "Tudo quitado",
-    "received": "Recebido até agora",
+    "received": "Total recebido",
     "receivedSub": "Planos compartilhados e pagamentos para outros",
     "count": "Pessoas",
     "countSub": "Planos: {share}\nPagos por mim: {proxy}"
@@ -42,7 +42,7 @@
   },
   "sheet": {
     "owed": "A receber",
-    "received": "Pago até agora",
+    "received": "Total recebido",
     "last": "Último pagamento",
     "in": {
       "one": "Em {count} plano",

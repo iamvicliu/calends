@@ -25,7 +25,7 @@
     "one": "Paid {count} charge",
     "other": "Paid {count} charges"
   },
-  "received": "Paid back",
+  "received": "Received",
   "owed": "Due",
   "settled": "Settled",
   "detailTitle": "Paid for others",
@@ -41,8 +41,8 @@
     "receivedOn": "Received {date}",
     "date": "Charge date",
     "charged": "Charged",
-    "received": "Paid back",
-    "diff": "Difference",
+    "received": "Received",
+    "diff": "Profit",
     "record": "Record",
     "even": "Even",
     "none": "No charges yet.",
@@ -66,7 +66,7 @@
     "receivedMore": "{amount} at the receipt-date rate, {diff} more than charged.",
     "receivedLess": "{amount} at the receipt-date rate, {diff} less than charged.",
     "notReceived": "Not received",
-    "receivedOn": "Date received",
+    "receivedOn": "Received on",
     "notePlaceholder": "Optional, e.g. bank transfer"
   },
   "page": {
@@ -78,12 +78,12 @@
       "one": "{count} subscription",
       "other": "{count} subscriptions"
     },
-    "diffSub": "Difference from exchange rates and fees on paid-back charges",
+    "diffSub": "Profit from exchange rates and fees on received payments",
     "emptyTitle": "Nothing paid for others yet",
     "emptyBody": "Create or edit a subscription, choose “Paying for” under “Who uses it”, and enter who it’s for.",
     "liveNext": "Active: {count}, next charge {date}",
     "lastIn": "Last received {date}",
-    "noneIn": "Nothing received yet",
+    "noneIn": "No payments received yet",
     "diffAvg": "Over {count} paid back: {amount} each on average",
     "perPeriod": "{amount} per period on average",
     "owedRate": "At charge-date rates",
@@ -101,7 +101,7 @@
   "prepaidTo": "Prepaid to {date}",
   "receipt": {
     "add": "Record payment",
-    "title": "Record a payment",
+    "title": "Record payment",
     "covers": "Covers",
     "from": "Starting with",
     "periods": "Payments covered",
@@ -109,7 +109,7 @@
     "coversFootOne": "Covers the {from} payment.",
     "coversFootMany": {
       "one": "Covers {count} payment from {from} to {to}.",
-      "other": "Covers {count} payments from {from} to {to}, skipping ones already repaid. The amount is split evenly and profit is counted per payment."
+      "other": "Covers {count} payments from {from} to {to}, skipping ones already received. The amount is split evenly and profit is counted per payment."
     },
     "total": "Amount received",
     "perFoot": "{per} per payment.",

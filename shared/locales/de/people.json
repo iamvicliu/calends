@@ -10,7 +10,7 @@
       "other": "{count} Personen schulden"
     },
     "allSettled": "Alle beglichen",
-    "received": "Bisher erhalten",
+    "received": "Insgesamt erhalten",
     "receivedSub": "Geteilte Abos und Auslagen zusammen",
     "count": "Personen",
     "countSub": "Geteilt: {share}\nAusgelegt: {proxy}"
@@ -42,7 +42,7 @@
   },
   "sheet": {
     "owed": "Offen",
-    "received": "Bisher bezahlt",
+    "received": "Insgesamt erhalten",
     "last": "Letzte Zahlung",
     "in": {
       "one": "In {count} Abo",

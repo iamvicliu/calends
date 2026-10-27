@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "付出 {amount}",
-    "receiptHint": "收到钱后，点成员旁的「收款」记一笔",
+    "receiptHint": "收到钱后，打开成员点「记收款」",
     "tabIn": "收款 {count}",
     "tabOut": "付款 {count}",
     "chargeDate": "扣款日",
@@ -122,16 +122,16 @@
       "m12": "按年自动算出，可改",
       "custom": "按 {count} 个月自动算出，可改"
     },
-    "receivedOn": "收到日期",
+    "receivedOn": "收款日期",
     "note": "备注",
     "notePh": "可选，如 USDT 转账",
     "record": "记下这笔",
     "recordBtn": {
-      "m1": "记一笔收款（每月 {fee}）",
-      "m3": "记一笔收款（每季 {fee}）",
-      "m6": "记一笔收款（每半年 {fee}）",
-      "m12": "记一笔收款（每年 {fee}）",
-      "custom": "记一笔收款（每 {count} 个月 {fee}）"
+      "m1": "记收款（每月 {fee}）",
+      "m3": "记收款（每季 {fee}）",
+      "m6": "记收款（每半年 {fee}）",
+      "m12": "记收款（每年 {fee}）",
+      "custom": "记收款（每 {count} 个月 {fee}）"
     },
     "firstPeriod": "首期方式",
     "firstAmount": "首期金额",
@@ -171,8 +171,8 @@
       "none": "没有符合条件的合租"
     },
     "title": "合租",
-    "netGain": "合租每年净赚",
-    "netCost": "合租每年净成本",
+    "netGain": "合租每年盈亏",
+    "netCost": "合租每年盈亏",
     "yearIncome": "成员每年应交 {amount}",
     "owed": "待收",
     "owedSub": "{count} 位成员未结清",
@@ -240,9 +240,9 @@
     "cost": "成本 / 年",
     "income": "收入 / 年",
     "loss": "没赚钱 / 年",
-    "profit": "利润 / 年",
+    "profit": "每年盈亏",
     "since": "{month}发起至今",
-    "actual": "付出 {paid}\n收回 {received}\n{result}",
+    "actual": "付出 {paid}\n已收 {received}\n{result}",
     "gain": "赚 {amount}",
     "lost": "亏 {amount}",
     "noRecords": "还没有收款记录",
@@ -258,7 +258,7 @@
     "viewSub": "查看详情",
     "period": "本期",
     "due": "本期应收",
-    "actual": "实际收款",
+    "actual": "实收",
     "nextPeriod": "下一期",
     "adjustPaid": "调整",
     "periodPaid": "已付清",
@@ -281,16 +281,16 @@
     "late": "已逾期 {count} 天",
     "owe": "待收 {amount}\n应收 {date}",
     "settled": "已结清\n下次应收 {date}",
-    "backCollect": "记一笔收款"
+    "backCollect": "记收款"
   },
   "strip": {
-    "yearNet": "每年净额",
+    "yearNet": "每年盈亏",
     "costIncome": "成本 {cost}\n收入 {income}",
     "noneOwed": "无人欠款",
     "since": "{date}起",
     "profit": "盈亏",
     "paid": "付出",
-    "received": "收回",
+    "received": "已收",
     "thisYear": "当年 {amount}"
   },
   "timeline": {
@@ -298,7 +298,7 @@
     "due": "待收",
     "future": "下一期",
     "unused": "已付未用",
-    "waived": "未收（已放弃）"
+    "waived": "已免收"
   },
   "refund": {
     "title": "下车退款",
@@ -308,7 +308,7 @@
   },
   "sort": {
     "owed": "按待收",
-    "received": "按至今收回",
+    "received": "按累计已收",
     "lastPaid": "按最近收款"
   }
 }

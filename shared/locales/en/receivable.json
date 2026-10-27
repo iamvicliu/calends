@@ -18,7 +18,7 @@
   "modeWaiver": "Waive",
   "record": "Record payment",
   "waive": "Waive periods",
-  "actual": "Received",
+  "actual": "Amount received",
   "waiverGroup": "Waiver",
   "receivedOn": "Received on",
   "waivedOn": "Agreed on",
@@ -53,7 +53,7 @@
     "paid": "Paid",
     "waived": "Waived",
     "free": "Free",
-    "due": "Unpaid",
+    "due": "Due",
     "upcoming": "Not due",
     "this": "This payment"
   },

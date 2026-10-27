@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "Dibayar {amount}",
-    "receiptHint": "Saat anggota membayar, ketuk “Terima” di sebelahnya",
+    "receiptHint": "Setelah anggota membayar, buka detailnya dan ketuk “Catat pembayaran”",
     "tabIn": "Diterima {count}",
     "tabOut": "Dibayar {count}",
     "chargeDate": "Tanggal tagihan",
@@ -126,7 +126,7 @@
       "m12": "Diatur dari periode tagihan; bisa diubah",
       "custom": "Diatur dari periode tagihan; bisa diubah"
     },
-    "receivedOn": "Diterima pada",
+    "receivedOn": "Tanggal diterima",
     "note": "Catatan",
     "notePh": "Opsional, mis. transfer USDT",
     "record": "Catat",
@@ -177,8 +177,8 @@
       "none": "Tidak ada patungan yang cocok"
     },
     "title": "Paket bersama",
-    "netGain": "Untung bersih per tahun",
-    "netCost": "Biaya bersih per tahun",
+    "netGain": "Laba/rugi paket bersama per tahun",
+    "netCost": "Laba/rugi paket bersama per tahun",
     "yearIncome": "Anggota membayar {amount}/thn",
     "owed": "Perlu ditagih",
     "owedSub": {
@@ -256,7 +256,7 @@
     "cost": "Biaya / thn",
     "income": "Pemasukan / thn",
     "loss": "Rugi / thn",
-    "profit": "Untung / thn",
+    "profit": "Laba/rugi per tahun",
     "since": "Sejak {month}",
     "actual": "Dibayar {paid}\nDiterima {received}\n{result}",
     "gain": "Untung {amount}",
@@ -274,7 +274,7 @@
     "viewSub": "Lihat detail",
     "period": "Periode",
     "due": "Tagihan periode ini",
-    "actual": "Pembayaran diterima",
+    "actual": "Jumlah diterima",
     "nextPeriod": "Periode berikutnya",
     "adjustPaid": "Sesuaikan",
     "periodPaid": "Lunas",
@@ -302,7 +302,7 @@
     "backCollect": "Catat pembayaran"
   },
   "strip": {
-    "yearNet": "Bersih per tahun",
+    "yearNet": "Laba/rugi per tahun",
     "costIncome": "Biaya {cost}\nPendapatan {income}",
     "noneOwed": "Tidak ada tunggakan",
     "since": "Sejak {date}",

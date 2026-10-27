@@ -23,7 +23,7 @@
   "paidPeriods": {
     "other": "{count}회 대신 결제"
   },
-  "received": "돌려받음",
+  "received": "입금",
   "owed": "미수",
   "settled": "정산 완료",
   "detailTitle": "대신 결제",
@@ -39,8 +39,8 @@
     "receivedOn": "{date} 받음",
     "date": "결제일",
     "charged": "결제 금액",
-    "received": "돌려받음",
-    "diff": "차액",
+    "received": "입금",
+    "diff": "손익",
     "record": "기록",
     "even": "차액 없음",
     "none": "아직 결제가 없습니다.",
@@ -64,7 +64,7 @@
     "receivedMore": "받은 날 환율 기준 {amount}, 결제 금액보다 {diff} 많습니다.",
     "receivedLess": "받은 날 환율 기준 {amount}, 결제 금액보다 {diff} 적습니다.",
     "notReceived": "받지 않음",
-    "receivedOn": "받은 날짜",
+    "receivedOn": "입금일",
     "notePlaceholder": "선택 사항, 예: 계좌 이체"
   },
   "page": {
@@ -74,12 +74,12 @@
     "subs": {
       "other": "구독 {count}개"
     },
-    "diffSub": "돌려받은 결제의 환율 및 수수료 차이",
+    "diffSub": "입금된 결제의 환율 및 수수료로 인한 손익",
     "emptyTitle": "아직 대신 결제한 내역이 없습니다",
     "emptyBody": "구독을 만들거나 편집하고 “사용자”에서 “대신 결제”를 선택한 다음 누구를 위한 결제인지 입력하세요.",
     "liveNext": "진행 중 {count}개, 다음 결제 {date}",
     "lastIn": "최근 받은 날 {date}",
-    "noneIn": "아직 받은 금액 없음",
+    "noneIn": "아직 입금 내역 없음",
     "diffAvg": "회수 {count}회, 회당 평균 {amount}",
     "perPeriod": "회당 평균 {amount}",
     "owedRate": "결제일 환율 기준",
@@ -97,7 +97,7 @@
     "periods": "회차 수",
     "owedTag": "결제 후 미수",
     "coversFootOne": "{from} 1회분입니다.",
-    "coversFootMany": "{from}~{to} 총 {count}회(이미 받은 회차는 건너뜀). 금액은 균등하게 나누고 손익은 회차별로 계산합니다.",
+    "coversFootMany": "{from}~{to} 총 {count}회(이미 입금된 회차는 건너뜀). 금액은 균등하게 나누고 손익은 회차별로 계산합니다.",
     "total": "받은 금액",
     "perFoot": "회당 {per}.",
     "baseFoot": "받은 날 환율로 {amount}.",

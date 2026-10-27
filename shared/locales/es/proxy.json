@@ -25,7 +25,7 @@
     "one": "{count} cobro pagado",
     "other": "{count} cobros pagados"
   },
-  "received": "Devuelto",
+  "received": "Recibido",
   "owed": "Pendiente",
   "settled": "Al día",
   "detailTitle": "Pago por otros",
@@ -41,8 +41,8 @@
     "receivedOn": "Recibido {date}",
     "date": "Fecha de cobro",
     "charged": "Cobrado",
-    "received": "Devuelto",
-    "diff": "Diferencia",
+    "received": "Recibido",
+    "diff": "Ganancia/pérdida",
     "record": "Registrar",
     "even": "Igual",
     "none": "Aún no hay cobros.",
@@ -66,7 +66,7 @@
     "receivedMore": "{amount} al tipo de cambio de la fecha de recepción, {diff} más que lo cobrado.",
     "receivedLess": "{amount} al tipo de cambio de la fecha de recepción, {diff} menos que lo cobrado.",
     "notReceived": "No recibido",
-    "receivedOn": "Fecha de recepción",
+    "receivedOn": "Recibido el",
     "notePlaceholder": "Opcional, p. ej. transferencia bancaria"
   },
   "page": {
@@ -78,12 +78,12 @@
       "one": "{count} suscripción",
       "other": "{count} suscripciones"
     },
-    "diffSub": "Diferencia por tipos de cambio y comisiones en los cobros devueltos",
+    "diffSub": "Ganancia/pérdida por tipos de cambio y comisiones en los pagos recibidos",
     "emptyTitle": "Aún no has pagado nada por otros",
     "emptyBody": "Crea o edita una suscripción, elige «Pago por otro» en «Quién la usa» e indica para quién es.",
     "liveNext": "Activos: {count}, próximo cobro {date}",
     "lastIn": "Último cobro {date}",
-    "noneIn": "Aún no se ha recibido nada",
+    "noneIn": "Aún no se han recibido pagos",
     "diffAvg": "{count} devueltos, {amount} de media por periodo",
     "perPeriod": "{amount} de media por periodo",
     "owedRate": "Al tipo del día del cobro",
@@ -101,7 +101,7 @@
   "prepaidTo": "Prepagado hasta {date}",
   "receipt": {
     "add": "Registrar cobro",
-    "title": "Registrar un cobro",
+    "title": "Registrar cobro",
     "covers": "Cubre",
     "from": "Desde",
     "periods": "Pagos cubiertos",
@@ -109,7 +109,7 @@
     "coversFootOne": "Cubre el pago del {from}.",
     "coversFootMany": {
       "one": "Cubre {count} pago del {from} al {to}.",
-      "other": "Cubre {count} pagos del {from} al {to}, omitiendo los ya devueltos. El importe se reparte por igual y la ganancia se calcula por pago."
+      "other": "Cubre {count} pagos del {from} al {to}, omitiendo los ya recibidos. El importe se reparte por igual y la ganancia/pérdida se calcula por pago."
     },
     "total": "Importe recibido",
     "perFoot": "{per} por pago.",

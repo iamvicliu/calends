@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "Pago {amount}",
-    "receiptHint": "Quando alguém pagar, toque em “Receber” ao lado do membro",
+    "receiptHint": "Quando um membro pagar, abra os detalhes dele e toque em “Registrar recebimento”",
     "tabIn": "Recebido {count}",
     "tabOut": "Pago {count}",
     "chargeDate": "Cobrado em",
@@ -133,13 +133,13 @@
     "notePh": "Opcional, ex.: transferência em USDT",
     "record": "Registrar",
     "recordBtn": {
-      "m1": "Registrar pagamento ({fee}/mês)",
-      "m3": "Registrar pagamento ({fee}/trimestre)",
-      "m6": "Registrar pagamento ({fee}/semestre)",
-      "m12": "Registrar pagamento ({fee}/ano)",
+      "m1": "Registrar recebimento ({fee}/mês)",
+      "m3": "Registrar recebimento ({fee}/trimestre)",
+      "m6": "Registrar recebimento ({fee}/semestre)",
+      "m12": "Registrar recebimento ({fee}/ano)",
       "custom": {
-        "one": "Registrar pagamento ({fee} a cada {count} mês)",
-        "other": "Registrar pagamento ({fee} a cada {count} meses)"
+        "one": "Registrar recebimento ({fee} a cada {count} mês)",
+        "other": "Registrar recebimento ({fee} a cada {count} meses)"
       }
     },
     "firstPeriod": "Primeiro período",
@@ -180,8 +180,8 @@
       "none": "Nenhum plano compartilhado corresponde"
     },
     "title": "Planos compartilhados",
-    "netGain": "Ganho líquido por ano",
-    "netCost": "Custo líquido por ano",
+    "netGain": "Lucro/prejuízo do plano compartilhado por ano",
+    "netCost": "Lucro/prejuízo do plano compartilhado por ano",
     "yearIncome": "Membros pagam {amount}/ano",
     "owed": "A receber",
     "owedSub": {
@@ -267,7 +267,7 @@
     "cost": "Custo / ano",
     "income": "Receita / ano",
     "loss": "Prejuízo / ano",
-    "profit": "Lucro / ano",
+    "profit": "Lucro/prejuízo por ano",
     "since": "Desde {month}",
     "actual": "Pago {paid}\nRecebido {received}\n{result}",
     "gain": "Ganho de {amount}",
@@ -285,7 +285,7 @@
     "viewSub": "Ver detalhes",
     "period": "Período",
     "due": "A receber neste período",
-    "actual": "Pagamento recebido",
+    "actual": "Valor recebido",
     "nextPeriod": "Próximo período",
     "adjustPaid": "Ajustar",
     "periodPaid": "Pago",
@@ -317,10 +317,10 @@
     },
     "owe": "{amount} pendente\ndesde {date}",
     "settled": "Em dia\npróxima cobrança {date}",
-    "backCollect": "Registrar pagamento"
+    "backCollect": "Registrar recebimento"
   },
   "strip": {
-    "yearNet": "Líquido por ano",
+    "yearNet": "Lucro/prejuízo por ano",
     "costIncome": "Custo {cost}\nReceita {income}",
     "noneOwed": "Ninguém deve",
     "since": "Desde {date}",
@@ -334,7 +334,7 @@
     "due": "Pendente",
     "future": "Próximo período",
     "unused": "Pago, não usado",
-    "waived": "Perdoado"
+    "waived": "Dispensado"
   },
   "refund": {
     "title": "Reembolso na saída",

@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "Pagado {amount}",
-    "receiptHint": "Cuando alguien pague, toca «Cobrar» junto al miembro",
+    "receiptHint": "Cuando un miembro pague, abre sus datos y toca «Registrar cobro»",
     "tabIn": "Recibido {count}",
     "tabOut": "Pagado {count}",
     "chargeDate": "Cargado el",
@@ -133,13 +133,13 @@
     "notePh": "Opcional, p. ej. transferencia en USDT",
     "record": "Registrar",
     "recordBtn": {
-      "m1": "Registrar pago ({fee}/mes)",
-      "m3": "Registrar pago ({fee}/trimestre)",
-      "m6": "Registrar pago ({fee}/semestre)",
-      "m12": "Registrar pago ({fee}/año)",
+      "m1": "Registrar cobro ({fee}/mes)",
+      "m3": "Registrar cobro ({fee}/trimestre)",
+      "m6": "Registrar cobro ({fee}/semestre)",
+      "m12": "Registrar cobro ({fee}/año)",
       "custom": {
-        "one": "Registrar pago ({fee} cada {count} mes)",
-        "other": "Registrar pago ({fee} cada {count} meses)"
+        "one": "Registrar cobro ({fee} cada {count} mes)",
+        "other": "Registrar cobro ({fee} cada {count} meses)"
       }
     },
     "firstPeriod": "Primer período",
@@ -180,8 +180,8 @@
       "none": "Ningún plan compartido coincide"
     },
     "title": "Planes compartidos",
-    "netGain": "Ganancia neta anual",
-    "netCost": "Coste neto anual",
+    "netGain": "Ganancia/pérdida anual del plan compartido",
+    "netCost": "Ganancia/pérdida anual del plan compartido",
     "yearIncome": "Los miembros pagan {amount}/año",
     "owed": "Por cobrar",
     "owedSub": {
@@ -267,7 +267,7 @@
     "cost": "Coste / año",
     "income": "Ingresos / año",
     "loss": "Pérdida / año",
-    "profit": "Ganancia / año",
+    "profit": "Ganancia/pérdida anual",
     "since": "Desde {month}",
     "actual": "Pagado {paid}\nRecibido {received}\n{result}",
     "gain": "+{amount}",
@@ -285,7 +285,7 @@
     "viewSub": "Ver detalles",
     "period": "Periodo",
     "due": "A cobrar este periodo",
-    "actual": "Pago recibido",
+    "actual": "Importe recibido",
     "nextPeriod": "Próximo periodo",
     "adjustPaid": "Ajustar",
     "periodPaid": "Pagado",
@@ -317,16 +317,16 @@
     },
     "owe": "{amount} pendiente\ndesde {date}",
     "settled": "Al día\npróximo cobro {date}",
-    "backCollect": "Registrar pago"
+    "backCollect": "Registrar cobro"
   },
   "strip": {
-    "yearNet": "Neto al año",
+    "yearNet": "Ganancia/pérdida anual",
     "costIncome": "Coste {cost}\nIngresos {income}",
     "noneOwed": "Nadie debe",
     "since": "Desde {date}",
     "profit": "Ganancia / pérdida",
     "paid": "Pagado",
-    "received": "Recuperado",
+    "received": "Recibido",
     "thisYear": "Este año {amount}"
   },
   "timeline": {

@@ -25,7 +25,7 @@
     "one": "{count} prélèvement payé",
     "other": "{count} prélèvements payés"
   },
-  "received": "Remboursé",
+  "received": "Reçu",
   "owed": "Dû",
   "settled": "Réglé",
   "detailTitle": "Payé pour d’autres",
@@ -41,8 +41,8 @@
     "receivedOn": "Reçu le {date}",
     "date": "Date du prélèvement",
     "charged": "Prélevé",
-    "received": "Remboursé",
-    "diff": "Écart",
+    "received": "Reçu",
+    "diff": "Bénéfice/perte",
     "record": "Saisir",
     "even": "Équilibré",
     "none": "Aucun prélèvement pour l’instant.",
@@ -66,7 +66,7 @@
     "receivedMore": "{amount} au taux du jour de réception, {diff} de plus que le prélèvement.",
     "receivedLess": "{amount} au taux du jour de réception, {diff} de moins que le prélèvement.",
     "notReceived": "Non reçu",
-    "receivedOn": "Date de réception",
+    "receivedOn": "Reçu le",
     "notePlaceholder": "Facultatif, ex. virement bancaire"
   },
   "page": {
@@ -78,12 +78,12 @@
       "one": "{count} abonnement",
       "other": "{count} abonnements"
     },
-    "diffSub": "Écart dû aux taux de change et aux frais sur les prélèvements remboursés",
+    "diffSub": "Bénéfice/perte dû aux taux de change et aux frais sur les paiements reçus",
     "emptyTitle": "Aucun paiement pour d’autres",
     "emptyBody": "Créez ou modifiez un abonnement, choisissez « Je paie pour » dans « Qui l’utilise » et indiquez pour qui.",
     "liveNext": "Actifs : {count}, prochain prélèvement {date}",
     "lastIn": "Dernier reçu le {date}",
-    "noneIn": "Rien reçu pour l’instant",
+    "noneIn": "Aucun paiement reçu pour l’instant",
     "diffAvg": "{count} remboursés, {amount} en moyenne par période",
     "perPeriod": "{amount} en moyenne par période",
     "owedRate": "Au taux du jour du prélèvement",
@@ -100,8 +100,8 @@
   "lastIn": "Dernier {date}",
   "prepaidTo": "Prépayé jusqu’au {date}",
   "receipt": {
-    "add": "Enregistrer un remboursement",
-    "title": "Enregistrer un remboursement",
+    "add": "Enregistrer un paiement",
+    "title": "Enregistrer un paiement",
     "covers": "Couvre",
     "from": "À partir de",
     "periods": "Paiements couverts",
@@ -109,7 +109,7 @@
     "coversFootOne": "Couvre le paiement du {from}.",
     "coversFootMany": {
       "one": "Couvre {count} paiement du {from} au {to}.",
-      "other": "Couvre {count} paiements du {from} au {to}, en ignorant ceux déjà remboursés. Le montant est réparti à parts égales et le gain calculé par paiement."
+      "other": "Couvre {count} paiements du {from} au {to}, en ignorant ceux déjà reçus. Le montant est réparti à parts égales et le bénéfice/perte calculé par paiement."
     },
     "total": "Montant reçu",
     "perFoot": "{per} par paiement.",

@@ -18,7 +18,7 @@
   "modeWaiver": "Erlassen",
   "record": "Zahlung erfassen",
   "waive": "Zahlungen erlassen",
-  "actual": "Erhalten",
+  "actual": "Erhaltener Betrag",
   "waiverGroup": "Erlass",
   "receivedOn": "Erhalten am",
   "waivedOn": "Vereinbart am",
@@ -53,7 +53,7 @@
     "paid": "Bezahlt",
     "waived": "Erlassen",
     "free": "Kostenlos",
-    "due": "Unbezahlt",
+    "due": "Fällig",
     "upcoming": "Noch nicht fällig",
     "this": "Diese Zahlung"
   },

@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "지출 {amount}",
-    "receiptHint": "돈을 받으면 멤버 옆 「받기」로 기록하세요",
+    "receiptHint": "돈을 받으면 멤버 상세를 열고 「입금 기록」을 누르세요",
     "tabIn": "받음 {count}",
     "tabOut": "결제 {count}",
     "chargeDate": "결제일",
@@ -126,17 +126,17 @@
       "m12": "결제 주기에 따라 자동 설정, 수정 가능",
       "custom": "결제 주기에 따라 자동 설정, 수정 가능"
     },
-    "receivedOn": "받은 날짜",
+    "receivedOn": "입금일",
     "note": "메모",
     "notePh": "선택 사항, 예: USDT 송금",
     "record": "기록",
     "recordBtn": {
-      "m1": "납부 기록({fee}/월)",
-      "m3": "납부 기록({fee}/분기)",
-      "m6": "납부 기록(6개월마다 {fee})",
-      "m12": "납부 기록({fee}/년)",
+      "m1": "입금 기록({fee}/월)",
+      "m3": "입금 기록({fee}/분기)",
+      "m6": "입금 기록(6개월마다 {fee})",
+      "m12": "입금 기록({fee}/년)",
       "custom": {
-        "other": "납부 기록({count}개월마다 {fee})"
+        "other": "입금 기록({count}개월마다 {fee})"
       }
     },
     "firstPeriod": "첫 기간 청구 방식",
@@ -177,8 +177,8 @@
       "none": "조건에 맞는 공유가 없습니다"
     },
     "title": "공유 플랜",
-    "netGain": "연간 순이익",
-    "netCost": "연간 순비용",
+    "netGain": "공유 요금제 연간 손익",
+    "netCost": "공유 요금제 연간 손익",
     "yearIncome": "멤버 납부액 {amount}/년",
     "owed": "받을 금액",
     "owedSub": {
@@ -256,9 +256,9 @@
     "cost": "비용 / 년",
     "income": "수입 / 년",
     "loss": "손실 / 년",
-    "profit": "이익 / 년",
+    "profit": "연간 손익",
     "since": "{month}부터",
-    "actual": "지출 {paid}\n받음 {received}\n{result}",
+    "actual": "지출 {paid}\n입금 {received}\n{result}",
     "gain": "{amount} 이익",
     "lost": "{amount} 손해",
     "noRecords": "아직 납부 없음",
@@ -274,7 +274,7 @@
     "viewSub": "상세 보기",
     "period": "이번 기간",
     "due": "이번 기간 받을 금액",
-    "actual": "실제 받은 금액",
+    "actual": "실제 입금액",
     "nextPeriod": "다음 기간",
     "adjustPaid": "조정",
     "periodPaid": "결제 완료",
@@ -299,16 +299,16 @@
     },
     "owe": "미수 {amount}\n{date}부터",
     "settled": "정산 완료\n다음 {date}",
-    "backCollect": "결제 기록"
+    "backCollect": "입금 기록"
   },
   "strip": {
-    "yearNet": "연간 순액",
+    "yearNet": "연간 손익",
     "costIncome": "비용 {cost}\n수입 {income}",
     "noneOwed": "미납 없음",
     "since": "{date}부터",
     "profit": "손익",
     "paid": "지출",
-    "received": "회수",
+    "received": "입금",
     "thisYear": "올해 {amount}"
   },
   "timeline": {
@@ -316,7 +316,7 @@
     "due": "미수",
     "future": "다음 기간",
     "unused": "결제 완료, 미사용",
-    "waived": "받지 않음"
+    "waived": "면제"
   },
   "refund": {
     "title": "탈퇴 환불",
@@ -326,7 +326,7 @@
   },
   "sort": {
     "owed": "미수금",
-    "received": "누적 수령액",
+    "received": "누적 입금액",
     "lastPaid": "최근 수령"
   }
 }

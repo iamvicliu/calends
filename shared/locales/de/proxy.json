@@ -25,7 +25,7 @@
     "one": "{count} Abbuchung bezahlt",
     "other": "{count} Abbuchungen bezahlt"
   },
-  "received": "Zurückgezahlt",
+  "received": "Erhalten",
   "owed": "Offen",
   "settled": "Beglichen",
   "detailTitle": "Für andere bezahlt",
@@ -41,8 +41,8 @@
     "receivedOn": "Erhalten {date}",
     "date": "Abbuchungsdatum",
     "charged": "Abgebucht",
-    "received": "Zurückgezahlt",
-    "diff": "Differenz",
+    "received": "Erhalten",
+    "diff": "Gewinn/Verlust",
     "record": "Erfassen",
     "even": "Ausgeglichen",
     "none": "Noch keine Abbuchungen.",
@@ -66,7 +66,7 @@
     "receivedMore": "{amount} zum Kurs am Eingangstag, {diff} mehr als abgebucht.",
     "receivedLess": "{amount} zum Kurs am Eingangstag, {diff} weniger als abgebucht.",
     "notReceived": "Nicht erhalten",
-    "receivedOn": "Eingangsdatum",
+    "receivedOn": "Erhalten am",
     "notePlaceholder": "Optional, z. B. Banküberweisung"
   },
   "page": {
@@ -78,12 +78,12 @@
       "one": "{count} Abo",
       "other": "{count} Abos"
     },
-    "diffSub": "Differenz durch Wechselkurse und Gebühren bei zurückgezahlten Abbuchungen",
+    "diffSub": "Gewinn/Verlust durch Wechselkurse und Gebühren bei erhaltenen Zahlungen",
     "emptyTitle": "Noch nichts für andere bezahlt",
     "emptyBody": "Erstelle oder bearbeite ein Abo, wähle unter „Wer es nutzt“ die Option „Ich zahle für“ und gib an, für wen.",
     "liveNext": "Aktiv: {count}, nächste Abbuchung {date}",
     "lastIn": "Zuletzt erhalten {date}",
-    "noneIn": "Noch nichts erhalten",
+    "noneIn": "Noch keine Zahlungen erhalten",
     "diffAvg": "{count} zurückgezahlt, im Schnitt {amount} je Zeitraum",
     "perPeriod": "Im Schnitt {amount} je Zeitraum",
     "owedRate": "Zum Kurs am Abbuchungstag",
@@ -109,7 +109,7 @@
     "coversFootOne": "Deckt die Zahlung vom {from} ab.",
     "coversFootMany": {
       "one": "Deckt {count} Zahlung von {from} bis {to} ab.",
-      "other": "Deckt {count} Zahlungen von {from} bis {to} ab; bereits erstattete werden übersprungen. Der Betrag wird gleichmäßig verteilt, Gewinn je Zahlung berechnet."
+      "other": "Deckt {count} Zahlungen von {from} bis {to} ab; bereits erhaltene werden übersprungen. Der Betrag wird gleichmäßig verteilt, Gewinn/Verlust je Zahlung berechnet."
     },
     "total": "Erhaltener Betrag",
     "perFoot": "{per} je Zahlung.",

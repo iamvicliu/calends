@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "Đã trả {amount}",
-    "receiptHint": "Khi thành viên trả tiền, bấm «Thu» cạnh tên họ",
+    "receiptHint": "Khi thành viên trả tiền, mở thông tin của họ rồi bấm «Ghi khoản thu»",
     "tabIn": "Đã nhận {count}",
     "tabOut": "Đã trả {count}",
     "chargeDate": "Ngày trừ",
@@ -131,12 +131,12 @@
     "notePh": "Tùy chọn, VD: chuyển USDT",
     "record": "Ghi nhận",
     "recordBtn": {
-      "m1": "Ghi nhận thanh toán ({fee}/tháng)",
-      "m3": "Ghi nhận thanh toán ({fee}/quý)",
-      "m6": "Ghi nhận thanh toán ({fee} mỗi 6 tháng)",
-      "m12": "Ghi nhận thanh toán ({fee}/năm)",
+      "m1": "Ghi khoản thu ({fee}/tháng)",
+      "m3": "Ghi khoản thu ({fee}/quý)",
+      "m6": "Ghi khoản thu ({fee} mỗi 6 tháng)",
+      "m12": "Ghi khoản thu ({fee}/năm)",
       "custom": {
-        "other": "Ghi nhận thanh toán ({fee} mỗi {count} tháng)"
+        "other": "Ghi khoản thu ({fee} mỗi {count} tháng)"
       }
     },
     "firstPeriod": "Kỳ đầu",
@@ -177,8 +177,8 @@
       "none": "Không có nhóm phù hợp"
     },
     "title": "Gói chia sẻ",
-    "netGain": "Lãi ròng mỗi năm",
-    "netCost": "Chi phí ròng mỗi năm",
+    "netGain": "Lãi/lỗ gói dùng chung mỗi năm",
+    "netCost": "Lãi/lỗ gói dùng chung mỗi năm",
     "yearIncome": "Thành viên trả {amount}/năm",
     "owed": "Cần thu",
     "owedSub": {
@@ -256,7 +256,7 @@
     "cost": "Chi phí / năm",
     "income": "Thu nhập / năm",
     "loss": "Lỗ / năm",
-    "profit": "Lãi / năm",
+    "profit": "Lãi/lỗ mỗi năm",
     "since": "Từ {month}",
     "actual": "Đã trả {paid}\nĐã nhận {received}\n{result}",
     "gain": "Lãi {amount}",
@@ -274,7 +274,7 @@
     "viewSub": "Xem chi tiết",
     "period": "Kỳ này",
     "due": "Phải thu kỳ này",
-    "actual": "Khoản đã nhận",
+    "actual": "Thực nhận",
     "nextPeriod": "Kỳ tiếp theo",
     "adjustPaid": "Điều chỉnh",
     "periodPaid": "Đã trả",
@@ -302,13 +302,13 @@
     "backCollect": "Ghi khoản thu"
   },
   "strip": {
-    "yearNet": "Ròng mỗi năm",
+    "yearNet": "Lãi/lỗ mỗi năm",
     "costIncome": "Chi phí {cost}\nThu {income}",
     "noneOwed": "Không ai nợ",
     "since": "Từ {date}",
     "profit": "Lãi / lỗ",
     "paid": "Đã chi",
-    "received": "Đã thu",
+    "received": "Đã nhận",
     "thisYear": "Năm nay {amount}"
   },
   "timeline": {
@@ -316,7 +316,7 @@
     "due": "Còn nợ",
     "future": "Kỳ tiếp theo",
     "unused": "Đã trả, chưa dùng",
-    "waived": "Đã miễn"
+    "waived": "Đã miễn thu"
   },
   "refund": {
     "title": "Hoàn tiền khi rời nhóm",

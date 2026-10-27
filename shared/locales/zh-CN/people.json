@@ -7,7 +7,7 @@
     "owed": "待收",
     "owedSub": "{count} 人欠款",
     "allSettled": "都已结清",
-    "received": "至今收回",
+    "received": "累计已收",
     "receivedSub": "合租与代付合计",
     "count": "人数",
     "countSub": "合租 {share}\n代付 {proxy}"
@@ -33,7 +33,7 @@
   },
   "sheet": {
     "owed": "待收",
-    "received": "至今收回",
+    "received": "累计已收",
     "last": "最近收款",
     "in": "参与 {count} 项",
     "inEmpty": "不在任何合租或代付里，可以删除。",

@@ -25,7 +25,7 @@
     "one": "{count} cobrança paga",
     "other": "{count} cobranças pagas"
   },
-  "received": "Reembolsado",
+  "received": "Recebido",
   "owed": "Pendente",
   "settled": "Quitado",
   "detailTitle": "Pagamento para outros",
@@ -41,8 +41,8 @@
     "receivedOn": "Recebido {date}",
     "date": "Data da cobrança",
     "charged": "Cobrado",
-    "received": "Reembolsado",
-    "diff": "Diferença",
+    "received": "Recebido",
+    "diff": "Lucro/prejuízo",
     "record": "Registrar",
     "even": "Zerado",
     "none": "Nenhuma cobrança ainda.",
@@ -66,7 +66,7 @@
     "receivedMore": "{amount} pelo câmbio da data de recebimento, {diff} a mais que o cobrado.",
     "receivedLess": "{amount} pelo câmbio da data de recebimento, {diff} a menos que o cobrado.",
     "notReceived": "Não recebido",
-    "receivedOn": "Data de recebimento",
+    "receivedOn": "Recebido em",
     "notePlaceholder": "Opcional, ex.: transferência bancária"
   },
   "page": {
@@ -78,12 +78,12 @@
       "one": "{count} assinatura",
       "other": "{count} assinaturas"
     },
-    "diffSub": "Diferença por câmbio e tarifas nas cobranças reembolsadas",
+    "diffSub": "Lucro/prejuízo por câmbio e tarifas nos pagamentos recebidos",
     "emptyTitle": "Nenhum pagamento para outros ainda",
     "emptyBody": "Crie ou edite uma assinatura, escolha “Pago para outra pessoa” em “Quem usa” e informe para quem é.",
     "liveNext": "Ativos: {count}, próxima cobrança {date}",
     "lastIn": "Último recebido {date}",
-    "noneIn": "Nada recebido ainda",
+    "noneIn": "Nenhum pagamento recebido ainda",
     "diffAvg": "{count} devolvidos, média de {amount} por período",
     "perPeriod": "Média de {amount} por período",
     "owedRate": "Pela cotação do dia da cobrança",
@@ -101,7 +101,7 @@
   "prepaidTo": "Pago antecipado até {date}",
   "receipt": {
     "add": "Registrar recebimento",
-    "title": "Registrar um recebimento",
+    "title": "Registrar recebimento",
     "covers": "Cobre",
     "from": "A partir de",
     "periods": "Pagamentos cobertos",
@@ -109,7 +109,7 @@
     "coversFootOne": "Cobre o pagamento de {from}.",
     "coversFootMany": {
       "one": "Cobre {count} pagamento de {from} a {to}.",
-      "other": "Cobre {count} pagamentos de {from} a {to}, ignorando os já reembolsados. O valor é dividido igualmente e o lucro calculado por pagamento."
+      "other": "Cobre {count} pagamentos de {from} a {to}, ignorando os já recebidos. O valor é dividido igualmente e o lucro/prejuízo calculado por pagamento."
     },
     "total": "Valor recebido",
     "perFoot": "{per} por pagamento.",

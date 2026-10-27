@@ -7,7 +7,7 @@
     "owed": "받을 돈",
     "owedSub": "{count}명 미납",
     "allSettled": "모두 정산 완료",
-    "received": "지금까지 받은 돈",
+    "received": "누적 입금액",
     "receivedSub": "공유 플랜과 대신 결제 합계",
     "count": "인원",
     "countSub": "공유 {share}\n대신 결제 {proxy}"
@@ -33,7 +33,7 @@
   },
   "sheet": {
     "owed": "받을 돈",
-    "received": "지금까지 받음",
+    "received": "누적 입금액",
     "last": "최근 입금",
     "in": "참여 {count}건",
     "inEmpty": "어떤 공유나 대신 결제에도 없어요. 삭제할 수 있어요.",

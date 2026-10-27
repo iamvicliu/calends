@@ -1,7 +1,7 @@
 {
   "sheet": {
     "paidOut": "支払い {amount}",
-    "receiptHint": "受け取ったらメンバー横の「受取」で記録",
+    "receiptHint": "入金後、メンバーの詳細を開いて「受取を記録」をタップ",
     "tabIn": "受取 {count}",
     "tabOut": "支払い {count}",
     "chargeDate": "引き落とし日",
@@ -126,17 +126,17 @@
       "m12": "請求期間から自動設定（編集可）",
       "custom": "請求期間から自動設定（編集可）"
     },
-    "receivedOn": "受領日",
+    "receivedOn": "受取日",
     "note": "メモ",
     "notePh": "任意（例：USDT 送金）",
     "record": "記録",
     "recordBtn": {
-      "m1": "支払いを記録（{fee}/月）",
-      "m3": "支払いを記録（{fee}/3か月）",
-      "m6": "支払いを記録（{fee}/6か月）",
-      "m12": "支払いを記録（{fee}/年）",
+      "m1": "受取を記録（{fee}/月）",
+      "m3": "受取を記録（{fee}/3か月）",
+      "m6": "受取を記録（{fee}/6か月）",
+      "m12": "受取を記録（{fee}/年）",
       "custom": {
-        "other": "支払いを記録（{count}か月ごとに{fee}）"
+        "other": "受取を記録（{count}か月ごとに{fee}）"
       }
     },
     "firstPeriod": "初回の請求方法",
@@ -177,8 +177,8 @@
       "none": "該当するシェアはありません"
     },
     "title": "共有プラン",
-    "netGain": "年間の純利益",
-    "netCost": "年間の純コスト",
+    "netGain": "共有プランの年間損益",
+    "netCost": "共有プランの年間損益",
     "yearIncome": "メンバーの支払い {amount}/年",
     "owed": "未回収",
     "owedSub": {
@@ -256,9 +256,9 @@
     "cost": "コスト / 年",
     "income": "収入 / 年",
     "loss": "損失 / 年",
-    "profit": "利益 / 年",
+    "profit": "年間損益",
     "since": "{month}から",
-    "actual": "支払い {paid}\n受け取り {received}\n{result}",
+    "actual": "支払い {paid}\n受取済み {received}\n{result}",
     "gain": "{amount}のプラス",
     "lost": "{amount}のマイナス",
     "noRecords": "まだ支払いはありません",
@@ -274,7 +274,7 @@
     "viewSub": "詳細を見る",
     "period": "今期",
     "due": "今期の請求額",
-    "actual": "実際の受取",
+    "actual": "実際の受取額",
     "nextPeriod": "次の期間",
     "adjustPaid": "調整",
     "periodPaid": "支払い済み",
@@ -299,16 +299,16 @@
     },
     "owe": "未収 {amount}\n{date}から",
     "settled": "精算済み\n次回 {date}",
-    "backCollect": "入金を記録"
+    "backCollect": "受取を記録"
   },
   "strip": {
-    "yearNet": "年間の収支",
+    "yearNet": "年間損益",
     "costIncome": "費用 {cost}\n収入 {income}",
     "noneOwed": "未払いなし",
     "since": "{date}から",
     "profit": "損益",
     "paid": "支出",
-    "received": "回収",
+    "received": "受取済み",
     "thisYear": "今年 {amount}"
   },
   "timeline": {
@@ -316,7 +316,7 @@
     "due": "未収",
     "future": "次の期間",
     "unused": "支払済み・未使用",
-    "waived": "回収しない"
+    "waived": "免除"
   },
   "refund": {
     "title": "退出時の返金",
