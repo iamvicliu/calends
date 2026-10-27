@@ -94,6 +94,21 @@ test('每期弹窗里改收款：只抵这一期就原地改；一笔分几期�
   assert.throws(() => editRecordPeriod(r, 'missing', third, { date: '2026-03-02' }, periods, 'new'), /invalidTarget/);
 });
 
+test('期初结清的一期可以补记成真实收款：拆出来带日期和金额，其余期仍算期初；只剩这一期时期初整笔去掉', () => {
+  const o = { id: 'opening', date: '2026-01-01', amount: 0, currency: 'CNY', periods: ['2026-01-01', '2026-02-01'], opening: true };
+  const r = { receipts: [o], waivers: [] };
+  const first = settle(periods, r, '2026-01-15').periods[0];
+  assert.throws(() => editRecordPeriod(r, 'opening', first, { date: '2025-12-30' }, periods, 'new'), /invalidTarget/);
+  const next = editRecordPeriod(r, 'opening', first, { date: '2025-12-30', amount: 10, note: '补记' }, periods, 'new');
+  assert.deepEqual(next.receipts, [
+    { id: 'new', date: '2025-12-30', amount: 10, currency: 'CNY', periods: ['2026-01-01'], note: '补记' },
+    { ...o, periods: ['2026-02-01'] },
+  ]);
+  const second = settle(periods, next, '2026-01-15').periods[1];
+  const last = editRecordPeriod(next, 'opening', second, { date: '2026-01-20', amount: 10 }, periods, 'new2');
+  assert.deepEqual(last.receipts.map((x) => [x.id, x.opening ?? false]), [['new', false], ['new2', false]]);
+});
+
 test('条款改过、期重新切过时，旧记录按落在哪一期对上，不会变成欠款', () => {
   const shifted = [p('2026-01-01', '2026-01-14'), p('2026-01-15', '2026-02-14'), p('2026-02-15', '2026-03-14')];
   assert.equal(resolveKey(shifted, '2026-02-01'), '2026-01-15');

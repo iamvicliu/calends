@@ -123,7 +123,7 @@ export function PeriodPop({
             </>
           ) : (
             <>
-              {isReceipt(r) && edit.editable && others.length > 0 && (
+              {isReceipt(r) && !r.opening && others.length > 0 && (
                 <button className="btn" onClick={() => startCopy(r)}>
                   {t('family.member.copyAria')}
                 </button>

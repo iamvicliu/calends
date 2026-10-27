@@ -225,27 +225,29 @@ export function ReceivableSheet({
 /** A period can occupy several months and several rows; all segments share one highlight. */
 /**
  * 改一期的收款（或免收）：日期、这一期分到的金额、备注。查看和编辑是同一组字段，点「编辑」后原地变成输入框；
- * 一笔分几期时保存会把这一期拆出来（editRecordPeriod）。期初结清金额不详，只能删
+ * 一笔分几期时保存会把这一期拆出来（editRecordPeriod）。期初结清的一期编辑即补记：默认这一期起始日、应收金额，保存后拆成一笔真实收款
  */
 export function usePeriodEdit(p: LedgerPeriod) {
   const r = p.receipt ?? p.waiver;
+  const opening = !!p.receipt?.opening;
+  const init = { date: opening ? p.from : (r?.date ?? ''), amount: opening ? p.due : p.share, note: opening ? '' : (r?.note ?? '') };
   const [editing, setEditing] = useState(false);
-  const [date, setDate] = useState(r?.date ?? '');
-  const [amount, setAmount] = useState(p.share);
-  const [note, setNote] = useState(r?.note ?? '');
-  const editable = !!r && !p.receipt?.opening;
+  const [date, setDate] = useState(init.date);
+  const [amount, setAmount] = useState(init.amount);
+  const [note, setNote] = useState(init.note);
+  const editable = !!r;
   const cancel = () => {
     setEditing(false);
-    setDate(r?.date ?? '');
-    setAmount(p.share);
-    setNote(r?.note ?? '');
+    setDate(init.date);
+    setAmount(init.amount);
+    setNote(init.note);
   };
   return {
     editing,
     start: () => setEditing(true),
     cancel,
     editable,
-    dirty: editable && (date !== r.date || note.trim() !== (r.note ?? '') || (!!p.receipt && amount !== p.share)),
+    dirty: editable && (opening || date !== r.date || note.trim() !== (r.note ?? '') || (!!p.receipt && amount !== p.share)),
     valid: !p.receipt || (amount != null && amount >= 0),
     /** 一笔分几期：保存时这一期会单独拆出 */
     splits: editable && r.periods.length > 1,
@@ -266,10 +268,10 @@ export function periodFields(p: LedgerPeriod, { due = true, edit, onBatch }: { d
   const e = edit?.editing ? edit : undefined;
   const r = data.receipt;
   const rec = p.receipt ?? p.waiver;
-  const batch = r && r.count > 1 ? t('receivable.batch', { amount: money(r.amount, r.currency), count: r.count }) : undefined;
+  const batch = r && r.count > 1 && !r.opening ? t('receivable.batch', { amount: money(r.amount, r.currency), count: r.count }) : undefined;
   return [
     ...(due ? [{ key: 'due', label: t('receivable.grid.due'), value: `${money(data.due, data.currency)} ${data.currency}` }] : []),
-    ...(r?.opening
+    ...(r?.opening && !e
       ? [{ key: 'opening', label: t('receivable.opening'), value: '' }]
       : rec
         ? [
