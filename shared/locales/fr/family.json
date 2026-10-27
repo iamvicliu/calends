@@ -344,5 +344,11 @@
     "owed": "Montant dû",
     "received": "Total reçu",
     "lastPaid": "Dernier paiement"
+  },
+  "costChange": {
+    "title": "Le coût a changé. Ajuster la participation ?",
+    "price": "Prix de l’abonnement",
+    "since": "À partir du {date}",
+    "adjust": "Ajuster la participation"
   }
 }

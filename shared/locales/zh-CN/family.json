@@ -308,5 +308,11 @@
     "owed": "按待收",
     "received": "按累计已收",
     "lastPaid": "按最近收款"
+  },
+  "costChange": {
+    "title": "成本已变，是否调整收费标准？",
+    "price": "订阅价格",
+    "since": "{date} 起",
+    "adjust": "调整收费标准"
   }
 }

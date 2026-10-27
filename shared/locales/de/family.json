@@ -344,5 +344,11 @@
     "owed": "Offener Betrag",
     "received": "Insgesamt erhalten",
     "lastPaid": "Letzte Zahlung"
+  },
+  "costChange": {
+    "title": "Die Kosten haben sich geändert. Beitrag anpassen?",
+    "price": "Abo-Preis",
+    "since": "Ab {date}",
+    "adjust": "Beitrag anpassen"
   }
 }

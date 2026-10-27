@@ -326,5 +326,11 @@
     "owed": "Khoản chờ thu",
     "received": "Tổng đã nhận",
     "lastPaid": "Lần nhận gần nhất"
+  },
+  "costChange": {
+    "title": "Chi phí đã thay đổi. Điều chỉnh mức thu?",
+    "price": "Giá gói",
+    "since": "Từ {date}",
+    "adjust": "Điều chỉnh mức thu"
   }
 }

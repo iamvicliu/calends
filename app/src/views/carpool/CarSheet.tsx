@@ -1,7 +1,7 @@
 import { chargesTotal, convertedTotal, dueTotal, formatTotal, sumTotals, totalNote, type FxTotal } from '../../../../shared/fx-total.ts';
 import { currentPhase } from '../../../../shared/billing.ts';
 import { CopyImageButton } from '../../components/CopyImageButton.tsx';
-import { DetailHead, DetailSheet, Panel } from '../../components/DetailKit.tsx';
+import { DetailHead, DetailSheet, Panel, Prop } from '../../components/DetailKit.tsx';
 import { ChargeMethods, chargeMethodIds, currencyTotals, YearLedger, YearMethods } from '../../components/YearLedger.tsx';
 import { copyParts } from '../../components/copy.tsx';
 import { addDays, chargesBetween, cycleLabel, effectiveStatus, memberDues, nextCharge, isStopped, collectCurrencyOf } from '../../../../shared/billing.ts';
@@ -21,6 +21,7 @@ import {
   carLedger,
   carRule,
   carYear,
+  costChange,
   followsCar,
   memberCashFlows,
   memberFlowValue,
@@ -79,6 +80,8 @@ export function CarSheet({
   const hasPending = oweSum > 0 || !Number.isFinite(oweSum);
   const rule = carRule(state, s, today);
   const [editingRule, setEditingRule] = useState(false);
+  // 订阅调价后提醒一次是否调整收费标准；只提示，不自动改
+  const cost = stopped ? undefined : costChange(s, today);
   const actual = -book.net;
   // 历来所有收款，已退出的成员也保留
   const receipts = sh.members.flatMap((m) => memberCashFlows(m).map((p) => ({ m, p, base: memberFlowValue(state, p) })));
@@ -164,6 +167,26 @@ export function CarSheet({
               </div>
             )}
           </MetricCards>
+
+          {cost && (
+            <div className="dt-notices" data-snapshot-hide>
+              <Panel
+                title={t('family.costChange.title')}
+                aside={
+                  <button className="dt-btn" onClick={() => setEditingRule(true)}>
+                    {t('family.costChange.adjust')}
+                  </button>
+                }
+              >
+                <dl className="dt-props one">
+                  <Prop k={t('family.costChange.price')} hint={t('family.costChange.since', { date: cnDateFull(cost.from) })}>
+                    {money(cost.before.price, cost.before.currency)} {cycleLabel(cost.before.cycle)} → {money(cost.after.price, cost.after.currency)}{' '}
+                    {cycleLabel(cost.after.cycle)}
+                  </Prop>
+                </dl>
+              </Panel>
+            </div>
+          )}
 
           {/* 与订阅详情一样：成员表、收付款表各在一张卡片里，标题在卡片内 */}
           {/* 成员卡片不加标题：表头第一列已经是「成员」 */}

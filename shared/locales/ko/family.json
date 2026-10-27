@@ -326,5 +326,11 @@
     "owed": "미수금",
     "received": "누적 입금액",
     "lastPaid": "최근 수령"
+  },
+  "costChange": {
+    "title": "비용이 바뀌었습니다. 요금 기준을 조정할까요?",
+    "price": "구독 가격",
+    "since": "{date}부터",
+    "adjust": "요금 기준 조정"
   }
 }

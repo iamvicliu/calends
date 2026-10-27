@@ -326,5 +326,11 @@
     "owed": "未回収額",
     "received": "受取累計",
     "lastPaid": "最新の受取"
+  },
+  "costChange": {
+    "title": "コストが変わりました。料金基準を見直しますか？",
+    "price": "サブスク料金",
+    "since": "{date} から",
+    "adjust": "料金基準を調整"
   }
 }

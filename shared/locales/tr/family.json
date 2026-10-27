@@ -335,5 +335,11 @@
     "owed": "Alacak",
     "received": "Toplam alınan",
     "lastPaid": "Son ödeme"
+  },
+  "costChange": {
+    "title": "Maliyet değişti. Ücret ayarlansın mı?",
+    "price": "Abonelik fiyatı",
+    "since": "{date} itibarıyla",
+    "adjust": "Ücreti ayarla"
   }
 }

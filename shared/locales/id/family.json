@@ -326,5 +326,11 @@
     "owed": "Belum dibayar",
     "received": "Total diterima",
     "lastPaid": "Pembayaran terakhir"
+  },
+  "costChange": {
+    "title": "Biaya berubah. Sesuaikan iuran?",
+    "price": "Harga langganan",
+    "since": "Mulai {date}",
+    "adjust": "Sesuaikan iuran"
   }
 }

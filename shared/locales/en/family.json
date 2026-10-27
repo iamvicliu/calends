@@ -347,5 +347,11 @@
     "owed": "Amount owed",
     "received": "Total received",
     "lastPaid": "Last payment"
+  },
+  "costChange": {
+    "title": "The cost changed. Adjust the fee?",
+    "price": "Subscription price",
+    "since": "From {date}",
+    "adjust": "Adjust fee"
   }
 }

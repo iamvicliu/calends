@@ -697,3 +697,41 @@ test('碎期：车的收款日只对生效日起的期起作用，重新起算�
   ).map((p) => p.from);
   assert.deepEqual(keys, ['2026-01-01', '2026-02-01', '2026-03-01', '2026-03-15']);
 });
+
+test('订阅调价：窗口内提示是否调整收费标准，改过收费、成员都免收或超出窗口后不再提示', async () => {
+  const { costChange } = await import('./carpool.ts');
+  const member = { id: 'm', name: 'Fictional', share: 1, fee: 10, feeCurrency: 'CNY', billEvery: 1, joined: '2026-01-01' };
+  const s = {
+    id: 's',
+    name: 'Fictional video',
+    category: 'Test',
+    tags: [],
+    price: 30,
+    currency: 'CNY',
+    start: '2026-01-01',
+    cycle: { unit: 'month' as const, every: 1 },
+    status: 'active' as const,
+    priceHistory: [
+      { from: '2026-01-01', amount: 25 },
+      { from: '2026-10-01', amount: 30 },
+    ],
+    share: { role: 'owner' as const, seats: 3, members: [member] },
+  };
+  assert.deepEqual(costChange(s, '2026-10-27'), {
+    from: '2026-10-01',
+    before: { price: 25, currency: 'CNY', cycle: s.cycle },
+    after: { price: 30, currency: 'CNY', cycle: s.cycle },
+  });
+  // 将要生效的调价也提前提示
+  assert.equal(costChange(s, '2026-09-15')?.from, '2026-10-01');
+  assert.equal(costChange(s, '2027-01-15'), undefined);
+  assert.equal(
+    costChange(
+      { ...s, share: { ...s.share, members: [{ ...member, feeHistory: [{ from: '2026-11-01', fee: 12, currency: 'CNY', billEvery: 1 }] }] } },
+      '2026-10-27',
+    ),
+    undefined,
+  );
+  assert.equal(costChange({ ...s, share: { ...s.share, members: [{ ...member, exempt: true }] } }, '2026-10-27'), undefined);
+  assert.equal(costChange({ ...s, priceHistory: undefined }, '2026-10-27'), undefined);
+});

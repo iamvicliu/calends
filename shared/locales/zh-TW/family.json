@@ -308,5 +308,11 @@
     "owed": "依待收",
     "received": "依累計已收",
     "lastPaid": "依最近收款"
+  },
+  "costChange": {
+    "title": "成本已變，是否調整收費標準？",
+    "price": "訂閱價格",
+    "since": "{date} 起",
+    "adjust": "調整收費標準"
   }
 }

@@ -344,5 +344,11 @@
     "owed": "Pendiente de cobro",
     "received": "Total recibido",
     "lastPaid": "Último pago"
+  },
+  "costChange": {
+    "title": "El coste ha cambiado. ¿Ajustar la cuota?",
+    "price": "Precio de la suscripción",
+    "since": "Desde el {date}",
+    "adjust": "Ajustar cuota"
   }
 }

@@ -21,6 +21,7 @@ import {
   memberPeriods,
   isStopped,
   uid,
+  priceAt,
 } from './billing.ts';
 import { chargeBaseOrNaN, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { yearCost } from './metrics.ts';
@@ -297,6 +298,36 @@ export function carRule(state: AppState, s: Subscription, today: string): CarRul
   const months = Math.max(1, Math.round(cycleMonths(s)));
   const fee = toBaseAt(state, s.price / Math.max(1, s.share?.seats ?? 1), s.currency, undefined, ccy);
   return { billEvery: months, fee: Math.round(fee * 100) / 100, currency: ccy };
+}
+
+/** 提示订阅成本变化的窗口：生效后 60 天内、生效前 31 天内 */
+const COST_CHANGE_AFTER = 60;
+const COST_CHANGE_BEFORE = 31;
+
+/**
+ * 订阅最近一次成本变化（价格、币种或周期变了），供合租提示「是否调整收费标准」；只提示，不改任何收费。
+ * 只看窗口内已生效或将生效的；那天或之后有在付的成员改过收费（车的收费标准改过）就不再提示
+ */
+export function costChange(s: Subscription, today: string) {
+  const cost = (day: string) => {
+    const p = currentPhase(s, day);
+    return { price: priceAt(s, day), currency: p.currency, cycle: p.cycle };
+  };
+  const key = (c: ReturnType<typeof cost>) => `${c.price}|${c.currency}|${c.cycle.unit}|${c.cycle.every ?? 1}`;
+  const days = [
+    ...(s.phases ?? []).flatMap((p) => [p.start, ...(p.priceHistory ?? []).map((h) => h.from), ...(p.intro ? [p.intro.until] : [])]),
+    ...(s.priceHistory ?? []).map((h) => h.from),
+    ...(s.intro ? [s.intro.until] : []),
+  ];
+  const from = [...new Set(days)]
+    .filter((d) => d > s.start && d <= addDays(today, COST_CHANGE_BEFORE) && d >= addDays(today, -COST_CHANGE_AFTER))
+    .sort()
+    .reverse()
+    .find((d) => key(cost(d)) !== key(cost(addDays(d, -1))));
+  if (!from) return undefined;
+  const payers = (s.share?.members ?? []).filter((m) => !m.exempt && !(m.left && m.left <= today));
+  if (!payers.length || payers.some((m) => (m.feeHistory ?? []).some((h) => h.from >= from))) return undefined;
+  return { from, before: cost(addDays(from, -1)), after: cost(from) };
 }
 
 /** 车的收款日：从基准日起每隔 billEvery 个月一次；day 是不是其中一天 */

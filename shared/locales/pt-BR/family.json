@@ -344,5 +344,11 @@
     "owed": "Valor a receber",
     "received": "Total recebido",
     "lastPaid": "Último pagamento"
+  },
+  "costChange": {
+    "title": "O custo mudou. Ajustar a cobrança?",
+    "price": "Preço da assinatura",
+    "since": "A partir de {date}",
+    "adjust": "Ajustar cobrança"
   }
 }
