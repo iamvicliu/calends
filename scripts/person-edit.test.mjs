@@ -42,6 +42,8 @@ function hooks() {
 }
 function nodes(node, match) {
   if (!React.isValidElement(node)) return [];
+  // 共用的资料表单（ProfileFields）就地展开，像渲染一样查到里面的输入框
+  if (typeof node.type === 'function') return nodes(node.type(node.props), match);
   return [...(match(node) ? [node] : []), ...React.Children.toArray(node.props.children).flatMap((n) => nodes(n, match))];
 }
 function fixture() {
@@ -111,8 +113,10 @@ function harness() {
     'ContactField',
     'EntrySheet',
     'LedgerSheet',
+    'ConfirmButton',
   ])
     deps[name] = name;
+  deps.ProfileFields = component('PersonProfile.tsx', 'ProfileFields', deps);
   const PersonSheet = component('PersonProfile.tsx', 'PersonSheet', deps);
   const render = () => {
     h.reset();
@@ -218,4 +222,53 @@ test('linked-member and proxy profile entry uses the same current person detail;
   const tree = h.render();
   assert.equal(tree.props.actions, undefined);
   assert.equal(nodes(tree, (n) => n.type === 'Pencil').length, 0);
+});
+
+test('new person sheet uses the full profile form and saves note, avatar and color', async () => {
+  const h = hooks();
+  let state = fixture(),
+    saved,
+    opened;
+  const avatar = 'data:image/webp;base64,fixture';
+  const deps = {
+    ...people,
+    ...h,
+    PERSON_COLORS,
+    t: (s) => s,
+    getState: () => state,
+    useSubmit: () => [false, (fn) => fn()],
+    run: async (fn) => {
+      await fn();
+    },
+    savePerson: async (p) => {
+      saved = p;
+      state = { ...state, people: [...state.people, p] };
+      return p;
+    },
+    compressAvatar: async () => avatar,
+    toast() {},
+  };
+  for (const name of ['Sheet', 'Group', 'Cell', 'PersonAvatar', 'ContactField', 'ConfirmButton', 'Icon']) deps[name] = name;
+  deps.ProfileFields = component('PersonProfile.tsx', 'ProfileFields', deps);
+  const NewPersonSheet = component('People.tsx', 'NewPersonSheet', deps);
+  const render = () => {
+    h.reset();
+    return NewPersonSheet({ onClose() {}, onSaved: (id) => (opened = id) });
+  };
+  const find = (match) => nodes(render(), match)[0];
+  // 与人员详情同一套字段：头像、称呼、联系方式、备注、颜色
+  assert.ok(find((n) => n.type === 'input' && n.props.type === 'file'));
+  assert.ok(find((n) => n.type === 'ContactField'));
+  find((n) => n.type === 'input' && n.props.placeholder === 'family.member.namePh').props.onChange({ target: { value: 'Fictional Wu' } });
+  find((n) => n.type === 'input' && n.props.placeholder === 'people.sheet.notePh').props.onChange({ target: { value: 'fictional note' } });
+  find((n) => n.props.role === 'radio' && n.props['aria-label'] === 'people.sheet.color 3').props.onClick();
+  find((n) => n.type === 'input' && n.props.type === 'file').props.onChange({ target: { files: [{}], value: '' } });
+  await Promise.resolve();
+  await Promise.resolve();
+  await nodes(render().props.foot, (n) => n.props?.className === 'btn primary')[0].props.onClick();
+  assert.equal(saved.name, 'Fictional Wu');
+  assert.equal(saved.note, 'fictional note');
+  assert.equal(saved.avatar, avatar);
+  assert.equal(saved.color, PERSON_COLORS[2]);
+  assert.equal(opened, saved.id);
 });

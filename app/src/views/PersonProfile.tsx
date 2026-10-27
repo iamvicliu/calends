@@ -69,7 +69,6 @@ export function PersonSheet({
   const base = state.settings.baseCurrency;
   const stored = l.person.id ? state.people?.find((p) => p.id === l.person.id) : undefined;
   const [f, setF] = useState<Person>(() => ({ ...l.person }));
-  const up = (p: Partial<Person>) => setF({ ...f, ...p });
   const via = f.contactVia ?? 'Telegram';
   const profile = (p: Person) => JSON.stringify([p.name, p.contact ? p.contactVia : undefined, p.contact, p.note, p.color, p.avatar]);
   const [saving, setSaving] = useState(false);
@@ -79,24 +78,7 @@ export function PersonSheet({
   const [member, setMember] = useState<{ s: Subscription; m: ShareMember } | null>(null);
   const [ledger, setLedger] = useState<Subscription | null>(null);
   const ro = !!state.readonly;
-  const fileInput = useRef<HTMLInputElement>(null);
-  const busyRef = useRef(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
-  const uploadAvatar = async (file?: File) => {
-    if (!file || ro || !stored || busyRef.current) return;
-    busyRef.current = true;
-    setAvatarBusy(true);
-    try {
-      const avatar = await compressAvatar(file);
-      setF((current) => ({ ...current, avatar }));
-    } catch (error) {
-      toast(error instanceof Error ? error.message : t('server.avatarInvalid'), 'error');
-    } finally {
-      busyRef.current = false;
-      setAvatarBusy(false);
-    }
-  };
-  const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const live = (s: Subscription) => state.subscriptions.find((x) => x.id === s.id) ?? s;
 
   const save = async () => {
@@ -163,97 +145,7 @@ export function PersonSheet({
         )}
         {stored && (
           <Group title={t('people.sheet.profile')} foot={refs > 1 ? t('people.sheet.syncFoot', { count: refs }) : undefined}>
-            <Cell label={t('people.avatar.label')}>
-              {!ro && (
-                <input
-                  ref={fileInput}
-                  type="file"
-                  hidden
-                  accept="image/png,image/jpeg,image/webp"
-                  onChange={(e) => {
-                    void uploadAvatar(e.target.files?.[0]);
-                    e.target.value = '';
-                  }}
-                />
-              )}
-              {!ro && f.avatar && (
-                <ConfirmButton disabled={avatarBusy} onConfirm={() => setF((current) => ({ ...current, avatar: undefined }))}>
-                  {t('people.avatar.remove')}
-                </ConfirmButton>
-              )}
-              {ro ? (
-                <PersonAvatar p={f} size={32} />
-              ) : (
-                <button
-                  type="button"
-                  className="person-avatar-edit"
-                  aria-label={t('people.avatar.change')}
-                  title={t('people.avatar.help')}
-                  disabled={avatarBusy}
-                  onClick={() => fileInput.current?.click()}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    void uploadAvatar(e.dataTransfer.files[0]);
-                  }}
-                  onPaste={(e) => {
-                    const file = [...e.clipboardData.files][0];
-                    if (file) {
-                      e.preventDefault();
-                      void uploadAvatar(file);
-                    }
-                  }}
-                >
-                  <PersonAvatar p={f} size={32} />
-                </button>
-              )}
-            </Cell>
-            <Cell label={t('family.member.name')}>
-              <input value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
-            </Cell>
-            <Cell label={t('family.member.contact')}>
-              <ContactField
-                via={via}
-                value={f.contact}
-                onVia={(v) => up({ contactVia: v })}
-                onChange={(c) => up({ contactVia: via, contact: c || undefined })}
-              />
-            </Cell>
-            <Cell label={t('family.member.note')}>
-              <input value={f.note ?? ''} disabled={ro} placeholder={t('people.sheet.notePh')} onChange={(e) => up({ note: val(e) || undefined })} />
-            </Cell>
-            <Cell label={t(f.avatar ? 'people.avatar.fallbackColor' : 'people.sheet.color')}>
-              <span className="pp-colors" role="radiogroup" aria-label={t('people.sheet.color')}>
-                {PERSON_COLORS.map((c, i) => (
-                  <button
-                    key={c}
-                    type="button"
-                    role="radio"
-                    aria-checked={(f.color ?? colorFor(f.id)) === c}
-                    aria-label={`${t('people.sheet.color')} ${i + 1}`}
-                    className={`pp-dot c-${c} ${(f.color ?? colorFor(f.id)) === c ? 'on' : ''}`}
-                    onClick={() => up({ color: c })}
-                  />
-                ))}
-                {/* 最后一个点打开色盘：选过自选色就显示那个颜色，没选过是虚线圈加号 */}
-                <label
-                  className={`pp-dot custom ${isCustomColor(f.color) ? 'on' : ''}`}
-                  style={isCustomColor(f.color) ? ({ '--pc': f.color } as CSSProperties) : undefined}
-                  title={t('people.sheet.customColor')}
-                >
-                  {!isCustomColor(f.color) && <Icon name="plus" />}
-                  <input
-                    type="color"
-                    role="radio"
-                    aria-checked={isCustomColor(f.color)}
-                    aria-label={t('people.sheet.customColor')}
-                    disabled={ro}
-                    value={isCustomColor(f.color) ? f.color : '#5b8def'}
-                    onChange={(e) => up({ color: personColor(e.target.value) })}
-                  />
-                </label>
-              </span>
-            </Cell>
+            <ProfileFields f={f} setF={setF} ro={ro} busy={avatarBusy} setBusy={setAvatarBusy} />
             {!ro && others.length > 0 && (
               <Cell label={t('people.sheet.merge')}>
                 <Picker
@@ -338,5 +230,132 @@ export function PersonSheet({
       )}
       {ledger && <LedgerSheet state={state} s={live(ledger)} onOpen={onOpen} onClose={() => setLedger(null)} />}
     </Sheet>
+  );
+}
+
+/** 人员资料表单：头像、称呼、联系方式、备注与颜色；人员详情与新建人员共用 */
+export function ProfileFields({
+  f,
+  setF,
+  ro = false,
+  busy,
+  setBusy,
+  autoFocus,
+}: {
+  f: Person;
+  setF: (update: (current: Person) => Person) => void;
+  ro?: boolean;
+  busy: boolean;
+  setBusy: (busy: boolean) => void;
+  autoFocus?: boolean;
+}) {
+  const up = (p: Partial<Person>) => setF((current) => ({ ...current, ...p }));
+  const via = f.contactVia ?? 'Telegram';
+  const fileInput = useRef<HTMLInputElement>(null);
+  const busyRef = useRef(false);
+  const uploadAvatar = async (file?: File) => {
+    if (!file || ro || busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
+    try {
+      const avatar = await compressAvatar(file);
+      setF((current) => ({ ...current, avatar }));
+    } catch (error) {
+      toast(error instanceof Error ? error.message : t('server.avatarInvalid'), 'error');
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
+    }
+  };
+  const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
+  return (
+    <>
+      <Cell label={t('people.avatar.label')}>
+        {!ro && (
+          <input
+            ref={fileInput}
+            type="file"
+            hidden
+            accept="image/png,image/jpeg,image/webp"
+            onChange={(e) => {
+              void uploadAvatar(e.target.files?.[0]);
+              e.target.value = '';
+            }}
+          />
+        )}
+        {!ro && f.avatar && (
+          <ConfirmButton disabled={busy} onConfirm={() => setF((current) => ({ ...current, avatar: undefined }))}>
+            {t('people.avatar.remove')}
+          </ConfirmButton>
+        )}
+        {ro ? (
+          <PersonAvatar p={f} size={32} />
+        ) : (
+          <button
+            type="button"
+            className="person-avatar-edit"
+            aria-label={t('people.avatar.change')}
+            title={t('people.avatar.help')}
+            disabled={busy}
+            onClick={() => fileInput.current?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              void uploadAvatar(e.dataTransfer.files[0]);
+            }}
+            onPaste={(e) => {
+              const file = [...e.clipboardData.files][0];
+              if (file) {
+                e.preventDefault();
+                void uploadAvatar(file);
+              }
+            }}
+          >
+            <PersonAvatar p={f} size={32} />
+          </button>
+        )}
+      </Cell>
+      <Cell label={t('family.member.name')}>
+        <input autoFocus={autoFocus} value={f.name} disabled={ro} placeholder={t('family.member.namePh')} onChange={(e) => up({ name: val(e) })} />
+      </Cell>
+      <Cell label={t('family.member.contact')}>
+        <ContactField via={via} value={f.contact} onVia={(v) => up({ contactVia: v })} onChange={(c) => up({ contactVia: via, contact: c || undefined })} />
+      </Cell>
+      <Cell label={t('family.member.note')}>
+        <input value={f.note ?? ''} disabled={ro} placeholder={t('people.sheet.notePh')} onChange={(e) => up({ note: val(e) || undefined })} />
+      </Cell>
+      <Cell label={t(f.avatar ? 'people.avatar.fallbackColor' : 'people.sheet.color')}>
+        <span className="pp-colors" role="radiogroup" aria-label={t('people.sheet.color')}>
+          {PERSON_COLORS.map((c, i) => (
+            <button
+              key={c}
+              type="button"
+              role="radio"
+              aria-checked={(f.color ?? colorFor(f.id)) === c}
+              aria-label={`${t('people.sheet.color')} ${i + 1}`}
+              className={`pp-dot c-${c} ${(f.color ?? colorFor(f.id)) === c ? 'on' : ''}`}
+              onClick={() => up({ color: c })}
+            />
+          ))}
+          {/* 最后一个点打开色盘：选过自选色就显示那个颜色，没选过是虚线圈加号 */}
+          <label
+            className={`pp-dot custom ${isCustomColor(f.color) ? 'on' : ''}`}
+            style={isCustomColor(f.color) ? ({ '--pc': f.color } as CSSProperties) : undefined}
+            title={t('people.sheet.customColor')}
+          >
+            {!isCustomColor(f.color) && <Icon name="plus" />}
+            <input
+              type="color"
+              role="radio"
+              aria-checked={isCustomColor(f.color)}
+              aria-label={t('people.sheet.customColor')}
+              disabled={ro}
+              value={isCustomColor(f.color) ? f.color : '#5b8def'}
+              onChange={(e) => up({ color: personColor(e.target.value) })}
+            />
+          </label>
+        </span>
+      </Cell>
+    </>
   );
 }

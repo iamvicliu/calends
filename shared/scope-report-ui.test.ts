@@ -96,6 +96,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
           'StatusFields',
           'SharingFields',
           'MoreFields',
+          'ProfileFields',
         ].includes(type.name)
           ? type({ ...props, children })
           : { type, props: props ?? {}, children },

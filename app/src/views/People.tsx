@@ -7,18 +7,18 @@ import { locale, t } from '../../../shared/i18n.ts';
 import { SortControl } from '../components/SortControl.tsx';
 import { isMarked, nextSort, usePhone } from '../components/LtHead.tsx';
 import { personLink, peopleLedger, peopleListRows, type PeopleSort, type PersonLedger } from '../../../shared/people.ts';
-import { type AppState, type Person, type Subscription } from '../../../shared/types.ts';
-import { Cell, Group, IconButton, MetricCards, Metric, Toolbar } from '../components/ui.tsx';
+import { PERSON_COLORS, type AppState, type Person, type Subscription } from '../../../shared/types.ts';
+import { Group, IconButton, MetricCards, Metric, Toolbar } from '../components/ui.tsx';
 import { Amount, Seg, useSubmit } from '../components/inputs.tsx';
 import { Sheet } from '../components/overlays.tsx';
 import { getState, savePerson } from '../store.ts';
 import { run } from '../toast.ts';
 import { Icon } from '../components/icons.tsx';
 import { SubIcon } from '../components/marks.tsx';
-import { ContactField, contactValue } from '../components/Contact.tsx';
+import { contactValue } from '../components/Contact.tsx';
 import './people-list.css';
 import { FamilyTabs } from './person-fields.tsx';
-import { PersonSheet } from './PersonProfile.tsx';
+import { PersonSheet, ProfileFields } from './PersonProfile.tsx';
 
 /** 选人：已有的人（可搜索）或「新的人」；选中已有的人时把称呼、联系方式带过去 */
 /** 人员表各列的默认方向：称呼 A→Z，金额与日期大的、近的在前 */
@@ -240,9 +240,11 @@ export function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: 
   );
 }
 
-/** 单独新建人员：只填称呼和联系方式；之后在合租或代付里选他。重名且联系方式对得上时不重复建档 */
+/** 单独新建人员：与人员详情同一套资料表单；之后在合租或代付里选他。重名且联系方式对得上时不重复建档 */
 function NewPersonSheet({ onClose, onSaved }: { onClose: () => void; onSaved: (id: string) => void }) {
-  const [f, setF] = useState<Pick<Person, 'name' | 'contactVia' | 'contact'>>({ name: '' });
+  // 颜色先随机定好，预览里的头像和保存后的一致
+  const [f, setF] = useState<Person>(() => ({ id: '', name: '', color: PERSON_COLORS[Math.floor(Math.random() * PERSON_COLORS.length)] }));
+  const [avatarBusy, setAvatarBusy] = useState(false);
   const [busy, submit] = useSubmit();
   const save = () =>
     submit(() =>
@@ -253,7 +255,7 @@ function NewPersonSheet({ onClose, onSaved }: { onClose: () => void; onSaved: (i
           contact: f.contact,
         });
         if (!link.created) throw new Error(t('people.add.exists', { name: f.name.trim() }));
-        await savePerson(link.created);
+        await savePerson({ ...link.created, note: f.note?.trim() || undefined, color: f.color, avatar: f.avatar });
         onClose();
         onSaved(link.created.id);
       }, t('people.add.saved')),
@@ -269,24 +271,14 @@ function NewPersonSheet({ onClose, onSaved }: { onClose: () => void; onSaved: (i
           <button className="btn" onClick={onClose}>
             {t('common.cancel')}
           </button>
-          <button className="btn primary" disabled={busy || !f.name.trim()} onClick={() => void save()}>
+          <button className="btn primary" disabled={busy || avatarBusy || !f.name.trim()} onClick={() => void save()}>
             {t('common.save')}
           </button>
         </>
       }
     >
       <Group>
-        <Cell label={t('family.member.name')}>
-          <input autoFocus value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
-        </Cell>
-        <Cell label={t('editor.proxy.contact')}>
-          <ContactField
-            via={f.contactVia ?? 'Telegram'}
-            value={f.contact}
-            onVia={(contactVia) => setF({ ...f, contactVia })}
-            onChange={(contact) => setF({ ...f, contactVia: f.contactVia ?? 'Telegram', contact: contact || undefined })}
-          />
-        </Cell>
+        <ProfileFields f={f} setF={setF} busy={avatarBusy} setBusy={setAvatarBusy} autoFocus />
       </Group>
     </Sheet>
   );
