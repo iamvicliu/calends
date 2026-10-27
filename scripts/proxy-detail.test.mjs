@@ -93,6 +93,7 @@ test('proxy privacy masks identity and notes, suppresses period tooltips, and re
     'CircleStop',
     'StopPanel',
     'Sheet',
+    'Act',
   ])
     deps[name] = name;
   deps.createPortal = (n) => n;
@@ -111,9 +112,9 @@ test('proxy privacy masks identity and notes, suppresses period tooltips, and re
     });
   };
   let tree = render();
-  // 代付详情底部可直接停止代付，不必绕回订阅详情
-  assert.ok(nodes(tree, 'button').some((b) => React.Children.toArray(b.props.children).includes('proxy.stop')));
   let head = nodes(tree, 'DetailHead')[0];
+  // 代付详情顶部按钮区可直接停止代付，不必绕回订阅详情
+  assert.equal(nodes(head.props.actions, 'Act')[0].props.label, 'proxy.stop');
   let facts = nodes(tree, 'Facts')[0];
   assert.equal(nodes(facts.props.items, 'PersonAvatar').length, 1);
   const row = { receipt: { note: 'receipt secret' }, charge: { note: 'charge secret' } };

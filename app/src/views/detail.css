@@ -98,10 +98,6 @@
   box-shadow: 0 0 0 var(--hairline) var(--dt-line-2);
   transition: background var(--duration) var(--ease);
 }
-.dt-foot {
-  display: flex;
-  justify-content: center;
-}
 .dt-btn:hover,
 .dt-act:hover {
   background: color-mix(in srgb, var(--dt-panel) 92%, var(--label));
