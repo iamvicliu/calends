@@ -1,9 +1,10 @@
-import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { use, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { StickyNote, X } from 'lucide-react';
 import { t } from '../../../shared/i18n.ts';
 import { copyParts } from './copy.tsx';
 import { CardTitle, IconButton } from './ui.tsx';
-import { Sheet } from './overlays.tsx';
+import { Icon } from './icons.tsx';
+import { Sheet, SheetNested } from './overlays.tsx';
 import '../views/detail.css';
 
 /*
@@ -36,8 +37,15 @@ export function DetailHead({
   actions?: ReactNode;
   onClose: () => void;
 }) {
+  // 叠在别的弹窗上时和普通弹窗一样：左上角返回，没有关闭
+  const nested = use(SheetNested);
   return (
-    <header className="dt-head">
+    <header className={`dt-head${nested ? ' nested' : ''}`}>
+      {nested && (
+        <IconButton className="dt-back" onClick={onClose} title={t('common.back')} aria-label={t('common.back')} data-snapshot-hide>
+          <Icon name="left" />
+        </IconButton>
+      )}
       {icon}
       <div className="dt-id">
         <h2>
@@ -47,9 +55,11 @@ export function DetailHead({
         {meta && <div className="dt-meta">{meta}</div>}
       </div>
       {actions && <div className="sheet-actions dt-actions">{actions}</div>}
-      <IconButton className="dt-close" onClick={onClose} title={t('ui.close')} aria-label={t('ui.close')} data-snapshot-hide>
-        <X size={17} />
-      </IconButton>
+      {!nested && (
+        <IconButton className="dt-close" onClick={onClose} title={t('ui.close')} aria-label={t('ui.close')} data-snapshot-hide>
+          <X size={17} />
+        </IconButton>
+      )}
     </header>
   );
 }

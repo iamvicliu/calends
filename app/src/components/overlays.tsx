@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { tooltipPosition } from './tooltip-position.ts';
 import type { ReactNode as ComponentChildren } from 'react';
 import { Button as AriaButton, Tooltip, TooltipTrigger, Dialog, Heading, Modal, ModalOverlay } from 'react-aria-components';
-import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { createContext, Fragment, useEffect, useEffectEvent, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { t } from '../../../shared/i18n.ts';
 import { Toaster } from 'sonner';
 import { Icon } from './icons.tsx';
@@ -22,6 +22,8 @@ const subscribeSheets = (f: () => void) => {
   return () => sheetListeners.delete(f);
 };
 const sheetsChanged = () => sheetListeners.forEach((f) => f());
+/** 当前弹窗是否叠在别的弹窗上：自带表头（header）的内容据此把关闭换成返回 */
+export const SheetNested = createContext(false);
 
 /**
  * 弹窗（react-aria Modal）：宽屏居中，窄屏贴底。点遮罩、按 Esc 关闭，多层叠放时只关最上面那层；
@@ -96,7 +98,9 @@ export function Sheet(props: {
               </div>
             </div>
           )}
-          <div className="sheet-body">{props.children}</div>
+          <div className="sheet-body">
+            <SheetNested.Provider value={nested}>{props.children}</SheetNested.Provider>
+          </div>
           {props.foot && <div className="sheet-foot sheet-actions">{copyParts(props.foot)}</div>}
         </Dialog>
       </Modal>
