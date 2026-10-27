@@ -1,7 +1,7 @@
 import { formatTotal, scaleTotal, totalNote } from '../../../../shared/fx-total.ts';
 import { copyParts } from '../../components/copy.tsx';
 import { PersonAvatar, personFor } from '../../components/PersonAvatar.tsx';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { addDays, cycleLabel, effectiveStatus, nextCharge, todayIn, isStopped, uid } from '../../../../shared/billing.ts';
 import { flow, cnDate, cnDateFull, money } from '../../../../shared/format.ts';
 import { toBaseOrNaN } from '../../../../shared/fx.ts';
@@ -11,18 +11,20 @@ import { editRecordPeriod, removeRecordPeriod } from '../../../../shared/receiva
 import { periodFields, ReceivableSheet, usePeriodEdit } from '../Receivable.tsx';
 import { DetailHead, DetailSheet, Facts, Note, Panel, Prop } from '../../components/DetailKit.tsx';
 import { YearLedger } from '../../components/YearLedger.tsx';
-import { MetricCards, Metric, Cell, Group } from '../../components/ui.tsx';
+import { MetricCards, Metric, Cell, Group, IconButton } from '../../components/ui.tsx';
 import { MoneyInput, useSubmit } from '../../components/inputs.tsx';
 import { NameLink, PayBadge, StatusPill, SubIcon } from '../../components/marks.tsx';
 import { Sheet } from '../../components/overlays.tsx';
 import { ConfirmButton } from '../../components/ConfirmButton.tsx';
-import { Plus } from 'lucide-react';
+import { Eye, EyeOff, Plus } from 'lucide-react';
 import { contactText } from '../../components/Contact.tsx';
 import { getState, saveSub } from '../../store.ts';
 import { run } from '../../toast.ts';
 import { CurrencySelect } from '../../components/Picker.tsx';
 import { proxyAhead, proxyLedger, proxyTotals } from '../../../../shared/proxy.ts';
 import { t } from '../../../../shared/i18n.ts';
+import { CopyImageButton } from '../../components/CopyImageButton.tsx';
+import { summarySnapshot } from '../carpool-snapshot.ts';
 import type { Row } from './common.tsx';
 import { rows } from './common.tsx';
 import { proxyStatus } from './common.tsx';
@@ -32,6 +34,8 @@ import { OwedOrNet } from './common.tsx';
 export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s: Subscription; onClose: () => void; onOpen: (s: Subscription) => void }) {
   const today = todayIn(state.settings.timezone);
   const base = state.settings.baseCurrency;
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const [masked, setMasked] = useState(false);
   const live = state.subscriptions.find((x) => x.id === s.id) ?? s;
   const list = rows(state, live, today);
   const ahead = proxyAhead(state, live, today);
@@ -50,7 +54,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
 
   return (
     <DetailSheet label={t('proxy.detailTitle')} onClose={onClose}>
-      <div className="dt">
+      <div className="dt car-summary" ref={summaryRef}>
         <DetailHead
           icon={<SubIcon sub={live} size={48} />}
           title={
@@ -72,6 +76,18 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               </b>
               {cardCcy && <span>{t('proxy.cardCcy', { ccy: cardCcy })}</span>}
             </>
+          }
+          actions={
+            <span className="dt-header-tools" data-snapshot-hide>
+              <IconButton
+                aria-label={t(masked ? 'family.sheet.showPersonal' : 'family.sheet.hidePersonal')}
+                aria-pressed={masked}
+                onClick={() => setMasked(!masked)}
+              >
+                {masked ? <EyeOff size={17} /> : <Eye size={17} />}
+              </IconButton>
+              <CopyImageButton render={() => summarySnapshot(summaryRef.current!)} />
+            </span>
           }
           onClose={onClose}
         />
@@ -125,10 +141,22 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               <>
                 <Prop k={t('proxy.forWhom')}>
                   <span className="row">
-                    <PersonAvatar p={personFor(state, px.personId, px.forName)} size={20} />
-                    {px.forName || t('proxy.unset')}
+                    {masked ? (
+                      <span className="car-private-avatar" style={{ width: 20, height: 20 }} aria-hidden="true" />
+                    ) : (
+                      <PersonAvatar p={personFor(state, px.personId, px.forName)} size={20} />
+                    )}
+                    <span className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
+                      {px.forName || t('proxy.unset')}
+                    </span>
                   </span>
-                  {contactText(px) && <small>{contactText(px)}</small>}
+                  {contactText(px) && (
+                    <small>
+                      <span className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
+                        {contactText(px)}
+                      </span>
+                    </small>
+                  )}
                 </Prop>
                 <Prop k={t('proxy.method')}>
                   <PayBadge m={method} />
@@ -139,7 +167,16 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               </>
             }
           >
-            {px.note && <Note text={px.note} />}
+            {px.note &&
+              (masked ? (
+                <div className="dt-note">
+                  <span className="car-private" aria-hidden="true">
+                    {px.note}
+                  </span>
+                </div>
+              ) : (
+                <Note text={px.note} />
+              ))}
           </Facts>
 
           {/* 与订阅详情、合租详情一样：标题和操作在卡片里，表格贴着卡片边 */}
@@ -147,7 +184,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
             className="dt-charges"
             title={t('proxy.table.title')}
             aside={
-              <button className="dt-btn dt-add" onClick={() => setAdding(true)}>
+              <button className="dt-btn dt-add" data-snapshot-hide onClick={() => setAdding(true)}>
                 <Plus size={14} /> {t('proxy.receipt.add')}
               </button>
             }
@@ -198,6 +235,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
                 }}
                 rowKey={(r) => r.date}
                 rowClass={(r) => (r.date > today ? 'ld-ahead' : '')}
+                rowTitle={(r) => (masked ? undefined : (r.receipt?.note ?? r.waiver?.note ?? r.charge?.note))}
                 onRow={setEdit}
               />
             ) : (
