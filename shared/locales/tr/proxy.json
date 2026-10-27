@@ -68,7 +68,8 @@
     "receivedLess": "Alınma tarihindeki kurla {amount}, ödenenden {diff} az.",
     "notReceived": "Alınmadı",
     "receivedOn": "Alınma tarihi",
-    "notePlaceholder": "İsteğe bağlı, ör. banka havalesi"
+    "notePlaceholder": "İsteğe bağlı, ör. banka havalesi",
+    "splitEdit": "Kaydedince bu dönem asıl ödemeden ayrılır; diğer dönemler aynı kalır."
   },
   "page": {
     "owedSub": {

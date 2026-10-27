@@ -62,7 +62,8 @@
     "receivedLess": "按收款当天汇率折合 {amount}，比实扣少 {diff}。",
     "notReceived": "未收",
     "receivedOn": "收到日期",
-    "notePlaceholder": "可选，如 微信转账"
+    "notePlaceholder": "可选，如 微信转账",
+    "splitEdit": "保存后这一期会从原来那笔里单独拆出，其余期照旧。"
   },
   "page": {
     "owedSub": "{count} 期未收，按扣款当天汇率",

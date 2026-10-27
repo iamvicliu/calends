@@ -71,7 +71,8 @@
     "receivedLess": "{amount} au taux du jour de réception, {diff} de moins que le prélèvement.",
     "notReceived": "Non reçu",
     "receivedOn": "Date de réception",
-    "notePlaceholder": "Facultatif, ex. virement bancaire"
+    "notePlaceholder": "Facultatif, ex. virement bancaire",
+    "splitEdit": "À l’enregistrement, cette période est séparée du paiement d’origine ; les autres restent inchangées."
   },
   "page": {
     "owedSub": {

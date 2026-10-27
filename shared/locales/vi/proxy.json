@@ -66,7 +66,8 @@
     "receivedLess": "{amount} theo tỷ giá ngày nhận, ít hơn khoản đã trừ {diff}.",
     "notReceived": "Chưa nhận",
     "receivedOn": "Ngày nhận",
-    "notePlaceholder": "Tùy chọn, VD: chuyển khoản ngân hàng"
+    "notePlaceholder": "Tùy chọn, VD: chuyển khoản ngân hàng",
+    "splitEdit": "Khi lưu, kỳ này được tách khỏi khoản ban đầu; các kỳ khác giữ nguyên."
   },
   "page": {
     "owedSub": {

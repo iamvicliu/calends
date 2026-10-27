@@ -71,7 +71,8 @@
     "receivedLess": "{amount} at the receipt-date rate, {diff} less than charged.",
     "notReceived": "Not received",
     "receivedOn": "Date received",
-    "notePlaceholder": "Optional, e.g. bank transfer"
+    "notePlaceholder": "Optional, e.g. bank transfer",
+    "splitEdit": "Saving splits this period out of the original payment; the other periods stay as they are."
   },
   "page": {
     "owedSub": {

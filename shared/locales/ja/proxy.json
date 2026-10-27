@@ -66,7 +66,8 @@
     "receivedLess": "受領日のレートで{amount}、請求額より{diff}少なくなっています。",
     "notReceived": "未受領",
     "receivedOn": "受領日",
-    "notePlaceholder": "任意（例：銀行振込）"
+    "notePlaceholder": "任意（例：銀行振込）",
+    "splitEdit": "保存するとこの期は元の入金から分けられ、他の期はそのままです。"
   },
   "page": {
     "owedSub": {

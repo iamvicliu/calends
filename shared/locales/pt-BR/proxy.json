@@ -71,7 +71,8 @@
     "receivedLess": "{amount} pelo câmbio da data de recebimento, {diff} a menos que o cobrado.",
     "notReceived": "Não recebido",
     "receivedOn": "Data de recebimento",
-    "notePlaceholder": "Opcional, ex.: transferência bancária"
+    "notePlaceholder": "Opcional, ex.: transferência bancária",
+    "splitEdit": "Ao salvar, este período é separado do pagamento original; os demais continuam iguais."
   },
   "page": {
     "owedSub": {

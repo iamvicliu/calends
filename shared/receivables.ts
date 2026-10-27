@@ -170,6 +170,30 @@ export function removeRecordPeriod(r: Receivable, id: string, period: Pick<Ledge
 }
 
 /**
+ * 改某一期的收款日期、金额和备注（每期弹窗里的编辑）：这笔只抵这一期就原地改；
+ * 一笔分几期时把这一期单独拆成一笔新记录（id 由调用方给），其余期和它们分到的金额照旧
+ */
+export function editRecordPeriod(
+  r: Receivable,
+  id: string,
+  period: Pick<LedgerPeriod, 'key' | 'share'>,
+  patch: { date: string; amount?: number; note?: string },
+  periods: Period[],
+  newId: string,
+): Required<Receivable> {
+  const receipt = (r.receipts ?? []).find((x) => x.id === id);
+  const rec = receipt ?? (r.waivers ?? []).find((x) => x.id === id);
+  const own = rec?.periods.filter((k) => resolveKey(periods, k) === period.key) ?? [];
+  if (!rec || !own.length || receipt?.opening) throw new Error(t('mcp.error.invalidTarget'));
+  const whole = own.length === rec.periods.length;
+  const { note: _, ...base } = whole ? rec : { ...rec, id: newId, periods: [period.key] };
+  const next = { ...base, date: patch.date, ...(patch.note ? { note: patch.note } : {}) };
+  if (!receipt) return putRecord(whole ? r : removeRecordPeriod(r, id, period, periods), 'waiver', next, periods);
+  const amount = patch.amount ?? (whole ? receipt.amount : (period.share ?? 0));
+  return putRecord(whole ? r : removeRecordPeriod(r, id, period, periods), 'receipt', { ...(next as Receipt), amount }, periods);
+}
+
+/**
  * 期初结清：开始记账前就收清了的期（金额不详，不计入收到的钱）。until 及之前、没被别的记录占用的期都算进来；
  * 原来的期初结清整笔替换，until 为空则去掉
  */

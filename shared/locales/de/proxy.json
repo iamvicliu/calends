@@ -71,7 +71,8 @@
     "receivedLess": "{amount} zum Kurs am Eingangstag, {diff} weniger als abgebucht.",
     "notReceived": "Nicht erhalten",
     "receivedOn": "Eingangsdatum",
-    "notePlaceholder": "Optional, z. B. Banküberweisung"
+    "notePlaceholder": "Optional, z. B. Banküberweisung",
+    "splitEdit": "Beim Speichern wird dieser Zeitraum aus der ursprünglichen Zahlung herausgelöst; die übrigen bleiben unverändert."
   },
   "page": {
     "owedSub": {

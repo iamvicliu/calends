@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { memberCashFlows } from './carpool.ts';
 import { memberLedger, memberDues } from './billing.ts';
-import { paidThrough, putRecord, removeRecord, removeRecordPeriod, resolveKey, setOpening, settle, type Period } from './receivables.ts';
+import { paidThrough, putRecord, removeRecord, removeRecordPeriod, editRecordPeriod, resolveKey, setOpening, settle, type Period } from './receivables.ts';
 import { migrateReceivables } from './receivables-legacy.ts';
 import type { ShareMember, Subscription } from './types.ts';
 
@@ -68,6 +68,30 @@ test('每期弹窗里删一期：同一笔的其余期照旧、金额扣掉这�
     ['r'],
   );
   assert.throws(() => removeRecordPeriod(next, 'r', third, periods), /invalidTarget/);
+});
+
+test('每期弹窗里改收款：只抵这一期就原地改；一笔分几期时把这一期拆成新的一笔，其余期照旧', () => {
+  const r = {
+    receipts: [
+      { id: 'r', date: '2026-01-05', amount: 100, currency: 'CNY', periods: ['2026-02-01', '2026-03-01', '2026-04-01'], note: '转账' },
+      { id: 's', date: '2026-01-06', amount: 5, currency: 'CNY', periods: ['2026-01-01'] },
+    ],
+    waivers: [],
+  };
+  const one = editRecordPeriod(r, 's', { key: '2026-01-01', share: 5 }, { date: '2026-01-08', amount: 6 }, periods, 'new');
+  assert.deepEqual(
+    one.receipts.find((x) => x.id === 's'),
+    { id: 's', date: '2026-01-08', amount: 6, currency: 'CNY', periods: ['2026-01-01'] },
+  );
+  const third = settle(periods, r, '2026-01-15').periods[2];
+  const split = editRecordPeriod(r, 'r', third, { date: '2026-03-02', amount: 40, note: '补' }, periods, 'new');
+  assert.deepEqual(split.receipts.find((x) => x.id === 'r')!.periods, ['2026-02-01', '2026-04-01']);
+  assert.equal(split.receipts.find((x) => x.id === 'r')!.amount, 66.67);
+  assert.deepEqual(
+    split.receipts.find((x) => x.id === 'new'),
+    { id: 'new', date: '2026-03-02', amount: 40, currency: 'CNY', periods: ['2026-03-01'], note: '补' },
+  );
+  assert.throws(() => editRecordPeriod(r, 'missing', third, { date: '2026-03-02' }, periods, 'new'), /invalidTarget/);
 });
 
 test('条款改过、期重新切过时，旧记录按落在哪一期对上，不会变成欠款', () => {

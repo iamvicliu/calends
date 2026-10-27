@@ -71,7 +71,8 @@
     "receivedLess": "{amount} al tipo de cambio de la fecha de recepción, {diff} menos que lo cobrado.",
     "notReceived": "No recibido",
     "receivedOn": "Fecha de recepción",
-    "notePlaceholder": "Opcional, p. ej. transferencia bancaria"
+    "notePlaceholder": "Opcional, p. ej. transferencia bancaria",
+    "splitEdit": "Al guardar, este periodo se separa del pago original; los demás no cambian."
   },
   "page": {
     "owedSub": {
