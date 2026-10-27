@@ -1,23 +1,31 @@
 import type { ReactNode as ComponentChildren } from 'react';
 import { dateFormat } from '../../../shared/intl.ts';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { addDays, addMonths, diffDays } from '../../../shared/billing.ts';
 import { monthLabel } from '../../../shared/format.ts';
 import { intlLocale, t } from '../../../shared/i18n.ts';
 import './timeline.css';
 import './copy.css';
+import { TailName } from './TailName.tsx';
+import { tooltipPosition } from './tooltip-position.ts';
 
 export interface TimelineItem {
   key: string;
   icon: ComponentChildren;
   /** 悬停提示：名称与金额 */
-  tip: string;
+  name: string;
+  amount: string;
+  /** 折成同一币种的金额，只用来比较大小（按日聚合时决定圆点大小）；缺汇率时为 0 或 NaN */
+  value?: number;
   onClick?: () => void;
 }
 
 export interface TimelineGroup {
   date: string;
   items: TimelineItem[];
+  /** 当天合计（已格式化），按日聚合时显示在提示里 */
+  total?: string;
 }
 
 /** 真实比例：每天固定宽度，疏密如实呈现 */
@@ -27,6 +35,11 @@ const LEVELS = 3; // 同一处最多往上叠三层，再多的折成「+N」
 const AXIS = 140;
 /** 右端：今天往后一年（未来的扣款看一年就够） */
 const AHEAD_MONTHS = 12;
+/** 按日聚合时：圆点直径（不超过一天的宽度，相邻两天不重叠）与竖线最高处（最高的点也低于右上角「今天」按钮，手机上按钮高 40px） */
+const DOT_MIN = 5;
+const DOT_MAX = DAY - 1;
+const STEM_MIN = 10;
+const STEM_MAX = 92;
 /** 只挂载视口附近的图标：按这个宽度分块，滚过一块才重新挑选；两侧各留一块余量 */
 const CHUNK = 1200;
 
@@ -81,7 +94,28 @@ export function Timeline({
       if (d >= from) months.push({ x: xOf(d), label: d.slice(5, 7) === '01' ? yearLabel(d) : monthLabel(d.slice(0, 7), { year: false }) });
     }
     const monday = (8 - new Date(from).getUTCDay()) % 7;
-    return { xOf, placed, overflow, months, dots: [...new Set(placed.map((p) => p.date))], width: xOf(to), monday };
+    // 稠密判定：图标叠满三层仍放不下（会出现「+N」）时，整条改成按日聚合——每天一个圆点，
+    // 竖线高度与圆点大小按当天金额（面积比例，取平方根）；明细放在悬停 / 点按的提示里
+    const dense = overflow.size > 0;
+    const weight = (g: TimelineGroup) => g.items.reduce((s, it) => s + (Number.isFinite(it.value) ? Math.max(0, it.value!) : 0), 0);
+    const top = Math.max(0, ...groups.map(weight));
+    const days = dense
+      ? groups.map((g) => {
+          const k = top > 0 ? Math.sqrt(weight(g) / top) : 0;
+          return { g, x: xOf(g.date), dot: Math.round(DOT_MIN + k * (DOT_MAX - DOT_MIN)), stem: Math.round(STEM_MIN + k * (STEM_MAX - STEM_MIN)) };
+        })
+      : [];
+    const icons = dense ? [] : placed;
+    return {
+      xOf,
+      placed: icons,
+      overflow: dense ? new Map<string, number>() : overflow,
+      months,
+      days,
+      dots: [...new Set(icons.map((p) => p.date))],
+      width: xOf(to),
+      monday,
+    };
   }, [from, to, load]);
 
   const center = (smooth = false) => {
@@ -179,8 +213,48 @@ export function Timeline({
     setTimeout(() => (drag.current = null), 0);
   };
 
-  const { xOf, placed, overflow, months, dots, width, monday } = layout;
+  const { xOf, placed, overflow, months, days, dots, width, monday } = layout;
   const near = (x: number) => x >= span[0] && x <= span[1];
+
+  // 按日聚合的提示：悬停 / 聚焦时只读显示；点按（含触屏）后固定，里面的订阅可点开，Esc 或点别处关闭
+  const tipId = useId();
+  const [tip, setTip] = useState<{ g: TimelineGroup; x: number; top: number; bottom: number; pinned: boolean; from: HTMLElement } | null>(null);
+  const tipBox = useRef<HTMLDivElement>(null);
+  const [tipAt, setTipAt] = useState({ left: 8, top: 8 });
+  const showTip = (g: TimelineGroup, el: HTMLElement, pinned: boolean) => {
+    const r = el.getBoundingClientRect();
+    setTip({ g, x: r.left + r.width / 2, top: r.top, bottom: r.bottom, pinned, from: el });
+  };
+  const closeTip = (refocus = false) => {
+    if (refocus) tip?.from.focus();
+    setTip(null);
+  };
+  useLayoutEffect(() => {
+    if (!tip || !tipBox.current) return;
+    setTipAt(tooltipPosition(tip, tipBox.current.getBoundingClientRect(), { width: window.innerWidth, height: window.innerHeight }));
+    if (tip.pinned) tipBox.current.querySelector<HTMLElement>('button')?.focus({ preventScroll: true });
+  }, [tip]);
+  useEffect(() => {
+    if (!tip) return;
+    const hide = () => setTip(null);
+    const key = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeTip(true);
+    };
+    const outside = (e: PointerEvent) => {
+      const n = e.target as Node;
+      if (!tipBox.current?.contains(n) && !tip.from.contains(n)) hide();
+    };
+    window.addEventListener('scroll', hide, true);
+    window.addEventListener('resize', hide);
+    window.addEventListener('keydown', key);
+    window.addEventListener('pointerdown', outside, true);
+    return () => {
+      window.removeEventListener('scroll', hide, true);
+      window.removeEventListener('resize', hide);
+      window.removeEventListener('keydown', key);
+      window.removeEventListener('pointerdown', outside, true);
+    };
+  }, [tip]);
   return (
     <div className="tl" ref={box}>
       <div
@@ -194,7 +268,7 @@ export function Timeline({
         onDragStart={(e) => e.preventDefault()}
         // 在空白处双击回到今天（双击图标不算，那是打开详情）
         onDoubleClick={(e) => {
-          if (!(e.target as Element).closest('.tl-icon')) center(true);
+          if (!(e.target as Element).closest('.tl-icon, .tl-day')) center(true);
         }}
         onClickCapture={(e) => {
           if (drag.current?.moved) e.stopPropagation();
@@ -211,6 +285,33 @@ export function Timeline({
           <div className="tl-today" style={{ left: xOf(today) }}>
             <span>{t('common.today')}</span>
           </div>
+          {days
+            .filter((d) => near(d.x))
+            .map(({ g, x, dot, stem }) => (
+              <button
+                key={`day-${g.date}`}
+                type="button"
+                className={`tl-day ${g.date < today ? 'past' : ''} ${tip?.g === g ? 'on' : ''}`}
+                style={{ left: x - DAY / 2, top: AXIS - stem - dot / 2, height: stem + dot / 2, '--dot': `${dot}px` } as Record<string, string | number>}
+                aria-label={[md(g.date), g.total, ...g.items.map((it) => `${it.name} ${it.amount}`)].filter(Boolean).join('\n')}
+                aria-describedby={tip?.g === g ? tipId : undefined}
+                aria-expanded={g.items.length > 1 ? tip?.g === g && tip.pinned : undefined}
+                onMouseEnter={(e) => tip?.pinned || showTip(g, e.currentTarget, false)}
+                onMouseLeave={() => tip?.pinned || setTip(null)}
+                onFocus={(e) => tip?.pinned || showTip(g, e.currentTarget, false)}
+                onBlur={(e) => tip?.pinned || tipBox.current?.contains(e.relatedTarget as Node) || setTip(null)}
+                onClick={(e) => {
+                  // 只有一笔：直接打开，与图标一致；多笔：固定提示，从里面挑
+                  if (g.items.length === 1 && g.items[0].onClick) {
+                    setTip(null);
+                    g.items[0].onClick();
+                  } else if (tip?.g === g && tip.pinned) closeTip();
+                  else showTip(g, e.currentTarget, true);
+                }}
+              >
+                <i />
+              </button>
+            ))}
           {placed
             .filter((p) => near(p.x))
             .map(({ it, date, x, level }) => (
@@ -224,7 +325,7 @@ export function Timeline({
                     string | number
                   >
                 }
-                data-tip={`${md(date)}\n${it.tip}`}
+                data-tip={`${md(date)}\n${it.name}\n${it.amount}`}
                 onClick={() => it.onClick?.()}
               >
                 {it.icon}
@@ -244,6 +345,49 @@ export function Timeline({
             ))}
         </div>
       </div>
+      {tip &&
+        createPortal(
+          <div
+            ref={tipBox}
+            id={tipId}
+            className={`tl-tip ${tip.pinned ? 'pinned' : ''}`}
+            role={tip.pinned ? 'dialog' : 'tooltip'}
+            // 键盘离开提示（Tab 出去）就收起
+            onBlur={(e) => {
+              const n = e.relatedTarget as Node | null;
+              if (n && !e.currentTarget.contains(n) && !tip.from.contains(n)) setTip(null);
+            }}
+            aria-label={tip.pinned ? md(tip.g.date) : undefined}
+            style={tipAt}
+          >
+            <div className="tl-tip-head">
+              <b>{md(tip.g.date)}</b>
+              {tip.g.total && <b className="num">{tip.g.total}</b>}
+            </div>
+            {tip.g.items.map((it) =>
+              tip.pinned && it.onClick ? (
+                <button
+                  key={it.key}
+                  type="button"
+                  className="tl-tip-row"
+                  onClick={() => {
+                    setTip(null);
+                    it.onClick!();
+                  }}
+                >
+                  <TailName name={it.name} />
+                  <span className="num">{it.amount}</span>
+                </button>
+              ) : (
+                <div key={it.key} className="tl-tip-row">
+                  <TailName name={it.name} />
+                  <span className="num">{it.amount}</span>
+                </div>
+              ),
+            )}
+          </div>,
+          document.body,
+        )}
       <button type="button" className="tl-home" onClick={() => center(true)} title={t('editor.timeline.home')}>
         {t('common.today')}
       </button>

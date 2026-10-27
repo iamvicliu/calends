@@ -188,6 +188,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     Seg: 'Seg',
     Stepper: 'Stepper',
     SubIcon: 'SubIcon',
+    TailName: 'TailName',
     CatIcon: 'CatIcon',
     BarLine: 'BarLine',
     MethodMark: 'MethodMark',
@@ -1080,8 +1081,8 @@ test('公开页时间线的支出和退款使用同一收支格式，关闭符�
       format.setSignedAmounts(on);
       assert.throws(() => r.render('Ledger', { state: st }), captured);
       const items = load!(today, today)[0].items;
-      assert.equal(items[0].tip, `Service\n${on ? '−' : ''}$10.00`);
-      assert.equal(items[1].tip, `Service\n${on ? '+' : ''}$3.00`);
+      assert.deepEqual([items[0].name, items[0].amount], ['Service', `${on ? '−' : ''}$10.00`]);
+      assert.deepEqual([items[1].name, items[1].amount], ['Service', `${on ? '+' : ''}$3.00`]);
     }
   } finally {
     format.setSignedAmounts(true);

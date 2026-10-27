@@ -115,6 +115,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     CopyImageButton: 'CopyImageButton',
     Hint: 'Hint',
     SubIcon: 'SubIcon',
+    TailName: 'TailName',
     FlagImg: 'FlagImg',
     ...metricComponents(extra.React ?? React),
     ...extra,
