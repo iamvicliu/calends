@@ -208,45 +208,32 @@
   color: var(--tl-fg);
 }
 
-/* 按日聚合（稠密时）：每天一根细线顶着一个圆点，线高与点大按当天金额；整根都可悬停、点按 */
-.tl.dragging .tl-day {
-  pointer-events: none;
+/* 按日聚合（稠密时）：当天最大一笔的图标，右下角写当天笔数；提示用下面的 .tl-tip，不用 data-tip */
+.tl-day.on {
+  z-index: 3;
+  opacity: 1;
 }
-.tl-day {
-  position: absolute;
-  width: 12px;
-  padding: 0;
-  border: 0;
-  background: linear-gradient(var(--tl-stem), var(--tl-stem)) center bottom / 1px calc(100% - var(--dot) / 2) no-repeat;
-  --tl-stem: color-mix(in srgb, var(--tl-mute) 45%, transparent);
-  cursor: pointer;
-  z-index: 1;
+.tl-day:focus-visible {
+  outline: var(--hairline) solid var(--focus-ring);
+  outline-offset: 2px;
 }
-.tl-day > i {
+.tl-count {
   position: absolute;
-  top: 0;
-  left: 50%;
-  width: var(--dot);
-  height: var(--dot);
-  transform: translate(-50%, -50%);
+  right: -2px;
+  bottom: -2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
   border-radius: var(--radius-pill);
   background: var(--tl-fg);
-}
-.tl-day.past {
-  opacity: 0.45;
-}
-.tl-day:hover,
-.tl-day.on,
-.tl-day:focus-visible {
-  --tl-stem: var(--tl-fg);
-  opacity: 1;
-  z-index: 3;
-  outline: none;
-}
-.tl-day:focus-visible > i {
-  box-shadow:
-    0 0 0 2px var(--tl-card),
-    0 0 0 3px var(--focus-ring, var(--ring, var(--tl-fg)));
+  color: var(--tl-card);
+  box-shadow: 0 0 0 1.5px var(--tl-card);
+  font-size: var(--fs-1);
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  width: auto !important;
+  height: 16px !important;
 }
 
 /* 按日聚合的提示：挂在 body 上，不被时间线的滚动层裁掉；配色与图标提示一致 */

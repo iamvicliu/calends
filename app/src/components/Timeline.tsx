@@ -35,11 +35,6 @@ const LEVELS = 3; // 同一处最多往上叠三层，再多的折成「+N」
 const AXIS = 140;
 /** 右端：今天往后一年（未来的扣款看一年就够） */
 const AHEAD_MONTHS = 12;
-/** 按日聚合时：圆点直径（不超过一天的宽度，相邻两天不重叠）与竖线最高处（最高的点也低于右上角「今天」按钮，手机上按钮高 40px） */
-const DOT_MIN = 5;
-const DOT_MAX = DAY - 1;
-const STEM_MIN = 10;
-const STEM_MAX = 92;
 /** 只挂载视口附近的图标：按这个宽度分块，滚过一块才重新挑选；两侧各留一块余量 */
 const CHUNK = 1200;
 
@@ -74,7 +69,7 @@ export function Timeline({
     const groups = load(from, to).sort((p, q) => p.date.localeCompare(q.date));
     // 逐个放图标：找最低一层、与该层上一个图标不重叠的位置
     const last = Array<number>(LEVELS).fill(-Infinity);
-    const placed: Array<{ it: TimelineItem; date: string; x: number; level: number }> = [];
+    const placed: Array<{ it: TimelineItem; date: string; x: number; level: number; g?: TimelineGroup }> = [];
     const overflow = new Map<string, number>();
     for (const g of groups) {
       const x = xOf(g.date);
@@ -94,28 +89,26 @@ export function Timeline({
       if (d >= from) months.push({ x: xOf(d), label: d.slice(5, 7) === '01' ? yearLabel(d) : monthLabel(d.slice(0, 7), { year: false }) });
     }
     const monday = (8 - new Date(from).getUTCDay()) % 7;
-    // 稠密判定：图标叠满三层仍放不下（会出现「+N」）时，整条改成按日聚合——每天一个圆点，
-    // 竖线高度与圆点大小按当天金额（面积比例，取平方根）；明细放在悬停 / 点按的提示里
-    const dense = overflow.size > 0;
-    const weight = (g: TimelineGroup) => g.items.reduce((s, it) => s + (Number.isFinite(it.value) ? Math.max(0, it.value!) : 0), 0);
-    const top = Math.max(0, ...groups.map(weight));
-    const days = dense
-      ? groups.map((g) => {
-          const k = top > 0 ? Math.sqrt(weight(g) / top) : 0;
-          return { g, x: xOf(g.date), dot: Math.round(DOT_MIN + k * (DOT_MAX - DOT_MIN)), stem: Math.round(STEM_MIN + k * (STEM_MAX - STEM_MIN)) };
-        })
-      : [];
-    const icons = dense ? [] : placed;
-    return {
-      xOf,
-      placed: icons,
-      overflow: dense ? new Map<string, number>() : overflow,
-      months,
-      days,
-      dots: [...new Set(icons.map((p) => p.date))],
-      width: xOf(to),
-      monday,
-    };
+    // 稠密判定：图标叠满三层仍放不下（会出现「+N」）时，改成每天只放一个图标——当天金额最大的那笔，
+    // 角上写当天笔数；三层轮流放下每天一个 30px 图标（3 × 12px ≥ 30 + 4），不再出现「+N」。明细放在悬停 / 点按的提示里
+    if (overflow.size) {
+      const worth = (it: TimelineItem) => (Number.isFinite(it.value) ? it.value! : -1);
+      last.fill(-Infinity);
+      placed.length = 0;
+      overflow.clear();
+      for (const g of groups) {
+        const x = xOf(g.date);
+        const it = g.items.reduce((a, b) => (worth(b) > worth(a) ? b : a));
+        const level = last.findIndex((l) => x - l >= ICON + 4);
+        if (level < 0) {
+          overflow.set(g.date, g.items.length);
+          continue;
+        }
+        last[level] = x;
+        placed.push({ it, date: g.date, x, level, g });
+      }
+    }
+    return { xOf, placed, overflow, months, dots: [...new Set(placed.map((p) => p.date))], width: xOf(to), monday };
   }, [from, to, load]);
 
   const center = (smooth = false) => {
@@ -213,7 +206,7 @@ export function Timeline({
     setTimeout(() => (drag.current = null), 0);
   };
 
-  const { xOf, placed, overflow, months, days, dots, width, monday } = layout;
+  const { xOf, placed, overflow, months, dots, width, monday } = layout;
   const near = (x: number) => x >= span[0] && x <= span[1];
 
   // 按日聚合的提示：悬停 / 聚焦时只读显示；点按（含触屏）后固定，里面的订阅可点开，Esc 或点别处关闭
@@ -285,52 +278,47 @@ export function Timeline({
           <div className="tl-today" style={{ left: xOf(today) }}>
             <span>{t('common.today')}</span>
           </div>
-          {days
-            .filter((d) => near(d.x))
-            .map(({ g, x, dot, stem }) => (
-              <button
-                key={`day-${g.date}`}
-                type="button"
-                className={`tl-day ${g.date < today ? 'past' : ''} ${tip?.g === g ? 'on' : ''}`}
-                style={{ left: x - DAY / 2, top: AXIS - stem - dot / 2, height: stem + dot / 2, '--dot': `${dot}px` } as Record<string, string | number>}
-                aria-label={[md(g.date), g.total, ...g.items.map((it) => `${it.name} ${it.amount}`)].filter(Boolean).join('\n')}
-                aria-describedby={tip?.g === g ? tipId : undefined}
-                aria-expanded={g.items.length > 1 ? tip?.g === g && tip.pinned : undefined}
-                onMouseEnter={(e) => tip?.pinned || showTip(g, e.currentTarget, false)}
-                onMouseLeave={() => tip?.pinned || setTip(null)}
-                onFocus={(e) => tip?.pinned || showTip(g, e.currentTarget, false)}
-                onBlur={(e) => tip?.pinned || tipBox.current?.contains(e.relatedTarget as Node) || setTip(null)}
-                onClick={(e) => {
-                  // 只有一笔：直接打开，与图标一致；多笔：固定提示，从里面挑
-                  if (g.items.length === 1 && g.items[0].onClick) {
-                    setTip(null);
-                    g.items[0].onClick();
-                  } else if (tip?.g === g && tip.pinned) closeTip();
-                  else showTip(g, e.currentTarget, true);
-                }}
-              >
-                <i />
-              </button>
-            ))}
           {placed
             .filter((p) => near(p.x))
-            .map(({ it, date, x, level }) => (
-              <button
-                key={it.key}
-                type="button"
-                className={`tl-icon copy-tooltip ${date < today ? 'past' : ''}`}
-                style={
-                  { left: x - ICON / 2, top: AXIS - 14 - ICON - level * (ICON + 4), '--stem': `${14 + level * (ICON + 4)}px` } as Record<
-                    string,
-                    string | number
+            .map(({ it, date, x, level, g }) => {
+              const style = { left: x - ICON / 2, top: AXIS - 14 - ICON - level * (ICON + 4), '--stem': `${14 + level * (ICON + 4)}px` } as Record<
+                string,
+                string | number
+              >;
+              // 聚合后的一天有多笔：图标是当天最大的一笔，角标写笔数，悬停 / 点按看当天明细
+              if (g && g.items.length > 1)
+                return (
+                  <button
+                    key={`day-${date}`}
+                    type="button"
+                    className={`tl-icon tl-day ${date < today ? 'past' : ''} ${tip?.g === g ? 'on' : ''}`}
+                    style={style}
+                    aria-label={[md(date), g.total, ...g.items.map((i) => `${i.name} ${i.amount}`)].filter(Boolean).join('\n')}
+                    aria-describedby={tip?.g === g ? tipId : undefined}
+                    aria-expanded={tip?.g === g && tip.pinned}
+                    onMouseEnter={(e) => tip?.pinned || showTip(g, e.currentTarget, false)}
+                    onMouseLeave={() => tip?.pinned || setTip(null)}
+                    onFocus={(e) => tip?.pinned || showTip(g, e.currentTarget, false)}
+                    onBlur={(e) => tip?.pinned || tipBox.current?.contains(e.relatedTarget as Node) || setTip(null)}
+                    onClick={(e) => (tip?.g === g && tip.pinned ? closeTip() : showTip(g, e.currentTarget, true))}
                   >
-                }
-                data-tip={`${md(date)}\n${it.name}\n${it.amount}`}
-                onClick={() => it.onClick?.()}
-              >
-                {it.icon}
-              </button>
-            ))}
+                    {it.icon}
+                    <span className="tl-count num">{g.items.length}</span>
+                  </button>
+                );
+              return (
+                <button
+                  key={it.key}
+                  type="button"
+                  className={`tl-icon copy-tooltip ${date < today ? 'past' : ''}`}
+                  style={style}
+                  data-tip={`${md(date)}\n${it.name}\n${it.amount}`}
+                  onClick={() => it.onClick?.()}
+                >
+                  {it.icon}
+                </button>
+              );
+            })}
           {[...overflow]
             .filter(([d]) => near(xOf(d)))
             .map(([d, n]) => (
