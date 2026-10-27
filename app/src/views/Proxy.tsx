@@ -339,44 +339,46 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
         )}
       </Toolbar>
       <div className="page fade-in stack">
-        {/* 与卡片同一套口径：已代付、已收回、盈亏；还有没收回的才加一格待收 */}
-        <MetricCards>
-          <Metric
-            label={t('proxy.paidPeriods', { count: sum.count })}
-            value={<FxAmount total={sum.partial.charged} ccy={base} direction={-1} />}
-            note={
-              totalNote(sum.partial.charged) ||
-              (sum.next ? t('proxy.page.liveNext', { count: sum.live, date: cnDate(sum.next) }) : t('proxy.page.subs', { count: sum.subs.length }))
-            }
-          />
-          <Metric
-            label={t('proxy.received')}
-            value={<FxAmount total={sum.partial.received} ccy={base} direction={1} />}
-            valueStyle={{ color: 'var(--green)' }}
-            note={totalNote(sum.partial.received) || (sum.lastIn ? t('proxy.page.lastIn', { date: cnDateFull(sum.lastIn) }) : t('proxy.page.noneIn'))}
-          />
-          <Metric
-            label={t('family.strip.profit')}
-            value={Math.abs(sum.diff) < 0.5 ? t('proxy.table.even') : <FxAmount total={sum.partial.diff} ccy={base} direction={1} />}
-            valueStyle={{ color: sum.partial.diff.incomplete || Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}
-            note={
-              // 持平时平均每期是 ±0，改写口径说明，不出现 −¥0.00
-              sum.partial.diff.incomplete
-                ? totalNote(sum.partial.diff)
-                : sum.closedCount && Math.abs(sum.diff) >= 0.5
-                  ? t('proxy.page.diffAvg', { count: sum.closedCount, amount: flow(sum.diff / sum.closedCount, base) })
-                  : t('proxy.page.diffSub')
-            }
-          />
-          {sum.owedCount > 0 && (
+        {/* 与卡片同一套口径：已代付、已收回、盈亏；还有没收回的才加一格待收。没有代付时只留空状态 */}
+        {sum.subs.length > 0 && (
+          <MetricCards>
             <Metric
-              label={t('proxy.owed')}
-              value={<FxAmount plain total={sum.partial.owed} ccy={base} direction={1} />}
-              valueStyle={{ color: 'var(--orange)' }}
-              note={totalNote(sum.partial.owed) || t('proxy.page.owedSub', { count: sum.owedCount })}
+              label={t('proxy.paidPeriods', { count: sum.count })}
+              value={<FxAmount total={sum.partial.charged} ccy={base} direction={-1} />}
+              note={
+                totalNote(sum.partial.charged) ||
+                (sum.next ? t('proxy.page.liveNext', { count: sum.live, date: cnDate(sum.next) }) : t('proxy.page.subs', { count: sum.subs.length }))
+              }
             />
-          )}
-        </MetricCards>
+            <Metric
+              label={t('proxy.received')}
+              value={<FxAmount total={sum.partial.received} ccy={base} direction={1} />}
+              valueStyle={{ color: 'var(--green)' }}
+              note={totalNote(sum.partial.received) || (sum.lastIn ? t('proxy.page.lastIn', { date: cnDateFull(sum.lastIn) }) : t('proxy.page.noneIn'))}
+            />
+            <Metric
+              label={t('family.strip.profit')}
+              value={Math.abs(sum.diff) < 0.5 ? t('proxy.table.even') : <FxAmount total={sum.partial.diff} ccy={base} direction={1} />}
+              valueStyle={{ color: sum.partial.diff.incomplete || Math.abs(sum.diff) < 0.5 ? undefined : sum.diff > 0 ? 'var(--green)' : 'var(--red)' }}
+              note={
+                // 持平时平均每期是 ±0，改写口径说明，不出现 −¥0.00
+                sum.partial.diff.incomplete
+                  ? totalNote(sum.partial.diff)
+                  : sum.closedCount && Math.abs(sum.diff) >= 0.5
+                    ? t('proxy.page.diffAvg', { count: sum.closedCount, amount: flow(sum.diff / sum.closedCount, base) })
+                    : t('proxy.page.diffSub')
+              }
+            />
+            {sum.owedCount > 0 && (
+              <Metric
+                label={t('proxy.owed')}
+                value={<FxAmount plain total={sum.partial.owed} ccy={base} direction={1} />}
+                valueStyle={{ color: 'var(--orange)' }}
+                note={totalNote(sum.partial.owed) || t('proxy.page.owedSub', { count: sum.owedCount })}
+              />
+            )}
+          </MetricCards>
+        )}
         {sum.subs.length === 0 ? (
           <div className="card empty">
             <b>{t('proxy.page.emptyTitle')}</b>
