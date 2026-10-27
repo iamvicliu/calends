@@ -1180,9 +1180,21 @@ export function collectionAnchor(s: Subscription): string {
   return starts.sort()[0] ?? s.start;
 }
 
-/** 包含 day 的对齐期。每次从原始 anchor 加月，短月夹紧不会累积漂移。成员钉了自己的基准日（车改过收款日）时用它。 */
+/**
+ * 某天适用的收款基准日：成员钉了自己的基准日（车改过收款日）时用它；
+ * 车的收款日（collectFrom）只对生效日起的期起作用，之前的期沿用开始合租时的节奏，不会倒推切出碎期
+ */
+function anchorOn(s: Subscription, m: ShareMember, day: string): string {
+  if (m.anchor) return m.anchor;
+  const from = s.share?.collectFrom;
+  if (!from || day >= from) return collectionAnchor(s);
+  const before = collectionAnchor({ ...s, share: { ...s.share!, collectFrom: undefined } });
+  return before < from ? before : from;
+}
+
+/** 包含 day 的对齐期。每次从原始 anchor 加月，短月夹紧不会累积漂移。 */
 export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
-  const anchor = m.anchor ?? collectionAnchor(s);
+  const anchor = anchorOn(s, m, day);
   const every = memberBillMonths(s, m, memberSince(s, m));
   const monthIndex = (d: string) => Number(d.slice(0, 4)) * 12 + Number(d.slice(5, 7));
   let k = Math.floor((monthIndex(day) - monthIndex(anchor)) / every);
@@ -1192,6 +1204,9 @@ export function collectionPeriod(s: Subscription, m: ShareMember, day: string) {
   const next = addMonths(anchor, (k + 1) * every);
   return { from, until: addDays(next, -1), next };
 }
+
+/** 重新起算前剩下的天数不超过 7 天、也不超过一期的十分之一时，并进前一期（月付最多 3 天） */
+const STUB_DAYS = 7;
 
 /**
  * 成员的应收期：从加入日起按条款切——首期对齐车的收款节奏，之后按成员自己的周期接着切；
@@ -1229,7 +1244,7 @@ function collectionDayOf(s: Subscription, m: ShareMember, from: string): number 
     .filter((r) => r <= from)
     .sort()
     .at(-1);
-  return Number((restart ?? m.anchor ?? collectionAnchor(s)).slice(8, 10));
+  return Number((restart ?? anchorOn(s, m, from)).slice(8, 10));
 }
 /** 把某天挪到同月的第 day 号（短月夹到月底），只往后挪 */
 function onCollectionDay(date: string, day: number): string {
@@ -1251,7 +1266,11 @@ export function memberCollection(s: Subscription, m: ShareMember, from: string, 
       : onCollectionDay(addMonths(from, rate.billEvery), collectionDayOf(s, m, from));
   // 收款节奏从某天起重新起算（比如订阅断过又在别的日子续上）：这一期截到那天前一天，按天折算
   const restart = (m.restarts ?? []).filter((r) => r > from && r < natural).sort()[0];
-  const next = restart ?? natural;
+  // 期满后不到半个月就重新起算：中间剩下的几天并进这一期，不单独切出按天折算的碎期
+  const stub = (r: string) => diffDays(natural, r) <= Math.min(STUB_DAYS, diffDays(from, natural) / 10);
+  // 旧版切法（legacyDrift）只用来对齐迁移前的期，保持原样不并
+  const stretch = restart || legacyDrift ? undefined : (m.restarts ?? []).filter((r) => r > natural && stub(r)).sort()[0];
+  const next = restart ?? stretch ?? natural;
   const until = isFirst && m.left && m.left <= next ? addDays(m.left, -1) : addDays(next, -1);
   const partial = (isFirst && (joined > first.from || until < first.until)) || !!restart;
   let amount = rate.amount;

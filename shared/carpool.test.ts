@@ -652,3 +652,48 @@ test('一笔收款分到各期按最小单位取整，合计等于实收', async
   const yen = receiptShares({ id: 'r', date: '2026-01-01', amount: 7000, currency: 'JPY', periods: ['a', 'b', 'c'] }, periods);
   assert.deepEqual([...yen.values()], [2334, 2333, 2333]);
 });
+
+test('碎期：车的收款日只对生效日起的期起作用，重新起算前剩下几天的并进前一期，月付半个月仍单独按天折算', () => {
+  // 2021 年 14 号起按季收，2022 年 10 号起改半年；车的收款日 2025-01-17 才定下来
+  const member = (o = {}) => ({
+    id: 'm',
+    name: 'M',
+    share: 0,
+    joined: '2021-04-14',
+    restarts: ['2021-07-18', '2021-10-10', '2025-01-17'],
+    feeHistory: [
+      { from: '2021-04-14', fee: 20, currency: 'CNY', billEvery: 3 },
+      { from: '2022-01-10', fee: 40, currency: 'CNY', billEvery: 6 },
+    ],
+    ...o,
+  });
+  const s = (m = member()): Subscription => ({
+    id: 's',
+    name: 'Fictional',
+    category: 'Tools',
+    tags: [],
+    price: 60,
+    currency: 'CNY',
+    start: '2021-04-14',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 6, since: '2021-04-14', collectFrom: '2025-01-17', members: [m] },
+  });
+  const plan = s();
+  const periods = memberPeriods(plan, plan.share!.members[0], '2025-07-17', 'CNY').map((p) => `${p.from}..${p.until} ${p.due}`);
+  // 加入时不按 2025 年才定的 17 号倒推出 3 天碎期；07-17 那 1 天、2025-01-10 起那 7 天都并进前一期，整期收全价
+  assert.deepEqual(periods.slice(0, 2), ['2021-04-14..2021-07-17 20', '2021-07-18..2021-10-09 18.26']);
+  assert.ok(periods.includes('2024-07-10..2025-01-16 40'));
+  assert.ok(periods.includes('2025-01-17..2025-07-16 40'));
+  assert.ok(periods.every((p) => !/ (0\.\d+|1\.55)$/.test(p)));
+
+  // 月付改到月中：剩下的 14 天远超一期的十分之一，仍单独按天折算
+  const monthly = s(member({ joined: '2026-01-01', restarts: ['2026-03-15'], feeHistory: [{ from: '2026-01-01', fee: 10, currency: 'CNY', billEvery: 1 }] }));
+  const keys = memberPeriods(
+    { ...monthly, share: { ...monthly.share!, since: '2026-01-01', collectFrom: '2026-01-01' } },
+    monthly.share!.members[0],
+    '2026-04-01',
+    'CNY',
+  ).map((p) => p.from);
+  assert.deepEqual(keys, ['2026-01-01', '2026-02-01', '2026-03-01', '2026-03-15']);
+});
