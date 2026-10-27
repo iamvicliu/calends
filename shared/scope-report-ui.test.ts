@@ -2931,54 +2931,29 @@ test('phase2 rendered ledger sections and assistant summaries retain their froze
   assert.deepEqual(normalized, JSON.parse(readFileSync(path, 'utf8')));
 });
 
-test('detail accounts and phone numbers start masked, can be revealed, and copy the full stored value', async () => {
-  for (const [category, account] of [
-    ['Tools', 'fictional@example.invalid'],
-    ['phone', '+65 8123 4567'],
-  ]) {
-    const copied: string[] = [];
-    const state = { ...st, subscriptions: [] };
-    const sub: Subscription = {
-      id: 'private',
-      name: 'Fictional account',
-      category,
-      tags: [],
-      account,
-      price: 10,
-      currency: 'USD',
-      cycle: { unit: 'month', every: 1 },
-      start: '2026-01-01',
-      status: 'active',
-    };
-    const h = harness(
-      '../app/src/views/Detail.tsx',
-      'Summary',
-      {},
-      {
-        presetCat: () => 'phone',
-        detailHistoryEnd,
-        copyText: async (value: string) => {
-          copied.push(value);
-        },
-        Eye: 'Eye',
-        EyeOff: 'EyeOff',
-      },
-    );
-    let nodes = h.render('Summary', { sub, state, today });
-    const value = () => nodes.find((n) => Object.hasOwn(n.props, 'data-private-account'))!;
-    const toggle = () => nodes.find((n) => Object.hasOwn(n.props, 'aria-pressed'))!;
-    assert.equal(value().props.className, 'car-private');
-    assert.equal(toggle().props['aria-label'], 'family.sheet.showPersonal');
-    await nodes.find((n) => n.props.className === 'dt-copy')!.props.onClick();
-    assert.deepEqual(copied, [account]);
-    toggle().props.onClick();
-    nodes = h.render('Summary', { sub, state, today });
-    assert.equal(value().props.className, undefined);
-    assert.equal(toggle().props['aria-label'], 'family.sheet.hidePersonal');
-    toggle().props.onClick();
-    nodes = h.render('Summary', { sub, state, today });
-    assert.equal(value().props.className, 'car-private');
-  }
+test('detail leaves the account to the editor and renders notes in a bottom panel hidden from PNG', () => {
+  const state = { ...st, subscriptions: [] };
+  const sub: Subscription = {
+    id: 'private',
+    name: 'Fictional account',
+    category: 'Tools',
+    tags: [],
+    account: 'fictional@example.invalid',
+    notes: 'Fictional note',
+    price: 10,
+    currency: 'USD',
+    cycle: { unit: 'month', every: 1 },
+    start: '2026-01-01',
+    status: 'active',
+  };
+  const h = harness('../app/src/views/Detail.tsx', 'Summary', {}, { detailHistoryEnd });
+  const summary = h.render('Summary', { sub, state, today });
+  assert.ok(!JSON.stringify(summary.map((n) => n.props.children ?? null)).includes(sub.account!));
+  assert.ok(!JSON.stringify(summary.map((n) => n.props.text ?? null)).includes(sub.notes!));
+  const note = harness('../app/src/views/Detail.tsx', 'NoteBlock', {}, {}).render('NoteBlock', { sub });
+  assert.equal(note[0].props['data-snapshot-hide'], true);
+  assert.ok(note.some((n) => n.props.text === sub.notes));
+  assert.deepEqual(harness('../app/src/views/Detail.tsx', 'NoteBlock', {}, {}).render('NoteBlock', { sub: { ...sub, notes: undefined } }), []);
 });
 
 test('detail PNG delegates privacy and cleanup to the shared renderer and excludes only actions', async () => {

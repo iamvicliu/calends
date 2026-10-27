@@ -156,31 +156,26 @@ test('card PNG uses a desktop layout, preserves chart pan and proxies images wit
   assert.equal(h.disposed(), 1);
 });
 
-test('hidden notes/actions are removed before measurement; accounts are forced private and transfer explanations survive', async () => {
+test('hidden notes/actions are removed before measurement and transfer explanations survive', async () => {
   const root = new Element();
   for (const cls of ['note', 'hint', 'action']) {
     const child = root.appendChild(new Element());
     child.className = cls;
     if (cls !== 'hint') child.setAttribute('data-snapshot-hide', '');
   }
-  const account = root.appendChild(new Element());
-  account.setAttribute('data-private-account', '');
   const transfer = root.appendChild(new Element());
   transfer.textContent = '从他人处收购';
   const h = harness();
   let prepared = false;
   await h.snapshot(root, {
     prepare: (clone) => {
-      assert.equal(clone.children.length, 2);
-      assert.equal(clone.children[0].classList.contains('car-private'), true);
-      assert.equal(clone.children[0].getAttribute('aria-hidden'), 'true');
+      assert.equal(clone.children.length, 1);
       prepared = true;
     },
   });
   assert.equal(prepared, true);
-  assert.equal(h.capture().clone.children[1].textContent, '从他人处收购');
-  assert.equal(root.children.length, 5);
-  assert.equal(account.classList.contains('car-private'), false);
+  assert.equal(h.capture().clone.children[0].textContent, '从他人处收购');
+  assert.equal(root.children.length, 4);
 });
 
 test('desktop and phone sources export at the same width, retaining named ancestors and theme', async () => {

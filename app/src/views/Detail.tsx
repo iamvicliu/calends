@@ -34,7 +34,7 @@ import { Timeline } from './detail/ChargeTimeline.tsx';
 import { Events } from './detail/Events.tsx';
 import { Summary } from './detail/Summary.tsx';
 import { Notices } from './detail/Notices.tsx';
-import { ShareCard } from './detail/Summary.tsx';
+import { NoteBlock, ShareCard } from './detail/Summary.tsx';
 import { Charges } from './detail/Ledgers.tsx';
 
 /**
@@ -223,7 +223,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
       <div className="dt-body dt-flow">
         <Kpis sub={sub} state={state} today={today} history={history} />
         {/* 指标下面：本期进度与属性（不加标题），然后是扣款走势、提醒和记录 */}
-        <Summary key={sub.id} sub={sub} state={state} today={today} />
+        <Summary key={sub.id} sub={sub} today={today} />
         {!compact && <Timeline sub={sub} state={state} today={today} history={history} />}
         <Notices sub={sub} state={state} today={today} />
         {/* 合租比扣款记录重要，放在前面 */}
@@ -231,6 +231,7 @@ export function Detail({ sub, state, today, onEdit, onClose }: { sub: Subscripti
         {charges}
         <Transfers sub={sub} state={state} onRow={(index) => setTransfer({ index })} onAdd={() => setTransfer({})} />
         {events}
+        <NoteBlock sub={sub} />
       </div>
 
       {/* 挂到 body：详情本身在弹层里，嵌套的弹层放在里面会被裁切 */}

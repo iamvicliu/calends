@@ -538,6 +538,7 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
   const Detail = load(file, 'Detail', extractUiFunction(new URL(file, import.meta.url), 'Detail'), {
     ...deps,
     Summary,
+    NoteBlock: empty,
     Kpis,
     Charges,
     Maximize2: empty,

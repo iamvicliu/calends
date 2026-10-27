@@ -896,10 +896,6 @@
 .dt-summary .dt-prop dt {
   font-size: var(--fs-1);
 }
-/* 账号多是长邮箱，占两列，不在字母中间断行 */
-.dt-summary .dt-prop:has(.dt-copy) {
-  grid-column: span 2;
-}
 /* 窄时指标卡两列、间距 8、内距 12，信息卡同样换算：列距 8 + 24 */
 @container detail-body (max-width: 520px) {
   .dt-panel.dt-glance {
@@ -915,9 +911,6 @@
 }
 .dt-summary .dt-prop dd {
   align-items: flex-start;
-  text-align: left;
-}
-.dt-summary .dt-copy {
   text-align: left;
 }
 .dt-glance .dt-note {
@@ -951,11 +944,6 @@
 }
 .dt-notices .dt-prop dt {
   font-size: var(--fs-1);
-}
-
-.dt-copy {
-  white-space: normal;
-  overflow-wrap: anywhere;
 }
 
 /* 续费卡：下次扣款的日期与金额同一行，下面按周期给节奏柱或本期进度 */
@@ -1064,16 +1052,9 @@
   font-size: var(--fs-1);
   color: var(--label-2);
 }
-.dt-about-grid .dt-prop dd,
-.dt-about-grid .dt-copy {
+.dt-about-grid .dt-prop dd {
   align-items: flex-start;
   text-align: left;
-}
-.dt-about-grid .dt-prop:has(.dt-copy) {
-  grid-column: span 2;
-}
-.dt-about .dt-note {
-  margin-top: 14px;
 }
 .dt-oc-reason {
   margin: 0 0 4px !important;
@@ -1137,14 +1118,17 @@
 .dt-about-grid:empty {
   display: none;
 }
-.dt-flow > .dt-about:not(:has(.dt-period, .dt-prop, .dt-note)) {
+.dt-flow > .dt-about:not(:has(.dt-period, .dt-prop)) {
   display: none;
 }
 
 /* 本期：详情开头一条进度，试用期绿色、赠送期青色；刻度为最晚取消（橙）与扣款日（墨） */
 .dt-period {
   --fill-c: var(--chart-ink);
-  margin-bottom: 18px;
+}
+/* 下面有属性时才隔开；属性为空时整栏隐藏，不留空白 */
+.dt-period + .dt-about-grid {
+  margin-top: 18px;
 }
 .dt-period.trial {
   --fill-c: var(--green-9);
@@ -1329,26 +1313,11 @@
   }
 }
 
-/* 详情里的备注：标签在上（与属性一致），正文在下；有属性时与上面隔一点距离 */
-.dt-note-block {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.dt-about-grid:not(:empty) + .dt-note-block,
-.dt-period + .dt-note-block {
-  margin-top: 14px;
-}
-.dt-note-k {
-  color: var(--label-2);
-  font-size: var(--fs-1);
-}
-.dt-note-block .dt-note {
+/* 详情最下面的备注：卡片已有标题，不再加便签图标 */
+.dt-note-panel .dt-note {
   margin-top: 0;
 }
-
-/* 备注已有标题，不再加便签图标 */
-.dt-note-block .dt-note > svg {
+.dt-note-panel .dt-note > svg {
   display: none;
 }
 

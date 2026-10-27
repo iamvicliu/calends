@@ -1,14 +1,9 @@
-import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
-import { IconButton } from '../../components/ui.tsx';
 import { renewalDates } from '../../../../shared/billing.ts';
 import { addDays, billingPeriod, diffDays, effectiveStatus, memberAboard, phaseSubs } from '../../../../shared/billing.ts';
 import { cnDateAuto, cnDateFull } from '../../../../shared/format.ts';
 import type { AppState, ShareMember, Subscription } from '../../../../shared/types.ts';
 import { CarMembers } from '../carpool/Members.tsx';
 import { carRule } from '../../../../shared/carpool.ts';
-import { presetCat } from '../../derive.ts';
-import { copyText } from '../../toast.ts';
 import { t } from '../../../../shared/i18n.ts';
 import { detailForecast, detailHistoryEnd } from '../detail-data.ts';
 import { Note, Panel, Prop } from '../../components/DetailKit.tsx';
@@ -62,9 +57,8 @@ export function PeriodBar({ sub, today }: { sub: Subscription; today: string }) 
   );
 }
 
-/** 详情：支付方式、订阅期间、账号、试用截止、付给谁与备注；金额、周期、分类、地区在标题，下次扣款在顶部四格 */
-export function Summary({ sub, state, today }: { sub: Subscription; state: AppState; today: string }) {
-  const [masked, setMasked] = useState(true);
+/** 详情：本期进度、订阅期间、试用截止与付给谁；账号只在编辑里，备注放在详情最下面 */
+export function Summary({ sub, today }: { sub: Subscription; today: string }) {
   const st = effectiveStatus(sub, today);
   const lifetime = sub.cycle.unit === 'lifetime' && phaseSubs(sub).length === 1;
   const live = !['ended', 'terminated', 'lifetime', 'paused'].includes(st);
@@ -79,45 +73,24 @@ export function Summary({ sub, state, today }: { sub: Subscription; state: AppSt
             {cnDateFull(sub.start)} – {end.unknown ? t('detail.field.endedUnknown') : end.date ? cnDateFull(end.date) : t('detail.field.present')}
           </Prop>
         )}
-        {sub.account && (
-          <Prop k={sub.category === presetCat('phone') ? t('editor.field.phone') : t('editor.field.account')}>
-            {/* 点一下复制，登录时直接粘贴 */}
-            <span className="icon-text">
-              <button
-                type="button"
-                className="dt-copy"
-                aria-label={t('detail.copy')}
-                title={t('detail.copy')}
-                onClick={() => void copyText(sub.account!, t('detail.copied'))}
-              >
-                <span data-private-account className={masked ? 'car-private' : undefined} aria-hidden={masked || undefined}>
-                  {sub.account}
-                </span>
-              </button>
-              <IconButton
-                data-snapshot-hide
-                aria-label={t(masked ? 'family.sheet.showPersonal' : 'family.sheet.hidePersonal')}
-                aria-pressed={masked}
-                onClick={() => setMasked(!masked)}
-              >
-                {masked ? <EyeOff size={17} /> : <Eye size={17} />}
-              </IconButton>
-            </span>
-          </Prop>
-        )}
         {/* 试用中顶部已写试用结束后的首次扣款，这里不再单列试用截止 */}
         {sub.trialEnd && st !== 'trial' && <Prop k={t('detail.field.trialEnd')}>{cnDateFull(sub.trialEnd)}</Prop>}
         {/* 加入别人的合租只有「付给谁」一项，放在详情里，不单独成卡 */}
         {sub.share?.role === 'member' && <Prop k={t('detail.share.payTo')}>{sub.share.ownerName ?? t('detail.share.host')}</Prop>}
       </dl>
-      {/* 备注单独带一个标题，与上面的属性同一种「标签在上」写法，一眼看出这是备注；属私人信息，复制成图片时不带 */}
-      {sub.notes && (
-        <div className="dt-note-block" data-snapshot-hide>
-          <span className="dt-note-k">{t('editor.field.notes')}</span>
-          <Note text={sub.notes} />
-        </div>
-      )}
     </Panel>
+  );
+}
+
+/** 备注不关键，放在详情最下面；属私人信息，复制成图片时不带 */
+export function NoteBlock({ sub }: { sub: Subscription }) {
+  if (!sub.notes) return null;
+  return (
+    <div data-snapshot-hide>
+      <Panel title={t('editor.field.notes')} className="dt-note-panel">
+        <Note text={sub.notes} />
+      </Panel>
+    </div>
   );
 }
 

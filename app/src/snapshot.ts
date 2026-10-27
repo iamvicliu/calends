@@ -132,10 +132,6 @@ export async function snapshot(el: HTMLElement, opts: SnapshotOptions = {}) {
         node.style.transition = 'none';
       }
     });
-    clone.querySelectorAll<HTMLElement>('[data-private-account]').forEach((node) => {
-      node.classList.add('car-private');
-      node.setAttribute('aria-hidden', 'true');
-    });
     const images = [...clone.querySelectorAll<HTMLImageElement>('img')];
     images.forEach((image) => {
       image.loading = 'eager';

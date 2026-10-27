@@ -8858,19 +8858,6 @@ img.mm-flag {
 .ed-account::placeholder {
   color: var(--label-3);
 }
-.dt-copy {
-  border: 0;
-  background: none;
-  padding: 0;
-  font: inherit;
-  color: inherit;
-  cursor: copy;
-  text-decoration: underline dotted transparent;
-  text-underline-offset: 3px;
-}
-.dt-copy:hover {
-  text-decoration-color: var(--label-3);
-}
 
 /* 设置 · 侧边栏模块：把手 + 名称 + 开关 */
 .nav-row {
