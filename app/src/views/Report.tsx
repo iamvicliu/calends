@@ -56,7 +56,7 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
         {/* 先看钱的全貌（现金与真实成本、钱花在哪），再看本月变动与体检 */}
         <CashCard state={state} today={today} />
         <Composition state={state} today={today} onOpen={onOpen} />
-        <div className="grid g-2">
+        <div className="grid g-2 report-pair">
           <Waterfall state={state} today={today} onOpen={onOpen} />
           <Checkup state={state} today={today} onOpen={onOpen} />
         </div>
@@ -248,8 +248,10 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
             <span className="wf-name">{it.sub.name}</span>
             <em>{kindLabel(it.kind)}</em>
             {!singleItem && (
+              // 新增、停用是生命周期事件，只写月额不带涨跌箭头；升降级才有方向
               <b className="num">
-                {it.delta > 0 ? '↑' : '↓'} {money(Math.abs(it.delta), base, { compact: true })}
+                {it.kind === 'expansion' ? '↑ ' : it.kind === 'contraction' ? '↓ ' : ''}
+                {money(Math.abs(it.delta), base, { compact: true })}
               </b>
             )}
           </button>
