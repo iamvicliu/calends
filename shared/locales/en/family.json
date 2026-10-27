@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "Paid {amount}",
     "receiptHint": "When a member pays you, open their details and tap “Record payment”",
-    "tabIn": "Received {count}",
-    "tabOut": "Paid {count}",
+    "tabIn": "{amount} ({count})",
+    "tabInShort": "Received",
+    "tabOut": "{amount} ({count})",
+    "tabOutShort": "Paid",
     "chargeDate": "Charged on",
     "refund": "Refund",
     "noCharges": "No charges yet",

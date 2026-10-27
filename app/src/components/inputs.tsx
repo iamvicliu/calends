@@ -1,6 +1,6 @@
 import { numberFormat } from '../../../shared/intl.ts';
 import './ui.css';
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 import { Switch as AriaSwitch, ToggleButton, ToggleButtonGroup } from 'react-aria-components';
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { currencyDecimals, moneyDecimals, flowSign, symbol } from '../../../shared/format.ts';
@@ -48,7 +48,7 @@ export function Seg<T extends string>({
   disabledKeys,
 }: {
   value: T;
-  options: Array<[T, string]>;
+  options: Array<[T, ReactNode]>;
   onChange: (v: T) => void;
   small?: boolean;
   disabledKeys?: T[];

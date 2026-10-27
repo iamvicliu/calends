@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "Payé {amount}",
     "receiptHint": "Quand un membre paie, ouvrez sa fiche et touchez « Enregistrer un paiement »",
-    "tabIn": "Reçu {count}",
-    "tabOut": "Payé {count}",
+    "tabIn": "{amount} ({count})",
+    "tabInShort": "Reçu",
+    "tabOut": "{amount} ({count})",
+    "tabOutShort": "Payé",
     "chargeDate": "Prélevé le",
     "refund": "Remboursement",
     "noCharges": "Aucun prélèvement",

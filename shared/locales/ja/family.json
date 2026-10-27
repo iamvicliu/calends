@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "支払い {amount}",
     "receiptHint": "入金後、メンバーの詳細を開いて「受取を記録」をタップ",
-    "tabIn": "受取 {count}",
-    "tabOut": "支払い {count}",
+    "tabIn": "{count} 件 {amount}",
+    "tabInShort": "受取",
+    "tabOut": "{count} 件 {amount}",
+    "tabOutShort": "支払い",
     "chargeDate": "引き落とし日",
     "refund": "返金",
     "noCharges": "まだ引き落としはありません",

@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "Bezahlt {amount}",
     "receiptHint": "Wenn ein Mitglied zahlt, öffne seine Details und tippe auf „Zahlung erfassen“",
-    "tabIn": "Erhalten {count}",
-    "tabOut": "Bezahlt {count}",
+    "tabIn": "{amount} ({count})",
+    "tabInShort": "Erhalten",
+    "tabOut": "{amount} ({count})",
+    "tabOutShort": "Bezahlt",
     "chargeDate": "Abgebucht am",
     "refund": "Erstattung",
     "noCharges": "Noch keine Abbuchungen",

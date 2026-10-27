@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "Dibayar {amount}",
     "receiptHint": "Setelah anggota membayar, buka detailnya dan ketuk “Catat pembayaran”",
-    "tabIn": "Diterima {count}",
-    "tabOut": "Dibayar {count}",
+    "tabIn": "{amount} ({count})",
+    "tabInShort": "Diterima",
+    "tabOut": "{amount} ({count})",
+    "tabOutShort": "Dibayar",
     "chargeDate": "Tanggal tagihan",
     "refund": "Refund",
     "noCharges": "Belum ada tagihan",

@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "Pagado {amount}",
     "receiptHint": "Cuando un miembro pague, abre sus datos y toca «Registrar cobro»",
-    "tabIn": "Recibido {count}",
-    "tabOut": "Pagado {count}",
+    "tabIn": "{amount} ({count})",
+    "tabInShort": "Recibido",
+    "tabOut": "{amount} ({count})",
+    "tabOutShort": "Pagado",
     "chargeDate": "Cargado el",
     "refund": "Reembolso",
     "noCharges": "Aún no hay cargos",

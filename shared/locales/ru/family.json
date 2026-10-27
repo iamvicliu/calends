@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "Оплачено {amount}",
     "receiptHint": "Когда участник заплатит, откройте его данные и нажмите «Записать платёж»",
-    "tabIn": "Получено {count}",
-    "tabOut": "Оплачено {count}",
+    "tabIn": "{amount} ({count})",
+    "tabInShort": "Получено",
+    "tabOut": "{amount} ({count})",
+    "tabOutShort": "Оплачено",
     "chargeDate": "Дата списания",
     "refund": "Возврат",
     "noCharges": "Списаний пока нет",

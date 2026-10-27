@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "Ödenen {amount}",
     "receiptHint": "Üye ödeme yaptığında bilgilerini açıp “Ödeme kaydet”e dokunun",
-    "tabIn": "Alınan {count}",
-    "tabOut": "Ödenen {count}",
+    "tabIn": "{amount} ({count})",
+    "tabInShort": "Alınan",
+    "tabOut": "{amount} ({count})",
+    "tabOutShort": "Ödenen",
     "chargeDate": "Ödeme günü",
     "refund": "İade",
     "noCharges": "Henüz ödeme yok",

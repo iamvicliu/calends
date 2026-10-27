@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "지출 {amount}",
     "receiptHint": "돈을 받으면 멤버 상세를 열고 「입금 기록」을 누르세요",
-    "tabIn": "받음 {count}",
-    "tabOut": "결제 {count}",
+    "tabIn": "{count}건 {amount}",
+    "tabInShort": "받음",
+    "tabOut": "{count}건 {amount}",
+    "tabOutShort": "결제",
     "chargeDate": "결제일",
     "refund": "환불",
     "noCharges": "아직 결제 내역이 없습니다",

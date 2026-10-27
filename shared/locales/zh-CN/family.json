@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "付出 {amount}",
     "receiptHint": "收到钱后，打开成员点「记收款」",
-    "tabIn": "收款 {count}",
-    "tabOut": "付款 {count}",
+    "tabIn": "{count} 笔 {amount}",
+    "tabInShort": "收款",
+    "tabOut": "{count} 笔 {amount}",
+    "tabOutShort": "付款",
     "chargeDate": "扣款日",
     "refund": "退款",
     "noCharges": "还没有扣款记录",

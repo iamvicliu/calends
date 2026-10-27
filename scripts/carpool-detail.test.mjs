@@ -107,6 +107,7 @@ function compile(names, extra = {}) {
     PeriodPair: noop,
     PeriodBar: noop,
     periodLive: () => false,
+    TabLabel: noop,
     ...extra,
   };
   // 成员头像统一经过 MemberAvatar（打码在那里处理），每个组件都要带上它

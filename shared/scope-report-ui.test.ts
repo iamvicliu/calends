@@ -2615,7 +2615,14 @@ test('合租成员主表和手机卡片收起已下车成员；展开保留灰�
   );
   // 下车成员的那笔收款仍归入原有账本。
   // 收款 / 付款切换在收付记录卡片的标题右侧
-  assert.ok(nodes.flatMap((n) => all(n.props.aside)).some((n) => n.type === 'Seg' && n.props.options[0][1] === 'family.sheet.tabIn'));
+  assert.ok(
+    nodes
+      .flatMap((n) => all(n.props.aside))
+      .some(
+        (n) =>
+          n.type === 'Seg' && n.props.options[0][1].props.full === 'family.sheet.tabIn' && n.props.options[1][1].props.short === 'family.sheet.tabOutShort',
+      ),
+  );
 });
 
 test('收款表点某一笔直接进入这笔收款的编辑，而不是成员资料', () => {

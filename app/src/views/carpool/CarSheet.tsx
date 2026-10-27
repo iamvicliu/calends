@@ -94,6 +94,15 @@ export function CarSheet({
     // 缺汇率的一笔为 NaN：行与年小计显示「—」
     .map((c) => ({ c, base: chargeBaseOrNaN(state, c) }))
     .reverse();
+  const inTotal = formatTotal(sumTotals(receipts.map((r) => convertedTotal(state, r.p.amount, r.p.currency, r.p.date))), base, { direction: 1 });
+  const outTotal = formatTotal(
+    chargesTotal(
+      state,
+      outs.map((r) => r.c),
+    ),
+    base,
+    { direction: -1 },
+  );
   return (
     <DetailSheet label={t('family.sheet.title')} onClose={onClose}>
       {/* 复制为图片取整张弹窗，收款表与按钮带 data-snapshot-hide 不入图 */}
@@ -214,8 +223,25 @@ export function CarSheet({
                   value={tab}
                   onChange={setTab}
                   options={[
-                    ['in', t('family.sheet.tabIn', { count: receipts.length })],
-                    ['out', t('family.sheet.tabOut', { count: outs.length })],
+                    // 切换上写明笔数与合计，表里不再加合计行；符号与表中金额一致。放不下时只写金额，再放不下只写收款 / 付款
+                    [
+                      'in',
+                      <TabLabel
+                        key="in"
+                        full={t('family.sheet.tabIn', { count: receipts.length, amount: inTotal })}
+                        amount={inTotal}
+                        short={t('family.sheet.tabInShort')}
+                      />,
+                    ],
+                    [
+                      'out',
+                      <TabLabel
+                        key="out"
+                        full={t('family.sheet.tabOut', { count: outs.length, amount: outTotal })}
+                        amount={outTotal}
+                        short={t('family.sheet.tabOutShort')}
+                      />,
+                    ],
                   ]}
                 />
               </span>
@@ -427,5 +453,16 @@ export function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppSta
         </Group>
       </div>
     </Sheet>
+  );
+}
+
+/** 收付切换的标签：三种写法都渲染，按卡片宽度只显示放得下的那种（styles.css 的 .car-ledger 容器查询） */
+function TabLabel({ full, amount, short }: { full: string; amount: string; short: string }) {
+  return (
+    <>
+      <span className="tab-full">{full}</span>
+      <span className="tab-amount">{amount}</span>
+      <span className="tab-short">{short}</span>
+    </>
   );
 }

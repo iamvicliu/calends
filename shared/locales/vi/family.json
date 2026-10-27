@@ -2,8 +2,10 @@
   "sheet": {
     "paidOut": "Đã trả {amount}",
     "receiptHint": "Khi thành viên trả tiền, mở thông tin của họ rồi bấm «Ghi khoản thu»",
-    "tabIn": "Đã nhận {count}",
-    "tabOut": "Đã trả {count}",
+    "tabIn": "{amount} ({count})",
+    "tabInShort": "Đã nhận",
+    "tabOut": "{amount} ({count})",
+    "tabOutShort": "Đã trả",
     "chargeDate": "Ngày trừ",
     "refund": "Hoàn tiền",
     "noCharges": "Chưa có khoản trừ",
