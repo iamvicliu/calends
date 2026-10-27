@@ -81,5 +81,9 @@
   },
   "list": {
     "none": "Nenhuma pessoa encontrada"
+  },
+  "add": {
+    "saved": "Pessoa adicionada",
+    "exists": "“{name}” já existe"
   }
 }

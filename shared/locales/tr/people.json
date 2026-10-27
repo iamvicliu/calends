@@ -81,5 +81,9 @@
   },
   "list": {
     "none": "Eşleşen kişi yok"
+  },
+  "add": {
+    "saved": "Kişi eklendi",
+    "exists": "“{name}” zaten var"
   }
 }

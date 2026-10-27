@@ -66,5 +66,9 @@
   },
   "list": {
     "none": "Không có người phù hợp"
+  },
+  "add": {
+    "saved": "Đã thêm người",
+    "exists": "“{name}” đã tồn tại"
   }
 }

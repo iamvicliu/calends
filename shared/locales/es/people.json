@@ -81,5 +81,9 @@
   },
   "list": {
     "none": "No hay personas que coincidan"
+  },
+  "add": {
+    "saved": "Persona añadida",
+    "exists": "«{name}» ya existe"
   }
 }

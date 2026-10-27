@@ -81,5 +81,9 @@
   },
   "list": {
     "none": "Aucune personne correspondante"
+  },
+  "add": {
+    "saved": "Personne ajoutée",
+    "exists": "« {name} » existe déjà"
   }
 }

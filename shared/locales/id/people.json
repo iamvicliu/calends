@@ -66,5 +66,9 @@
   },
   "list": {
     "none": "Tidak ada orang yang cocok"
+  },
+  "add": {
+    "saved": "Orang ditambahkan",
+    "exists": "“{name}” sudah ada"
   }
 }

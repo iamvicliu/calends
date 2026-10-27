@@ -81,5 +81,9 @@
   },
   "list": {
     "none": "No matching people"
+  },
+  "add": {
+    "saved": "Person added",
+    "exists": "“{name}” already exists in People"
   }
 }

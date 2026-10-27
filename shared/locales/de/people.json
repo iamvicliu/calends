@@ -81,5 +81,9 @@
   },
   "list": {
     "none": "Keine passenden Personen"
+  },
+  "add": {
+    "saved": "Person hinzugefügt",
+    "exists": "„{name}“ ist bereits vorhanden"
   }
 }

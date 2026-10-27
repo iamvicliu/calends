@@ -6,13 +6,16 @@ import { flow, cnDateAuto, money } from '../../../shared/format.ts';
 import { locale, t } from '../../../shared/i18n.ts';
 import { SortControl } from '../components/SortControl.tsx';
 import { isMarked, nextSort, usePhone } from '../components/LtHead.tsx';
-import { peopleLedger, peopleListRows, type PeopleSort, type PersonLedger } from '../../../shared/people.ts';
-import { type AppState, type Subscription } from '../../../shared/types.ts';
-import { MetricCards, Metric, Toolbar } from '../components/ui.tsx';
-import { Amount, Seg } from '../components/inputs.tsx';
+import { personLink, peopleLedger, peopleListRows, type PeopleSort, type PersonLedger } from '../../../shared/people.ts';
+import { type AppState, type Person, type Subscription } from '../../../shared/types.ts';
+import { Cell, Group, MetricCards, Metric, Toolbar } from '../components/ui.tsx';
+import { Amount, Seg, useSubmit } from '../components/inputs.tsx';
+import { Sheet } from '../components/overlays.tsx';
+import { getState, savePerson } from '../store.ts';
+import { run } from '../toast.ts';
 import { Icon } from '../components/icons.tsx';
 import { SubIcon } from '../components/marks.tsx';
-import { contactValue } from '../components/Contact.tsx';
+import { ContactField, contactValue } from '../components/Contact.tsx';
 import './people-list.css';
 import { FamilyTabs } from './person-fields.tsx';
 import { PersonSheet } from './PersonProfile.tsx';
@@ -26,6 +29,7 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   const base = state.settings.baseCurrency;
   const book = peopleLedger(state, today);
   const [open, setOpen] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
   const [filter, setFilter] = useState<'all' | 'owe' | 'settled'>('all');
   const [sort, setSort] = useState<PeopleSort>('owed');
   const [dir, setDir] = useState<'asc' | 'desc'>('desc');
@@ -58,7 +62,8 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
   return (
     <>
       {/* 筛选与「合租」页同位置：工具栏右上角 */}
-      <Toolbar title={t('family.pool.title')}>
+      {/* 右上角 + 在人员页单独新建人员，不是新建订阅 */}
+      <Toolbar title={t('family.pool.title')} onAdd={() => setAdding(true)}>
         {book.length > 0 && (
           <Seg
             small
@@ -145,6 +150,7 @@ export function PeopleView({ state, today, onOpen }: { state: AppState; today: s
           </>
         )}
       </div>
+      {adding && <NewPersonSheet onClose={() => setAdding(false)} onSaved={(id) => setOpen(id)} />}
       {current && <PersonSheet memberDialog={MemberSheet} state={state} today={today} l={current} onOpen={onOpen} onClose={() => setOpen(null)} />}
     </>
   );
@@ -226,5 +232,57 @@ export function PersonRow({ l, base, today, onClick }: { l: PersonLedger; base: 
         {l.lastPaid ? cnDateAuto(l.lastPaid, today) : t('people.item.noPay')}
       </div>
     </div>
+  );
+}
+
+/** 单独新建人员：只填称呼和联系方式；之后在合租或代付里选他。重名且联系方式对得上时不重复建档 */
+function NewPersonSheet({ onClose, onSaved }: { onClose: () => void; onSaved: (id: string) => void }) {
+  const [f, setF] = useState<Pick<Person, 'name' | 'contactVia' | 'contact'>>({ name: '' });
+  const [busy, submit] = useSubmit();
+  const save = () =>
+    submit(() =>
+      run(async () => {
+        const link = personLink(getState().people ?? [], {
+          name: f.name,
+          contactVia: f.contact ? (f.contactVia ?? 'Telegram') : undefined,
+          contact: f.contact,
+        });
+        if (!link.created) throw new Error(t('people.add.exists', { name: f.name.trim() }));
+        await savePerson(link.created);
+        onClose();
+        onSaved(link.created.id);
+      }, t('people.add.saved')),
+    );
+  return (
+    <Sheet
+      narrow
+      title={t('people.pick.new')}
+      onClose={onClose}
+      foot={
+        <>
+          <span className="grow" />
+          <button className="btn" onClick={onClose}>
+            {t('common.cancel')}
+          </button>
+          <button className="btn primary" disabled={busy || !f.name.trim()} onClick={() => void save()}>
+            {t('common.save')}
+          </button>
+        </>
+      }
+    >
+      <Group>
+        <Cell label={t('family.member.name')}>
+          <input autoFocus value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} />
+        </Cell>
+        <Cell label={t('editor.proxy.contact')}>
+          <ContactField
+            via={f.contactVia ?? 'Telegram'}
+            value={f.contact}
+            onVia={(contactVia) => setF({ ...f, contactVia })}
+            onChange={(contact) => setF({ ...f, contactVia: f.contactVia ?? 'Telegram', contact: contact || undefined })}
+          />
+        </Cell>
+      </Group>
+    </Sheet>
   );
 }
