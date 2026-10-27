@@ -145,6 +145,20 @@ export function monthLabel(month: string, opts: { year?: boolean; long?: boolean
   return fmtDate(`${month}-01`, { month: opts.long ? 'long' : 'short', ...(opts.year === false ? {} : { year: 'numeric' }) });
 }
 
+/**
+ * 月度横轴的刻度下标：只落在整月 / 双月 / 季度 / 半年 / 年 / 两年的边界上，取不超过 max 个的最密一档。
+ * 档位在一年内都落在一月上，标签在一月处写年份即可给出年份线索；一档也放不下时只标第一个月。
+ */
+export function monthTicks(months: string[], max: number): number[] {
+  const at = (step: number) =>
+    months.flatMap((m, i) => ((Number(m.slice(0, 4)) * 12 + Number(m.slice(5, 7)) - 1) % step === 0 ? [i] : []));
+  for (const step of [1, 2, 3, 6, 12, 24, 60]) {
+    const ticks = at(step);
+    if (ticks.length && ticks.length <= max) return ticks;
+  }
+  return months.length ? [0] : [];
+}
+
 /** 星期几的简称，0 = 周日 */
 export function weekdayShort(i: number, narrow = false): string {
   // 2023-01-01 是周日

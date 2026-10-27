@@ -2,6 +2,34 @@ import { useSnapshotRender } from '../snapshot-render.tsx';
 import type { ReactNode as ComponentChildren } from 'react';
 import { tipProps } from './overlays.tsx';
 import { useWidth } from './inputs.tsx';
+import { monthTicks } from '../../../shared/format.ts';
+
+/** 每个刻度标签至少留这么宽，窄屏自动换到更稀的一档；宽屏最多 12 个 */
+const TICK_PX = 48;
+/** 放在组件外：Oxc 版 React Compiler 处理组件里的 Math.max 会放弃优化整个组件 */
+const tickBudget = (w: number) => Math.min(12, Math.max(2, Math.floor((w || 600) / TICK_PX)));
+
+/**
+ * 横轴标签。pos 为 0–1 的位置；贴边的标签改成左对齐 / 右对齐，不伸出图外。
+ * 给了 months（YYYY-MM）就按季度、半年、年等边界取刻度，否则用调用方的 fallback 下标。
+ */
+function XAxis({ labels, months, pos, w, fallback }: { labels: string[]; months?: string[]; pos: (i: number) => number; w: number; fallback: number[] }) {
+  const ticks = months ? monthTicks(months, tickBudget(w)) : fallback;
+  const half = w ? 24 / w : 0.02;
+  return (
+    <div className="area-x">
+      {ticks.map((i) => {
+        const p = pos(i);
+        const transform = p < half ? 'none' : p > 1 - half ? 'translateX(-100%)' : undefined;
+        return (
+          <span key={i} style={{ left: `${p * 100}%`, transform }}>
+            {labels[i]}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 /** 面积折线图：SVG 只画形状，文字用 HTML 叠加，避免被拉伸 */
 export function AreaChart({
@@ -10,12 +38,15 @@ export function AreaChart({
   height = 160,
   tip,
   markers,
+  months,
 }: {
   values: number[];
   labels: string[];
   height?: number;
   tip: (i: number) => ComponentChildren;
   markers?: number[];
+  /** 每个点的月份（YYYY-MM）：给了就按日历边界取刻度 */
+  months?: string[];
 }) {
   const W = 1000;
   const max = Math.max(1, ...values) * 1.12;
@@ -25,8 +56,10 @@ export function AreaChart({
   const line = values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
   const area = `${line}L${W},${height}L0,${height}Z`;
   const step = Math.max(1, Math.ceil(n / 8));
+  const [box, w] = useWidth();
+  useSnapshotRender(box, () => <AreaChart values={values} labels={labels} height={height} tip={tip} markers={markers} months={months} />);
   return (
-    <div className="area" style={{ height: height + 22 }}>
+    <div className="area" ref={box} style={{ height: height + 22 }}>
       <svg viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" style={{ height }}>
         <defs>
           <linearGradient id="area-fill" x1="0" y1="0" x2="0" y2="1">
@@ -59,15 +92,13 @@ export function AreaChart({
           <span key={i} {...tipProps(() => tip(i))} />
         ))}
       </div>
-      <div className="area-x">
-        {labels.map((l, i) =>
-          i % step === 0 || i === n - 1 ? (
-            <span key={i} style={{ left: `${(x(i) / W) * 100}%` }}>
-              {l}
-            </span>
-          ) : null,
-        )}
-      </div>
+      <XAxis
+        labels={labels}
+        months={months}
+        w={w}
+        pos={(i) => x(i) / W}
+        fallback={labels.flatMap((_, i) => (i % step === 0 || i === n - 1 ? [i] : []))}
+      />
     </div>
   );
 }
@@ -80,6 +111,7 @@ export function BarLine({
   future,
   height = 150,
   tip,
+  months,
 }: {
   bars: number[];
   line: number[];
@@ -87,6 +119,8 @@ export function BarLine({
   future: boolean[];
   height?: number;
   tip: (i: number) => ComponentChildren;
+  /** 每根柱子的月份（YYYY-MM）：给了就按日历边界取刻度 */
+  months?: string[];
 }) {
   const max = Math.max(1, ...bars, ...line) * 1.08;
   const min = Math.min(0, ...bars, ...line) * 1.08;
@@ -98,7 +132,7 @@ export function BarLine({
   const path = line.map((v, i) => `${i ? 'L' : 'M'}${cx(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
   // 每个月份标签约占 44px，按实际宽度决定隔几根柱子标一次，窄屏不挤
   const [box, w] = useWidth();
-  useSnapshotRender(box, () => <BarLine bars={bars} line={line} labels={labels} future={future} height={height} tip={tip} />);
+  useSnapshotRender(box, () => <BarLine bars={bars} line={line} labels={labels} future={future} height={height} tip={tip} months={months} />);
   const step = Math.max(1, Math.ceil(n / Math.min(12, Math.max(2, Math.floor(w / 44) || 12))));
   return (
     <div className="barline" ref={box} style={{ height: height + 22 }}>
@@ -113,15 +147,7 @@ export function BarLine({
         {min < 0 && <line x1="0" x2={W} y1={y(0)} y2={y(0)} stroke="var(--sep)" vectorEffect="non-scaling-stroke" />}
         <path d={path} fill="none" stroke="var(--chart-ink)" strokeWidth="2.4" vectorEffect="non-scaling-stroke" strokeLinejoin="round" strokeLinecap="round" />
       </svg>
-      <div className="area-x">
-        {labels.map((l, i) =>
-          i % step === 0 ? (
-            <span key={i} style={{ left: `${(cx(i) / W) * 100}%` }}>
-              {l}
-            </span>
-          ) : null,
-        )}
-      </div>
+      <XAxis labels={labels} months={months} w={w} pos={(i) => cx(i) / W} fallback={labels.flatMap((_, i) => (i % step === 0 ? [i] : []))} />
     </div>
   );
 }

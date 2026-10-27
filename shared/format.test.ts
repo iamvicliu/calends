@@ -1,6 +1,6 @@
 import { afterEach, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { currencyDecimals, moneyTick, symbol, flow, flowSign, money, relDays, setSignedAmounts } from './format.ts';
+import { currencyDecimals, monthTicks, moneyTick, symbol, flow, flowSign, money, relDays, setSignedAmounts } from './format.ts';
 import { setLocale } from './i18n.ts';
 import { DEFAULT_SETTINGS } from './types.ts';
 
@@ -130,4 +130,27 @@ test('relative dates use days, then months, then years for long cycles', () => {
   // 两年付的下次扣款说「2 年后」，不说「24 个月后」
   assert.equal(relDays(730), 'in 2 years');
   assert.equal(relDays(-1461), '4 years ago');
+});
+
+const monthsFrom = (start: string, n: number) =>
+  Array.from({ length: n }, (_, i) => {
+    const k = Number(start.slice(0, 4)) * 12 + Number(start.slice(5, 7)) - 1 + i;
+    return `${Math.floor(k / 12)}-${String((k % 12) + 1).padStart(2, '0')}`;
+  });
+
+test('month axis ticks snap to calendar boundaries and keep January for the year cue', () => {
+  const three = monthsFrom('2023-11', 36);
+  const pick = (max: number) => monthTicks(three, max).map((i) => three[i]);
+  // 宽屏：季度
+  assert.deepEqual(pick(12), ['2024-01', '2024-04', '2024-07', '2024-10', '2025-01', '2025-04', '2025-07', '2025-10', '2026-01', '2026-04', '2026-07', '2026-10']);
+  // 中等：半年
+  assert.deepEqual(pick(6), ['2024-01', '2024-07', '2025-01', '2025-07', '2026-01', '2026-07']);
+  // 手机：只标年
+  assert.deepEqual(pick(5), ['2024-01', '2025-01', '2026-01']);
+  // 短区间逐月；放不下时取双月
+  const six = monthsFrom('2026-05', 6);
+  assert.deepEqual(monthTicks(six, 8), [0, 1, 2, 3, 4, 5]);
+  assert.deepEqual(monthTicks(six, 5), [0, 2, 4]);
+  // 一个也放不下逐月时退到双月，总留一个刻度
+  assert.deepEqual(monthTicks(monthsFrom('2026-02', 2), 1), [1]);
 });

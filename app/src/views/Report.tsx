@@ -13,6 +13,7 @@ import { t } from '../../../shared/i18n.ts';
 import { tx } from '../i18n.ts';
 import {
   cashVsAccrual,
+  chartMonths,
   events,
   insights,
   monthEnd,
@@ -71,18 +72,12 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
 }
 
 /** 头部：负 MRR + 历史走势 */
-/** 从最早订阅所在月到今天的月数，至少 2 个月。放在组件外：Oxc 版 React Compiler 处理组件里的 Math.max 会内部报错并整组件放弃优化 */
-function monthsSince(first: string, today: string): number {
-  return Math.max(2, diffDays(first.slice(0, 8) + '01', today) / DAYS_PER_MONTH + 1);
-}
-
 function Hero({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const [range, setRange] = useState<'12' | '36' | 'all'>('36');
   const [hist, setHist] = useState(true);
-  const first = firstStart(state, today);
-  const allMonths = monthsSince(first, today);
-  const months = range === 'all' ? Math.ceil(allMonths) : Number(range);
+  // 区间早于账本第一笔数据时从那个月画起，不画前面的零线；不足 13 个月时 yearAgo 为空、不显示，不会变成 0
+  const months = chartMonths(firstStart(state, today), today, range === 'all' ? undefined : Number(range));
   const series = useMemo(() => mrrSeries(state, today, months, hist), [state, today, months, hist]);
   const tot = totals(state, today);
   const current = series[series.length - 1].partial;
@@ -149,6 +144,7 @@ function Hero({ state, today }: { state: AppState; today: string }) {
         <AreaChart
           values={series.map((p) => p.partial.value)}
           labels={series.map((p) => mLabel(p.month))}
+          months={series.map((p) => p.month)}
           markers={markers}
           tip={(i) => (
             <>
@@ -317,7 +313,9 @@ function Checkup({ state, today, onOpen }: { state: AppState; today: string; onO
 /** 现金 vs 权责 + 预付余值 */
 function CashCard({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
-  const rows = useMemo(() => cashVsAccrual(state, today, 23, 12), [state, today]);
+  // 往回最多 2 年，但不早于账本第一笔数据所在月
+  const back = chartMonths(firstStart(state, today), today, 24) - 1;
+  const rows = useMemo(() => cashVsAccrual(state, today, back, 12), [state, today, back]);
   const pv = useMemo(() => prepaidValue(state, today), [state, today]);
   const next90 = chargesTotal(state, allCharges(state, addDays(today, 1), addDays(today, 90), today));
   const peak = rows.filter((r) => r.projected).sort((a, b) => b.cash - a.cash)[0];
@@ -347,6 +345,7 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
           line={rows.map((r) => r.partial.accrual.value)}
           future={rows.map((r) => r.projected)}
           labels={rows.map((r) => mLabel(r.month))}
+          months={rows.map((r) => r.month)}
           tip={(i) => (
             <>
               <b>{rows[i].month}</b>
