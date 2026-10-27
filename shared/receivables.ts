@@ -207,3 +207,26 @@ export function setOpening(r: Receivable, periods: Period[], until: string | und
     : [];
   return { receipts: [...opening, ...receipts], waivers: r.waivers ?? [] };
 }
+
+/**
+ * 收款表单勾选抵扣的期：在可选的期（order，按时间）里只能连成一段，不跳着勾。
+ * 勾一期就把它和已勾的连起来；取消首尾只去掉它自己，取消中间一期连同后面的一起取消。
+ * 不在 order 里的键（对不上现在账期的旧记录）单独增删。数据层仍允许不连续，老记录与 MCP 写入照旧
+ */
+export function togglePeriodRange(order: string[], picked: string[], key: string): string[] {
+  const at = order.indexOf(key);
+  if (at < 0) return picked.includes(key) ? picked.filter((k) => k !== key) : [...picked, key].sort();
+  const others = picked.filter((k) => !order.includes(k));
+  const idx = picked
+    .map((k) => order.indexOf(k))
+    .filter((i) => i >= 0)
+    .sort((a, b) => a - b);
+  let keep: number[];
+  if (picked.includes(key)) keep = at === idx[0] ? idx.filter((i) => i !== at) : idx.filter((i) => i < at);
+  else {
+    const lo = Math.min(at, idx[0] ?? at);
+    const hi = Math.max(at, idx.at(-1) ?? at);
+    keep = Array.from({ length: hi - lo + 1 }, (_, n) => lo + n);
+  }
+  return [...others, ...keep.map((i) => order[i])].sort();
+}

@@ -5,7 +5,16 @@ import { convertOn } from '../../../shared/fx.ts';
 import { cnDate, cnDateFull, currencyDecimals, flow, money } from '../../../shared/format.ts';
 import { t } from '../../../shared/i18n.ts';
 import { periodCellKind, periodGrid, periodTipData, type PeriodGridMode } from '../../../shared/period-grid.ts';
-import { isSettled, putRecord, removeRecord, resolveKey, resolvedPeriods, type LedgerPeriod, type Receivable } from '../../../shared/receivables.ts';
+import {
+  isSettled,
+  putRecord,
+  togglePeriodRange,
+  removeRecord,
+  resolveKey,
+  resolvedPeriods,
+  type LedgerPeriod,
+  type Receivable,
+} from '../../../shared/receivables.ts';
 import type { AppState, Person, Receipt, Waiver } from '../../../shared/types.ts';
 import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { DatePicker } from '../components/DatePicker.tsx';
@@ -109,9 +118,15 @@ export function ReceivableSheet({
   const [saving, guard] = useSubmit();
   const blocked = saving || !keys.length || lost.length > 0 || !date;
   const invalid = blocked || (mode === 'receipt' && (!Number.isFinite(amount) || amount < 0));
-  // 改了勾选就按新勾的期重新给出金额，再手改
+  // 勾选只能连成一段（togglePeriodRange）；改了勾选就按新勾的期重新给出金额，再手改
   const toggle = (k: string) => {
-    setKeys((ks) => (ks.includes(k) ? ks.filter((x) => x !== k) : [...ks, k].sort()));
+    setKeys((ks) =>
+      togglePeriodRange(
+        open.map((p) => p.key),
+        ks,
+        k,
+      ),
+    );
     setAmount(undefined);
   };
 

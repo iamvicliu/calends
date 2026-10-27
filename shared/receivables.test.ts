@@ -2,7 +2,18 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { memberCashFlows } from './carpool.ts';
 import { memberLedger, memberDues } from './billing.ts';
-import { paidThrough, putRecord, removeRecord, removeRecordPeriod, editRecordPeriod, resolveKey, setOpening, settle, type Period } from './receivables.ts';
+import {
+  paidThrough,
+  putRecord,
+  removeRecord,
+  removeRecordPeriod,
+  editRecordPeriod,
+  resolveKey,
+  setOpening,
+  settle,
+  togglePeriodRange,
+  type Period,
+} from './receivables.ts';
 import { migrateReceivables } from './receivables-legacy.ts';
 import type { ShareMember, Subscription } from './types.ts';
 
@@ -106,7 +117,13 @@ test('期初结清的一期可以补记成真实收款：拆出来带日期和�
   ]);
   const second = settle(periods, next, '2026-01-15').periods[1];
   const last = editRecordPeriod(next, 'opening', second, { date: '2026-01-20', amount: 10 }, periods, 'new2');
-  assert.deepEqual(last.receipts.map((x) => [x.id, x.opening ?? false]), [['new', false], ['new2', false]]);
+  assert.deepEqual(
+    last.receipts.map((x) => [x.id, x.opening ?? false]),
+    [
+      ['new', false],
+      ['new2', false],
+    ],
+  );
 });
 
 test('条款改过、期重新切过时，旧记录按落在哪一期对上，不会变成欠款', () => {
@@ -258,4 +275,18 @@ test('MCP 记收款：期写成那一期里的某一天时，缺省金额按那�
   const out = recordReceipt(st, s, { kind: 'share', member: s.share.members[0] }, { id: 'r', date: '2026-03-12', periods: ['2026-03-10'] }, '2026-03-12');
   assert.equal(out.record.amount, 10);
   assert.deepEqual(out.after.share!.members[0].receipts![0].periods, ['2026-03-01']);
+});
+
+test('收款表单勾选的期只能连成一段：勾远处补齐中间，取消中间连同后面一起取消，取消首尾只去掉自己', () => {
+  const order = ['2026-01', '2026-02', '2026-03', '2026-04'];
+  assert.deepEqual(togglePeriodRange(order, [], '2026-02'), ['2026-02']);
+  assert.deepEqual(togglePeriodRange(order, ['2026-01'], '2026-03'), ['2026-01', '2026-02', '2026-03']);
+  assert.deepEqual(togglePeriodRange(order, ['2026-03'], '2026-01'), ['2026-01', '2026-02', '2026-03']);
+  assert.deepEqual(togglePeriodRange(order, ['2026-01', '2026-02', '2026-03'], '2026-02'), ['2026-01']);
+  assert.deepEqual(togglePeriodRange(order, ['2026-01', '2026-02', '2026-03'], '2026-01'), ['2026-02', '2026-03']);
+  assert.deepEqual(togglePeriodRange(order, ['2026-01', '2026-02', '2026-03'], '2026-03'), ['2026-01', '2026-02']);
+  assert.deepEqual(togglePeriodRange(order, ['2026-02'], '2026-02'), []);
+  // 对不上现在账期的旧键单独增删，不影响连续段
+  assert.deepEqual(togglePeriodRange(order, ['2025-12-15', '2026-02'], '2025-12-15'), ['2026-02']);
+  assert.deepEqual(togglePeriodRange(order, ['2025-12-15', '2026-01'], '2026-02'), ['2025-12-15', '2026-01', '2026-02']);
 });
