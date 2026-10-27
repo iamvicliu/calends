@@ -46,6 +46,7 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
   // 表格的行：预收的期（还没扣款）在前，然后是已扣款的期，都按日期从新到旧
   const all = [...ahead, ...list];
   const cardCcy = list.find((r) => r.currency !== r.listCurrency)?.currency;
+  const [tone, label] = proxyStatus(st, list, ahead);
 
   return (
     <DetailSheet label={t('proxy.detailTitle')} onClose={onClose}>
@@ -62,7 +63,8 @@ export function LedgerSheet({ state, s, onClose, onOpen }: { state: AppState; s:
               {live.name}
             </NameLink>
           }
-          badge={<StatusPill tone={proxyStatus(st, list, ahead)[0]}>{proxyStatus(st, list, ahead)[1]}</StatusPill>}
+          // 待收已在指标卡里写明期数和金额，标题旁不再重复
+          badge={tone !== 'owe' && <StatusPill tone={tone}>{label}</StatusPill>}
           meta={
             <>
               <b>

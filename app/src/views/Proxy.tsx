@@ -63,7 +63,8 @@ export function ProxyCard({ state, s, onOpen }: { state: AppState; s: Subscripti
               </div>
             </div>
           </div>
-          <StatusPill tone={tone}>{label}</StatusPill>
+          {/* 待收的金额已在第三格，胶囊不再重复 */}
+          {tone !== 'owe' && <StatusPill tone={tone}>{label}</StatusPill>}
         </div>
         <div className="ph-chips">
           <span className="who-chip" title={s.proxy!.note}>
