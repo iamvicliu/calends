@@ -46,7 +46,6 @@
     "mergePick": "선택…",
     "mergeConfirm": "'{from}'을(를) '{into}'에 병합할까요? {from}의 공유와 대신 결제가 모두 {into}(으)로 옮겨지고, 이름과 연락처는 {into} 기준이 돼요.",
     "merged": "{name}에 병합했어요",
-    "confirmDelete": "'{name}'을(를) 삭제할까요?",
     "accountMissing": "이 멤버 관계가 더 이상 없습니다. 인물 상세를 다시 여세요."
   },
   "pick": {

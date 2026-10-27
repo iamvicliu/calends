@@ -145,7 +145,6 @@
     "testSent": "Đã gửi tin nhắn thử",
     "add": "Thêm kênh",
     "addKind": "Thêm {name}",
-    "confirmDelete": "Xóa kênh “{name}”?",
     "delete": "Xóa",
     "save": "Lưu",
     "fillField": "Vui lòng nhập {field}",
@@ -224,7 +223,6 @@
     "passkeyUnsupported": "Trình duyệt này không hỗ trợ passkey.",
     "lastUsed": "Dùng lần cuối {time}",
     "addedAt": "Đã thêm {time}",
-    "confirmRemovePasskey": "Xóa passkey “{name}”?",
     "remove": "Xóa",
     "removed": "Đã xóa",
     "addPasskey": "Thêm passkey",
@@ -271,7 +269,6 @@
     "moveTo": {
       "other": "Chuyển {count} gói đăng ký của nó sang"
     },
-    "confirmDelete": "Xóa “{name}”?",
     "dragHandle": "Kéo để sắp xếp",
     "toast": {
       "created": "Đã thêm danh mục",

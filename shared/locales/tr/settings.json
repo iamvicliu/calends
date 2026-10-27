@@ -146,7 +146,6 @@
     "testSent": "Test mesajı gönderildi",
     "add": "Kanal ekle",
     "addKind": "{name} ekle",
-    "confirmDelete": "“{name}” kanalı silinsin mi?",
     "delete": "Sil",
     "save": "Kaydet",
     "fillField": "Lütfen şunu girin: {field}",
@@ -225,7 +224,6 @@
     "passkeyUnsupported": "Bu tarayıcı geçiş anahtarlarını desteklemiyor.",
     "lastUsed": "Son kullanım: {time}",
     "addedAt": "Eklenme: {time}",
-    "confirmRemovePasskey": "“{name}” geçiş anahtarı kaldırılsın mı?",
     "remove": "Kaldır",
     "removed": "Kaldırıldı",
     "addPasskey": "Geçiş anahtarı ekle",
@@ -275,7 +273,6 @@
       "one": "İçindeki {count} aboneliği taşı:",
       "other": "İçindeki {count} aboneliği taşı:"
     },
-    "confirmDelete": "“{name}” silinsin mi?",
     "dragHandle": "Sıralamak için sürükleyin",
     "toast": {
       "created": "Kategori eklendi",

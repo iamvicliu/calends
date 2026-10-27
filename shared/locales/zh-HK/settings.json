@@ -145,7 +145,6 @@
     "testSent": "測試訊息已送出",
     "add": "新增渠道",
     "addKind": "新增 {name}",
-    "confirmDelete": "刪除渠道「{name}」？",
     "delete": "刪除",
     "save": "儲存",
     "fillField": "請填寫{field}",
@@ -224,7 +223,6 @@
     "passkeyUnsupported": "目前瀏覽器不支援 Passkey。",
     "lastUsed": "上次使用 {time}",
     "addedAt": "新增於 {time}",
-    "confirmRemovePasskey": "移除 Passkey「{name}」？",
     "remove": "移除",
     "removed": "已移除",
     "addPasskey": "新增 Passkey",
@@ -271,7 +269,6 @@
     "moveTo": {
       "other": "其中 {count} 個訂閱移到"
     },
-    "confirmDelete": "刪除分類「{name}」？",
     "dragHandle": "拖曳排序",
     "toast": {
       "created": "已新增分類",

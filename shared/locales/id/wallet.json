@@ -68,7 +68,6 @@
   "editor": {
     "titleNew": "Tambah metode pembayaran",
     "titleEdit": "Edit metode pembayaran",
-    "confirmDelete": "Hapus “{name}”?",
     "deleted": "Dihapus",
     "delete": "Hapus",
     "cancel": "Batal",

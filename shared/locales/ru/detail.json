@@ -214,7 +214,6 @@
       "date": "Дата",
       "amount": "Сумма",
       "base": "В {ccy}"
-    },
-    "confirmDelete": "Удалить передачу от {date}?"
+    }
   }
 }

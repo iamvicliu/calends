@@ -1,3 +1,4 @@
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { useEditorDraft } from './editor/useEditorDraft.ts';
 import { prepareEditorSave, mergeEditorSave } from './editor/save.ts';
 
@@ -71,10 +72,9 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
       foot={
         <>
           {!isNew && (
-            <button
-              className="btn danger"
-              onClick={async () => {
-                if (!(await ask(t('editor.confirmDelete', { name: sub.name })))) return;
+            <ConfirmButton
+              hint={t('editor.confirmDelete', { name: sub.name })}
+              onConfirm={() => {
                 // 删除会把它移出公开页隐藏列表；撤销时一并放回
                 const hidden = getState().settings.publicHidden?.includes(sub.id);
                 const restore = async () => {
@@ -94,7 +94,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
               }}
             >
               {t('common.delete')}
-            </button>
+            </ConfirmButton>
           )}
           {dirty ? (
             <button className="btn plain" onClick={reset}>

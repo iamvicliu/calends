@@ -84,7 +84,6 @@
   "editor": {
     "titleNew": "결제 수단 추가",
     "titleEdit": "결제 수단 편집",
-    "confirmDelete": "‘{name}’을(를) 삭제할까요?",
     "deleted": "삭제했습니다",
     "delete": "삭제",
     "cancel": "취소",

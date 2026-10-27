@@ -242,8 +242,7 @@
     "sources": "Paid with",
     "addSource": "Add source",
     "splitOk": "Adds up to {amount}",
-    "splitLeft": "Remaining to allocate: {amount}",
-    "confirmDelete": "Delete the record on {date}?"
+    "splitLeft": "Remaining to allocate: {amount}"
   },
   "timeline": {
     "home": "Back to today (or double-click the timeline)"

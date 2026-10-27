@@ -45,7 +45,6 @@
     "upcoming": "Chưa đến hạn",
     "this": "Khoản này"
   },
-  "confirmDelete": "Xóa bản ghi ngày {date}?",
   "grid": {
     "year": "{year}",
     "quarter": "{year} Q{quarter}",

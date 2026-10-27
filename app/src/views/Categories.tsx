@@ -1,3 +1,4 @@
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 // 分类管理：设置里的「分类」列表（拖动排序、改名、换图标和颜色、删除并移走订阅），以及新建 / 编辑分类的弹层（订阅表单里「新建分类…」也用它）
 import { closestCenter, DndContext, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -9,7 +10,7 @@ import { CatGlyph } from '../components/CatGlyph.tsx';
 import { CAT_ICON_GROUPS } from '../components/cat-icons.gen.ts';
 import { Picker } from '../components/Picker.tsx';
 import { IconButton, Cell, Group } from '../components/ui.tsx';
-import { ask, Sheet } from '../components/overlays.tsx';
+import { Sheet } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
 import { categories } from '../derive.ts';
 import { run, toast } from '../toast.ts';
@@ -204,7 +205,6 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
   };
   const remove = async () => {
     if (!cat) return;
-    if (!n && !(await ask(t('settings.cat.confirmDelete', { name: cat.name })))) return;
     void run(async () => {
       await saveCategories(others, n ? { [cat.name]: target } : {});
       onClose();
@@ -272,13 +272,17 @@ export function CategorySheet({ state, cat, onClose, onSaved }: { state: AppStat
                 />
               </Cell>
             )}
-            <button
-              className="cell tap"
-              style={{ justifyContent: 'center', color: 'var(--red)' }}
-              onClick={() => (n && !deleting ? setDeleting(true) : remove())}
-            >
-              {deleting && n > 0 ? t('common.delete') : t('settings.cat.delete')}
-            </button>
+            {n && !deleting ? (
+              <button className="cell tap" style={{ justifyContent: 'center', color: 'var(--red)' }} onClick={() => setDeleting(true)}>
+                {t('settings.cat.delete')}
+              </button>
+            ) : (
+              <div className="cell" style={{ justifyContent: 'center' }}>
+                <ConfirmButton hint={n ? t('settings.cat.moveTo', { count: n }) : undefined} onConfirm={remove}>
+                  {deleting && n > 0 ? t('common.delete') : t('settings.cat.delete')}
+                </ConfirmButton>
+              </div>
+            )}
           </Group>
         )}
       </div>

@@ -1,6 +1,7 @@
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { useState } from 'react';
 import { activePhases, chargesBetween, currentPhase, cycleLabel, phaseSubs } from '../../../shared/billing.ts';
-import { cnDateFull, currencyDecimals, money } from '../../../shared/format.ts';
+import { currencyDecimals, money } from '../../../shared/format.ts';
 import { settlementCurrencyOf } from '../../../shared/fx.ts';
 import { t } from '../../../shared/i18n.ts';
 import { deletePayment, savePayment, setPhaseMethod } from '../../../shared/phases.ts';
@@ -8,7 +9,7 @@ import type { Payment, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { MethodPicker } from '../components/MethodPicker.tsx';
-import { ask, Sheet } from '../components/overlays.tsx';
+import { Sheet } from '../components/overlays.tsx';
 import { MoneyInput, Seg, useSubmit } from '../components/inputs.tsx';
 import { Cell, Group, IconButton } from '../components/ui.tsx';
 import { Icon } from '../components/icons.tsx';
@@ -102,7 +103,6 @@ export function PaymentSheet({
   };
   const remove = async () => {
     if (!originalDate || originalIndex == null) return;
-    if (!(await ask(t('editor.payment.confirmDelete', { date: cnDateFull(originalDate) })))) return;
     return submit(() =>
       run(async () => {
         await saveSub(deletePayment(sub, today, originalDate, originalIndex, originalPhase));
@@ -119,9 +119,9 @@ export function PaymentSheet({
       foot={
         <>
           {edit && (
-            <button className="btn danger" style={{ marginRight: 'auto' }} disabled={busy} onClick={remove}>
+            <ConfirmButton disabled={busy} onConfirm={remove}>
               {t('common.delete')}
-            </button>
+            </ConfirmButton>
           )}
           <button className="btn" onClick={onClose}>
             {t('common.cancel')}

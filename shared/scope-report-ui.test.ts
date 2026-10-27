@@ -127,6 +127,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
       return (query: string, text: string) => matchText(query, indexes.get(text) ?? text, 'en');
     },
     categories: () => [],
+    ...(!/export function ConfirmButton/.test(source) ? { ConfirmButton: 'ConfirmButton' } : {}),
     Picker: 'Picker',
     SortControl: 'SortControl',
     PersonAvatar: 'PersonAvatar',
@@ -1931,8 +1932,9 @@ test('删除一笔收款：它抵扣的期恢复为没收，期初结清不受�
         Picker: 'Picker',
         ConfirmButton: 'ConfirmButton',
         todayIn: () => today,
-        // 删除前要确认：这里确认
-        ask: async () => true,
+        ask: async () => {
+          throw new Error('record deletion must not open ask');
+        },
         getState: () => ({ ...st, subscriptions: [sub] }),
         linkPerson: async () => ({}),
         run: (fn: () => Promise<unknown>) => fn(),
@@ -1943,21 +1945,26 @@ test('删除一笔收款：它抵扣的期恢复为没收，期初结清不受�
     );
   const r = make();
   const left = () => saved!.share!.members[0].receipts!.map((x) => x.id);
-  // 成员表单里点 r1 抵扣的那一格，小弹窗里直接删
+  // 成员表单里点 r1 抵扣的那一格，确认按钮在小窗内，确认后才关闭
   const form = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
   form()
     .find((n) => n.type === 'button' && n.props['data-period'] === '2026-04-14')!
     .props.onClick({ currentTarget: 'cell' });
   const pop = form().find((n) => n.type === 'Pop')!;
+  assert.equal(saved, undefined);
+  assert.ok(
+    form().some((n) => n.type === 'Pop'),
+    'the confirmation stays in the popover',
+  );
   all(pop)
-    .find((n) => n.type === 'button' && n.children.includes('common.delete'))!
-    .props.onClick();
+    .find((n) => n.type === 'ConfirmButton')!
+    .props.onConfirm();
   await new Promise((done) => setTimeout(done, 0));
   assert.deepEqual(left(), ['o']);
   assert.equal(
     form().some((n) => n.type === 'Pop'),
     false,
-    'the popover closes before confirming',
+    'the popover closes after confirming',
   );
   // 点开那一笔在收款表单里删，结果一样
   saved = undefined;
@@ -2094,6 +2101,171 @@ test('成员表单：改自定义收费从生效日起记调价', async () => {
   assert.equal(m.custom, true);
   assert.equal(m.fee, 50);
   assert.deepEqual(m.feeHistory!.at(-1)!.from, today);
+});
+
+test('转让和扣款删除通过胶囊执行，保留同日其他记录且不再打开 ask', async () => {
+  const phases = await import('./phases.ts');
+  const sub: Subscription = {
+    id: 'fictional-plan',
+    name: 'Orbit',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'CNY',
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    payments: [
+      { date: today, amount: 10, currency: 'CNY' },
+      { date: today, amount: 2, currency: 'CNY', kind: 'adjust' },
+    ],
+  };
+  let saved: Subscription | undefined;
+  let closed = 0;
+  const deps = {
+    ...phases,
+    Sheet: 'Sheet',
+    DatePicker: 'DatePicker',
+    CurrencySelect: 'CurrencySelect',
+    MethodPicker: 'MethodPicker',
+    MoneyInput: 'MoneyInput',
+    ConfirmButton: 'ConfirmButton',
+    getState: () => ({ ...st, subscriptions: [sub] }),
+    ask: () => {
+      throw new Error('deletion must not open ask');
+    },
+    run: (fn: () => Promise<unknown>) => fn(),
+    saveSub: async (s: Subscription) => {
+      saved = s;
+    },
+  };
+  const r = harness('../app/src/views/PaymentSheet.tsx', 'PaymentSheet', {}, deps);
+  const foot = r.render('PaymentSheet', { sub, today, edit: { pay: sub.payments![0], index: 0 }, onClose: () => closed++ }).find((n) => n.type === 'Sheet')!
+    .props.foot;
+  assert.equal(saved, undefined);
+  await all(foot)
+    .find((n) => n.type === 'ConfirmButton')!
+    .props.onConfirm();
+  assert.deepEqual(saved!.payments, [sub.payments![1]]);
+  assert.equal(closed, 1);
+
+  const list = [
+    { kind: 'buy', date: today, amount: 20, currency: 'CNY' },
+    { kind: 'sell', date: today, amount: 5, currency: 'CNY' },
+  ];
+  let transfers: unknown;
+  const tr = harness('../app/src/components/TransferSheet.tsx', 'TransferSheet', {}, deps);
+  const tf = tr
+    .render('TransferSheet', {
+      list,
+      index: 0,
+      currency: 'CNY',
+      today,
+      onSave: (next: unknown) => {
+        transfers = next;
+      },
+      onClose() {},
+    })
+    .find((n) => n.type === 'Sheet')!.props.foot;
+  assert.equal(transfers, undefined);
+  await all(tf)
+    .find((n) => n.type === 'ConfirmButton')!
+    .props.onConfirm();
+  assert.deepEqual(transfers, [list[1]]);
+});
+
+test('成员、人员和渠道胶囊确认后删除，成员删除保留其他成员，人员引用仍阻止删除', async () => {
+  const people = await import('./people.ts');
+  const member = {
+    id: 'm',
+    name: 'Fictional member',
+    share: 1,
+    joined: '2026-01-01',
+    receipts: [{ id: 'r', date: today, amount: 10, currency: 'CNY', periods: ['2026-10-01'] }],
+  };
+  const other = { ...member, id: 'other', name: 'Other member' };
+  const sub: Subscription = {
+    id: 's',
+    name: 'Orbit',
+    category: 'Tools',
+    tags: [],
+    price: 10,
+    currency: 'CNY',
+    start: '2026-01-01',
+    cycle: { unit: 'month', every: 1 },
+    status: 'active',
+    share: { role: 'owner', seats: 3, collectFrom: '2026-01-01', members: [member, other] },
+  };
+  let saved: Subscription | undefined;
+  let deleted = '';
+  let closed = 0;
+  const deps = {
+    ...people,
+    ...carpool,
+    statusOf: carpool.memberStatus,
+    Sheet: 'Sheet',
+    DatePicker: 'DatePicker',
+    CurrencySelect: 'CurrencySelect',
+    NumInput: 'NumInput',
+    ConfirmButton: 'ConfirmButton',
+    todayIn: () => today,
+    getState: () => ({ ...st, subscriptions: [sub] }),
+    ask: () => {
+      throw new Error('deletion must not open ask');
+    },
+    run: (fn: () => Promise<unknown>) => fn(),
+    saveSub: async (s: Subscription) => {
+      saved = s;
+    },
+    deletePerson: async (id: string) => {
+      deleted = id;
+    },
+  };
+  const r = harness('../app/src/views/Members.tsx', 'MemberForm', {}, deps);
+  const foot = r.render('MemberForm', { state: st, s: sub, member, onClose: () => closed++ }).find((n) => n.type === 'Sheet')!.props.foot;
+  const remove = all(foot).find((n) => n.type === 'ConfirmButton')!;
+  assert.equal(remove.props.hint, 'family.member.confirmDelete');
+  assert.equal(saved, undefined);
+  await remove.props.onConfirm();
+  assert.deepEqual(saved!.share!.members, [other]);
+  assert.equal(closed, 1);
+
+  const person = { id: 'person', name: 'Fictional person', color: 'blue' };
+  const state = { ...st, people: [person] };
+  const pr = harness('../app/src/views/People.tsx', 'PersonSheet', {}, { ...deps, PERSON_COLORS, ContactField: 'ContactField' });
+  const personFoot = (state: AppState) =>
+    all(
+      pr.render('PersonSheet', { state, today, l: { person, items: [], owed: 0, received: 0 }, onClose() {}, onOpen() {} }).find((n) => n.type === 'Sheet')!
+        .props.foot,
+    );
+  assert.equal(deleted, '');
+  await personFoot(state)
+    .find((n) => n.type === 'ConfirmButton')!
+    .props.onConfirm();
+  assert.equal(deleted, person.id);
+  assert.equal(
+    personFoot({ ...state, subscriptions: [{ ...sub, share: { ...sub.share!, members: [{ ...member, personId: person.id }] } }] }).some(
+      (n) => n.type === 'ConfirmButton',
+    ),
+    false,
+  );
+
+  let channelDeleted = 0;
+  const cr = harness('../app/src/views/Channels.tsx', 'ChannelSheet', {}, { ...deps, base: (s: string) => s, Toggle: 'Toggle' });
+  const channel = { id: 'channel', name: 'Fictional email', kind: 'email', enabled: true, config: { to: 'fictional@example.test' } };
+  const channelFoot = (isNew: boolean) =>
+    all(
+      cr.render('ChannelSheet', { c: channel, isNew, onClose() {}, onSave() {}, onDelete: () => channelDeleted++ }).find((n) => n.type === 'Sheet')!.props.foot,
+    );
+  assert.equal(channelDeleted, 0);
+  channelFoot(false)
+    .find((n) => n.type === 'ConfirmButton')!
+    .props.onConfirm();
+  assert.equal(channelDeleted, 1);
+  assert.equal(
+    channelFoot(true).some((n) => n.type === 'ConfirmButton'),
+    false,
+  );
 });
 
 test('弹窗底部删除就地确认：第一次点伸出问号转红底，失焦收回，再点才执行', () => {
@@ -3267,7 +3439,7 @@ test('点开已收的格子弹出这一笔的明细，可改可删；没收的�
   cell('2026-08-01').props.onClick({ currentTarget: 'cell' });
   const pop = render().find((n) => n.type === 'Pop')!;
   assert.equal(pop.props.triggerRef.current, 'cell');
-  const buttons = all(pop).filter((n) => n.type === 'button');
+  const buttons = all(pop).filter((n) => n.type === 'button' || n.type === 'ConfirmButton');
   assert.deepEqual(
     buttons.map((n) => n.children.join('')),
     ['common.delete', 'detail.action.edit'],

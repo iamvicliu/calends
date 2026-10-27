@@ -233,8 +233,7 @@
     "sources": "Dibayar dengan",
     "addSource": "Tambah sumber",
     "splitOk": "Total {amount}, sesuai jumlah",
-    "splitLeft": "Sisa dialokasikan: {amount}",
-    "confirmDelete": "Hapus catatan tanggal {date}?"
+    "splitLeft": "Sisa dialokasikan: {amount}"
   },
   "timeline": {
     "home": "Kembali ke hari ini (atau klik dua kali linimasa)"

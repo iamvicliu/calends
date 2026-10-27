@@ -233,8 +233,7 @@
     "sources": "결제 출처",
     "addSource": "출처 추가",
     "splitOk": "합계 {amount}, 금액과 일치",
-    "splitLeft": "남은 금액: {amount}",
-    "confirmDelete": "{date} 기록을 삭제할까요?"
+    "splitLeft": "남은 금액: {amount}"
   },
   "timeline": {
     "home": "오늘로 돌아가기(또는 타임라인 더블 클릭)"

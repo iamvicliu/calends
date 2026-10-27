@@ -1,6 +1,6 @@
+import { ConfirmButton } from './ConfirmButton.tsx';
 import { popupOpen, sheetSubmitKey } from '../keyboard.ts';
 import { useId, useState } from 'react';
-import { Trash2 } from 'lucide-react';
 import { addDays, addMonths, cycleLabel, nextCharge, phaseSubs } from '../../../shared/billing.ts';
 import {
   changePrice,
@@ -19,7 +19,7 @@ import type { AppState, Cycle, Subscription } from '../../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { History } from './History.tsx';
 import { ask } from './overlays.tsx';
-import { Group, IconButton } from './ui.tsx';
+import { Group } from './ui.tsx';
 import { Icon } from './icons.tsx';
 import { Toggle } from './inputs.tsx';
 import { MethodPicker } from './MethodPicker.tsx';
@@ -84,8 +84,8 @@ export function ChangePanel({
       onPriceValidity(false);
     }
   };
-  const deletePoint = async () => {
-    if (!point || !(await ask(t('editor.history.deletePrice')))) return;
+  const deletePoint = () => {
+    if (!point) return;
     setF(removePricePoint(syncPhase(f, today), point.start, point.from));
     setPoint(null);
     setPointError('');
@@ -233,9 +233,11 @@ export function ChangePanel({
                       </p>
                     )}
                     {pricePoints(pointPhase)[0].from !== point.from && (
-                      <IconButton className="h-price-delete danger" aria-label={t('common.delete')} onClick={() => void deletePoint()}>
-                        <Trash2 size={16} />
-                      </IconButton>
+                      <div className="h-price-delete">
+                        <ConfirmButton hint={t('editor.history.deletePrice')} onConfirm={deletePoint}>
+                          {t('common.delete')}
+                        </ConfirmButton>
+                      </div>
                     )}
                   </div>
                 ),

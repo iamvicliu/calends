@@ -45,7 +45,6 @@
     "upcoming": "期日前",
     "this": "この受取"
   },
-  "confirmDelete": "{date} の記録を削除しますか？",
   "grid": {
     "year": "{year}年",
     "quarter": "{year}年第{quarter}季",

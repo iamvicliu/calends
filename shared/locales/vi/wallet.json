@@ -68,7 +68,6 @@
   "editor": {
     "titleNew": "Thêm phương thức thanh toán",
     "titleEdit": "Sửa phương thức thanh toán",
-    "confirmDelete": "Xóa “{name}”?",
     "deleted": "Đã xóa",
     "delete": "Xóa",
     "cancel": "Hủy",

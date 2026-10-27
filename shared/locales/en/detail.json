@@ -211,7 +211,6 @@
       "date": "Date",
       "amount": "Amount",
       "base": "In {ccy}"
-    },
-    "confirmDelete": "Delete the transfer on {date}?"
+    }
   }
 }

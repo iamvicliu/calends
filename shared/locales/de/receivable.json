@@ -57,7 +57,6 @@
     "upcoming": "Noch nicht fällig",
     "this": "Diese Zahlung"
   },
-  "confirmDelete": "Eintrag vom {date} löschen?",
   "grid": {
     "year": "{year}",
     "quarter": "{year} Q{quarter}",

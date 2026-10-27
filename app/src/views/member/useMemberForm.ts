@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
 import { todayIn, uid, addDays, memberBillMonths, memberCollection, memberRate, collectionAnchor, collectCurrencyOf } from '../../../../shared/billing.ts';
-import { cnDateFull } from '../../../../shared/format.ts';
 import type { AppState, Receipt, ShareMember, Subscription } from '../../../../shared/types.ts';
 import { isSettled, putRecord, removeRecord, resolveKey, setOpening } from '../../../../shared/receivables.ts';
-
-import { ask } from '../../components/overlays.tsx';
 
 import { useSubmit } from '../../components/inputs.tsx';
 import { getState, savePerson, saveSub } from '../../store.ts';
@@ -193,8 +190,7 @@ export function useMemberForm({
       t('family.member.copied', { count: targets.length }),
     );
   };
-  const removeRecordById = async (id: string, date: string) =>
-    (await ask(t('receivable.confirmDelete', { date: cnDateFull(date) }))) &&
+  const removeRecordById = (id: string) =>
     run(() => saveReceivable(s, f.id, id === 'opening' ? setOpening(member!, [], undefined) : removeRecord(member!, id)), t('receivable.toastRemoved'));
 
   const [busy, submit] = useSubmit();

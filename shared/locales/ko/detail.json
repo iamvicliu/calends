@@ -196,7 +196,6 @@
       "date": "날짜",
       "amount": "금액",
       "base": "{ccy} 환산"
-    },
-    "confirmDelete": "{date} 양도 기록을 삭제할까요?"
+    }
   }
 }

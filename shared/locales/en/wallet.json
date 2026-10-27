@@ -68,7 +68,6 @@
   "editor": {
     "titleNew": "Add payment method",
     "titleEdit": "Edit payment method",
-    "confirmDelete": "Delete “{name}”?",
     "deleted": "Deleted",
     "delete": "Delete",
     "cancel": "Cancel",

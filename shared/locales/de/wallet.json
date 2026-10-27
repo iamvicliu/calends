@@ -89,7 +89,6 @@
   "editor": {
     "titleNew": "Zahlungsmethode hinzufügen",
     "titleEdit": "Zahlungsmethode bearbeiten",
-    "confirmDelete": "„{name}“ löschen?",
     "deleted": "Gelöscht",
     "delete": "Löschen",
     "cancel": "Abbrechen",

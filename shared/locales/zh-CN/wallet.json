@@ -68,7 +68,6 @@
   "editor": {
     "titleNew": "添加支付方式",
     "titleEdit": "编辑支付方式",
-    "confirmDelete": "删除「{name}」？",
     "deleted": "已删除",
     "delete": "删除",
     "cancel": "取消",

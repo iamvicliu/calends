@@ -159,7 +159,6 @@
     "testSent": "테스트 메시지를 보냈습니다",
     "add": "채널 추가",
     "addKind": "{name} 추가",
-    "confirmDelete": "‘{name}’ 채널을 삭제할까요?",
     "delete": "삭제",
     "save": "저장",
     "fillField": "{field}을(를) 입력하세요",
@@ -244,7 +243,6 @@
     "passkeyUnsupported": "이 브라우저는 패스키를 지원하지 않습니다.",
     "lastUsed": "마지막 사용 {time}",
     "addedAt": "{time}에 추가",
-    "confirmRemovePasskey": "‘{name}’ 패스키를 삭제할까요?",
     "remove": "삭제",
     "removed": "삭제했습니다",
     "addPasskey": "패스키 추가",
@@ -297,7 +295,6 @@
     "moveTo": {
       "other": "포함된 구독 {count}개를 옮길 곳"
     },
-    "confirmDelete": "“{name}” 카테고리를 삭제할까요?",
     "dragHandle": "드래그해서 순서 변경",
     "toast": {
       "created": "카테고리를 추가했습니다",

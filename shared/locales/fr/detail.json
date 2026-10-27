@@ -211,7 +211,6 @@
       "date": "Date",
       "amount": "Montant",
       "base": "En {ccy}"
-    },
-    "confirmDelete": "Supprimer le transfert du {date} ?"
+    }
   }
 }

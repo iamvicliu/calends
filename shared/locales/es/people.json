@@ -61,7 +61,6 @@
     "mergePick": "Elegir…",
     "mergeConfirm": "¿Combinar «{from}» con «{into}»? Todos los planes y pagos de {from} pasan a {into}, y se conservan el nombre y contacto de {into}.",
     "merged": "Combinado con {name}",
-    "confirmDelete": "¿Eliminar a «{name}»?",
     "accountMissing": "Esta relación ya no existe. Vuelve a abrir los detalles de la persona."
   },
   "pick": {

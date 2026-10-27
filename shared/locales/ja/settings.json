@@ -159,7 +159,6 @@
     "testSent": "テストメッセージを送信しました",
     "add": "チャネルを追加",
     "addKind": "{name}を追加",
-    "confirmDelete": "チャネル「{name}」を削除しますか？",
     "delete": "削除",
     "save": "保存",
     "fillField": "{field}を入力してください",
@@ -244,7 +243,6 @@
     "passkeyUnsupported": "このブラウザはパスキーに対応していません。",
     "lastUsed": "最終使用 {time}",
     "addedAt": "{time}に追加",
-    "confirmRemovePasskey": "パスキー「{name}」を削除しますか？",
     "remove": "削除",
     "removed": "削除しました",
     "addPasskey": "パスキーを追加",
@@ -297,7 +295,6 @@
     "moveTo": {
       "other": "含まれる {count} 件のサブスクの移動先"
     },
-    "confirmDelete": "「{name}」を削除しますか？",
     "dragHandle": "ドラッグで並べ替え",
     "toast": {
       "created": "カテゴリを追加しました",

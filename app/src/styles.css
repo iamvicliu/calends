@@ -3470,13 +3470,10 @@ button.h-price-row:focus-visible {
 }
 .change-form.h-price-editor {
   margin: 4px 0 12px;
-  position: relative;
-  padding-right: 52px;
 }
 .h-price-delete {
-  position: absolute;
-  top: 26px;
-  right: 4px;
+  grid-column: 1 / -1;
+  justify-self: end;
 }
 .h-price-editor .h-error {
   grid-column: 1 / -1;
@@ -7683,7 +7680,7 @@ a.car-toggle {
 /* 名称 | 密钥 | 创建 | 最近使用 | 操作：表头与每行共用列宽 */
 .ai-token {
   display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 0.9fr) 32px;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(128px, 0.8fr);
   align-items: center;
   gap: 16px;
   padding: 12px 0;
@@ -7749,10 +7746,6 @@ a.car-toggle {
 .ai-token-act {
   display: flex;
   justify-content: flex-end;
-}
-.ai-revoke:hover {
-  color: var(--red);
-  background: var(--red-3);
 }
 @media (max-width: 720px) {
   /* 窄屏：名称一行，密钥、创建、最近使用在下一行带标签，删除按钮留在右上 */

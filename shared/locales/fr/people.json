@@ -61,7 +61,6 @@
     "mergePick": "Choisir…",
     "mergeConfirm": "Fusionner « {from} » avec « {into} » ? Les abonnements et paiements de {from} passent à {into}, dont le nom et le contact sont conservés.",
     "merged": "Fusionné avec {name}",
-    "confirmDelete": "Supprimer « {name} » ?",
     "accountMissing": "Cette adhésion n’existe plus. Rouvrez les détails de la personne."
   },
   "pick": {

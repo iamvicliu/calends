@@ -1,3 +1,4 @@
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { useMemberForm, refundInvalid } from './member/useMemberForm.ts';
 import { FirstReceiptFields, PeriodPop } from './member/Receipts.tsx';
 
@@ -10,7 +11,7 @@ import { isSettled, type LedgerPeriod } from '../../../shared/receivables.ts';
 import { PeriodStrip } from './Receivable.tsx';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { Cell, Group } from '../components/ui.tsx';
-import { ask, Sheet } from '../components/overlays.tsx';
+import { Sheet } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
 import { NumInput, Seg } from '../components/inputs.tsx';
 import { getState, saveSub } from '../store.ts';
@@ -364,12 +365,10 @@ export function MemberForm({
       foot={
         <>
           {!isNew && (
-            <button
-              className="btn plain"
-              style={{ color: 'var(--red)' }}
+            <ConfirmButton
               disabled={busy}
-              onClick={async () =>
-                (await ask(t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') }))) &&
+              hint={t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') })}
+              onConfirm={() =>
                 submit(() =>
                   run(async () => {
                     const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
@@ -383,7 +382,7 @@ export function MemberForm({
               }
             >
               {t('family.member.delete')}
-            </button>
+            </ConfirmButton>
           )}
           <span className="grow" />
           <button className="btn" onClick={onClose}>

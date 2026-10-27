@@ -71,7 +71,6 @@
   "editor": {
     "titleNew": "Adicionar forma de pagamento",
     "titleEdit": "Editar forma de pagamento",
-    "confirmDelete": "Apagar “{name}”?",
     "deleted": "Apagada",
     "delete": "Apagar",
     "cancel": "Cancelar",

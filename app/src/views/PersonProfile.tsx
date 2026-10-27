@@ -1,3 +1,4 @@
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { useRef, useState, type CSSProperties } from 'react';
 import { PersonAvatar } from '../components/PersonAvatar.tsx';
 import { compressAvatar } from '../handoff.ts';
@@ -129,11 +130,8 @@ export function PersonSheet({
         stored && !ro ? (
           <>
             {refs === 0 && (
-              <button
-                className="btn plain"
-                style={{ color: 'var(--red)' }}
-                onClick={async () =>
-                  (await ask(t('people.sheet.confirmDelete', { name: stored.name }))) &&
+              <ConfirmButton
+                onConfirm={() =>
                   run(async () => {
                     await deletePerson(stored.id);
                     onClose();
@@ -141,7 +139,7 @@ export function PersonSheet({
                 }
               >
                 {t('family.member.delete')}
-              </button>
+              </ConfirmButton>
             )}
             <span className="grow" />
             <button className="btn" onClick={onClose}>

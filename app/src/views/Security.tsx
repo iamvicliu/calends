@@ -1,3 +1,4 @@
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
@@ -138,16 +139,11 @@ export function SecurityGroup({ state }: { state: AppState }) {
                 : t('settings.security.addedAt', { time: localTime(p.createdAt, tz, true) })
             }
           >
-            <button
-              type="button"
-              className="chip-btn"
-              onClick={async () =>
-                (await ask(t('settings.security.confirmRemovePasskey', { name: p.name }))) &&
-                run(() => api(`/api/auth/passkey/${encodeURIComponent(p.id)}`, { method: 'DELETE' }).then(load), t('settings.security.removed'))
-              }
+            <ConfirmButton
+              onConfirm={() => run(() => api(`/api/auth/passkey/${encodeURIComponent(p.id)}`, { method: 'DELETE' }).then(load), t('settings.security.removed'))}
             >
               {t('settings.security.remove')}
-            </button>
+            </ConfirmButton>
           </Cell>
         ))}
         {supported && (

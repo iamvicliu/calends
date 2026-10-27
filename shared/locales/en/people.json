@@ -61,7 +61,6 @@
     "mergePick": "Choose…",
     "mergeConfirm": "Merge “{from}” into “{into}”? All of {from}'s plans and payments move to {into}, keeping {into}'s name and contact.",
     "merged": "Merged into {name}",
-    "confirmDelete": "Delete “{name}”?",
     "accountMissing": "This membership no longer exists. Reopen the person to refresh."
   },
   "pick": {

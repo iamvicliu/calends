@@ -100,6 +100,7 @@ function runtime(file: string, extra: Record<string, unknown>, names = file.incl
     useSubmit: () => [false, (fn: () => unknown) => Promise.resolve(fn())],
     t,
     intlLocale,
+    ConfirmButton: 'ConfirmButton',
     Cell: 'Cell',
     Picker: 'Picker',
     CurrencySelect: 'CurrencySelect',

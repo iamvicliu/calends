@@ -149,7 +149,6 @@
     "testSent": "Mensaje de prueba enviado",
     "add": "Añadir canal",
     "addKind": "Añadir {name}",
-    "confirmDelete": "¿Eliminar el canal «{name}»?",
     "delete": "Eliminar",
     "save": "Guardar",
     "fillField": "Introduce {field}",
@@ -228,7 +227,6 @@
     "passkeyUnsupported": "Este navegador no admite llaves de acceso.",
     "lastUsed": "Último uso: {time}",
     "addedAt": "Añadida: {time}",
-    "confirmRemovePasskey": "¿Quitar la llave de acceso «{name}»?",
     "remove": "Quitar",
     "removed": "Quitada",
     "addPasskey": "Añadir llave de acceso",
@@ -278,7 +276,6 @@
       "one": "Mover su {count} suscripción a",
       "other": "Mover sus {count} suscripciones a"
     },
-    "confirmDelete": "¿Eliminar «{name}»?",
     "dragHandle": "Arrastra para reordenar",
     "toast": {
       "created": "Categoría añadida",

@@ -242,8 +242,7 @@
     "sources": "Ödeme kaynakları",
     "addSource": "Kaynak ekle",
     "splitOk": "Toplam {amount}",
-    "splitLeft": "Dağıtılacak kalan: {amount}",
-    "confirmDelete": "{date} tarihli kayıt silinsin mi?"
+    "splitLeft": "Dağıtılacak kalan: {amount}"
   },
   "timeline": {
     "home": "Bugüne dön (veya zaman çizelgesine çift tıklayın)"

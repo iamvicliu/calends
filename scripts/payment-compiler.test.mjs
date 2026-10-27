@@ -49,7 +49,20 @@ test('compiled payment renders the whole new form including its unused delete ca
     t: String,
     money: String,
   };
-  for (const name of ['Sheet', 'MoneyInput', 'Seg', 'Cell', 'Group', 'IconButton', 'Icon', 'DatePicker', 'CurrencySelect', 'Picker', 'MethodPicker'])
+  for (const name of [
+    'ConfirmButton',
+    'Sheet',
+    'MoneyInput',
+    'Seg',
+    'Cell',
+    'Group',
+    'IconButton',
+    'Icon',
+    'DatePicker',
+    'CurrencySelect',
+    'Picker',
+    'MethodPicker',
+  ])
     deps[name] = name;
   const PaymentSheet = new Function(...Object.keys(deps), code + ';return PaymentSheet;')(...Object.values(deps));
   assert.doesNotThrow(() => PaymentSheet({ sub: { price: 10, currency: 'USD', start: '2026-10-01' }, today: '2026-10-25', onClose() {} }));
@@ -91,7 +104,20 @@ test('editing an early payment keeps its owning phase unassigned and saves witho
     money: String,
     t: String,
   };
-  for (const name of ['Sheet', 'MoneyInput', 'Seg', 'Cell', 'Group', 'IconButton', 'Icon', 'DatePicker', 'CurrencySelect', 'Picker', 'MethodPicker'])
+  for (const name of [
+    'ConfirmButton',
+    'Sheet',
+    'MoneyInput',
+    'Seg',
+    'Cell',
+    'Group',
+    'IconButton',
+    'Icon',
+    'DatePicker',
+    'CurrencySelect',
+    'Picker',
+    'MethodPicker',
+  ])
     deps[name] = name;
   const source = readFileSync(new URL('../app/src/views/PaymentSheet.tsx', import.meta.url), 'utf8');
   const compiled = transformSync('PaymentSheet.tsx', source, { lang: 'tsx', jsx: { runtime: 'classic' }, reactCompiler: true });

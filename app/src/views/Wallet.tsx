@@ -1,3 +1,4 @@
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { formatTotal, sumTotals, totalNote } from '../../../shared/fx-total.ts';
 import { FxAmount } from '../components/FxAmount.tsx';
 import { copyParts } from '../components/copy.tsx';
@@ -24,7 +25,7 @@ import { BALANCE_KINDS, type AppState, type CardNetwork, type MethodKind, type P
 import { DatePicker } from '../components/DatePicker.tsx';
 import { IconButton, Cell, Group, Toolbar } from '../components/ui.tsx';
 import { NumInput, MoneyInput, Seg, Toggle } from '../components/inputs.tsx';
-import { ask, Sheet } from '../components/overlays.tsx';
+import { Sheet } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
 import { MethodMark, NetworkMark, SubIcon } from '../components/marks.tsx';
 import { bankOf, brandOf, domainOf, KIND_BG, KIND_LABEL, liveSubs, methodName, NETWORKS } from '../derive.ts';
@@ -602,9 +603,9 @@ function MethodDeleteSheet({ m, state, onClose, onDeleted }: { m: PaymentMethod;
           <button className="btn" onClick={onClose}>
             {t('wallet.editor.cancel')}
           </button>
-          <button
-            className="btn danger-solid"
-            onClick={() =>
+          <ConfirmButton
+            hint={usage}
+            onConfirm={() =>
               run(async () => {
                 await deleteMethod(m.id, target || null);
                 onDeleted();
@@ -612,7 +613,7 @@ function MethodDeleteSheet({ m, state, onClose, onDeleted }: { m: PaymentMethod;
             }
           >
             {t('wallet.editor.delete')}
-          </button>
+          </ConfirmButton>
         </>
       }
     >
@@ -658,22 +659,25 @@ function MethodEditor({ m, state, onClose }: { m: PaymentMethod; state: AppState
       onClose={onClose}
       foot={
         <>
-          {!isNew && (
-            <button
-              className="btn danger"
-              onClick={async () => {
-                // 仍有订阅、扣款或默认设置用着这张卡：先选迁到哪张卡或清空
-                if (methodReferences(getState(), m.id).length) return setDeleting(true);
-                if (await ask(t('wallet.editor.confirmDelete', { name: m.name })))
-                  run(async () => {
+          {!isNew &&
+            (methodReferences(state, m.id).length ? (
+              <button className="btn danger" onClick={() => setDeleting(true)}>
+                {t('wallet.editor.delete')}
+              </button>
+            ) : (
+              <ConfirmButton
+                onConfirm={() => {
+                  // 编辑期间新增了引用时，仍须先选择迁移目标。
+                  if (methodReferences(getState(), m.id).length) return setDeleting(true);
+                  void run(async () => {
                     await deleteMethod(m.id);
                     onClose();
                   }, t('wallet.editor.deleted'));
-              }}
-            >
-              {t('wallet.editor.delete')}
-            </button>
-          )}
+                }}
+              >
+                {t('wallet.editor.delete')}
+              </ConfirmButton>
+            ))}
           <span className="grow" />
           <button className="btn" onClick={onClose}>
             {t('wallet.editor.cancel')}

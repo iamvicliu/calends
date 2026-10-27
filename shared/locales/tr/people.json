@@ -61,7 +61,6 @@
     "mergePick": "Seç…",
     "mergeConfirm": "“{from}” kişisi “{into}” ile birleştirilsin mi? {from} kişisinin tüm planları ve ödemeleri {into} kişisine geçer; ad ve iletişim {into} kişisinden alınır.",
     "merged": "{name} ile birleştirildi",
-    "confirmDelete": "“{name}” silinsin mi?",
     "accountMissing": "Bu üyelik artık yok. Kişi ayrıntılarını yeniden açın."
   },
   "pick": {

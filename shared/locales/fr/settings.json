@@ -167,7 +167,6 @@
     "testSent": "Message de test envoyé",
     "add": "Ajouter un canal",
     "addKind": "Ajouter {name}",
-    "confirmDelete": "Supprimer le canal « {name} » ?",
     "delete": "Supprimer",
     "save": "Enregistrer",
     "fillField": "Veuillez saisir {field}",
@@ -255,7 +254,6 @@
     "passkeyUnsupported": "Ce navigateur ne prend pas en charge les clés d’accès.",
     "lastUsed": "Dernière utilisation {time}",
     "addedAt": "Ajoutée {time}",
-    "confirmRemovePasskey": "Supprimer la clé d’accès « {name} » ?",
     "remove": "Supprimer",
     "removed": "Supprimée",
     "addPasskey": "Ajouter une clé d’accès",
@@ -314,7 +312,6 @@
       "one": "Déplacer son abonnement vers",
       "other": "Déplacer ses {count} abonnements vers"
     },
-    "confirmDelete": "Supprimer « {name} » ?",
     "dragHandle": "Faire glisser pour réordonner",
     "toast": {
       "created": "Catégorie ajoutée",

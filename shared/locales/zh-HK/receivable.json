@@ -45,7 +45,6 @@
     "upcoming": "未到期",
     "this": "本筆"
   },
-  "confirmDelete": "刪除 {date} 的這條記錄？",
   "grid": {
     "year": "{year}年",
     "quarter": "{year}年第{quarter}季",

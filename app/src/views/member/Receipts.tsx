@@ -1,3 +1,4 @@
+import { ConfirmButton } from '../../components/ConfirmButton.tsx';
 import { addDays } from '../../../../shared/billing.ts';
 import { cnDate, cnDateFull } from '../../../../shared/format.ts';
 
@@ -86,16 +87,14 @@ export function PeriodPop({
         <CopyReceiptFields context={context} record={r} />
       ) : (
         <div className="period-pop-actions">
-          <button
-            className="btn plain"
-            style={{ color: 'var(--red)' }}
-            onClick={() => {
+          <ConfirmButton
+            onConfirm={() => {
               onClose();
-              void removeRecordById(r.id, r.date);
+              void removeRecordById(r.id);
             }}
           >
             {t('common.delete')}
-          </button>
+          </ConfirmButton>
           <span className="grow" />
           {isReceipt(r) && !opening && others.length > 0 && (
             <button className="btn" onClick={() => startCopy(r)}>

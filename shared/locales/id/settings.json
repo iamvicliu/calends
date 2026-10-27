@@ -145,7 +145,6 @@
     "testSent": "Pesan uji terkirim",
     "add": "Tambah saluran",
     "addKind": "Tambah {name}",
-    "confirmDelete": "Hapus saluran “{name}”?",
     "delete": "Hapus",
     "save": "Simpan",
     "fillField": "Masukkan {field}",
@@ -224,7 +223,6 @@
     "passkeyUnsupported": "Browser ini tidak mendukung passkey.",
     "lastUsed": "Terakhir dipakai {time}",
     "addedAt": "Ditambahkan {time}",
-    "confirmRemovePasskey": "Hapus passkey “{name}”?",
     "remove": "Hapus",
     "removed": "Dihapus",
     "addPasskey": "Tambah passkey",
@@ -271,7 +269,6 @@
     "moveTo": {
       "other": "Pindahkan {count} langganannya ke"
     },
-    "confirmDelete": "Hapus “{name}”?",
     "dragHandle": "Seret untuk mengurutkan",
     "toast": {
       "created": "Kategori ditambahkan",

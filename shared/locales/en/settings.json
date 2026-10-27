@@ -146,7 +146,6 @@
     "testSent": "Test message sent",
     "add": "Add channel",
     "addKind": "Add {name}",
-    "confirmDelete": "Delete channel “{name}”?",
     "delete": "Delete",
     "save": "Save",
     "fillField": "Please enter {field}",
@@ -225,7 +224,6 @@
     "passkeyUnsupported": "This browser doesn't support passkeys.",
     "lastUsed": "Last used {time}",
     "addedAt": "Added {time}",
-    "confirmRemovePasskey": "Remove passkey “{name}”?",
     "remove": "Remove",
     "removed": "Removed",
     "addPasskey": "Add passkey",
@@ -275,7 +273,6 @@
       "one": "Move its {count} subscription to",
       "other": "Move its {count} subscriptions to"
     },
-    "confirmDelete": "Delete “{name}”?",
     "dragHandle": "Drag to reorder",
     "toast": {
       "created": "Category added",

@@ -45,7 +45,6 @@
     "upcoming": "Belum jatuh tempo",
     "this": "Pembayaran ini"
   },
-  "confirmDelete": "Hapus catatan tanggal {date}?",
   "grid": {
     "year": "{year}",
     "quarter": "{year} Q{quarter}",

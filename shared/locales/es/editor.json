@@ -242,8 +242,7 @@
     "sources": "Pagado con",
     "addSource": "Añadir origen",
     "splitOk": "Suma {amount}",
-    "splitLeft": "Falta asignar: {amount}",
-    "confirmDelete": "¿Eliminar el registro del {date}?"
+    "splitLeft": "Falta asignar: {amount}"
   },
   "timeline": {
     "home": "Volver a hoy (o haz doble clic en la línea de tiempo)"

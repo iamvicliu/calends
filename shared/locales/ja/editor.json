@@ -233,8 +233,7 @@
     "sources": "支払い元",
     "addSource": "支払い元を追加",
     "splitOk": "合計 {amount}（金額と一致）",
-    "splitLeft": "未割り当て：{amount}",
-    "confirmDelete": "{date} の記録を削除しますか？"
+    "splitLeft": "未割り当て：{amount}"
   },
   "timeline": {
     "home": "今日に戻る（またはタイムラインをダブルクリック）"

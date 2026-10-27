@@ -46,7 +46,6 @@
     "mergePick": "選擇…",
     "mergeConfirm": "把「{from}」合併到「{into}」？{from} 的共享和代付都會轉到 {into} 名下，稱呼和聯絡方式以 {into} 為準。",
     "merged": "已合併到 {name}",
-    "confirmDelete": "刪除「{name}」？",
     "accountMissing": "這筆成員關係已不存在，請重新開啟人員詳情。"
   },
   "pick": {

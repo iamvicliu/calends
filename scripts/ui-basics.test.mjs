@@ -261,7 +261,6 @@ async function priceEditorHarness() {
   let cursor = 0;
   let valid = true;
   let confirmations = 0;
-  let confirm = true;
   let form = {
     id: 'fictional',
     name: 'Orbit Notes',
@@ -297,7 +296,7 @@ async function priceEditorHarness() {
     },
     useId: () => 'point-error',
     CYCLES: [['m1', { unit: 'month', every: 1 }]],
-    Trash2: 'trash',
+    ConfirmButton: 'confirm-button',
     History: 'history',
     Group: 'group',
     Icon: 'icon',
@@ -305,7 +304,7 @@ async function priceEditorHarness() {
     DatePicker: 'date-picker',
     ask: async () => {
       confirmations++;
-      return confirm;
+      throw new Error('price deletion must not open ask');
     },
   };
   const Component = new Function(...Object.keys(deps), `${result.code}; return ChangePanel;`)(...Object.values(deps));
@@ -338,15 +337,12 @@ async function priceEditorHarness() {
             .props.onChange({ target: { value } }),
     remove: () =>
       walk(inline())
-        .find((el) => el.type === 'icon-button')
-        .props.onClick(),
+        .find((el) => el.type === 'confirm-button')
+        .props.onConfirm(),
     inline,
     form: () => form,
     valid: () => valid,
     confirmations: () => confirmations,
-    confirm: (v) => {
-      confirm = v;
-    },
     nodes: () => walk(inline()),
   };
 }
@@ -399,23 +395,21 @@ test('invalid price drafts remain visible and block completion until corrected',
   assert.equal(h.form().price, 19);
 });
 
-test('inline deletion confirms once and only changes the form; initial price has no delete action', async () => {
+test('inline deletion uses the capsule confirmation and only changes the form; initial price has no delete action', async () => {
   const h = await priceEditorHarness();
   h.open();
-  h.confirm(false);
-  await h.remove();
   assert.equal(h.form().priceHistory.length, 3);
-  h.confirm(true);
+  assert.ok(h.nodes().some((el) => el.type === 'confirm-button' && el.props.hint));
   h.change('amount', 'invalid');
   await h.remove();
   assert.equal(h.form().priceHistory.length, 2);
   assert.equal(h.form().price, 14);
   assert.equal(h.valid(), true);
   assert.equal(h.inline(), undefined);
-  assert.equal(h.confirmations(), 2);
+  assert.equal(h.confirmations(), 0);
   h.open('2026-01-01');
   assert.equal(
-    h.nodes().some((el) => el.type === 'icon-button'),
+    h.nodes().some((el) => el.type === 'confirm-button'),
     false,
   );
 });

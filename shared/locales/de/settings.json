@@ -167,7 +167,6 @@
     "testSent": "Testnachricht gesendet",
     "add": "Kanal hinzufügen",
     "addKind": "{name} hinzufügen",
-    "confirmDelete": "Kanal „{name}“ löschen?",
     "delete": "Löschen",
     "save": "Sichern",
     "fillField": "Bitte {field} eingeben",
@@ -255,7 +254,6 @@
     "passkeyUnsupported": "Dieser Browser unterstützt keine Passkeys.",
     "lastUsed": "Zuletzt verwendet {time}",
     "addedAt": "Hinzugefügt {time}",
-    "confirmRemovePasskey": "Passkey „{name}“ entfernen?",
     "remove": "Entfernen",
     "removed": "Entfernt",
     "addPasskey": "Passkey hinzufügen",
@@ -314,7 +312,6 @@
       "one": "Ihr {count} Abo verschieben nach",
       "other": "Ihre {count} Abos verschieben nach"
     },
-    "confirmDelete": "„{name}“ löschen?",
     "dragHandle": "Zum Sortieren ziehen",
     "toast": {
       "created": "Kategorie hinzugefügt",

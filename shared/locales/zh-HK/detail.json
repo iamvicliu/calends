@@ -184,7 +184,6 @@
       "date": "日期",
       "amount": "金額",
       "base": "折合 {ccy}"
-    },
-    "confirmDelete": "刪除 {date} 的這筆轉讓收付？"
+    }
   }
 }

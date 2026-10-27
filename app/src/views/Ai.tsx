@@ -1,12 +1,13 @@
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { copyParts } from '../components/copy.tsx';
 import { base } from '../base.ts';
 import { useEffect, useState } from 'react';
 import type { AppState } from '../../../shared/types.ts';
-import { CardTitle, IconButton, Toolbar } from '../components/ui.tsx';
-import { ask, LoadFailed, Sheet } from '../components/overlays.tsx';
+import { CardTitle, Toolbar } from '../components/ui.tsx';
+import { LoadFailed, Sheet } from '../components/overlays.tsx';
 import { Icon } from '../components/icons.tsx';
 import { Toggle } from '../components/inputs.tsx';
-import { ChartPie, Eye, KeyRound, Layers, PencilLine, ReceiptText, Settings2, Shapes, Tags, Trash2, Users, Wallet } from 'lucide-react';
+import { ChartPie, Eye, KeyRound, Layers, PencilLine, ReceiptText, Settings2, Shapes, Tags, Users, Wallet } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { api, saveSettings } from '../store.ts';
 import { copyText, run } from '../toast.ts';
@@ -355,12 +356,9 @@ export function Ai({ state }: { state: AppState }) {
                   </span>
                   <span className="ai-token-act" role="cell">
                     {!ro && (
-                      <IconButton
-                        className="ai-revoke"
-                        aria-label={t('ai.revoke')}
-                        title={t('ai.revoke')}
-                        onClick={async () =>
-                          (await ask(t('ai.confirmRevoke', { name: tk.name }))) &&
+                      <ConfirmButton
+                        hint={t('ai.confirmRevoke', { name: tk.name })}
+                        onConfirm={() =>
                           run(async () => {
                             await api(`/api/mcp/tokens/${tk.id}`, { method: 'DELETE' });
                             if (fresh?.item.id === tk.id) setFresh(null);
@@ -368,8 +366,8 @@ export function Ai({ state }: { state: AppState }) {
                           }, t('ai.revoked'))
                         }
                       >
-                        <Trash2 size={15} />
-                      </IconButton>
+                        {t('ai.revoke')}
+                      </ConfirmButton>
                     )}
                   </span>
                 </div>

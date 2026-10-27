@@ -1,12 +1,12 @@
+import { ConfirmButton } from './ConfirmButton.tsx';
 import { useState } from 'react';
 import { t } from '../../../shared/i18n.ts';
 import type { Transfer } from '../../../shared/types.ts';
 import { DatePicker } from './DatePicker.tsx';
 import { CurrencySelect } from './Picker.tsx';
-import { ask, Sheet } from './overlays.tsx';
+import { Sheet } from './overlays.tsx';
 import { Cell, Group } from './ui.tsx';
 import { MoneyInput, Seg, useSubmit } from './inputs.tsx';
-import { cnDateFull } from '../../../shared/format.ts';
 
 /**
  * 记一笔 / 修改一笔转让收付：二手买入付给原主的钱，或卖出时收到的钱。金额是实际现金，不推算剩余价值。
@@ -53,16 +53,9 @@ export function TransferSheet({
       foot={
         <>
           {edit && (
-            <button
-              className="btn danger"
-              style={{ marginRight: 'auto' }}
-              disabled={busy}
-              onClick={async () =>
-                (await ask(t('detail.transfer.confirmDelete', { date: cnDateFull(edit.date) }))) && submit(() => onSave(list.filter((_, i) => i !== index)))
-              }
-            >
+            <ConfirmButton disabled={busy} onConfirm={() => void submit(() => onSave(list.filter((_, i) => i !== index)))}>
               {t('common.delete')}
-            </button>
+            </ConfirmButton>
           )}
           <button className="btn" onClick={onClose}>
             {t('common.cancel')}

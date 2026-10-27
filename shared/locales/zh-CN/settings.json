@@ -145,7 +145,6 @@
     "testSent": "测试消息已发出",
     "add": "添加渠道",
     "addKind": "添加 {name}",
-    "confirmDelete": "删除渠道「{name}」？",
     "delete": "删除",
     "save": "保存",
     "fillField": "请填写{field}",
@@ -224,7 +223,6 @@
     "passkeyUnsupported": "当前浏览器不支持 Passkey。",
     "lastUsed": "上次使用 {time}",
     "addedAt": "添加于 {time}",
-    "confirmRemovePasskey": "移除 Passkey「{name}」？",
     "remove": "移除",
     "removed": "已移除",
     "addPasskey": "添加 Passkey",
@@ -271,7 +269,6 @@
     "moveTo": {
       "other": "其中 {count} 个订阅移到"
     },
-    "confirmDelete": "删除分类「{name}」？",
     "dragHandle": "拖动排序",
     "toast": {
       "created": "已新建分类",

@@ -78,7 +78,6 @@
   "editor": {
     "titleNew": "Новый способ оплаты",
     "titleEdit": "Изменить способ оплаты",
-    "confirmDelete": "Удалить «{name}»?",
     "deleted": "Удалено",
     "delete": "Удалить",
     "cancel": "Отменить",

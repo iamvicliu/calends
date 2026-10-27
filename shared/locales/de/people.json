@@ -61,7 +61,6 @@
     "mergePick": "Auswählen…",
     "mergeConfirm": "„{from}“ mit „{into}“ zusammenführen? Alle Abos und Zahlungen von {from} gehen auf {into} über; Name und Kontakt von {into} bleiben.",
     "merged": "Mit {name} zusammengeführt",
-    "confirmDelete": "„{name}“ löschen?",
     "accountMissing": "Diese Mitgliedschaft existiert nicht mehr. Öffne die Person erneut."
   },
   "pick": {

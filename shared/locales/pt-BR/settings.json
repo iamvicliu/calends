@@ -149,7 +149,6 @@
     "testSent": "Mensagem de teste enviada",
     "add": "Adicionar canal",
     "addKind": "Adicionar {name}",
-    "confirmDelete": "Apagar o canal “{name}”?",
     "delete": "Apagar",
     "save": "Salvar",
     "fillField": "Preencha {field}",
@@ -228,7 +227,6 @@
     "passkeyUnsupported": "Este navegador não suporta chaves de acesso.",
     "lastUsed": "Último uso {time}",
     "addedAt": "Adicionada {time}",
-    "confirmRemovePasskey": "Remover a chave de acesso “{name}”?",
     "remove": "Remover",
     "removed": "Removida",
     "addPasskey": "Adicionar chave de acesso",
@@ -278,7 +276,6 @@
       "one": "Mover a {count} assinatura dela para",
       "other": "Mover as {count} assinaturas dela para"
     },
-    "confirmDelete": "Excluir “{name}”?",
     "dragHandle": "Arraste para reordenar",
     "toast": {
       "created": "Categoria adicionada",

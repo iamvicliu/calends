@@ -196,7 +196,6 @@
       "date": "Ngày",
       "amount": "Số tiền",
       "base": "Quy đổi {ccy}"
-    },
-    "confirmDelete": "Xóa khoản chuyển nhượng ngày {date}?"
+    }
   }
 }

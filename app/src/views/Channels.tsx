@@ -1,8 +1,9 @@
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { base } from '../base.ts';
 import { useState } from 'react';
 import { uid } from '../../../shared/billing.ts';
 import { channelsOf, type AppState, type Channel, type ChannelKind } from '../../../shared/types.ts';
-import { ask, Sheet } from '../components/overlays.tsx';
+import { Sheet } from '../components/overlays.tsx';
 import { Cell, Group } from '../components/ui.tsx';
 import { Icon } from '../components/icons.tsx';
 import { Toggle } from '../components/inputs.tsx';
@@ -202,8 +203,7 @@ export function ChannelsGroup({ state }: { state: AppState }) {
               setEdit(null);
             }, t('settings.toast.saved'))
           }
-          onDelete={async () =>
-            (await ask(t('settings.channels.confirmDelete', { name: edit.name }))) &&
+          onDelete={() =>
             run(async () => {
               await save(list.filter((x) => x.id !== edit.id));
               setEdit(null);
@@ -238,11 +238,7 @@ function ChannelSheet({
       onClose={onClose}
       foot={
         <>
-          {!isNew && (
-            <button className="btn danger" onClick={onDelete}>
-              {t('settings.channels.delete')}
-            </button>
-          )}
+          {!isNew && <ConfirmButton onConfirm={onDelete}>{t('settings.channels.delete')}</ConfirmButton>}
           <span className="grow" />
           <button className="btn" disabled={missing.length > 0} onClick={() => test(f)}>
             {t('settings.channels.test')}

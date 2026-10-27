@@ -89,7 +89,6 @@
   "editor": {
     "titleNew": "Ajouter un moyen de paiement",
     "titleEdit": "Modifier le moyen de paiement",
-    "confirmDelete": "Supprimer « {name} » ?",
     "deleted": "Supprimé",
     "delete": "Supprimer",
     "cancel": "Annuler",

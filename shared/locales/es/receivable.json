@@ -57,7 +57,6 @@
     "upcoming": "Aún no vence",
     "this": "Este cobro"
   },
-  "confirmDelete": "¿Eliminar el registro del {date}?",
   "grid": {
     "year": "{year}",
     "quarter": "{year} Q{quarter}",

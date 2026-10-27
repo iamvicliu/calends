@@ -84,7 +84,6 @@
   "editor": {
     "titleNew": "支払い方法を追加",
     "titleEdit": "支払い方法を編集",
-    "confirmDelete": "「{name}」を削除しますか？",
     "deleted": "削除しました",
     "delete": "削除",
     "cancel": "キャンセル",
