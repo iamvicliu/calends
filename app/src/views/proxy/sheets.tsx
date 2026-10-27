@@ -375,7 +375,10 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
         >
           {future ? (
             <Cell label={t('proxy.entry.amount')}>
-              <span className="muted">{flow(-row.list, row.listCurrency)}</span>
+              <span className="row">
+                <span className="muted">{flow(-row.list, row.listCurrency)}</span>
+                <span className="badge">{t('proxy.table.notCharged')}</span>
+              </span>
             </Cell>
           ) : (
             <>
