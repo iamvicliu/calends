@@ -20,6 +20,7 @@ const groups: Record<string, string[]> = {
     'app/src/views/Carpool.tsx',
     'app/src/views/carpool/CarTable.tsx',
     'app/src/views/carpool/Members.tsx',
+    'app/src/views/detail/Periods.tsx',
     'app/src/views/carpool/CarSheet.tsx',
     'app/src/views/carpool/ConvertSheet.tsx',
   ],
