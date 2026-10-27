@@ -9,8 +9,9 @@ import { isSettled, putRecord, removeRecord, resolveKey, resolvedPeriods, type L
 import type { AppState, Receipt, Waiver } from '../../../shared/types.ts';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { CurrencySelect } from '../components/Picker.tsx';
-import { ask, Sheet, tipProps, tipSet, TipTable } from '../components/overlays.tsx';
+import { Sheet, tipProps, tipSet, TipTable } from '../components/overlays.tsx';
 import { Cell, Group } from '../components/ui.tsx';
+import { ConfirmButton } from '../components/ConfirmButton.tsx';
 import { NumInput, useSubmit } from '../components/inputs.tsx';
 import { run } from '../toast.ts';
 
@@ -138,17 +139,13 @@ export function ReceivableSheet({
       foot={
         <>
           {edit && (
-            <button
-              className="btn plain"
-              style={{ color: 'var(--red)' }}
+            <ConfirmButton
               disabled={saving}
-              onClick={async () =>
-                (await ask(t('receivable.confirmDelete', { date: cnDateFull(edit.date) }))) &&
-                write(() => removeRecord(record, edit.id), t('receivable.toastRemoved'))
-              }
+              hint={t('receivable.toastRemoved')}
+              onConfirm={() => write(() => removeRecord(record, edit.id), t('receivable.toastRemoved'))}
             >
               {t('common.delete')}
-            </button>
+            </ConfirmButton>
           )}
           {!edit && (
             <button className="btn danger-soft" disabled={blocked} title={t('receivable.waiverFoot')} onClick={() => submit('waiver')}>

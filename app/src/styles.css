@@ -4415,6 +4415,33 @@ button.h-price-row:focus-visible {
   color: var(--white-a12);
   box-shadow: none;
 }
+/* 就地二次确认的删除按钮：点一下伸出问号、转红底，再点才执行 */
+.btn.confirm-btn {
+  gap: 0;
+  transition:
+    background var(--duration) var(--ease),
+    color var(--duration) var(--ease);
+}
+.confirm-btn .confirm-q {
+  display: inline-flex;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    width var(--duration) var(--ease),
+    margin var(--duration) var(--ease),
+    opacity var(--duration) var(--ease);
+}
+.confirm-btn.armed .confirm-q {
+  width: 15px;
+  margin-right: 6px;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .confirm-btn .confirm-q {
+    transition: none;
+  }
+}
 /* 停止面板：结束日正好是扣款日时的提醒 */
 .stop-warn {
   color: var(--orange);

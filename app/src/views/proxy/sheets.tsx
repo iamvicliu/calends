@@ -14,7 +14,8 @@ import { YearLedger } from '../../components/YearLedger.tsx';
 import { MetricCards, Metric, Cell, Group } from '../../components/ui.tsx';
 import { MoneyInput, useSubmit } from '../../components/inputs.tsx';
 import { NameLink, PayBadge, StatusPill, SubIcon } from '../../components/marks.tsx';
-import { ask, Sheet } from '../../components/overlays.tsx';
+import { Sheet } from '../../components/overlays.tsx';
+import { ConfirmButton } from '../../components/ConfirmButton.tsx';
 import { Plus } from 'lucide-react';
 import { contactText } from '../../components/Contact.tsx';
 import { getState, saveSub } from '../../store.ts';
@@ -320,16 +321,15 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       onClose();
     }, t('proxy.entry.saved'));
   // 删掉这笔记录：一笔分几期时这几期一起回到待收
-  const remove = async () => {
-    if (!rec || !(await ask(t('receivable.confirmDelete', { date: cnDateFull(rec.date) })))) return;
-    await submit(() =>
+  const remove = () =>
+    rec &&
+    submit(() =>
       run(async () => {
         const current = getState().subscriptions.find((x) => x.id === s.id) ?? live;
         await saveSub({ ...current, proxy: { ...current.proxy!, ...removeRecord(current.proxy!, rec.id) } });
         onClose();
       }, t('receivable.toastRemoved')),
     );
-  };
 
   return (
     <Sheet
@@ -339,9 +339,9 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       foot={
         <>
           {rec && (
-            <button className="btn plain" style={{ color: 'var(--red)' }} disabled={busy} onClick={() => void remove()}>
+            <ConfirmButton disabled={busy} hint={t('receivable.toastRemoved')} onConfirm={() => void remove()}>
               {t('common.delete')}
-            </button>
+            </ConfirmButton>
           )}
           <span className="grow" />
           <button className="btn" onClick={onClose}>

@@ -1929,6 +1929,7 @@ test('删除一笔收款：它抵扣的期恢复为没收，期初结清不受�
         CurrencySelect: 'CurrencySelect',
         NumInput: 'NumInput',
         Picker: 'Picker',
+        ConfirmButton: 'ConfirmButton',
         todayIn: () => today,
         // 删除前要确认：这里确认
         ask: async () => true,
@@ -1965,8 +1966,9 @@ test('删除一笔收款：它抵扣的期恢复为没收，期初结清不受�
       .render('ReceiptForm', { state: st, s: sub, member, editId: 'r1', onDone() {} })
       .find((n) => n.type === 'Sheet')!.props.foot,
   )
-    .find((n) => n.type === 'button' && n.children.includes('common.delete'))!
-    .props.onClick();
+    .find((n) => n.type === 'ConfirmButton')!
+    .props.onConfirm();
+  await new Promise((done) => setTimeout(done, 0));
   assert.deepEqual(left(), ['o']);
   const after = { ...sub, share: { ...sub.share!, members: saved!.share!.members } };
   assert.equal(billing.memberUnpaidFrom(after, after.share.members[0]), '2026-04-14');
@@ -2092,6 +2094,21 @@ test('成员表单：改自定义收费从生效日起记调价', async () => {
   assert.equal(m.custom, true);
   assert.equal(m.fee, 50);
   assert.deepEqual(m.feeHistory!.at(-1)!.from, today);
+});
+
+test('弹窗底部删除就地确认：第一次点伸出问号转红底，失焦收回，再点才执行', () => {
+  let done = 0;
+  const r = harness('../app/src/components/ConfirmButton.tsx', 'ConfirmButton', {}, { CircleHelp: 'CircleHelp', useEffect() {} });
+  const button = () => r.render('ConfirmButton', { children: 'common.delete', onConfirm: () => done++ }).find((n) => n.type === 'button')!;
+  assert.match(button().props.className, /danger-soft/);
+  button().props.onClick();
+  assert.equal(done, 0);
+  assert.match(button().props.className, /armed/);
+  button().props.onBlur();
+  assert.doesNotMatch(button().props.className, /armed/);
+  button().props.onClick();
+  button().props.onClick();
+  assert.equal(done, 1);
 });
 
 test('行尾删除需二次确认：第一次点只展开「确认」，第二次才删除；未保存条目直接删除', async () => {
