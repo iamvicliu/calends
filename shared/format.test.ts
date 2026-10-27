@@ -142,7 +142,20 @@ test('month axis ticks snap to calendar boundaries and keep January for the year
   const three = monthsFrom('2023-11', 36);
   const pick = (max: number) => monthTicks(three, max).map((i) => three[i]);
   // 宽屏：季度
-  assert.deepEqual(pick(12), ['2024-01', '2024-04', '2024-07', '2024-10', '2025-01', '2025-04', '2025-07', '2025-10', '2026-01', '2026-04', '2026-07', '2026-10']);
+  assert.deepEqual(pick(12), [
+    '2024-01',
+    '2024-04',
+    '2024-07',
+    '2024-10',
+    '2025-01',
+    '2025-04',
+    '2025-07',
+    '2025-10',
+    '2026-01',
+    '2026-04',
+    '2026-07',
+    '2026-10',
+  ]);
   // 中等：半年
   assert.deepEqual(pick(6), ['2024-01', '2024-07', '2025-01', '2025-07', '2026-01', '2026-07']);
   // 手机：只标年

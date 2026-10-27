@@ -1,7 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FALLBACK_FX } from './billing.ts';
-import { cancelSavings, cashVsAccrual, chartMonths, events, monthMovement, mrrChangeSinceLastMonth, movement, mrrOn, prepaidValue, topUpPlan } from './metrics.ts';
+import {
+  cancelSavings,
+  cashVsAccrual,
+  chartMonths,
+  events,
+  monthMovement,
+  mrrChangeSinceLastMonth,
+  movement,
+  mrrOn,
+  prepaidValue,
+  topUpPlan,
+} from './metrics.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
 const sub = (o: Partial<Subscription>): Subscription => ({

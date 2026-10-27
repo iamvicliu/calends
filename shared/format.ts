@@ -150,8 +150,7 @@ export function monthLabel(month: string, opts: { year?: boolean; long?: boolean
  * 档位在一年内都落在一月上，标签在一月处写年份即可给出年份线索；一档也放不下时只标第一个月。
  */
 export function monthTicks(months: string[], max: number): number[] {
-  const at = (step: number) =>
-    months.flatMap((m, i) => ((Number(m.slice(0, 4)) * 12 + Number(m.slice(5, 7)) - 1) % step === 0 ? [i] : []));
+  const at = (step: number) => months.flatMap((m, i) => ((Number(m.slice(0, 4)) * 12 + Number(m.slice(5, 7)) - 1) % step === 0 ? [i] : []));
   for (const step of [1, 2, 3, 6, 12, 24, 60]) {
     const ticks = at(step);
     if (ticks.length && ticks.length <= max) return ticks;

@@ -92,13 +92,7 @@ export function AreaChart({
           <span key={i} {...tipProps(() => tip(i))} />
         ))}
       </div>
-      <XAxis
-        labels={labels}
-        months={months}
-        w={w}
-        pos={(i) => x(i) / W}
-        fallback={labels.flatMap((_, i) => (i % step === 0 || i === n - 1 ? [i] : []))}
-      />
+      <XAxis labels={labels} months={months} w={w} pos={(i) => x(i) / W} fallback={labels.flatMap((_, i) => (i % step === 0 || i === n - 1 ? [i] : []))} />
     </div>
   );
 }
