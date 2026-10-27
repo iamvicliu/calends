@@ -75,7 +75,7 @@ test('a proxy editor draft survives new-subscription save and JSON round trip', 
   const draft = { ...newSub(today, 'fictional-method', 'USD'), proxy: { forName: '' } };
   const form = { ...draft, name: ' Fictional proxy ', price: 12, proxy: { forName: 'Lin', personId: 'fictional-person' } };
   const out = prepareEditorSave(draft, form, today, true, 0);
-  const saved = JSON.parse(JSON.stringify(mergeEditorSave(state, draft, out, undefined, true, undefined, today)));
+  const saved = JSON.parse(JSON.stringify(mergeEditorSave(draft, out, undefined, true)));
   assert.deepEqual(saved.proxy, form.proxy);
   assert.equal(saved.name, 'Fictional proxy');
   assert.equal(saved.methodId, 'fictional-method');
