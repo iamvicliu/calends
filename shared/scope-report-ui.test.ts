@@ -188,6 +188,7 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     Seg: 'Seg',
     Stepper: 'Stepper',
     SubIcon: 'SubIcon',
+    TailName: 'TailName',
     CatIcon: 'CatIcon',
     BarLine: 'BarLine',
     MethodMark: 'MethodMark',

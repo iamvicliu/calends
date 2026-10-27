@@ -210,6 +210,7 @@ function mount(rawZoom?: string, width = 214, today = '2026-10-21') {
     CardTitle: 'h3',
     Seg: 'Seg',
     SubIcon: 'SubIcon',
+    TailName: 'TailName',
     useWidth: () => [null, width],
     useSnapshotRender: () => {},
     perLabel: () => 'mo',
@@ -433,7 +434,7 @@ test('名称列交互：拖到图标最小值隐藏名称、保留可访问名�
   find('gt-resize').props.onDoubleClick();
   assert.equal(host.prefs['gantt-label-w'], null);
   assert.equal(find('gt').props.style['--lw'], '105px');
-  assert.equal(find('gt-name').children[0], host.sub.name);
+  assert.equal(find('gt-name').props.name, host.sub.name);
   find('gt-resize').props.onPointerDown(pointer(100));
   find('gt-resize').props.onPointerMove(pointer(1000));
   assert.equal(find('gt').props.style['--lw'], '105px', '拖动不可超过最长名称');
@@ -461,7 +462,7 @@ test('手机竖屏不渲染名称和拖拽线，整行打开详情，横屏恢�
   host.env.portrait = false;
   assert.equal(find('gt')!.props.style['--lw'], '80px');
   assert.ok(find('gt-resize'));
-  assert.equal(find('gt-name')!.children[0], host.sub.name);
+  assert.equal(find('gt-name')!.props.name, host.sub.name);
   host.prefs['gantt-label-w-m'] = '44';
   assert.equal(find('gt-name'), undefined, '横屏也可拖到只剩图标');
   find('gt-resize')!.props.onDoubleClick();

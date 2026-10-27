@@ -2,6 +2,7 @@ import { useSnapshotRender } from '../snapshot-render.tsx';
 import { durationLabel } from '../../../shared/billing.ts';
 import { transferredStop } from '../../../shared/transfers.ts';
 import { stopDescription } from '../components/StopPanel.tsx';
+import { TailName } from '../components/TailName.tsx';
 import { Fragment, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   addDays,
@@ -547,7 +548,7 @@ export function Gantt({
                   <span className="gt-icon" role="img" title={r.s.name} aria-label={r.s.name}>
                     <SubIcon sub={r.s} size={20} proxied={compact} />
                   </span>
-                  {!iconOnly && <span className="gt-name">{r.s.name}</span>}
+                  {!iconOnly && <TailName className="gt-name" name={r.s.name} />}
                 </div>
                 <div className="gt-track">
                   <div className="gt-pan">

@@ -1,0 +1,19 @@
+/* 头部省略、后缀保留；后缀的前导空格要留着 */
+.tail-name {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+}
+.tail-name > .tn-head {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 拆成两段后合计宽度会比整段多出零点几像素，按整段量好宽度的地方（时间轴名称列）会被误截；
+   后缀以空格开头，往左叠 1px 看不出来 */
+.tail-name > .tn-tail {
+  flex: none;
+  margin-left: -1px;
+  white-space: pre;
+}

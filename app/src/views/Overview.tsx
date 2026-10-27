@@ -14,6 +14,7 @@ import { contributionOn, insights, mrrChangeSinceLastMonth, mrrSeries, stopLosse
 import { BALANCE_KINDS, type AppState, type Subscription } from '../../../shared/types.ts';
 import { Activity, packCircles, type Bucket } from '../components/charts.tsx';
 import { Timeline, type TimelineGroup } from '../components/Timeline.tsx';
+import { TailName } from '../components/TailName.tsx';
 import { MetricCards, Metric, IconButton, CardTitle, Toolbar } from '../components/ui.tsx';
 import { Seg } from '../components/inputs.tsx';
 import { CatIcon, MethodMark, SubIcon } from '../components/marks.tsx';
@@ -274,10 +275,7 @@ function Spending({ state, today, onOpen }: { state: AppState; today: string; on
           {items.slice(0, 12).map((e) => (
             <button key={e.sub.id} className="sel-item" onClick={() => onOpen(e.sub)}>
               <SubIcon sub={e.sub} size={22} />
-              <span className="si-name" style={{ opacity: e.proj && !isFuture ? 0.6 : 1 }}>
-                {e.sub.name}
-                {e.n > 1 ? ` ×${e.n}` : ''}
-              </span>
+              <TailName className="si-name" style={{ opacity: e.proj && !isFuture ? 0.6 : 1 }} name={e.sub.name} after={e.n > 1 ? ` ×${e.n}` : ''} />
               <b>
                 {formatTotal(
                   chargesTotal(
