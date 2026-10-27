@@ -92,9 +92,8 @@ export function ReceivableSheet({
   const [ahead, setAhead] = useState(() => Math.max(1, open.filter((p) => p.from > today && keys.includes(p.key)).length));
   const upcoming = open.filter((p) => p.from > today);
   const shown = open.filter((p) => p.from <= today || keys.includes(p.key) || upcoming.indexOf(p) < ahead);
-  // 每点一次「更多」多列大约一年的期：年付两期、月付十二期，周付也最多十二期
-  const sample = upcoming[0] ?? periods.at(-1);
-  const step = sample ? Math.min(12, Math.max(2, Math.round(365 / (diffDays(sample.from, sample.until) + 1)))) : 2;
+  // 每点一次「更多」多列三期
+  const step = 3;
   // 订阅结束或成员退出后没有新的期；否则可以一直往后
   const last = periods.at(-1);
   const more = upcoming.length > ahead || (!!last && last.until >= horizon);
