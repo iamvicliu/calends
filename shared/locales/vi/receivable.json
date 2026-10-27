@@ -51,5 +51,7 @@
     "due": "Số tiền phải thu"
   },
   "batch": "{amount} chia cho {count} kỳ",
-  "splitEdit": "Khi lưu, kỳ này được tách khỏi khoản ban đầu; các kỳ khác giữ nguyên."
+  "splitEdit": "Khi lưu, kỳ này được tách khỏi khoản ban đầu; các kỳ khác giữ nguyên.",
+  "dueOverrideFoot": "Chỉ thay đổi kỳ này. Lưu để trống để quay về mức phí chuẩn.",
+  "dueSaved": "Đã cập nhật số tiền phải thu của kỳ này"
 }

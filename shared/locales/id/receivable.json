@@ -51,5 +51,7 @@
     "due": "Jumlah tagihan"
   },
   "batch": "{amount} dibagi {count} tagihan",
-  "splitEdit": "Saat disimpan, periode ini dipisahkan dari pembayaran asal; periode lain tetap."
+  "splitEdit": "Saat disimpan, periode ini dipisahkan dari pembayaran asal; periode lain tetap.",
+  "dueOverrideFoot": "Hanya mengubah periode ini. Simpan kosong untuk kembali ke tarif standar.",
+  "dueSaved": "Jumlah tagihan periode ini diperbarui"
 }

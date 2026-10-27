@@ -66,5 +66,7 @@
     "one": "{amount} para {count} pagamento",
     "other": "{amount} dividido em {count} pagamentos"
   },
-  "splitEdit": "Ao salvar, este período é separado do pagamento original; os demais continuam iguais."
+  "splitEdit": "Ao salvar, este período é separado do pagamento original; os demais continuam iguais.",
+  "dueOverrideFoot": "Altera só este período. Salve em branco para voltar à tarifa padrão.",
+  "dueSaved": "Valor devido deste período atualizado"
 }

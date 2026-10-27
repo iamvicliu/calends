@@ -51,5 +51,7 @@
     "due": "Ödenecek tutar"
   },
   "batch": "{amount}, {count} ödemeye bölündü",
-  "splitEdit": "Kaydedince bu dönem asıl ödemeden ayrılır; diğer dönemler aynı kalır."
+  "splitEdit": "Kaydedince bu dönem asıl ödemeden ayrılır; diğer dönemler aynı kalır.",
+  "dueOverrideFoot": "Yalnızca bu dönemi değiştirir. Standart ücrete dönmek için boş kaydedin.",
+  "dueSaved": "Bu dönemin alacak tutarı güncellendi"
 }

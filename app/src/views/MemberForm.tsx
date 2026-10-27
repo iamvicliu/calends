@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { calendarSpan, collectionAnchor } from '../../../shared/billing.ts';
 import { cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, Person, ShareMember, Subscription } from '../../../shared/types.ts';
-import { isSettled, type LedgerPeriod } from '../../../shared/receivables.ts';
+import type { LedgerPeriod } from '../../../shared/receivables.ts';
 import { PeriodStrip } from './Receivable.tsx';
 import { DatePicker } from '../components/DatePicker.tsx';
 import { Cell, Group } from '../components/ui.tsx';
@@ -452,7 +452,7 @@ export function MemberForm({
                       mode="months"
                       periods={ledger.periods}
                       today={today}
-                      onPick={(p, anchor) => (p.receipt || p.waiver ? setCell({ period: p, anchor }) : !isSettled(p) && setReceipt({ preset: [p.key] }))}
+                      onPick={(p, anchor) => setCell({ period: p, anchor })}
                     />
                   </div>
                 )}

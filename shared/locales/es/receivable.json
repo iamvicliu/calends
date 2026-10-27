@@ -66,5 +66,7 @@
     "one": "{amount} para {count} pago",
     "other": "{amount} repartido en {count} pagos"
   },
-  "splitEdit": "Al guardar, este periodo se separa del pago original; los demás no cambian."
+  "splitEdit": "Al guardar, este periodo se separa del pago original; los demás no cambian.",
+  "dueOverrideFoot": "Solo cambia este periodo. Guárdalo vacío para volver a la tarifa estándar.",
+  "dueSaved": "Importe adeudado de este periodo actualizado"
 }

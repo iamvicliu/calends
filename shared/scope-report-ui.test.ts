@@ -3392,7 +3392,7 @@ test('public stopped card omits the avoided-renewal total while retaining each o
   assert.ok(!('endedMonthly' in d));
 });
 
-test('点开已收的格子弹出这一笔的明细，可改可删；没收的格子直接记这一期；不再有收款记录列表', () => {
+test('点开已收的格子弹出这一笔的明细，可改可删；没收的格子弹出这一期，可改应收或记收款；不再有收款记录列表', () => {
   const member = {
     id: 'm',
     name: 'Fictional',
@@ -3486,10 +3486,49 @@ test('点开已收的格子弹出这一笔的明细，可改可删；没收的�
     .find((n) => n.type === 'button' && n.props['data-period'] === '2026-09-01')!
     .props.onClick({ currentTarget: 'cell' });
   nodes = again();
-  assert.equal(
-    nodes.some((n) => n.type === 'Pop'),
-    false,
+  const unpaid = nodes.find((n) => n.type === 'Pop')!;
+  assert.deepEqual(
+    all(unpaid)
+      .filter((n) => n.type === 'button' || n.type === 'ConfirmButton')
+      .map((n) => n.children.join('')),
+    ['family.quick.backCollect'],
   );
+  // 点应收金额：这一期的应收原地变成输入框，只改这一期
+  const dueRow = () =>
+    all(again().find((n) => n.type === 'Pop')!)
+      .find((n) => n.type === 'TipTable')!
+      .props.rows.find((row: { key: string }) => row.key === 'due');
+  dueRow().value.props.onClick();
+  assert.equal(dueRow().value.type, 'NumInput');
+  assert.deepEqual(
+    all(again().find((n) => n.type === 'Pop')!)
+      .filter((n) => n.type === 'button' || n.type === 'ConfirmButton')
+      .map((n) => n.children.join('')),
+    ['common.cancel', 'common.save'],
+  );
+  // 记收款：直接记这一期
+  const r3 = harness(
+    '../app/src/views/Members.tsx',
+    'MemberForm',
+    {},
+    {
+      Sheet: 'Sheet',
+      DatePicker: 'DatePicker',
+      Toggle: 'Toggle',
+      CurrencySelect: 'CurrencySelect',
+      NumInput: 'NumInput',
+      Picker: 'Picker',
+      todayIn: () => today,
+    },
+  );
+  const third = () => r3.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  third()
+    .find((n) => n.type === 'button' && n.props['data-period'] === '2026-09-01')!
+    .props.onClick({ currentTarget: 'cell' });
+  all(third().find((n) => n.type === 'Pop')!)
+    .find((n) => n.type === 'button' && n.children.join('') === 'family.quick.backCollect')!
+    .props.onClick();
+  nodes = third();
   assert.deepEqual(nodes.find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!.props.preset, ['2026-09-01']);
 });
 

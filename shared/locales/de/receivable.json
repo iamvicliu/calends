@@ -66,5 +66,7 @@
     "one": "{amount} für {count} Zahlung",
     "other": "{amount} auf {count} Zahlungen verteilt"
   },
-  "splitEdit": "Beim Speichern wird dieser Zeitraum aus der ursprünglichen Zahlung herausgelöst; die übrigen bleiben unverändert."
+  "splitEdit": "Beim Speichern wird dieser Zeitraum aus der ursprünglichen Zahlung herausgelöst; die übrigen bleiben unverändert.",
+  "dueOverrideFoot": "Ändert nur diesen Zeitraum. Leer speichern, um zum Standardbetrag zurückzukehren.",
+  "dueSaved": "Fälliger Betrag für diesen Zeitraum geändert"
 }

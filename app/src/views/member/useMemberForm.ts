@@ -191,6 +191,24 @@ export function useMemberForm({
   const editRecordPeriodOf = (id: string, period: LedgerPeriod, patch: { date: string; amount?: number; note?: string }) =>
     run(() => saveReceivable(s, f.id, editRecordPeriod(member!, id, period, patch, ledger.periods, uid())), t('family.member.saved'));
 
+  // 每期弹窗里改应收：只改这一期，存成这一期的单独定价（与过渡期同一字段）；留空恢复按收费标准算。
+  // 与收款一样即时保存，表单里的副本同步更新，之后保存成员表单不会把它改回去
+  const setPeriodDue = (period: LedgerPeriod, amount: number | undefined) => {
+    const dues = (list: ShareMember['periodDues']) => {
+      const rest = (list ?? []).filter((d) => d.from !== period.from);
+      const out = amount == null ? rest : [...rest, { from: period.from, amount }].sort((a, b) => a.from.localeCompare(b.from));
+      return out.length ? out : undefined;
+    };
+    setF((c) => ({ ...c, periodDues: dues(c.periodDues) }));
+    if (period.from === bridgeAt?.from) setBridgeDue(amount);
+    return run(async () => {
+      const current = getState().subscriptions.find((x) => x.id === s.id) ?? s;
+      const sh = current.share!;
+      const members = sh.members.map((o) => (o.id === f.id ? { ...o, periodDues: dues(o.periodDues) } : o));
+      await saveSub({ ...current, share: { ...sh, collectFrom: collectionAnchor(current), members } });
+    }, t('receivable.dueSaved'));
+  };
+
   const [busy, submit] = useSubmit();
   const save = () =>
     run(
@@ -280,6 +298,7 @@ export function useMemberForm({
     copyTo,
     removeRecordPeriodOf,
     editRecordPeriodOf,
+    setPeriodDue,
     busy,
     submit,
     save,

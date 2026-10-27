@@ -263,14 +263,34 @@ export type PeriodEdit = ReturnType<typeof usePeriodEdit>;
  * 一期的明细字段：应收、收款/免收日期、这一期实收、一笔分几期、备注。悬停提示、成员表里点开的一格、代付每期弹窗都用这一份，
  * 编辑态只是把可改的几项换成输入框，不多不少。onBatch 给了时「一笔分几期」可点，去改整笔（调整抵扣哪几期）
  */
-export function periodFields(p: LedgerPeriod, { due = true, edit, onBatch }: { due?: boolean; edit?: PeriodEdit; onBatch?: () => void } = {}) {
+export function periodFields(
+  p: LedgerPeriod,
+  { due = true, edit, onBatch, dueInput, onDue }: { due?: boolean; edit?: PeriodEdit; onBatch?: () => void; dueInput?: ReactNode; onDue?: () => void } = {},
+) {
   const data = periodTipData(p);
   const e = edit?.editing ? edit : undefined;
   const r = data.receipt;
   const rec = p.receipt ?? p.waiver;
   const batch = r && r.count > 1 && !r.opening ? t('receivable.batch', { amount: money(r.amount, r.currency), count: r.count }) : undefined;
   return [
-    ...(due ? [{ key: 'due', label: t('receivable.grid.due'), value: `${money(data.due, data.currency)} ${data.currency}` }] : []),
+    ...(due
+      ? [
+          {
+            key: 'due',
+            label: t('receivable.grid.due'),
+            // 成员弹窗里可以单独改这一期的应收：点金额改，与「一笔分几期」同一种链接
+            value:
+              dueInput ??
+              (onDue ? (
+                <button type="button" className="btn plain" onClick={onDue}>
+                  {`${money(data.due, data.currency)} ${data.currency}`}
+                </button>
+              ) : (
+                `${money(data.due, data.currency)} ${data.currency}`
+              )),
+          },
+        ]
+      : []),
     ...(r?.opening && !e
       ? [{ key: 'opening', label: t('receivable.opening'), value: '' }]
       : rec
@@ -326,8 +346,20 @@ export function periodFields(p: LedgerPeriod, { due = true, edit, onBatch }: { d
 }
 
 /** 一期的明细表：悬停提示和点开的小弹窗共用；传 edit 时可原地编辑 */
-export function PeriodTip({ p, edit, onBatch }: { p: LedgerPeriod; edit?: PeriodEdit; onBatch?: () => void }) {
-  return <TipTable head={[periodRange(p), t(`receivable.status.${p.status}`)]} rows={periodFields(p, { edit, onBatch })} />;
+export function PeriodTip({
+  p,
+  edit,
+  onBatch,
+  dueInput,
+  onDue,
+}: {
+  p: LedgerPeriod;
+  edit?: PeriodEdit;
+  onBatch?: () => void;
+  dueInput?: ReactNode;
+  onDue?: () => void;
+}) {
+  return <TipTable head={[periodRange(p), t(`receivable.status.${p.status}`)]} rows={periodFields(p, { edit, onBatch, dueInput, onDue })} />;
 }
 
 export function PeriodStrip({

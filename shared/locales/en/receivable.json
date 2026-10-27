@@ -66,5 +66,7 @@
     "one": "{amount} for {count} payment",
     "other": "{amount} split over {count} payments"
   },
-  "splitEdit": "Saving splits this period out of the original payment; the other periods stay as they are."
+  "splitEdit": "Saving splits this period out of the original payment; the other periods stay as they are.",
+  "dueOverrideFoot": "Changes this period only. Save it blank to go back to the standard fee.",
+  "dueSaved": "Amount due updated for this period"
 }
