@@ -1483,12 +1483,23 @@ a {
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
-/* 叠在别的弹窗上时左侧是「返回」，没有关闭 */
+/* 叠在别的弹窗上时左侧是「返回」，没有关闭；标题与返回同一行居中，两侧等宽才能真居中 */
 .sheet-head:has(> .sheet-back) {
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 1fr minmax(0, max-content) 1fr;
 }
 .sheet-back {
+  justify-self: start;
   margin-left: -6px;
+}
+.sheet-head:has(> .sheet-back) h3 {
+  grid-column: 2;
+  justify-content: center;
+}
+.sheet-head:has(> .sheet-back) .ui-title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 /* 被上一层盖住的弹窗不显示（状态保留），同一时刻只露出一层 */
 .scrim.covered {
