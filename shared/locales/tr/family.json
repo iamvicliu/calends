@@ -297,9 +297,8 @@
     "follow": "Planı izle",
     "custom": "Özel",
     "followValue": "{rule} (plan kuralı)",
-    "sheetTitle": "Ücret",
-    "applyNote": "Plana uyan {count} üye sonraki tahsilattan itibaren yeni ücreti öder; özel ücretler ve kayıtlı ödemeler değişmez.",
-    "nextDay": "Sonraki tahsilat"
+    "sheetTitle": "Ücret ve koltuklar",
+    "applyNote": "Plana uyan {count} üye sonraki tahsilattan itibaren yeni ücreti öder; özel ücretler ve kayıtlı ödemeler değişmez."
   },
   "quick": {
     "late": {

@@ -20,8 +20,12 @@ import { writeDraft } from './editor/draft.ts';
 import { Form } from './editor/Form.tsx';
 
 export function Editor({ sub, state, today, onClose }: { sub: Subscription; state: AppState; today: string; onClose: () => void }) {
-  const { isNew, key, restored, priceValid, setPriceValid, historyReset, f, setF, up, ruleFrom, setRuleFrom, stop, setStop, basePrice, dirty, close, reset } =
-    useEditorDraft({ sub, state, today, onClose });
+  const { isNew, key, restored, priceValid, setPriceValid, historyReset, f, setF, up, stop, setStop, basePrice, dirty, close, reset } = useEditorDraft({
+    sub,
+    state,
+    today,
+    onClose,
+  });
   /** 交给 AI 助手：已经填的名称一并带过去 */
   const toAssistant = (images: string[] = []) => {
     close();
@@ -54,7 +58,7 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           : {};
         if (px) out = { ...out, proxy: { ...px, forName: px.forName.trim(), personId: link.id } };
         const latest = getState().subscriptions.find((x) => x.id === sub.id);
-        const final = mergeEditorSave(state, sub, out, latest, isNew, ruleFrom, today);
+        const final = mergeEditorSave(sub, out, latest, isNew);
         await saveSub(final);
         if (link.after) await savePerson(link.after);
         writeDraft(key, undefined);
@@ -148,8 +152,6 @@ export function Editor({ sub, state, today, onClose }: { sub: Subscription; stat
           today={today}
           stop={stop}
           setStop={setStop}
-          ruleFrom={ruleFrom}
-          setRuleFrom={setRuleFrom}
           history={!isNew && <ChangePanel key={historyReset} f={f} setF={setF} state={state} today={today} onPriceValidity={setPriceValid} />}
         />
       </div>

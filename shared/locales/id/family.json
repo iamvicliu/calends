@@ -289,9 +289,8 @@
     "follow": "Ikuti paket",
     "custom": "Kustom",
     "followValue": "{rule} (aturan paket)",
-    "sheetTitle": "Biaya",
-    "applyNote": "{count} anggota yang mengikuti paket membayar tarif baru mulai penagihan berikutnya; tarif khusus dan pembayaran tercatat tidak berubah.",
-    "nextDay": "Penagihan berikutnya"
+    "sheetTitle": "Biaya dan kursi",
+    "applyNote": "{count} anggota yang mengikuti paket membayar tarif baru mulai penagihan berikutnya; tarif khusus dan pembayaran tercatat tidak berubah."
   },
   "quick": {
     "late": {

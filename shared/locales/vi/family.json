@@ -289,9 +289,8 @@
     "follow": "Theo gói",
     "custom": "Tùy chỉnh",
     "followValue": "{rule} (quy tắc gói)",
-    "sheetTitle": "Phí",
-    "applyNote": "{count} thành viên theo gói trả mức mới từ lần thu tiếp theo; phí riêng và các khoản đã ghi không đổi.",
-    "nextDay": "Lần thu tiếp theo"
+    "sheetTitle": "Phí và số chỗ",
+    "applyNote": "{count} thành viên theo gói trả mức mới từ lần thu tiếp theo; phí riêng và các khoản đã ghi không đổi."
   },
   "quick": {
     "late": {

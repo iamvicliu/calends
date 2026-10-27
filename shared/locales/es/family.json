@@ -303,12 +303,11 @@
     "follow": "Seguir plan",
     "custom": "Personalizado",
     "followValue": "{rule} (regla del plan)",
-    "sheetTitle": "Tarifa",
+    "sheetTitle": "Tarifa y plazas",
     "applyNote": {
       "one": "{count} miembro que sigue el plan paga la nueva cuota desde el próximo cobro; las cuotas personalizadas y los cobros registrados no cambian.",
       "other": "{count} miembros que siguen el plan pagan la nueva cuota desde el próximo cobro; las cuotas personalizadas y los cobros registrados no cambian."
-    },
-    "nextDay": "Próximo cobro"
+    }
   },
   "quick": {
     "late": {

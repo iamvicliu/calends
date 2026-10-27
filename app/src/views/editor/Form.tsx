@@ -26,8 +26,6 @@ export function Form({
   isNew,
   stop,
   setStop,
-  ruleFrom,
-  setRuleFrom,
   f,
   setF,
   up,
@@ -38,8 +36,6 @@ export function Form({
   isNew: boolean;
   stop?: StopForm;
   setStop: (value: StopForm | undefined) => void;
-  ruleFrom?: string;
-  setRuleFrom: (d: string) => void;
   f: Subscription;
   setF: (s: Subscription) => void;
   up: (p: Partial<Subscription>) => void;
@@ -47,7 +43,7 @@ export function Form({
   today: string;
   history?: ReactNode;
 }) {
-  const context = useEditorFields({ isNew, stop, setStop, ruleFrom, setRuleFrom, f, setF, up, state, today, history });
+  const context = useEditorFields({ isNew, stop, setStop, f, setF, up, state, today, history });
   const { method, lt, extras, transfer, setTransfer, more, setMore, newCat, setNewCat, plans, loadPlans } = context;
   return (
     <div className="ed">

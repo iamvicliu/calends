@@ -303,12 +303,11 @@
     "follow": "Wie Abo",
     "custom": "Eigen",
     "followValue": "{rule} (Abo-Regel)",
-    "sheetTitle": "Gebühr",
+    "sheetTitle": "Gebühr und Plätze",
     "applyNote": {
       "one": "{count} Mitglied, das dem Abo folgt, zahlt ab der nächsten Zahlung den neuen Betrag; individuelle Beiträge und erfasste Zahlungen bleiben unverändert.",
       "other": "{count} Mitglieder, die dem Abo folgen, zahlen ab der nächsten Zahlung den neuen Betrag; individuelle Beiträge und erfasste Zahlungen bleiben unverändert."
-    },
-    "nextDay": "Nächste Zahlung"
+    }
   },
   "quick": {
     "late": {

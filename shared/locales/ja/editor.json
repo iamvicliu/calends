@@ -108,7 +108,6 @@
     "perHead": "1人あたり {amount}",
     "ownerName": "主催者",
     "ownerPlaceholder": "支払う相手",
-    "seats": "総人数（自分を含む）",
     "perPeriod": "1期間あたりの負担額",
     "paidUntil": "支払い済み期限",
     "manageHint": "保存後、「共有プラン」でこのプランを開き、メンバーの追加と入金記録を行います。"

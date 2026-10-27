@@ -19,9 +19,7 @@ import { stopForm } from '../../../../shared/stop-form.ts';
 import { syncPhase, reactivate } from '../../../../shared/phases.ts';
 import { cycleName } from '../../components/ChangePanel.tsx';
 import { MethodPicker } from '../../components/MethodPicker.tsx';
-import { FeeRuleFields } from '../member-fields.tsx';
 import { ContactField, contactText } from '../../components/Contact.tsx';
-import { nextCollectionDay } from '../../../../shared/carpool.ts';
 import { getState } from '../../store.ts';
 import { PersonPicker } from '../person-fields.tsx';
 import { PersonProfileSheet } from '../PersonProfile.tsx';
@@ -197,8 +195,7 @@ export function StatusFields({ context }: { context: ReturnType<typeof useEditor
 }
 
 export function SharingFields({ context }: { context: ReturnType<typeof useEditorFields> }) {
-  const { ruleFrom, setRuleFrom, f, up, state, today, proxyLinked, proxyProfile, setProxyProfile, share, setShare, perHead, stored, rule, ruleFollowers, val } =
-    context;
+  const { f, up, state, today, proxyLinked, proxyProfile, setProxyProfile, share, setShare, perHead, val } = context;
   return (
     <Group
       title={t('editor.group.who')}
@@ -301,28 +298,6 @@ export function SharingFields({ context }: { context: ReturnType<typeof useEdito
             onChange={(e) => setShare({ ownerName: val(e) || undefined })}
           />
         </Cell>
-      )}
-      {/* 这里只定身份与席位；成员、收费规则、收款都在合租详情里管 */}
-      {share?.role === 'owner' && (
-        <>
-          <Cell label={t('editor.share.seats')}>
-            <Stepper
-              label={t('editor.share.seats')}
-              value={share.seats}
-              min={1}
-              max={50}
-              unit={(n) => t('family.convert.seatUnit', { count: n })}
-              onChange={(n) => setShare({ seats: n })}
-            />
-          </Cell>
-          {/* 收费标准就是合租详情里的「收费规则」，同一份数据；新成员默认按它收 */}
-          <FeeRuleFields value={rule} onChange={(r) => setShare({ rule: r })} />
-          {ruleFollowers > 0 && stored && (
-            <Cell label={t('family.rule.nextDay')}>
-              <DatePicker value={ruleFrom ?? nextCollectionDay(stored, rule.billEvery, today)} onChange={(v) => v && setRuleFrom(v)} />
-            </Cell>
-          )}
-        </>
       )}
     </Group>
   );

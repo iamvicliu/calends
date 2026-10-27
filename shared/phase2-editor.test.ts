@@ -32,17 +32,19 @@ test('editor save trims fields, preserves past charges and applies a manual pric
   assert.equal(chargesBetween(out, '2026-11-01', '2026-11-01', today)[0].amount, 22);
 });
 
-test('editor merge retains concurrent receipts and unrelated fields, and cannot resurrect a deleted record', () => {
+test('editor merge keeps role edits but takes seats, receipts and unrelated fields from the latest plan, and cannot resurrect a deleted record', () => {
   const member = { id: 'm', name: 'Fictional member', share: 5, fee: 5, feeCurrency: 'USD', joined: original.start };
   const sub: Subscription = { ...original, share: { role: 'owner', seats: 4, members: [member], since: original.start } };
   const receipt = { id: 'r', date: today, amount: 5, currency: 'USD', periods: ['2026-10-01'] };
-  const latest: Subscription = { ...sub, notes: 'written elsewhere', share: { ...sub.share!, members: [{ ...member, receipts: [receipt] }] } };
-  const edited = { ...sub, share: { ...sub.share!, seats: 5 } };
-  const out = mergeEditorSave(state(latest), sub, edited, latest, false, undefined, today);
-  assert.equal(out.share!.seats, 5);
+  const latest: Subscription = { ...sub, notes: 'written elsewhere', share: { ...sub.share!, seats: 6, members: [{ ...member, receipts: [receipt] }] } };
+  const edited: Subscription = { ...sub, share: { ...sub.share!, role: 'member', ownerName: 'Fictional owner' } };
+  const out = mergeEditorSave(sub, edited, latest, false);
+  assert.equal(out.share!.role, 'member');
+  assert.equal(out.share!.ownerName, 'Fictional owner');
+  assert.equal(out.share!.seats, 6);
   assert.deepEqual(out.share!.members, latest.share!.members);
   assert.equal(out.notes, 'written elsewhere');
-  assert.throws(() => mergeEditorSave(state(sub), sub, edited, undefined, false, undefined, today));
+  assert.throws(() => mergeEditorSave(sub, edited, undefined, false));
 });
 
 test('shared member status exposes numeric dues and segments retain unpaid, paid and unused coverage', () => {

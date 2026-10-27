@@ -32,7 +32,7 @@ import { DatePicker } from '../../components/DatePicker.tsx';
 import { MetricCards, Cell, Group, IconButton } from '../../components/ui.tsx';
 import { Icon } from '../../components/icons.tsx';
 import { NameLink, StatusPill, SubIcon } from '../../components/marks.tsx';
-import { Seg, useSubmit } from '../../components/inputs.tsx';
+import { Seg, Stepper, useSubmit } from '../../components/inputs.tsx';
 import { Sheet } from '../../components/overlays.tsx';
 import { run } from '../../toast.ts';
 import { saveSub } from '../../store.ts';
@@ -340,11 +340,15 @@ export function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppSta
   // 下期收款日：新标准从这天起执行，也是全车往后的收款节奏；默认按现在的节奏算出的下一次
   const [next, setNext] = useState(nextCollectionDay(s, rule.billEvery, today));
   const followers = (s.share?.members ?? []).filter((m) => followsCar(state, s, m, today) && (!m.left || m.left > today)).length;
+  // 席位不能少于车上现有的人（含自己）
+  const taken = carpoolRoster(s, today).taken;
+  const [seats, setSeats] = useState(s.share?.seats ?? taken);
   const [busy, submit] = useSubmit();
   const save = () =>
     run(async () => {
       // 改了收款日：已有成员钉住原基准，历史不重切，从这天起按新节奏收
-      await saveSub(moveCollectFrom(applyCarRule(state, s, draft, next, today), next));
+      const out = moveCollectFrom(applyCarRule(state, s, draft, next, today), next);
+      await saveSub({ ...out, share: { ...out.share!, seats } });
       onClose();
     }, t('family.member.saved'));
   return (
@@ -367,8 +371,20 @@ export function CarRuleSheet({ state, s, today, rule, onClose }: { state: AppSta
       <div className="stack">
         <Group foot={t('family.rule.applyNote', { count: followers })}>
           <FeeRuleFields value={draft} onChange={setDraft} />
-          <Cell label={t('family.rule.nextDay')}>
+          <Cell label={t('family.collect.feeFrom')}>
             <DatePicker value={next} onChange={(v) => v && setNext(v)} />
+          </Cell>
+        </Group>
+        <Group>
+          <Cell label={t('family.convert.seats')}>
+            <Stepper
+              label={t('family.convert.seats')}
+              value={seats}
+              min={Math.max(1, taken)}
+              max={50}
+              unit={(n) => t('family.convert.seatUnit', { count: n })}
+              onChange={setSeats}
+            />
           </Cell>
         </Group>
       </div>

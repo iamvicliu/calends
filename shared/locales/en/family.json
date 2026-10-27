@@ -306,12 +306,11 @@
     "follow": "Follow plan",
     "custom": "Custom",
     "followValue": "{rule} (plan rule)",
-    "sheetTitle": "Fee",
+    "sheetTitle": "Fee and seats",
     "applyNote": {
       "one": "{count} member following the plan pays the new rate from the next collection; custom-fee members and recorded payments stay unchanged.",
       "other": "{count} members following the plan pay the new rate from the next collection; custom-fee members and recorded payments stay unchanged."
-    },
-    "nextDay": "Next collection"
+    }
   },
   "quick": {
     "late": {

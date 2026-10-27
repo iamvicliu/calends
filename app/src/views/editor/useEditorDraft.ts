@@ -18,8 +18,6 @@ export function useEditorDraft({ sub, state, today, onClose }: { sub: Subscripti
   const [priceValid, setPriceValid] = useState(true);
   const [historyReset, setHistoryReset] = useState(0);
   const [f, setFRaw] = useState<Subscription>(() => draft?.form ?? initialForm);
-  // 收费标准改了、车上已有跟随车的成员时，从哪天起按新标准收
-  const [ruleFrom, setRuleFrom] = useState<string>();
   const [stop, setStop] = useState<StopForm | undefined>(
     () => draft?.stop ?? (f.stop || f.end || ['cancelled', 'terminated'].includes(f.status) ? stopForm(f, today, state) : undefined),
   );
@@ -72,8 +70,6 @@ export function useEditorDraft({ sub, state, today, onClose }: { sub: Subscripti
     f,
     setF,
     up,
-    ruleFrom,
-    setRuleFrom,
     stop,
     setStop,
     basePrice,

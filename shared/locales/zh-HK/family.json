@@ -273,9 +273,8 @@
     "follow": "跟隨車",
     "custom": "自訂",
     "followValue": "{rule}（跟隨車）",
-    "sheetTitle": "收費",
-    "applyNote": "{count} 位跟隨車嘅成員由下期收款日起按新標準收；自訂收費嘅成員唔受影響，已記嘅收款不變。",
-    "nextDay": "下期收款日"
+    "sheetTitle": "收費與席位",
+    "applyNote": "{count} 位跟隨車嘅成員由生效日期起按新標準收；自訂收費嘅成員唔受影響，已記嘅收款不變。"
   },
   "quick": {
     "late": "已逾期 {count} 天",

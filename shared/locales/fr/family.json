@@ -303,12 +303,11 @@
     "follow": "Suivre le forfait",
     "custom": "Personnalisé",
     "followValue": "{rule} (règle du forfait)",
-    "sheetTitle": "Tarif",
+    "sheetTitle": "Tarif et places",
     "applyNote": {
       "one": "{count} membre qui suit l’abonnement paie le nouveau tarif dès le prochain encaissement ; les tarifs personnalisés et les paiements enregistrés ne changent pas.",
       "other": "{count} membres qui suivent l’abonnement paient le nouveau tarif dès le prochain encaissement ; les tarifs personnalisés et les paiements enregistrés ne changent pas."
-    },
-    "nextDay": "Prochain encaissement"
+    }
   },
   "quick": {
     "late": {

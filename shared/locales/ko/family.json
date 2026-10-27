@@ -289,9 +289,8 @@
     "follow": "요금제 따름",
     "custom": "개별",
     "followValue": "{rule} (요금제 규칙)",
-    "sheetTitle": "요금",
-    "applyNote": "플랜을 따르는 {count}명은 다음 수금일부터 새 요금을 냅니다. 개별 요금 멤버와 기록된 입금은 바뀌지 않습니다.",
-    "nextDay": "다음 수금일"
+    "sheetTitle": "요금과 좌석",
+    "applyNote": "플랜을 따르는 {count}명은 다음 수금일부터 새 요금을 냅니다. 개별 요금 멤버와 기록된 입금은 바뀌지 않습니다."
   },
   "quick": {
     "late": {

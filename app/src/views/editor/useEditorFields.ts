@@ -11,7 +11,6 @@ import { type StopForm } from '../../../../shared/stop-form.ts';
 
 import { CYCLES as RENEW_CYCLES } from '../../components/ChangePanel.tsx';
 
-import { carRule, followsCar, sameRule } from '../../../../shared/carpool.ts';
 import { api } from '../../store.ts';
 
 import type { AppStorePlan } from '../../../../shared/appstore-plans.ts';
@@ -25,8 +24,6 @@ export function useEditorFields({
   isNew,
   stop,
   setStop,
-  ruleFrom,
-  setRuleFrom,
   f,
   setF,
   up,
@@ -37,8 +34,6 @@ export function useEditorFields({
   isNew: boolean;
   stop?: StopForm;
   setStop: (value: StopForm | undefined) => void;
-  ruleFrom?: string;
-  setRuleFrom: (d: string) => void;
   f: Subscription;
   setF: (s: Subscription) => void;
   up: (p: Partial<Subscription>) => void;
@@ -59,14 +54,6 @@ export function useEditorFields({
     up({ share: p === null ? undefined : { role: 'owner', seats: 6, members: [], ...share, ...p } });
   const unit = 10 ** currencyDecimals(f.currency);
   const perHead = share && share.seats > 0 ? Math.round((f.price / share.seats) * unit) / unit : 0;
-  // 收费标准：存过的就用存的，否则按价格和席位推算（随价格、席位变）
-  const stored = state.subscriptions.find((x) => x.id === f.id);
-  const rule = carRule(state, f, today);
-  // 改了收费标准、车上有跟随车的成员时才问生效日
-  const ruleFollowers =
-    stored?.share && f.share?.rule && !sameRule(f.share.rule, carRule(state, stored, today))
-      ? stored.share.members.filter((m) => followsCar(state, stored, m, today) && (!m.left || m.left > today)).length
-      : 0;
   const val = (e: { target: EventTarget | null }) => (e.target as HTMLInputElement).value;
   const method = state.methods.find((m) => m.id === f.methodId);
   // 「更多选项」里有内容时默认展开，并在标题上列出已设置的项
@@ -100,8 +87,6 @@ export function useEditorFields({
     isNew,
     stop,
     setStop,
-    ruleFrom,
-    setRuleFrom,
     f,
     setF,
     up,
@@ -120,9 +105,6 @@ export function useEditorFields({
     setShare,
     unit,
     perHead,
-    stored,
-    rule,
-    ruleFollowers,
     val,
     method,
     lt,

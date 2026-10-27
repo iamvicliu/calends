@@ -100,7 +100,6 @@
     "perHead": "人均 {amount}",
     "ownerName": "发起人",
     "ownerPlaceholder": "付给谁",
-    "seats": "总席位（含自己）",
     "perPeriod": "每期份额",
     "paidUntil": "已付至",
     "manageHint": "保存后在「合租」里打开这辆车，添加成员、记收款。"
