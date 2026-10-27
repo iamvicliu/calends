@@ -107,7 +107,11 @@ export function ReceivableSheet({
   const [saving, guard] = useSubmit();
   const blocked = saving || !keys.length || lost.length > 0 || !date;
   const invalid = blocked || (mode === 'receipt' && (!Number.isFinite(amount) || amount < 0));
-  const toggle = (k: string) => setKeys((ks) => (ks.includes(k) ? ks.filter((x) => x !== k) : [...ks, k].sort()));
+  // 改了勾选就按新勾的期重新给出金额，再手改
+  const toggle = (k: string) => {
+    setKeys((ks) => (ks.includes(k) ? ks.filter((x) => x !== k) : [...ks, k].sort()));
+    setAmount(undefined);
+  };
 
   // 失败时 run 提示错误，表单保留，可直接重试
   const write = (next: () => Receivable, msg: string) =>
