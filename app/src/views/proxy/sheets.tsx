@@ -7,14 +7,14 @@ import { flow, cnDate, cnDateFull, money } from '../../../../shared/format.ts';
 import { toBaseOrNaN } from '../../../../shared/fx.ts';
 import type { AppState, Receipt, Subscription, Waiver } from '../../../../shared/types.ts';
 import { recordProxyCharge } from '../../../../shared/receivable-edit.ts';
+import { removeRecord } from '../../../../shared/receivables.ts';
 import { ReceivableSheet } from '../Receivable.tsx';
 import { DetailHead, DetailSheet, Facts, Note, Panel, Prop } from '../../components/DetailKit.tsx';
 import { YearLedger } from '../../components/YearLedger.tsx';
 import { MetricCards, Metric, Cell, Group } from '../../components/ui.tsx';
 import { MoneyInput, useSubmit } from '../../components/inputs.tsx';
 import { NameLink, PayBadge, StatusPill, SubIcon } from '../../components/marks.tsx';
-import { Sheet } from '../../components/overlays.tsx';
-import { Icon } from '../../components/icons.tsx';
+import { ask, Sheet } from '../../components/overlays.tsx';
 import { Plus } from 'lucide-react';
 import { contactText } from '../../components/Contact.tsx';
 import { getState, saveSub } from '../../store.ts';
@@ -283,7 +283,7 @@ export function ReceiptSheet({
   );
 }
 
-/** 一期的详情：卡上实扣（可修正）和这一期收回的情况；记收款、改收款都进同一个收款表单 */
+/** 一期的详情：卡上实扣（已扣的可修正）和这一期收回的情况；收款可改、可删（删后回到待收），没收的直接记 */
 export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Subscription; row: Row; onClose: () => void }) {
   const base = state.settings.baseCurrency;
   const today = todayIn(state.settings.timezone);
@@ -296,7 +296,9 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
   // 缺汇率时为 NaN：差额显示「—」，不按 0 算出假的盈亏
   const chargedBase = toBaseOrNaN(state, chargedN, charged === '' ? row.listCurrency : chargedCcy, row.date);
   const rec = row.receipt ?? row.waiver;
-  const diff = row.receivedBase == null ? undefined : row.receivedBase - chargedBase;
+  const opening = !!row.receipt?.opening;
+  // 还没扣款的期没有实扣，不比盈亏
+  const diff = future || row.receivedBase == null ? undefined : row.receivedBase - chargedBase;
   const dirty =
     charged !== (row.charge?.amount != null ? String(row.charge.amount) : '') || (charged !== '' && chargedCcy !== (row.charge?.currency ?? row.listCurrency));
 
@@ -317,6 +319,17 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       await saveSub(after);
       onClose();
     }, t('proxy.entry.saved'));
+  // 删掉这笔记录：一笔分几期时这几期一起回到待收
+  const remove = async () => {
+    if (!rec || !(await ask(t('receivable.confirmDelete', { date: cnDateFull(rec.date) })))) return;
+    await submit(() =>
+      run(async () => {
+        const current = getState().subscriptions.find((x) => x.id === s.id) ?? live;
+        await saveSub({ ...current, proxy: { ...current.proxy!, ...removeRecord(current.proxy!, rec.id) } });
+        onClose();
+      }, t('receivable.toastRemoved')),
+    );
+  };
 
   return (
     <Sheet
@@ -325,16 +338,27 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       onClose={onClose}
       foot={
         <>
+          {rec && (
+            <button className="btn plain" style={{ color: 'var(--red)' }} disabled={busy} onClick={() => void remove()}>
+              {t('common.delete')}
+            </button>
+          )}
           <span className="grow" />
           <button className="btn" onClick={onClose}>
             {t('proxy.entry.cancel')}
           </button>
-          {!future && (
-            <button
-              className="btn primary"
-              disabled={busy || !dirty || (charged !== '' && !Number.isFinite(Number(charged)))}
-              onClick={() => void submit(save)}
-            >
+          {rec && !opening && (
+            <button className={dirty ? 'btn' : 'btn primary'} disabled={busy} onClick={() => setReceipt(true)}>
+              {t('detail.action.edit')}
+            </button>
+          )}
+          {!rec && (
+            <button className={dirty ? 'btn' : 'btn primary'} disabled={busy} onClick={() => setReceipt(true)}>
+              {t('proxy.table.record')}
+            </button>
+          )}
+          {dirty && (
+            <button className="btn primary" disabled={busy || (charged !== '' && !Number.isFinite(Number(charged)))} onClick={() => void submit(save)}>
               {t('proxy.entry.save')}
             </button>
           )}
@@ -342,32 +366,42 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
       }
     >
       <div className="stack">
-        <div className="row">
-          <PersonAvatar p={personFor(state, live.proxy!.personId, live.proxy!.forName)} size={36} />
-          <b>{live.proxy!.forName}</b>
-        </div>
-        {/* 还没到扣款日的期没有实扣可改 */}
-        {!future && (
-          <Group
-            title={t('proxy.table.charged')}
-            foot={t('proxy.entry.chargedFoot', { amount: flow(-chargedBase, base), list: money(row.list, row.listCurrency) })}
-          >
-            <Cell label={t('proxy.entry.amount')}>
-              <MoneyInput
-                ccy={chargedCcy}
-                className="num"
-                value={charged}
-                placeholder={String(row.list)}
-                onChange={(ev) => setCharged((ev.target as HTMLInputElement).value)}
-              />
-            </Cell>
-            <Cell label={t('proxy.entry.currency')}>
-              <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
-            </Cell>
-          </Group>
-        )}
+        {/* 卡上实扣：已扣的可修正；还没到扣款日的只写按原价预计 */}
         <Group
-          title={live.proxy!.forName ? t('proxy.entry.paidBack', { name: live.proxy!.forName }) : t('proxy.entry.paidBackAnon')}
+          title={t('proxy.table.charged')}
+          foot={
+            future ? t('proxy.table.notCharged') : t('proxy.entry.chargedFoot', { amount: flow(-chargedBase, base), list: money(row.list, row.listCurrency) })
+          }
+        >
+          {future ? (
+            <Cell label={t('proxy.entry.amount')}>
+              <span className="muted">{flow(-row.list, row.listCurrency)}</span>
+            </Cell>
+          ) : (
+            <>
+              <Cell label={t('proxy.entry.amount')}>
+                <MoneyInput
+                  ccy={chargedCcy}
+                  className="num"
+                  value={charged}
+                  placeholder={String(row.list)}
+                  onChange={(ev) => setCharged((ev.target as HTMLInputElement).value)}
+                />
+              </Cell>
+              <Cell label={t('proxy.entry.currency')}>
+                <CurrencySelect value={chargedCcy} onChange={setChargedCcy} />
+              </Cell>
+            </>
+          )}
+        </Group>
+        <Group
+          title={
+            row.waiver
+              ? t('receivable.waiverGroup')
+              : live.proxy!.forName
+                ? t('proxy.entry.paidBack', { name: live.proxy!.forName })
+                : t('proxy.entry.paidBackAnon')
+          }
           foot={
             diff == null || row.status === 'waived'
               ? undefined
@@ -379,23 +413,28 @@ export function EntrySheet({ state, s, row, onClose }: { state: AppState; s: Sub
                   })
           }
         >
-          {rec ? (
-            <button type="button" className="cell tap" disabled={!!row.receipt?.opening} onClick={() => setReceipt(true)}>
-              <span className="cell-l">
-                <ReceivedCell r={row} base={base} />
-                <small className="muted">
-                  {copyParts(
-                    [cnDateFull(rec.date), rec.periods.length > 1 && t('receivable.periodsCount', { count: rec.periods.length }), rec.note]
-                      .filter(Boolean)
-                      .join('\n'),
-                  )}
-                </small>
-              </span>
-            </button>
+          {!rec ? (
+            <div className="cell muted">{t('proxy.entry.notReceived')}</div>
+          ) : opening ? (
+            <div className="cell">{t('receivable.opening')}</div>
+          ) : row.receipt ? (
+            <>
+              <Cell label={t('receivable.receivedOn')}>{cnDateFull(row.receipt.date)}</Cell>
+              <Cell label={t('proxy.table.received')}>
+                <b className="green num">{flow(row.share ?? 0, row.receipt.currency)}</b>
+              </Cell>
+              {row.receipt.periods.length > 1 && (
+                <Cell label={t('receivable.periods')}>
+                  {t('proxy.table.batch', { amount: money(row.receipt.amount, row.receipt.currency), count: row.receipt.periods.length })}
+                </Cell>
+              )}
+              {row.receipt.note && <Cell label={t('receivable.note')}>{copyParts(row.receipt.note)}</Cell>}
+            </>
           ) : (
-            <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt(true)}>
-              <Icon name="plus" /> {t('proxy.receipt.add')}
-            </button>
+            <>
+              <Cell label={t('receivable.waivedOn')}>{cnDateFull(row.waiver!.date)}</Cell>
+              {row.waiver!.note && <Cell label={t('receivable.note')}>{copyParts(row.waiver!.note)}</Cell>}
+            </>
           )}
         </Group>
       </div>
