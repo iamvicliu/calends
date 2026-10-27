@@ -262,6 +262,7 @@ export function Activity({
         {buckets.map((b, i) => (
           <button
             key={b.key}
+            data-snapshot-keep
             className={`act-col ${(buckets.length - 1 - i) % 2 ? 'odd' : ''} ${b.future ? 'future' : ''} ${b.current ? 'current' : ''} ${(selected ?? current) === b.key ? 'sel' : ''} ${selected && selected !== b.key ? 'dim' : ''}`}
             onClick={() => onSelect(b.key)}
             aria-label={`${b.label} ${fmt(b.total)}`}

@@ -25,6 +25,7 @@
     "paused": "Duraklatıldı. Gelecek ödemeler tahmin edilmeyecek",
     "imageCopied": "Görsel kopyalandı"
   },
+  "snapshotRest": "{count} tane daha",
   "history": "Geçmiş",
   "field": {
     "amount": "Tutar",

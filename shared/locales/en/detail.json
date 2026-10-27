@@ -25,6 +25,7 @@
     "paused": "Paused. Future charges won't be projected",
     "imageCopied": "Image copied"
   },
+  "snapshotRest": "{count} more",
   "history": "History",
   "field": {
     "amount": "Amount",

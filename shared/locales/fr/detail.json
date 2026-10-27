@@ -25,6 +25,7 @@
     "paused": "Suspendu. Les prochains prélèvements ne seront plus prévus",
     "imageCopied": "Image copiée"
   },
+  "snapshotRest": "{count} de plus",
   "history": "Historique",
   "field": {
     "amount": "Montant",

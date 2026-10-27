@@ -25,6 +25,7 @@
     "paused": "已暫停，不再推算之後的扣款",
     "imageCopied": "已複製圖片"
   },
+  "snapshotRest": "其餘 {count} 項",
   "history": "歷程",
   "field": {
     "amount": "金額",

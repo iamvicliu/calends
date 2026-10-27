@@ -25,6 +25,7 @@
     "paused": "Đã tạm dừng. Các khoản phí sắp tới sẽ không được dự kiến",
     "imageCopied": "Đã sao chép ảnh"
   },
+  "snapshotRest": "{count} mục khác",
   "history": "Lịch sử",
   "field": {
     "amount": "Số tiền",

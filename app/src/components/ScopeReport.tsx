@@ -63,6 +63,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         // 等待图表布局稳定，组装动画在复制后保持关闭。
         await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
         const image = await snapshot(el, {
+          card: true,
           style: { backgroundColor: getComputedStyle(el).getPropertyValue('--bg'), padding: '20px', borderRadius: 'var(--radius-lg)' },
           filter: (n) => !(n instanceof Element && n.matches('.scope-actions')),
         });
@@ -120,7 +121,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   );
   const chargeRows = (rows: ChargeRow[]) =>
     rows.map((r, i) => (
-      <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
+      <button type="button" className="scope-row scope-tap" data-snapshot-keep key={`${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
         {name(r.sub, cnDateAuto(r.date, today))}
         <b className="num">{expense(r.amount, r.partial)}</b>
       </button>
@@ -128,7 +129,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
   const eventLabel = (r: ReportEvent) => t(`scope.event.${r.kind === 'price' || r.kind === 'intro-end' ? (r.delta >= 0 ? 'increase' : 'decrease') : r.kind}`);
   const eventRows = (rows: ReportEvent[]) =>
     rows.map((r, i) => (
-      <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.date}-${r.kind}-${i}`} onClick={() => onOpen(r.sub)}>
+      <button type="button" className="scope-row scope-tap" data-snapshot-keep key={`${r.sub.id}-${r.date}-${r.kind}-${i}`} onClick={() => onOpen(r.sub)}>
         {name(
           r.sub,
           <>
@@ -307,9 +308,9 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 </div>
               ))}
             </div>
-            <div className="scope-movements">
+            <div className="scope-movements" data-snapshot-list>
               {mv.items.map((r) => (
-                <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
+                <button type="button" className="scope-row scope-tap" data-snapshot-keep key={r.sub.id} onClick={() => onOpen(r.sub)}>
                   {name(
                     r.sub,
                     <>
@@ -415,7 +416,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               ? chargeRows(visibleCharges(block.rows))
               : (() => {
                   const list = block.rows.map((r, n) => (
-                    <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
+                    <button type="button" className="scope-row scope-tap" data-snapshot-keep key={r.sub.id} onClick={() => onOpen(r.sub)}>
                       {name(r.sub)}
                       <span className="scope-rank-amount">
                         {/* 只给前三名标名次：金、银、铜 */}
@@ -447,7 +448,9 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
         return (
           <>
             {heading('events')}
-            <div className="scope-movements">{eventRows(block.rows)}</div>
+            <div className="scope-movements" data-snapshot-list>
+              {eventRows(block.rows)}
+            </div>
           </>
         );
       case 'losses':
@@ -459,8 +462,9 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               {block.refunds.length > 1 && fact(t('scope.refunded'), income(block.refunded, block.partial?.refunded))}
             </MetricCards>
             {block.incomplete && <p className="scope-note red">{block.partial?.loss ? totalNote(block.partial.loss) : t('scope.incomplete')}</p>}
+            <div data-snapshot-list>
             {block.rows.map((r) => (
-              <button type="button" className="scope-row scope-tap" key={`${r.sub.id}-${r.phaseIndex}`} onClick={() => onOpen(r.sub)}>
+              <button type="button" className="scope-row scope-tap" data-snapshot-keep key={`${r.sub.id}-${r.phaseIndex}`} onClick={() => onOpen(r.sub)}>
                 {name(
                   r.sub,
                   events.some((e) => e.sub.id === r.sub.id && e.date === r.date && (e.kind === 'cancel' || e.kind === 'terminate')) ? undefined : (
@@ -477,7 +481,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
               </button>
             ))}
             {visibleCharges(block.refunds).map((r, i) => (
-              <button type="button" className="scope-row scope-tap" key={`refund-${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
+              <button type="button" className="scope-row scope-tap" data-snapshot-keep key={`refund-${r.sub.id}-${r.date}-${i}`} onClick={() => onOpen(r.sub)}>
                 {name(
                   r.sub,
                   <>
@@ -487,6 +491,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 <b className="num green">{income(-r.amount, r.partial ? scaleTotal(r.partial, -1) : undefined)}</b>
               </button>
             ))}
+            </div>
           </>
         );
       case 'sharing':
@@ -499,8 +504,9 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 {(block.owed > 0 || block.partial?.owed.incomplete) && fact(t('scope.owed'), income(block.owed, block.partial?.owed))}
               </MetricCards>
             )}
+            <div data-snapshot-list>
             {block.rows.map((r) => (
-              <button type="button" className="scope-row scope-tap" key={r.sub.id} onClick={() => onOpen(r.sub)}>
+              <button type="button" className="scope-row scope-tap" data-snapshot-keep key={r.sub.id} onClick={() => onOpen(r.sub)}>
                 {name(r.sub)}
                 <span>
                   {r.received !== 0 && <b className="num green">{t('scope.receivedAmount', { amount: income(r.received, r.partial?.received) })}</b>}
@@ -510,6 +516,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
                 </span>
               </button>
             ))}
+            </div>
           </>
         );
     }

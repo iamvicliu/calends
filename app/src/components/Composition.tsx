@@ -89,6 +89,7 @@ export function Composition({
       return (
         <button
           key={x.s.id}
+          data-snapshot-keep
           className={`tm-cell ${side > 200 ? 'lg' : ''}`}
           style={{ left: r.x, top: r.y, width: r.w, height: r.h, background: bg(x.s.category) }}
           onClick={() => (onPick ? onPick() : onOpen(x.s))}
@@ -145,6 +146,7 @@ export function Composition({
                     {head > 0 && (
                       <button
                         className="tm-head"
+                        data-snapshot-keep
                         onClick={() => setFocus(e.k)}
                         {...tipProps(() => t('report.comp.groupTip', { name: e.name, count: e.xs.length, amount: flow(-e.v, base) }))}
                       >

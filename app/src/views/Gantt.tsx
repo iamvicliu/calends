@@ -528,6 +528,7 @@ export function Gantt({
                 key={r.s.id}
                 data-id={r.s.id}
                 className="gt-row"
+                data-snapshot-keep
                 role={compact ? 'button' : undefined}
                 tabIndex={compact ? 0 : undefined}
                 onKeyDown={

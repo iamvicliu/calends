@@ -217,6 +217,7 @@ export function Timeline({
               <button
                 key={it.key}
                 type="button"
+                data-snapshot-keep
                 className={`tl-icon copy-tooltip ${date < today ? 'past' : ''}`}
                 style={
                   { left: x - ICON / 2, top: AXIS - 14 - ICON - level * (ICON + 4), '--stem': `${14 + level * (ICON + 4)}px` } as Record<

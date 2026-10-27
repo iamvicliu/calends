@@ -25,6 +25,7 @@
     "paused": "Pausiert. Künftige Abbuchungen werden nicht mehr prognostiziert",
     "imageCopied": "Bild kopiert"
   },
+  "snapshotRest": "{count} weitere",
   "history": "Verlauf",
   "field": {
     "amount": "Betrag",

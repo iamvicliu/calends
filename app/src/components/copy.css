@@ -15,3 +15,46 @@
 .tl-icon.copy-tooltip::after {
   white-space: pre-line;
 }
+
+/* Card exports (snapshot iframe): one column, names on one line, amounts never break. */
+.snapshot-more {
+  margin: 6px 0 0;
+  color: var(--label-3);
+  font-size: var(--fs-1);
+}
+:root[data-snapshot='card'] :is(.g-2, .scope-grid, .scope-compositions, .scope-movements, .sel-box, .sel-items) {
+  grid-template-columns: minmax(0, 1fr);
+}
+/* The page hero is flat; the image needs the card inset. */
+:root[data-snapshot='card'] .hero-card {
+  padding: 22px 24px 18px;
+}
+:root[data-snapshot='card'] .scope-ranks {
+  grid-auto-flow: row;
+  grid-template-rows: none;
+}
+:root[data-snapshot='card'] .report-log:not(.expanded) {
+  contain: none;
+  min-height: 0;
+}
+:root[data-snapshot='card'] .report-log:not(.expanded) .log {
+  flex: none;
+  overflow: visible;
+}
+:root[data-snapshot='card'] :is(.scope-name, .stop-info > b),
+:root[data-snapshot='card'] .scope-share .scope-sub > span:last-child {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+:root[data-snapshot='card'] .scope-row > :last-child:not(:first-child),
+:root[data-snapshot='card'] :is(.num, .chip-d, .stop-amount, .mv-row > b, .sel-item > b) {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+:root[data-snapshot='card'] .stop-amount > b,
+:root[data-snapshot='card'] :is(.num, .chip-d) .copy-parts {
+  flex-wrap: nowrap;
+}
