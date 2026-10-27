@@ -200,6 +200,9 @@ function harness(file: string, names: string, prefs: Record<string, string> = {}
     Gantt: 'Gantt',
     Composition: 'Composition',
     useCallback: (fn: unknown) => fn,
+    // 弹窗叠加层级（overlays 的 SheetNested）：测试里都当作最底层
+    createContext: (value: unknown) => ({ Provider: 'Provider', value }),
+    use: () => false,
     Fragment: 'Fragment',
     Timeline: 'Timeline',
     Amount: 'Amount',
@@ -3001,7 +3004,15 @@ test('owner carpool detail shows the subscription and collection periods side by
 });
 
 test('collection period stays when a mid-period joiner shares the end date and hides when member periods differ', () => {
-  const member = (id: string, extra: Record<string, unknown> = {}) => ({ id, name: id, joined: '2026-03-01', fee: 10, feeCurrency: 'USD', billEvery: 1, ...extra });
+  const member = (id: string, extra: Record<string, unknown> = {}) => ({
+    id,
+    name: id,
+    joined: '2026-03-01',
+    fee: 10,
+    feeCurrency: 'USD',
+    billEvery: 1,
+    ...extra,
+  });
   const sub = (members: unknown[]): Subscription => ({
     id: 'car',
     name: 'Fictional family plan',

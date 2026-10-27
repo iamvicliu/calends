@@ -553,6 +553,9 @@ test('Detail leads with state-aware cells, puts the next charge first, and lays 
       IconButton: empty,
       X: empty,
       CircleStop: empty,
+      Icon: empty,
+      use: React.use,
+      SheetNested: React.createContext(false),
     }),
     DetailSheet: ({ children }: { children: React.ReactNode }) => React.createElement(React.Fragment, null, children),
   });
