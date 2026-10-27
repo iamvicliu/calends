@@ -174,7 +174,7 @@
     "netCost": "共享每年盈虧",
     "yearIncome": "成員每年應交 {amount}",
     "owed": "待收",
-    "owedSub": "{count} 位成員未結清",
+    "owedSub": "{count} 人待收",
     "count": "共享數",
     "countStarted": " 發起\n",
     "countJoined": " 加入",

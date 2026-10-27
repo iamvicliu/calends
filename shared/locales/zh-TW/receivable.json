@@ -27,7 +27,7 @@
   "waived": "免收",
   "toastReceived": "已記收款 {amount}",
   "toastWaived": "已免收 {count} 期",
-  "toastRemoved": "已刪除，這幾期恢復為未收",
+  "toastRemoved": "已刪除，這幾期恢復為待收",
   "chargedClear": "按訂閱價",
   "action": "操作",
   "actions": {

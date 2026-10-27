@@ -1,4 +1,4 @@
-import { chargesTotal, convertedTotal, dueTotal, formatTotal, sumTotals, totalNote } from '../../../../shared/fx-total.ts';
+import { chargesTotal, convertedTotal, dueTotal, formatTotal, sumTotals, totalNote, type FxTotal } from '../../../../shared/fx-total.ts';
 import { currentPhase } from '../../../../shared/billing.ts';
 import { CopyImageButton } from '../../components/CopyImageButton.tsx';
 import { DetailHead, DetailSheet, Panel } from '../../components/DetailKit.tsx';
@@ -310,8 +310,8 @@ export function CarSheet({
  * 合租账本，像一张小利润表：订阅一年花多少（成本）、成员一年交多少（收入）、两者之差（利润）。
  * 利润为负就是我自己用的那部分；下面一行是发起以来实际付出和收回的钱。
  */
-/** 车卡上的数字：这辆车从发起到现在一共付出、收回多少，赚还是亏；按年的在弹窗里看 */
-export function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; base: string }) {
+/** 车卡上的数字：这辆车现在每年的成本与收入；第三格与代付卡同一规则，有人待收时是待收，否则是年净额 */
+export function CarFacts({ book, base, owed, owedCount = 0 }: { book: ReturnType<typeof carLedger>; base: string; owed?: FxTotal; owedCount?: number }) {
   const net = book.yearIncome - book.yearCost;
   // 卡片看这辆车现在每年的账：量级稳定、各车可比；累计历史放在详情页
   return (
@@ -325,10 +325,17 @@ export function CarFacts({ book, base }: { book: ReturnType<typeof carLedger>; b
           <small>{t('family.facts.yearIncome')}</small>
           <b className={book.yearIncome > 0 ? 'green' : undefined}>{formatTotal(book.partial.yearIncome, base, { direction: 1, compact: true })}</b>
         </div>
-        <div>
-          <small>{t('family.strip.yearNet')}</small>
-          <b className={net > 0 ? 'gain' : net < 0 ? 'loss' : undefined}>{formatTotal(book.partial.yearNet, base, { direction: -1, compact: true })}</b>
-        </div>
+        {owed && owedCount > 0 ? (
+          <div>
+            <small>{t('family.pool.owedN', { count: owedCount })}</small>
+            <b className="warn">{formatTotal(owed, base, { compact: true, approx: true })}</b>
+          </div>
+        ) : (
+          <div>
+            <small>{t('family.strip.yearNet')}</small>
+            <b className={net > 0 ? 'gain' : net < 0 ? 'loss' : undefined}>{formatTotal(book.partial.yearNet, base, { direction: -1, compact: true })}</b>
+          </div>
+        )}
       </MetricCards>
     </div>
   );

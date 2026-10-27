@@ -174,7 +174,7 @@
     "netCost": "合租每年盈亏",
     "yearIncome": "成员每年应交 {amount}",
     "owed": "待收",
-    "owedSub": "{count} 位成员未结清",
+    "owedSub": "{count} 人待收",
     "count": "合租数",
     "countStarted": " 发起\n",
     "countJoined": " 加入",

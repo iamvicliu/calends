@@ -60,12 +60,12 @@
     "receivedEven": "按收款当天汇率折合 {amount}，比实扣持平。",
     "receivedMore": "按收款当天汇率折合 {amount}，比实扣多 {diff}。",
     "receivedLess": "按收款当天汇率折合 {amount}，比实扣少 {diff}。",
-    "notReceived": "未收",
+    "notReceived": "待收",
     "receivedOn": "收款日期",
     "notePlaceholder": "可选，如 微信转账"
   },
   "page": {
-    "owedSub": "{count} 期未收，按扣款当天汇率",
+    "owedSub": "{count} 期待收，按扣款当天汇率",
     "subs": "{count} 个订阅",
     "diffSub": "已收的期数里，汇率和手续费带来的盈亏",
     "emptyTitle": "还没有代付",

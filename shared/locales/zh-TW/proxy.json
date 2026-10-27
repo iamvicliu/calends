@@ -60,12 +60,12 @@
     "receivedEven": "依收款當天匯率折合 {amount}，與實扣持平。",
     "receivedMore": "依收款當天匯率折合 {amount}，比實扣多 {diff}。",
     "receivedLess": "依收款當天匯率折合 {amount}，比實扣少 {diff}。",
-    "notReceived": "未收",
+    "notReceived": "待收",
     "receivedOn": "收款日期",
     "notePlaceholder": "選填，例如 LINE Pay 轉帳"
   },
   "page": {
-    "owedSub": "{count} 期未收，依扣款當天匯率",
+    "owedSub": "{count} 期待收，依扣款當天匯率",
     "subs": "{count} 個訂閱",
     "diffSub": "已收的期數中，匯率與手續費造成的盈虧",
     "emptyTitle": "還沒有代付",

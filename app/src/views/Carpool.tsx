@@ -222,7 +222,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                 {shown.map((s, idx) => {
                   if (idx % colCount !== col) return null;
                   const sh = s.share!;
-                  const dues = duesOf(s);
+                  const owing = duesOf(s).filter((d) => d.periodsOwed > 0);
                   // 已退出的成员不占座，只在展开的明细里保留
                   const free = carpoolRoster(s, today).vacancies;
                   const next = nextCharge(s, addDays(today, 1));
@@ -260,20 +260,17 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
                       <div className="seats-row">
                         <ShareAvatars sub={s} state={state} today={today} onMember={(m) => setMember({ s, m })} />
                         <button className={`car-toggle ${expanded.has(s.id) ? 'open' : ''}`} onClick={() => toggle(s.id)} aria-expanded={expanded.has(s.id)}>
-                          {(() => {
-                            const n = dues.filter((d) => d.periodsOwed > 0).length;
-                            return n ? (
-                              <span className="owe">{t('family.pool.owedN', { count: n })}</span>
-                            ) : sh.members.length ? (
-                              t('family.pool.settled')
-                            ) : (
-                              t('family.pool.noMembers')
-                            );
-                          })()}
+                          {/* 待收的人数和金额已在下面第三格，这里与代付卡的状态胶囊一样不再重复 */}
+                          {owing.length ? t('family.pool.members') : sh.members.length ? t('family.pool.settled') : t('family.pool.noMembers')}
                           <Icon name="down" size={14} />
                         </button>
                       </div>
-                      <CarFacts book={books.get(s.id)!} base={base} />
+                      <CarFacts
+                        book={books.get(s.id)!}
+                        base={base}
+                        owed={sumTotals(owing.map((d) => dueTotal(state, d, toBase(state, d.owed, d.currency))))}
+                        owedCount={owing.length}
+                      />
                       {expanded.has(s.id) && (
                         <>
                           {free > 0 && live(s) && (
