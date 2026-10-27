@@ -40,7 +40,7 @@ import { saveSub } from '../../store.ts';
 import { carpoolRoster } from '../../../../shared/carpool-timeline.ts';
 import { MemberAvatar } from './Members.tsx';
 import { CarMembers } from './Members.tsx';
-import { collectNow, PeriodPair } from '../detail/Periods.tsx';
+import { collectNow, PeriodBar, PeriodPair, periodLive } from '../detail/Periods.tsx';
 
 /**
  * 合租弹窗：一辆车的全部信息。上面是基本信息和指标，中间是成员与收款，下面是历来所有收款；
@@ -171,10 +171,9 @@ export function CarSheet({
           </MetricCards>
 
           {/* 指标下面：订阅周期与收费周期并排，与订阅详情的本期同一块 */}
-          {collect && (
-            <Panel className="dt-about">
-              <PeriodPair sub={s} today={today} collect={collect} />
-            </Panel>
+          {/* 各人收费周期不一样时只画订阅周期，收费周期看下面成员表的时间线 */}
+          {periodLive(s, today) && (
+            <Panel className="dt-about">{collect ? <PeriodPair sub={s} today={today} collect={collect} /> : <PeriodBar sub={s} today={today} split />}</Panel>
           )}
 
           {cost && (

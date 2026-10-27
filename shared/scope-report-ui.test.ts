@@ -2993,6 +2993,33 @@ test('owner carpool detail shows the subscription and collection periods side by
   assert.ok(!h.render('Summary', { sub: { ...sub, share: undefined }, state, today }).some((n) => n.props.className === 'dt-period-pair'));
 });
 
+test('collection period stays when a mid-period joiner shares the end date and hides when member periods differ', () => {
+  const member = (id: string, extra: Record<string, unknown> = {}) => ({ id, name: id, joined: '2026-03-01', fee: 10, feeCurrency: 'USD', billEvery: 1, ...extra });
+  const sub = (members: unknown[]): Subscription => ({
+    id: 'car',
+    name: 'Fictional family plan',
+    category: 'Tools',
+    tags: [],
+    price: 120,
+    currency: 'USD',
+    cycle: { unit: 'year', every: 1 },
+    start: '2026-03-01',
+    status: 'active',
+    share: { role: 'owner', seats: 4, collectFrom: '2026-03-01', rule: { billEvery: 1, fee: 10, currency: 'USD' }, members: members as never },
+  });
+  const h = harness('../app/src/views/Detail.tsx', 'Summary', {}, { detailHistoryEnd });
+  const collectOf = (members: unknown[]) => {
+    const s = sub(members);
+    const nodes = h.render('Summary', { sub: s, state: { ...st, subscriptions: [s] }, today });
+    return nodes.find((n) => n.props.title === 'detail.period.collect');
+  };
+  // 10 月 15 日上车的人首期折算到 10 月 31 日，与大家同一天到期：仍画收费周期，从本期开始日画起
+  const joined = collectOf([member('a'), member('b', { joined: '2026-10-15' })])!;
+  assert.deepEqual([joined.props.from, joined.props.end], ['2026-10-01', '2026-11-01']);
+  // 有人按季收费，到期日不同：不画收费周期，订阅详情退回单条本期
+  assert.equal(collectOf([member('a'), member('b', { billEvery: 3, custom: true })]), undefined);
+});
+
 test('detail PNG delegates privacy and cleanup to the shared renderer and excludes only actions', async () => {
   for (const failed of [false, true]) {
     const source = { closest: () => ({}) };

@@ -1,5 +1,5 @@
-import { addDays, billingPeriod, diffDays, effectiveStatus, renewalDates } from '../../../../shared/billing.ts';
-import { carRule, collectionPeriod } from '../../../../shared/carpool.ts';
+import { addDays, billingPeriod, diffDays, effectiveStatus, memberAboard, renewalDates } from '../../../../shared/billing.ts';
+import { carRule, collectionPeriod, memberStatus } from '../../../../shared/carpool.ts';
 import { cnDateAuto } from '../../../../shared/format.ts';
 import { t } from '../../../../shared/i18n.ts';
 import type { AppState, Subscription } from '../../../../shared/types.ts';
@@ -77,10 +77,22 @@ function Bar({
   );
 }
 
-/** 我发起且仍在计费的合租：今天所在的收款期；其余为 undefined */
+/** 计费中（未结束、未暂停、非买断）才画本期进度 */
+export const periodLive = (sub: Subscription, today: string) => !['ended', 'terminated', 'lifetime', 'paused'].includes(effectiveStatus(sub, today));
+
+/**
+ * 我发起且仍在计费的合租：今天所在的收款期；其余为 undefined。
+ * 在车上、要分摊的成员本期到期日不一样时（收费周期或起算日因人而异）也是 undefined，成员表的时间线已经说明各人的周期；
+ * 还没有要分摊的成员时按车的收费规则推算
+ */
 export function collectNow(sub: Subscription, state: AppState, today: string) {
-  const live = !['ended', 'terminated', 'lifetime', 'paused'].includes(effectiveStatus(sub, today));
-  return live && sub.share?.role === 'owner' ? collectionPeriod(sub, carRule(state, sub, today).billEvery, today) : undefined;
+  if (!periodLive(sub, today) || sub.share?.role !== 'owner') return undefined;
+  const paying = sub.share.members.filter((m) => memberAboard(m, today) && !m.exempt);
+  if (!paying.length) return collectionPeriod(sub, carRule(state, sub, today).billEvery, today);
+  // 中途上车的人首期按天折算、开始日晚一些，但和大家同一天到期，仍算同一个周期；条从最早的开始日画起
+  const now = paying.map((m) => memberStatus(state, sub, m, today).period);
+  if (new Set(now.map((p) => p.until)).size > 1) return undefined;
+  return { from: now.map((p) => p.from).sort()[0], next: addDays(now[0].until, 1) };
 }
 
 /** 订阅周期与收费周期左右并排；订阅详情与合租详情共用 */
