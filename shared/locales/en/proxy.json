@@ -121,5 +121,12 @@
       "one": "{count} payment, {amount}",
       "other": "{count} payments, {amount} each"
     }
+  },
+  "convert": {
+    "maybeGroup": "Possibly paid for others",
+    "submit": "Convert to proxy payment",
+    "title": "Convert {name} to proxy payment",
+    "saved": "Converted to proxy payment",
+    "changed": "This subscription was changed or deleted. Reopen it and try again."
   }
 }

@@ -61,7 +61,17 @@ export function Metric({
 }
 
 /** 页面工具栏：桌面端为半透明窗口工具栏，手机端为大标题 */
-export function Toolbar({ title, sub, children }: { title: ComponentChildren; sub?: ComponentChildren; children?: ComponentChildren }) {
+export function Toolbar({
+  title,
+  sub,
+  children,
+  onAdd,
+}: {
+  title: ComponentChildren;
+  sub?: ComponentChildren;
+  children?: ComponentChildren;
+  onAdd?: () => void;
+}) {
   return (
     <header className="toolbar">
       <IconButton className="sb-btn tb-lead" aria-label={t('ui.toolbar.openSidebar')} onClick={() => window.dispatchEvent(new Event('ledger:drawer'))}>
@@ -71,7 +81,7 @@ export function Toolbar({ title, sub, children }: { title: ComponentChildren; su
         <h1>{copyParts(title)}</h1>
         {sub && <div className="tb-sub">{copyParts(sub)}</div>}
       </div>
-      <IconButton className="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={() => window.dispatchEvent(new Event('ledger:add'))}>
+      <IconButton className="sb-btn tb-trail" aria-label={t('ui.toolbar.add')} onClick={onAdd ?? (() => window.dispatchEvent(new Event('ledger:add')))}>
         <Icon name="compose" />
       </IconButton>
       <div className="tb-actions">{children}</div>

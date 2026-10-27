@@ -121,5 +121,12 @@
       "one": "{count} Zahlung, {amount}",
       "other": "{count} Zahlungen, je {amount}"
     }
+  },
+  "convert": {
+    "maybeGroup": "Möglicherweise für andere bezahlt",
+    "submit": "In Zahlung für andere umwandeln",
+    "title": "{name} in Zahlung für andere umwandeln",
+    "saved": "In Zahlung für andere umgewandelt",
+    "changed": "Dieses Abo wurde geändert oder gelöscht. Öffne es erneut und versuche es noch einmal."
   }
 }

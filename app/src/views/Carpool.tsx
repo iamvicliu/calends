@@ -32,11 +32,16 @@ import { CAR_SORT_DIR } from './carpool/common.ts';
 import { CarTable } from './carpool/CarTable.tsx';
 import { MemberRows } from './carpool/Members.tsx';
 import { CarSheet } from './carpool/CarSheet.tsx';
-import { ConvertSheet } from './carpool/ConvertSheet.tsx';
+import { newSub } from './editor/new-sub.ts';
+import { defaultSeats, ConvertSheet } from './carpool/ConvertSheet.tsx';
 import { CarFacts } from './carpool/CarSheet.tsx';
 
 export function Carpool({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
+  const add = () => {
+    const draft = newSub(today, state.settings.defaultMethodId, base);
+    window.dispatchEvent(new CustomEvent('ledger:add', { detail: { ...draft, share: { role: 'owner', seats: defaultSeats(draft.name), members: [] } } }));
+  };
   const [colsRef, colsWidth] = useWidth();
   const colCount = Math.max(1, Math.min(4, Math.floor((colsWidth + 16) / 356)));
   // 没有停止的车都算进行中：包括买断（没有到期）和还没开始的
@@ -127,7 +132,7 @@ export function Carpool({ state, today, onOpen }: { state: AppState; today: stri
 
   return (
     <>
-      <Toolbar title={t('family.pool.title')}>
+      <Toolbar title={t('family.pool.title')} onAdd={add}>
         <Seg
           small
           value={filter}

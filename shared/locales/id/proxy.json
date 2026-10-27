@@ -105,5 +105,12 @@
     "undo": "Batalkan penerimaan ini",
     "batchFoot": "Bagian dari satu penerimaan untuk beberapa periode. Untuk mengubah jumlah atau periode, batalkan lalu catat ulang.",
     "perPeriod": "{count} tagihan, masing-masing {amount}"
+  },
+  "convert": {
+    "maybeGroup": "Mungkin dibayarkan untuk orang lain",
+    "submit": "Ubah menjadi pembayaran untuk orang lain",
+    "title": "Ubah {name} menjadi pembayaran untuk orang lain",
+    "saved": "Diubah menjadi pembayaran untuk orang lain",
+    "changed": "Langganan ini telah diubah atau dihapus. Buka kembali dan coba lagi."
   }
 }

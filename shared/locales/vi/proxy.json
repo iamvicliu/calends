@@ -105,5 +105,12 @@
     "undo": "Hủy khoản nhận này",
     "batchFoot": "Kỳ này thuộc một khoản nhận cho nhiều kỳ. Muốn đổi số tiền hoặc kỳ, hãy hủy rồi ghi lại.",
     "perPeriod": "{count} kỳ, mỗi kỳ {amount}"
+  },
+  "convert": {
+    "maybeGroup": "Có thể là thanh toán hộ",
+    "submit": "Chuyển sang thanh toán hộ",
+    "title": "Chuyển {name} sang thanh toán hộ",
+    "saved": "Đã chuyển sang thanh toán hộ",
+    "changed": "Gói đăng ký này đã bị thay đổi hoặc xóa. Hãy mở lại và thử lại."
   }
 }

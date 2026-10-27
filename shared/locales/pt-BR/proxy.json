@@ -121,5 +121,12 @@
       "one": "{count} pagamento, {amount}",
       "other": "{count} pagamentos, {amount} cada"
     }
+  },
+  "convert": {
+    "maybeGroup": "Possíveis pagamentos por terceiros",
+    "submit": "Converter em pagamento por outra pessoa",
+    "title": "Converter {name} em pagamento por outra pessoa",
+    "saved": "Convertido em pagamento por outra pessoa",
+    "changed": "Esta assinatura foi alterada ou excluída. Abra-a novamente e tente outra vez."
   }
 }

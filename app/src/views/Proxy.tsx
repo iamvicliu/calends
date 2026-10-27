@@ -8,7 +8,7 @@ import { addDays, cycleLabel, diffDays, effectiveStatus, nextCharge, todayIn, is
 import { flow, cnDate, cnDateFull, money, relDays } from '../../../shared/format.ts';
 import { toBaseAt } from '../../../shared/fx.ts';
 import type { AppState, Subscription } from '../../../shared/types.ts';
-import { MetricCards, Metric, Toolbar } from '../components/ui.tsx';
+import { MetricCards, Metric, Group, Toolbar } from '../components/ui.tsx';
 import { Seg } from '../components/inputs.tsx';
 import { NameLink, PayBadge, StatusPill, SubIcon } from '../components/marks.tsx';
 import { contactText } from '../components/Contact.tsx';
@@ -22,6 +22,9 @@ import { proxySummary } from './proxy/common.tsx';
 import { proxyStatus } from './proxy/common.tsx';
 import { OwedOrNet } from './proxy/common.tsx';
 import { LedgerSheet } from './proxy/sheets.tsx';
+import { ConvertProxySheet } from './proxy/ConvertProxySheet.tsx';
+import { isProxyCandidate } from './proxy/candidates.ts';
+import { newSub } from './editor/new-sub.ts';
 
 /**
  * 代付卡片：头部（图标、名称）点开是订阅详情；底部「N 期明细」点开是逐期的扣款与收款。
@@ -293,6 +296,12 @@ export function ProxyTable({
 export function ProxyPage({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
   const base = state.settings.baseCurrency;
   const sum = proxySummary(state, today);
+  const [convert, setConvert] = useState<Subscription | null>(null);
+  const candidates = state.subscriptions.filter((s) => isProxyCandidate(s, today));
+  const add = () => {
+    const draft = newSub(today, state.settings.defaultMethodId, base);
+    window.dispatchEvent(new CustomEvent('ledger:add', { detail: { ...draft, proxy: { forName: '' } } }));
+  };
   const [filter, setFilter] = usePref<ProxyFilter>('proxy-filter', 'all', (v): v is ProxyFilter => (PROXY_FILTERS as readonly string[]).includes(v));
   const stopped = (s: Subscription) => isStopped(effectiveStatus(s, today));
   const groups: Record<ProxyFilter, Subscription[]> = {
@@ -308,7 +317,7 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
   const view = phone ? 'grid' : savedView;
   return (
     <>
-      <Toolbar title={t('proxy.title')}>
+      <Toolbar title={t('proxy.title')} onAdd={add}>
         {sum.subs.length > 0 && (
           <Seg
             small
@@ -388,6 +397,27 @@ export function ProxyPage({ state, today, onOpen }: { state: AppState; today: st
             )}
           </>
         )}
+        {candidates.length > 0 && (
+          <Group title={t('proxy.convert.maybeGroup')}>
+            {candidates.map((s) => (
+              <div key={s.id} className="cell">
+                <span className="cell-l">
+                  <span className="row">
+                    <SubIcon sub={s} size={30} />
+                    {s.name}
+                  </span>
+                </span>
+                <span className="cell-r">
+                  {money(currentPhase(s, today).price, currentPhase(s, today).currency)}
+                  <button className="btn tinted" onClick={() => setConvert(s)}>
+                    {t('proxy.convert.submit')}
+                  </button>
+                </span>
+              </div>
+            ))}
+          </Group>
+        )}
+        {convert && <ConvertProxySheet state={state} s={convert} onClose={() => setConvert(null)} />}
       </div>
     </>
   );

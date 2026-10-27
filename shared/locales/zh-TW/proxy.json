@@ -97,5 +97,12 @@
     "undo": "撤銷這筆收款",
     "batchFoot": "這一期屬於一筆多期收款。要改金額或涵蓋期，先撤銷整筆再重記。",
     "perPeriod": "{count} 期，每期 {amount}"
+  },
+  "convert": {
+    "maybeGroup": "可能是代付",
+    "submit": "轉為代付",
+    "title": "將 {name} 轉為代付",
+    "saved": "已轉為代付",
+    "changed": "訂閱已被修改或刪除，請重新開啟後再試。"
   }
 }

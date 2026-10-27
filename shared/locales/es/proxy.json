@@ -121,5 +121,12 @@
       "one": "{count} pago, {amount}",
       "other": "{count} pagos, {amount} cada uno"
     }
+  },
+  "convert": {
+    "maybeGroup": "Posibles pagos por otros",
+    "submit": "Convertir en pago por otra persona",
+    "title": "Convertir {name} en pago por otra persona",
+    "saved": "Convertido en pago por otra persona",
+    "changed": "Esta suscripción se ha modificado o eliminado. Vuelve a abrirla e inténtalo de nuevo."
   }
 }

@@ -109,5 +109,12 @@
     "undo": "Bu tahsilatı geri al",
     "batchFoot": "Birden çok dönemi kapsayan bir tahsilatın parçası. Tutarı veya dönemleri değiştirmek için geri alıp yeniden kaydedin.",
     "perPeriod": "{count} ödeme, her biri {amount}"
+  },
+  "convert": {
+    "maybeGroup": "Başkası adına ödeniyor olabilir",
+    "submit": "Başkası adına ödemeye dönüştür",
+    "title": "{name} aboneliğini başkası adına ödemeye dönüştür",
+    "saved": "Başkası adına ödemeye dönüştürüldü",
+    "changed": "Bu abonelik değiştirildi veya silindi. Yeniden açıp tekrar deneyin."
   }
 }

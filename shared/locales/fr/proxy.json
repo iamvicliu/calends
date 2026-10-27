@@ -121,5 +121,12 @@
       "one": "{count} paiement, {amount}",
       "other": "{count} paiements, {amount} chacun"
     }
+  },
+  "convert": {
+    "maybeGroup": "Peut-être payé pour un tiers",
+    "submit": "Convertir en paiement pour un tiers",
+    "title": "Convertir {name} en paiement pour un tiers",
+    "saved": "Converti en paiement pour un tiers",
+    "changed": "Cet abonnement a été modifié ou supprimé. Rouvrez-le et réessayez."
   }
 }
