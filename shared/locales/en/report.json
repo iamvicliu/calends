@@ -46,7 +46,7 @@
     "added": "New",
     "expansion": "Price up",
     "contraction": "Price down",
-    "churned": "Cancelled",
+    "churned": "Stopped",
     "now": "Now",
     "monthEnd": "Month end",
     "empty": "No new, cancelled, or repriced subscriptions this month.",
@@ -71,8 +71,6 @@
     "prepaidItem": "{name}\n{amount}\nuntil {until}",
     "prepaid": "Prepaid value",
     "prepaidSub": "{count} paid, not used up",
-    "saved": "Less per month from cancelling",
-    "savedSub": "{count} cancelled",
     "next90": "Due in the next 90 days",
     "peak": "Peak in {month}\n{amount}",
     "fullPaidHint": "Full amount paid, including advances for members"
@@ -133,12 +131,9 @@
   },
   "stops": {
     "title": "Cancellations & terminations",
-    "saved": "Saved",
     "loss": "Unrefunded loss",
-    "savedHint": "Estimated renewals avoided since cancellation, through today",
     "lossHint": "Paid for service that ended early and was not refunded",
     "basis": "All history\nMy share; unrefunded loss at stop-date FX.",
-    "details": "Unrefunded loss details",
     "cancel": "Voluntary early cancellation"
   }
 }

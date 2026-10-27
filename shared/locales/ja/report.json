@@ -46,7 +46,7 @@
     "added": "新規",
     "expansion": "値上げ",
     "contraction": "値下げ",
-    "churned": "解約",
+    "churned": "停止",
     "now": "現在",
     "monthEnd": "月末",
     "empty": "今月は新規・解約・価格変更のあったサブスクはありません。",
@@ -70,8 +70,6 @@
     "prepaidItem": "{name}\n{amount}\n{until}まで",
     "prepaid": "前払いの残存価値",
     "prepaidSub": "{count}件が支払い済み・未消化",
-    "saved": "解約で毎月減った額",
-    "savedSub": "{count}件を解約",
     "next90": "今後90日間の請求",
     "peak": "ピークは{month}\n{amount}",
     "fullPaidHint": "支払総額（メンバーへの立て替えを含む）"
@@ -130,12 +128,9 @@
   },
   "stops": {
     "title": "解約と利用停止",
-    "saved": "節約額",
     "loss": "未返金損失",
-    "savedHint": "解約後から今日までに回避できた更新料の推計",
     "lossHint": "サービスの早期終了により返金されなかった料金",
     "basis": "全履歴\n自分の負担分。未返金損失は停止日の為替で換算。",
-    "details": "未返金損失の明細",
     "cancel": "自分で早期解約"
   }
 }

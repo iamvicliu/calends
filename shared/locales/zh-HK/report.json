@@ -46,7 +46,7 @@
     "added": "新增",
     "expansion": "漲價",
     "contraction": "降價",
-    "churned": "退訂",
+    "churned": "停用",
     "now": "現在",
     "monthEnd": "月末",
     "empty": "這個月沒有新增、退訂或調價。",
@@ -68,8 +68,6 @@
     "prepaidItem": "{name}\n{amount}\n至 {until}",
     "prepaid": "預付餘值",
     "prepaidSub": "{count} 項已付未用完",
-    "saved": "退訂後每月少花",
-    "savedSub": "{count} 個已退訂",
     "next90": "未來 90 天要付",
     "peak": "高峰在 {n} 月\n{amount}",
     "fullPaidHint": "全額實付，含替成員墊付"
@@ -124,12 +122,9 @@
   },
   "stops": {
     "title": "退訂與停用",
-    "saved": "慳下",
     "loss": "未退款損失",
-    "savedHint": "退訂後截至今天，估算省去的續費",
     "lossHint": "服務提前終止、沒有退回的費用",
     "basis": "全部歷史\n我的份額；未退款損失按停止日匯率。",
-    "details": "未退款損失明細",
     "cancel": "主動提前退訂"
   }
 }

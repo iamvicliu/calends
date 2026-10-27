@@ -46,7 +46,7 @@
     "added": "신규",
     "expansion": "가격 인상",
     "contraction": "가격 인하",
-    "churned": "해지",
+    "churned": "중단",
     "now": "현재",
     "monthEnd": "월말",
     "empty": "이번 달에는 신규, 해지, 가격 변경된 구독이 없습니다.",
@@ -70,8 +70,6 @@
     "prepaidItem": "{name}\n{amount}\n{until}까지",
     "prepaid": "선결제 잔여 가치",
     "prepaidSub": "{count}개 결제 완료, 아직 사용 중",
-    "saved": "해지 후 매달 절약",
-    "savedSub": "{count}개 해지",
     "next90": "다음 90일 결제 예정",
     "peak": "최고점 {month}\n{amount}",
     "fullPaidHint": "멤버 대신 낸 금액을 포함한 전체 결제액"
@@ -130,12 +128,9 @@
   },
   "stops": {
     "title": "해지 및 서비스 중단",
-    "saved": "절약",
     "loss": "미환불 손실",
-    "savedHint": "해지 후 오늘까지 지불하지 않은 갱신 비용 추정액",
     "lossHint": "서비스가 조기 종료되어 환불받지 못한 요금",
     "basis": "전체 내역\n내 부담분. 미환불 손실은 종료일 환율 기준.",
-    "details": "미환불 손실 내역",
     "cancel": "자발적 조기 해지"
   }
 }

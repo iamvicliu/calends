@@ -46,7 +46,7 @@
     "added": "Yeni",
     "expansion": "Zam",
     "contraction": "İndirim",
-    "churned": "İptal",
+    "churned": "Durdurulan",
     "now": "Şimdi",
     "monthEnd": "Ay sonu",
     "empty": "Bu ay yeni, iptal edilen veya fiyatı değişen abonelik yok.",
@@ -71,8 +71,6 @@
     "prepaidItem": "{name}\n{amount}\n{until} tarihine kadar",
     "prepaid": "Ön ödemeli değer",
     "prepaidSub": "{count} ödendi, henüz tüketilmedi",
-    "saved": "İptallerle aylık tasarruf",
-    "savedSub": "{count} iptal edildi",
     "next90": "Önümüzdeki 90 günde ödenecek",
     "peak": "Zirve: {month}\n{amount}",
     "fullPaidHint": "Üyeler adına yapılan avanslar dahil ödenen toplam tutar"
@@ -133,12 +131,9 @@
   },
   "stops": {
     "title": "İptaller ve sonlandırmalar",
-    "saved": "Tasarruf",
     "loss": "İade edilmeyen kayıp",
-    "savedHint": "İptalden bugüne kadar önlenen yenileme ücretlerinin tahmini",
     "lossHint": "Erken sona eren hizmet için ödenen ve iade edilmeyen tutar",
     "basis": "Tüm geçmiş\nBenim payım; iade edilmeyen kayıp sonlandırma tarihindeki kurla hesaplanır.",
-    "details": "İade edilmeyen kayıp ayrıntıları",
     "cancel": "İsteğe bağlı erken iptal"
   }
 }

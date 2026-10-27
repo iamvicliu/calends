@@ -1974,13 +1974,9 @@ select.btn {
   padding: 1px 6px;
   border-radius: var(--radius-sm);
 }
-.wf-item em.up {
-  background: color-mix(in srgb, var(--red-10) 10%, transparent);
-  color: var(--red);
-}
-.wf-item em.down {
-  background: color-mix(in srgb, var(--green-9) 14%, transparent);
-  color: var(--green-11);
+.wf-item em {
+  background: var(--fill-2);
+  color: var(--label-2);
 }
 
 /* 体检 */
@@ -2053,81 +2049,11 @@ select.btn {
   font-size: var(--fs-1);
   line-height: 1.5;
 }
-.stop-info small,
-.stop-amount small {
-  display: block;
-  color: var(--label-2);
-  font-size: var(--fs-1);
-  line-height: 1.5;
-}
-.stop-list-title {
-  margin: 20px 0 6px;
-  font-size: var(--fs-2);
-  font-weight: 600;
-}
-.stop-row {
-  display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  border: 0;
-  border-bottom: var(--hairline) solid var(--sep);
-  background: none;
-  padding: 12px 0;
-  text-align: left;
-}
-.stop-row:last-child {
-  border-bottom: 0;
-}
-.stop-row:hover {
-  background: var(--fill-2);
-}
-.stop-info {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-.stop-info > b {
-  font-size: var(--fs-2);
-}
-.stop-amount {
-  min-width: 0;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.stop-amount > b {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0 4px;
-}
-.stop-amount > b > span {
-  white-space: nowrap;
-}
-.stop-amount .stop-days {
-  color: var(--label-2);
-  font-size: var(--fs-1);
-  font-weight: 400;
-  align-self: center;
-}
-.stop-amount > b {
-  font-size: var(--fs-2);
-}
 .review-loss {
   font-size: var(--fs-1);
   line-height: 1.5;
   margin-top: 8px;
   overflow-wrap: anywhere;
-}
-@media (max-width: 680px) {
-  .stop-row {
-    gap: 8px;
-    grid-template-columns: 32px minmax(0, 1fr) minmax(0, auto);
-  }
-  .stop-amount > b {
-    font-size: var(--fs-2);
-  }
 }
 .barline {
   position: relative;
@@ -2780,8 +2706,7 @@ select.btn {
   background: var(--green-3);
   color: var(--green);
 }
-.log-item b.green,
-.wf-item em.down {
+.log-item b.green {
   color: var(--green);
 }
 .badge.green {
@@ -8928,22 +8853,14 @@ img.mm-flag {
   min-width: 3px;
   border-radius: var(--radius-sm);
 }
-.mv-row.up .mv-bar i {
-  background: var(--red-9);
-}
-.mv-row.down .mv-bar i {
-  background: var(--green-9);
+/* 变化来源只比大小，不分好坏：新增、停用、汇率都用中性色；涨跌结论只在合计上表达 */
+.mv-bar i {
+  background: var(--label-3);
 }
 .mv-row b {
   font-weight: 600;
   min-width: 64px;
   text-align: right;
-}
-.mv-row.up b {
-  color: var(--red);
-}
-.mv-row.down b {
-  color: var(--green);
 }
 
 /* 账号：表单里右对齐的输入框；详情里点一下复制 */

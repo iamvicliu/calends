@@ -60,7 +60,7 @@ export function Report({ state, today, onOpen, onReview }: { state: AppState; to
           <Waterfall state={state} today={today} onOpen={onOpen} />
           <Checkup state={state} today={today} onOpen={onOpen} />
         </div>
-        <StopsCard state={state} today={today} onOpen={onOpen} />
+        <StopsCard state={state} today={today} />
         <div className="grid g-2 report-bottom">
           <TopUps state={state} today={today} />
           <Changelog state={state} today={today} onOpen={onOpen} base={base} />
@@ -171,11 +171,11 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
   const mv = useMemo(() => monthMovement(state, end, offset !== 0), [state, month, end, offset]);
   const steps = [
     { k: t('report.wf.from'), v: mv.from, kind: 'total' },
-    { k: t('report.wf.fx'), v: mv.fx, kind: mv.fx >= 0 ? 'up' : 'down' },
     { k: t('report.wf.added'), v: mv.added, kind: 'up' },
     { k: t('report.wf.expansion'), v: mv.expansion, kind: 'up' },
     { k: t('report.wf.contraction'), v: -mv.contraction, kind: 'down' },
     { k: t('report.wf.churned'), v: -mv.churned, kind: 'down' },
+    { k: t('report.wf.fx'), v: mv.fx, kind: mv.fx >= 0 ? 'up' : 'down' },
     { k: offset === 0 ? t('report.wf.now') : t('report.wf.monthEnd'), v: mv.to, kind: 'total' },
   ];
   // 不画瀑布：总额两千多、变化几十上百，放在一根轴上变化量只剩几条细线。
@@ -222,7 +222,7 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
       {drivers.length > 0 && !singleDriver && (
         <div className="mv-rows">
           {drivers.map((x) => (
-            <div key={x.k} className={`mv-row ${x.v > 0 ? 'up' : 'down'}`}>
+            <div key={x.k} className="mv-row">
               <span>{x.k}</span>
               <div className="mv-bar">
                 <i style={{ width: `${(Math.abs(x.v) / peak) * 100}%` }} />
@@ -237,14 +237,16 @@ function Waterfall({ state, today, onOpen }: { state: AppState; today: string; o
       <div className="wf-items">
         {mv.items.length === 0 && (
           <div className="muted" style={{ fontSize: 'var(--fs-2)', padding: '8px 0' }}>
-            {Math.abs(mv.fx) >= 0.5 ? t('report.wf.fx') : t('report.wf.empty')}
+            {Math.abs(mv.fx) >= 0.5
+              ? t('report.wf.emptyFx', { amount: `${mv.fx > 0 ? '↑' : '↓'} ${money(Math.abs(mv.fx), base, { compact: true })}` })
+              : t('report.wf.empty')}
           </div>
         )}
         {mv.items.slice(0, 4).map((it) => (
           <button key={it.sub.id} className="wf-item" onClick={() => onOpen(it.sub)}>
             <SubIcon sub={it.sub} size={24} />
             <span className="wf-name">{it.sub.name}</span>
-            <em className={it.delta > 0 ? 'up' : 'down'}>{kindLabel(it.kind)}</em>
+            <em>{kindLabel(it.kind)}</em>
             {!singleItem && (
               <b className="num">
                 {it.delta > 0 ? '↑' : '↓'} {money(Math.abs(it.delta), base, { compact: true })}
@@ -398,10 +400,11 @@ function CashCard({ state, today }: { state: AppState; today: string }) {
   );
 }
 
-/** 未退款损失，截至今天、全部历史 */
-function StopsCard({ state, today, onOpen }: { state: AppState; today: string; onOpen: (s: Subscription) => void }) {
+/** 未退款损失，截至今天、全部历史。报告只放汇总，逐条明细在订阅详情与订阅页里看 */
+function StopsCard({ state, today }: { state: AppState; today: string }) {
   const base = state.settings.baseCurrency;
   const losses = useMemo(() => stopLosses(state, today), [state, today]);
+  const count = (kind: 'cancel' | 'terminate') => losses.items.filter((i) => i.kind === kind).length;
   return (
     <div className="card stop-report copy-card" data-copy-card id="report-stops">
       <div className="copy-corner">
@@ -411,51 +414,18 @@ function StopsCard({ state, today, onOpen }: { state: AppState; today: string; o
         <CardTitle>{t('report.stops.title')}</CardTitle>
       </div>
       <p className="stop-basis">{copyParts(t('report.stops.basis'))}</p>
-      {losses.items.length !== 1 && (
-        <MetricCards inline>
-          <Metric
-            label={t('report.stops.loss')}
-            value={<FxAmount total={losses.partial} ccy={base} direction={-1} compact />}
-            // 没有损失时 ¥0 不标红
-            valueClassName={losses.total > 0 || !Number.isFinite(losses.total) ? 'loss' : ''}
-            note={t('report.stops.lossHint')}
-          />
-        </MetricCards>
-      )}
+      <MetricCards inline>
+        <Metric
+          label={t('report.stops.loss')}
+          value={<FxAmount total={losses.partial} ccy={base} direction={-1} compact />}
+          // 没有损失时 ¥0 不标红
+          valueClassName={losses.total > 0 || !Number.isFinite(losses.total) ? 'loss' : ''}
+          note={t('report.stops.lossHint')}
+        />
+        {count('cancel') > 0 && <Metric label={t('report.stops.cancel')} value={count('cancel')} />}
+        {count('terminate') > 0 && <Metric label={t('core.stop.terminate')} value={count('terminate')} />}
+      </MetricCards>
       {losses.incomplete && <p className="stop-basis red">{totalNote(losses.partial)}</p>}
-      {/* 没有未退款损失时，上面的指标已写 ¥0，不再放一个空的明细区块 */}
-      {losses.items.length > 0 && (
-        <>
-          <h4 className="stop-list-title">{t('report.stops.details')}</h4>
-          <div className="stop-list">
-            {losses.items.map((i) => (
-              <button key={`${i.sub.id}-${i.phaseIndex}`} className="stop-row" onClick={() => onOpen(i.sub)}>
-                <SubIcon sub={i.sub} size={32} />
-                <span className="stop-info">
-                  <b>{i.sub.name}</b>
-                  <small>
-                    {cnDate(i.date)} <span className="copy-gap" aria-hidden="true" />{' '}
-                    {i.kind === 'terminate' ? t('core.stop.terminate') : t('report.stops.cancel')}
-                    {copyParts(i.reason ? `\n${i.reason}` : '')}
-                  </small>
-                  <small style={i.refunded > 0 ? { color: 'var(--green)' } : undefined}>
-                    {i.refundStatus === 'none' ? t('core.stop.refundNo') : t('core.stop.partial', { money: flow(i.refunded, i.currency) })}
-                  </small>
-                </span>
-                <span className="stop-amount">
-                  <b className="red">
-                    <span className="stop-days">
-                      {t('core.stop.lossDays', { count: i.wastedDays })} <span className="copy-gap" aria-hidden="true" />{' '}
-                    </span>
-                    <span>{flow(-i.lossBase, base)}</span>
-                  </b>
-                  {i.currency !== base && <small>{flow(-i.loss, i.currency)}</small>}
-                </span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
     </div>
   );
 }
@@ -568,17 +538,17 @@ function TopUps({ state, today }: { state: AppState; today: string }) {
   );
 }
 
-/** 事件类型 → [文案键, 色调] */
+/** 事件类型 → [文案键, 色调]。开始、停止、暂停只说明用或不用，不分好坏，一律中性；同一订阅变贵变便宜才标涨跌 */
 const EV: Record<EventKind, [string, string]> = {
-  start: ['start', 'up'],
-  end: ['end', 'down'],
-  terminate: ['terminate', 'down'],
+  start: ['start', 'neutral'],
+  end: ['end', 'neutral'],
+  terminate: ['terminate', 'neutral'],
   price: ['price', 'up'],
   'intro-end': ['introEnd', 'up'],
   buy: ['buy', 'buy'],
-  pause: ['pause', 'down'],
+  pause: ['pause', 'neutral'],
   switch: ['switch', 'up'],
-  resume: ['resume', 'up'],
+  resume: ['resume', 'neutral'],
 };
 
 /** 变更日志 */
@@ -646,13 +616,14 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
           const showYear = i === 0 || list[i - 1].date.slice(0, 4) !== yr;
           const [labelKey, tone] = EV[e.kind];
           const label = e.kind === 'terminate' ? t('core.stop.terminate') : t(`report.ev.${labelKey}`);
-          const up = e.kind === 'price' || e.kind === 'intro-end' || e.kind === 'switch' ? e.delta > 0 : tone === 'up';
+          const up = e.delta > 0;
+          const neutral = tone === 'neutral';
           return (
             <Fragment key={e.sub.id + e.kind + e.date + i}>
               {showYear && <div className="log-year">{yr}</div>}
               <button className="log-item" onClick={() => onOpen(e.sub)}>
                 <span className="log-date num">{e.date.slice(5).replace('-', '/')}</span>
-                <i className={`log-dot ${tone}`} />
+                <i className={`log-dot ${neutral ? '' : up ? 'up' : 'down'}`} />
                 <SubIcon sub={e.sub} size={24} />
                 <span className="log-name">
                   {e.sub.name}
@@ -661,7 +632,7 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
                     {e.note ? ` ${e.note}` : ''}
                   </small>
                 </span>
-                <b className={`num ${tone === 'buy' ? '' : up ? 'red' : 'green'}`}>
+                <b className={`num ${tone === 'buy' || neutral ? '' : up ? 'red' : 'green'}`}>
                   {copyParts(
                     tone === 'buy'
                       ? e.partial
@@ -669,7 +640,7 @@ function Changelog({ state, today, onOpen, base }: { state: AppState; today: str
                         : money(e.delta, base, { compact: true })
                       : perMonth(
                           Number.isFinite(e.delta)
-                            ? `${e.delta > 0 ? '↑' : e.delta < 0 ? '↓' : ''} ${money(Math.abs(e.delta), base, { compact: true })}`
+                            ? `${neutral ? '' : e.delta > 0 ? '↑ ' : e.delta < 0 ? '↓ ' : ''}${money(Math.abs(e.delta), base, { compact: true })}`
                             : e.partial
                               ? formatTotal(e.partial, base, { compact: true })
                               : '—',

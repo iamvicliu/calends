@@ -31,6 +31,9 @@ interface Props {
   selectedChargeDate?: string;
 }
 
+/** Starting or stopping says whether a subscription is used, not whether money was saved; these rows stay neutral. */
+const LIFECYCLE = new Set<ReportEvent['kind']>(['start', 'end', 'cancel', 'terminate', 'trial', 'pause', 'resume']);
+
 /** Spending increases use the same direction and unsigned comparison in both calendar modes. */
 export function SpendingDelta({ value, base }: { value: Comparison; base: string }) {
   const direction = value.amount > 0.005 ? 'up' : value.amount < -0.005 ? 'down' : '';
@@ -135,7 +138,19 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             {cnDateAuto(r.date, today)} <span className="copy-gap" aria-hidden="true" /> {eventLabel(r)}
           </>,
         )}
-        {r.delta !== 0 && (Number.isFinite(r.delta) ? delta({ amount: r.delta }) : r.partial ? formatTotal(r.partial, base) : '—')}
+        {r.delta !== 0 &&
+          (!Number.isFinite(r.delta) ? (
+            r.partial ? (
+              formatTotal(r.partial, base)
+            ) : (
+              '—'
+            )
+          ) : LIFECYCLE.has(r.kind) ? (
+            // 开始、停止只说明用或不用，不算多花或省下：中性显示金额，不带箭头和红绿
+            <span className="chip-d">{money(Math.abs(r.delta), base)}</span>
+          ) : (
+            delta({ amount: r.delta })
+          ))}
       </button>
     ));
   const heading = (key: string, hint?: string, count?: number) => (
@@ -296,7 +311,7 @@ export function ScopeReport({ report, state, today, onOpen, title, animate, open
             </div>
             <div className="mv-rows">
               {drivers.map((r) => (
-                <div className={`mv-row ${r.amount > 0 ? 'up' : 'down'}`} key={r.key}>
+                <div className="mv-row" key={r.key}>
                   <span>{t(`scope.${r.key}`)}</span>
                   <div className="mv-bar">
                     <i style={{ width: `${(Math.abs(r.amount) / peak) * 100}%` }} />

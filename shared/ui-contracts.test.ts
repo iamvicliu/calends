@@ -343,43 +343,18 @@ test('报告损失明细可打开原订阅；四种年度分享在非零且未�
     const messages = {};
     for (const ns of ['common', 'core', 'report', 'review']) flatten(ns, locale(lang, ns), messages);
     setLocale(lang as 'en' | 'zh-CN', [messages]);
-    let opened: unknown;
-    const tree = StopsCard({
-      state: st,
-      today,
-      onOpen: (s: unknown) => {
-        opened = s;
-      },
-    });
-    assert.ok(!text(tree).includes(t('report.stops.saved')));
-    assert.ok(!text(tree).includes(t('report.stops.savedHint')));
-    assert.equal(all(tree).filter((e) => e.props.className === 'metric').length, 1);
-    const single = StopsCard({ state: { ...st, subscriptions: [stopped] }, today, onOpen() {} });
-    assert.equal(all(single).filter((e) => e.props.className === 'metric').length, 0);
-    assert.equal(all(single).filter((e) => e.props.className === 'stop-row').length, 1);
-    const rows = all(tree).filter((e) => e.props.className === 'stop-row');
-    assert.equal(rows.length, 2);
-    const terminated = rows.find((e) => text(e).includes('abuse'))!;
-    assert.ok(text(terminated).includes(t('core.stop.partial', { money: flow(6, 'USD') })));
-    assert.ok(text(terminated).includes(money(10, 'USD')));
-    assert.ok(text(terminated).includes(t('core.stop.lossDays', { count: 10 })));
-    assert.ok(text(terminated).includes('−'));
-    assert.ok(text(tree).includes(t('core.stop.lossTitle')));
+    const tree = StopsCard({ state: st, today });
+    // 报告只给汇总：损失合计和我取消 / 被停用次数，不列明细
+    assert.equal(all(tree).filter((e) => e.props.className === 'stop-row').length, 0);
+    assert.ok(text(tree).includes(t('report.stops.loss')));
     assert.ok(text(tree).includes(t('report.stops.cancel')));
-    assert.ok(text(tree).includes(t('core.stop.refundNo')));
-    terminated.props.onClick();
-    assert.equal(opened, stopped);
-    const empty = StopsCard({ state: { ...st, subscriptions: [] }, today, onOpen() {} });
-    assert.equal(all(empty).filter((e) => e.props.className === 'metric').length, 1);
+    assert.ok(text(tree).includes(t('core.stop.terminate')));
+    const empty = StopsCard({ state: { ...st, subscriptions: [] }, today });
     assert.ok(text(empty).includes(t('report.stops.loss')));
-    assert.ok(!text(empty).includes(t('report.stops.saved')));
-    // 没有未退款损失：不放明细标题和空提示
-    assert.ok(!text(empty).includes(t('report.stops.details')));
-    assert.equal(all(empty).filter((e) => e.props.className === 'stop-row').length, 0);
+    assert.ok(!text(empty).includes(t('report.stops.cancel')));
     const unknown = stopSubscription({ ...original, currency: 'XYZ' }, today, 'terminate');
-    const unknownTree = StopsCard({ state: { ...st, subscriptions: [unknown] }, today, onOpen() {} });
+    const unknownTree = StopsCard({ state: { ...st, subscriptions: [unknown] }, today });
     assert.ok(text(unknownTree).includes(fxTotals.totalNote(stopLosses({ ...st, subscriptions: [unknown] }, today).partial)));
-    assert.ok(text(unknownTree).includes(t('report.stops.details')));
     const r = yearReview(st, today);
     const ctx = {
       r,

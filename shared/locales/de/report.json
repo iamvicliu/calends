@@ -46,7 +46,7 @@
     "added": "Neu",
     "expansion": "Teurer",
     "contraction": "Günstiger",
-    "churned": "Gekündigt",
+    "churned": "Beendet",
     "now": "Jetzt",
     "monthEnd": "Monatsende",
     "empty": "Diesen Monat keine neuen, gekündigten oder im Preis geänderten Abos.",
@@ -71,8 +71,6 @@
     "prepaidItem": "{name}\n{amount}\nbis {until}",
     "prepaid": "Vorausbezahlter Wert",
     "prepaidSub": "{count} bezahlt, nicht aufgebraucht",
-    "saved": "Monatlich weniger durch Kündigen",
-    "savedSub": "{count} gekündigt",
     "next90": "Fällig in den nächsten 90 Tagen",
     "peak": "Höchststand im {month}\n{amount}",
     "fullPaidHint": "Vollständig gezahlter Betrag, einschließlich Auslagen für Mitglieder"
@@ -133,12 +131,9 @@
   },
   "stops": {
     "title": "Kündigungen & Abschaltungen",
-    "saved": "Gespart",
     "loss": "Nicht erstatteter Verlust",
-    "savedHint": "Geschätzte vermiedene Verlängerungskosten seit der Kündigung bis heute",
     "lossHint": "Bezahlte Gebühren für vorzeitig beendete Leistungen, die nicht erstattet wurden",
     "basis": "Gesamter Verlauf\nMein Anteil; nicht erstatteter Verlust zum Kurs am Beendigungstag.",
-    "details": "Nicht erstattete Verluste im Detail",
     "cancel": "Freiwillig vorzeitig gekündigt"
   }
 }

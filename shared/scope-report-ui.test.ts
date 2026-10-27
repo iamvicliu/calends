@@ -431,7 +431,9 @@ test('report changes use unsigned spending direction and omit the current total 
     },
   );
   const mixedNodes = mixed.render('Waterfall', { state: st, today, onOpen() {} });
-  const driver = mixedNodes.find((n) => n.props.className === 'mv-row down')!;
+  // 分解行不分涨跌颜色，只靠方向符号
+  assert.ok(!mixedNodes.some((n) => /mv-row (up|down)/.test(n.props.className ?? '')));
+  const driver = mixedNodes.find((n) => n.props.className === 'mv-row' && all(n).some((c) => c.children.includes('report.wf.churned')))!;
   assert.equal(
     all(driver).some((n) => n.children.includes('↓')),
     true,
@@ -890,7 +892,7 @@ test('scope composition uses category colors for both marks and bars and exports
   assert.ok(nodes.some((n) => n.type === 'MethodMark' && n.props.m === method && n.props.proxied));
 });
 
-test('单项停止损失只显示明细；多项和零损失保留汇总', () => {
+test('退订与停用只给汇总，不列损失明细', () => {
   const sub: Subscription = {
     id: 's',
     name: 'Stopped',
@@ -907,9 +909,9 @@ test('单项停止损失只显示明细；多项和零损失保留汇总', () =>
   const r = harness('../app/src/views/Report.tsx', 'StopsCard', {}, { tipProps: () => ({}) });
   for (const count of [0, 1, 2]) {
     const state = { ...st, subscriptions: Array.from({ length: count }, (_, i) => ({ ...sub, id: String(i) })) };
-    const nodes = r.render('StopsCard', { state, today, onOpen() {} });
-    assert.equal(nodes.filter((n) => n.props.className === 'stop-row').length, count);
-    assert.equal(nodes.filter((n) => n.children.includes('report.stops.loss')).length, count === 1 ? 0 : 1);
+    const nodes = r.render('StopsCard', { state, today });
+    assert.equal(nodes.filter((n) => n.props.className === 'stop-row').length, 0);
+    assert.equal(nodes.filter((n) => n.children.includes('report.stops.loss')).length, 1);
   }
 });
 

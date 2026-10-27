@@ -46,7 +46,7 @@
     "added": "Baru",
     "expansion": "Harga naik",
     "contraction": "Harga turun",
-    "churned": "Dibatalkan",
+    "churned": "Dihentikan",
     "now": "Sekarang",
     "monthEnd": "Akhir bulan",
     "empty": "Tidak ada langganan baru, dibatalkan, atau berubah harga bulan ini.",
@@ -70,8 +70,6 @@
     "prepaidItem": "{name}\n{amount}\nhingga {until}",
     "prepaid": "Nilai prabayar",
     "prepaidSub": "{count} sudah dibayar, belum habis",
-    "saved": "Lebih hemat per bulan karena dibatalkan",
-    "savedSub": "{count} dibatalkan",
     "next90": "Jatuh tempo dalam 90 hari ke depan",
     "peak": "Puncak pada {month}\n{amount}",
     "fullPaidHint": "Total pembayaran, termasuk talangan untuk anggota"
@@ -130,12 +128,9 @@
   },
   "stops": {
     "title": "Pembatalan & penghentian",
-    "saved": "Dihemat",
     "loss": "Kerugian tanpa pengembalian dana",
-    "savedHint": "Perkiraan biaya perpanjangan yang dihindari sejak pembatalan hingga hari ini",
     "lossHint": "Biaya yang dibayar untuk layanan yang berakhir lebih awal dan tidak dikembalikan",
     "basis": "Seluruh riwayat\nBagian saya; kerugian tanpa pengembalian dana memakai kurs tanggal penghentian.",
-    "details": "Rincian kerugian tanpa pengembalian dana",
     "cancel": "Pembatalan dini sukarela"
   }
 }

@@ -46,7 +46,7 @@
     "added": "Mới",
     "expansion": "Tăng giá",
     "contraction": "Giảm giá",
-    "churned": "Đã hủy",
+    "churned": "Đã dừng",
     "now": "Hiện tại",
     "monthEnd": "Cuối tháng",
     "empty": "Tháng này không có gói đăng ký mới, bị hủy hay đổi giá.",
@@ -70,8 +70,6 @@
     "prepaidItem": "{name}\n{amount}\nđến {until}",
     "prepaid": "Giá trị trả trước",
     "prepaidSub": "{count} đã trả, chưa dùng hết",
-    "saved": "Mỗi tháng bớt nhờ hủy",
-    "savedSub": "{count} đã hủy",
     "next90": "Đến hạn trong 90 ngày tới",
     "peak": "Cao nhất vào {month}\n{amount}",
     "fullPaidHint": "Toàn bộ số tiền đã trả, gồm khoản ứng trước cho thành viên"
@@ -130,12 +128,9 @@
   },
   "stops": {
     "title": "Hủy và ngừng dịch vụ",
-    "saved": "Tiết kiệm",
     "loss": "Tổn thất chưa hoàn tiền",
-    "savedHint": "Ước tính phí gia hạn tránh được từ khi hủy đến hôm nay",
     "lossHint": "Khoản đã trả cho dịch vụ kết thúc sớm nhưng không được hoàn lại",
     "basis": "Toàn bộ lịch sử\nPhần của tôi; tổn thất chưa hoàn tiền theo tỷ giá ngày dừng.",
-    "details": "Chi tiết tổn thất chưa hoàn tiền",
     "cancel": "Chủ động hủy sớm"
   }
 }
