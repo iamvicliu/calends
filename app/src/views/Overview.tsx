@@ -1,5 +1,5 @@
 import { useSnapshotRender } from '../snapshot-render.tsx';
-import { chargesTotal, emptyTotal, formatTotal, scaleTotal, totalNote } from '../../../shared/fx-total.ts';
+import { chargeTotal, chargesTotal, emptyTotal, formatTotal, scaleTotal, totalNote } from '../../../shared/fx-total.ts';
 import { FxAmount } from '../components/FxAmount.tsx';
 import { DAYS_PER_MONTH } from '../../../shared/billing.ts';
 import { CopyImageButton } from '../components/CopyImageButton.tsx';
@@ -62,20 +62,26 @@ function ChargeTimeline({ state, today, onOpen }: { state: AppState; today: stri
   const load = useCallback(
     (from: string, to: string) => {
       const map = new Map<string, TimelineGroup>();
+      const byDay = new Map<string, Charge[]>();
       for (const c of allCharges(state, from, to, today)) {
         const g = map.get(c.date) ?? { date: c.date, items: [] };
         const real = state.subscriptions.find((x) => x.id === c.sub.id) ?? c.sub;
         g.items.push({
           key: `${c.sub.id}-${c.date}-${g.items.length}`,
           icon: <SubIcon sub={c.sub} size={30} />,
-          tip: `${c.sub.name}\n${flow(-c.amount, c.currency)}`,
+          name: c.sub.name,
+          amount: flow(-c.amount, c.currency),
+          value: chargeTotal(state, c).value,
           onClick: () => onOpen(real),
         });
         map.set(c.date, g);
+        byDay.set(c.date, byDay.get(c.date)?.concat(c) ?? [c]);
       }
+      // 当天合计：缺汇率时带「不完整」标记，不当作 0
+      for (const g of map.values()) g.total = formatTotal(chargesTotal(state, byDay.get(g.date)!), base, { direction: -1 });
       return [...map.values()];
     },
-    [state, today, onOpen],
+    [state, today, onOpen, base],
   );
   return (
     <section className="card copy-card" data-copy-card>

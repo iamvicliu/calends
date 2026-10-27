@@ -207,3 +207,103 @@
 .tl-home:hover {
   color: var(--tl-fg);
 }
+
+/* 按日聚合（稠密时）：每天一根细线顶着一个圆点，线高与点大按当天金额；整根都可悬停、点按 */
+.tl.dragging .tl-day {
+  pointer-events: none;
+}
+.tl-day {
+  position: absolute;
+  width: 12px;
+  padding: 0;
+  border: 0;
+  background: linear-gradient(var(--tl-stem), var(--tl-stem)) center bottom / 1px calc(100% - var(--dot) / 2) no-repeat;
+  --tl-stem: color-mix(in srgb, var(--tl-mute) 45%, transparent);
+  cursor: pointer;
+  z-index: 1;
+}
+.tl-day > i {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--dot);
+  height: var(--dot);
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius-pill);
+  background: var(--tl-fg);
+}
+.tl-day.past {
+  opacity: 0.45;
+}
+.tl-day:hover,
+.tl-day.on,
+.tl-day:focus-visible {
+  --tl-stem: var(--tl-fg);
+  opacity: 1;
+  z-index: 3;
+  outline: none;
+}
+.tl-day:focus-visible > i {
+  box-shadow:
+    0 0 0 2px var(--tl-card),
+    0 0 0 3px var(--focus-ring, var(--ring, var(--tl-fg)));
+}
+
+/* 按日聚合的提示：挂在 body 上，不被时间线的滚动层裁掉；配色与图标提示一致 */
+.tl-tip {
+  position: fixed;
+  z-index: 1000;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
+  max-width: min(320px, calc(100vw - 16px));
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--label, var(--foreground));
+  color: var(--card);
+  font-size: var(--fs-1);
+  line-height: 1.3;
+  pointer-events: none;
+}
+.tl-tip.pinned {
+  pointer-events: auto;
+}
+.tl-tip-head,
+.tl-tip-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+}
+.tl-tip-head {
+  margin-bottom: 4px;
+  padding-bottom: 4px;
+  border-bottom: var(--hairline) solid color-mix(in srgb, var(--card) 30%, transparent);
+}
+.tl-tip-head b {
+  font-weight: 600;
+}
+.tl-tip .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tl-tip-row {
+  padding: 1px 0;
+}
+button.tl-tip-row {
+  margin: 0 -4px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.tl-tip-row:hover,
+button.tl-tip-row:focus-visible {
+  outline: none;
+  background: color-mix(in srgb, var(--card) 16%, transparent);
+}

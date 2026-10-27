@@ -6,7 +6,7 @@ import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } fro
 import { addDays, addMonths, currentPhase, cycleLabel, diffDays, effectiveStatus, monthlyGross, myShareFactor, nextCharge, todayIn, isStopped } from '../../../shared/billing.ts';
 import { cnDate, flow, moneyTick, money, monthLabel, setSignedAmounts, symbol } from '../../../shared/format.ts';
 import { t, type Params } from '../../../shared/i18n.ts';
-import { chargeValue, toBaseAt, toBaseOrNaN } from '../../../shared/fx.ts';
+import { chargeBaseOrNaN, chargeValue, toBaseAt, toBaseOrNaN } from '../../../shared/fx.ts';
 import { cancelSavings, contributionOn, mrrSeries } from '../../../shared/metrics.ts';
 import { avatarOf, type AppState, type Subscription } from '../../../shared/types.ts';
 import { allCharges, catIcon, periodRange, sumBase, syncCategories, firstStart } from '../derive.ts';
@@ -151,8 +151,18 @@ function Ledger({ state }: { state: AppState }) {
       for (const c of allCharges(state, from, to, today)) {
         const g = map.get(c.date) ?? { date: c.date, items: [] };
         const v = chargeValue(state, c) * k;
-        g.items.push({ key: `${c.sub.id}-${c.date}-${g.items.length}`, icon: <AppIcon sub={c.sub} className="rounded-md bg-card" size={30} />, tip: `${clean(c.sub.name)}\n${flow(-c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${flow(-v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 })}` : ''}` });
+        g.items.push({
+          key: `${c.sub.id}-${c.date}-${g.items.length}`,
+          icon: <AppIcon sub={c.sub} className="rounded-md bg-card" size={30} />,
+          name: clean(c.sub.name),
+          amount: `${flow(-c.amount, c.currency)}${c.currency !== ccy ? ` ≈ ${flow(-v, ccy, { decimals: Math.abs(v) < 10 ? 2 : 0 })}` : ''}`,
+          value: chargeBaseOrNaN(state, c) * k,
+        });
         map.set(c.date, g);
+      }
+      for (const g of map.values()) {
+        const sum = g.items.reduce((s, it) => s + (it.value ?? 0), 0);
+        g.total = Number.isFinite(sum) ? flow(-sum, ccy, { decimals: Math.abs(sum) < 10 ? 2 : 0 }) : undefined;
       }
       return [...map.values()];
     },
