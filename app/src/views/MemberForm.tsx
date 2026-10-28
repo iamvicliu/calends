@@ -253,7 +253,7 @@ export function MemberForm({
   );
   const seatGroup = (
     <>
-      {/* 座位：哪天上车、首期怎么算、哪天下车。已有成员的加入日期、时长只展示；退出日期是记下车的唯一入口 */}
+      {/* 加入与退出：哪天上车、首期怎么算、哪天下车。已有成员的加入日期、时长只展示；退出日期是记下车的唯一入口 */}
       <Group title={t('family.member.seatGroup')}>
         <Cell label={t('family.member.joined')}>
           {isNew ? (
@@ -409,6 +409,7 @@ export function MemberForm({
         {isNew ? (
           <>
             {whoGroup}
+            {seatGroup}
             {/* 收款：与已有成员同一位置；勾上则存好后接着打开收款表单 */}
             {mode !== 'exempt' && (
               <Group title={t('receivable.modeReceipt')}>
@@ -418,11 +419,12 @@ export function MemberForm({
               </Group>
             )}
             {feeGroup}
-            {seatGroup}
           </>
         ) : (
           <>
+            {/* 谁 → 什么时候加入和退出（决定有哪几期）→ 收款格子 → 收费标准（每期收多少） */}
             {whoGroup}
+            {seatGroup}
             {/* 收款：一格一期，点已收的格子看明细；已付至和记一笔跟在下面；欠款默认勾欠的期，结清了默认勾下一期（预收） */}
             {mode !== 'exempt' && (
               <Group
@@ -471,9 +473,8 @@ export function MemberForm({
                 )}
               </Group>
             )}
-            {/* 收费：标题旁「编辑收费信息」点开，紧跟在收款下面 */}
+            {/* 收费标准：收款标题旁「编辑收费标准」点开，紧跟在收款下面 */}
             {feeOpen && feeGroup}
-            {seatGroup}
           </>
         )}
       </div>

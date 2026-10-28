@@ -3636,18 +3636,18 @@ test('成员弹窗：先是谁，再是收款（含收费标准、已付至、�
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
   const nodes = render();
   const groups = nodes.filter((n) => n.type === 'Group');
-  // 先是谁，再是收款：已结清，下面直接有「记一笔」
+  // 先是谁，再是加入与退出，然后收款：已结清，下面直接有「记一笔」
   assert.equal(groups[0].props.title, 'family.member.group');
-  const collect = groups[1];
+  const collect = groups[2];
   assert.equal(collect.props.title, 'receivable.modeReceipt');
   const add = all(collect).find((n) => n.type === 'button' && n.children.includes('family.quick.backCollect'))!;
   assert.ok(add, 'settled members can record from the top section');
   // 已付至在收款这一块里，不再单独一块，也不再重复「下次应收」
   assert.ok(all(collect).some((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil'));
   assert.equal(collect.props.foot, undefined);
-  // 座位直接可改；收费标准跟在收款里，「编辑收费信息」点开收费表单
+  // 加入与退出在收款前面（日期决定有哪几期）；收费标准跟在收款里，「编辑收费标准」点开收费表单
   const titles = groups.map((n) => n.props.title);
-  assert.deepEqual(titles, ['family.member.group', 'receivable.modeReceipt', 'family.member.seatGroup']);
+  assert.deepEqual(titles, ['family.member.group', 'family.member.seatGroup', 'receivable.modeReceipt']);
   assert.ok(
     all(collect).some((n) => n.type === 'Cell' && n.props.label === 'family.member.feeGroup'),
     'fee standard shows with the receipts',

@@ -1299,87 +1299,6 @@
                   ]
                 },
                 {
-                  "type": {
-                    "render": "[handler]"
-                  },
-                  "props": {
-                    "title": "receivable.modeReceipt"
-                  },
-                  "children": [
-                    {
-                      "type": "Cell",
-                      "props": {
-                        "label": "family.member.firstPayToggle"
-                      },
-                      "children": [
-                        {
-                          "type": "Toggle",
-                          "props": {
-                            "checked": false,
-                            "onChange": "[handler]"
-                          },
-                          "children": []
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "Fragment",
-                  "props": {},
-                  "children": [
-                    {
-                      "type": {
-                        "render": "[handler]"
-                      },
-                      "props": {
-                        "title": "family.member.feeGroup"
-                      },
-                      "children": [
-                        {
-                          "type": "div",
-                          "props": {
-                            "className": "cell"
-                          },
-                          "children": [
-                            {
-                              "type": "Seg",
-                              "props": {
-                                "value": "follow",
-                                "onChange": "[handler]",
-                                "options": [
-                                  ["follow", "family.rule.follow"],
-                                  ["custom", "family.rule.custom"],
-                                  ["exempt", "family.member.exempt"]
-                                ]
-                              },
-                              "children": []
-                            }
-                          ]
-                        },
-                        {
-                          "type": "Cell",
-                          "props": {
-                            "label": "family.member.feeGroup"
-                          },
-                          "children": [
-                            {
-                              "type": "span",
-                              "props": {
-                                "className": "muted"
-                              },
-                              "children": ["family.pool.perFee.m1"]
-                            }
-                          ]
-                        },
-                        false,
-                        false,
-                        []
-                      ]
-                    }
-                  ]
-                },
-                {
                   "type": "Fragment",
                   "props": {},
                   "children": [
@@ -1467,6 +1386,87 @@
                         },
                         null,
                         false
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "receivable.modeReceipt"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.firstPayToggle"
+                      },
+                      "children": [
+                        {
+                          "type": "Toggle",
+                          "props": {
+                            "checked": false,
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Fragment",
+                  "props": {},
+                  "children": [
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "div",
+                          "props": {
+                            "className": "cell"
+                          },
+                          "children": [
+                            {
+                              "type": "Seg",
+                              "props": {
+                                "value": "follow",
+                                "onChange": "[handler]",
+                                "options": [
+                                  ["follow", "family.rule.follow"],
+                                  ["custom", "family.rule.custom"],
+                                  ["exempt", "family.member.exempt"]
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.feeGroup"
+                          },
+                          "children": [
+                            {
+                              "type": "span",
+                              "props": {
+                                "className": "muted"
+                              },
+                              "children": ["family.pool.perFee.m1"]
+                            }
+                          ]
+                        },
+                        false,
+                        false,
+                        []
                       ]
                     }
                   ]
@@ -1655,87 +1655,6 @@
               ]
             },
             {
-              "type": {
-                "render": "[handler]"
-              },
-              "props": {
-                "title": "receivable.modeReceipt"
-              },
-              "children": [
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstPayToggle"
-                  },
-                  "children": [
-                    {
-                      "type": "Toggle",
-                      "props": {
-                        "checked": false,
-                        "onChange": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "Fragment",
-              "props": {},
-              "children": [
-                {
-                  "type": {
-                    "render": "[handler]"
-                  },
-                  "props": {
-                    "title": "family.member.feeGroup"
-                  },
-                  "children": [
-                    {
-                      "type": "div",
-                      "props": {
-                        "className": "cell"
-                      },
-                      "children": [
-                        {
-                          "type": "Seg",
-                          "props": {
-                            "value": "follow",
-                            "onChange": "[handler]",
-                            "options": [
-                              ["follow", "family.rule.follow"],
-                              ["custom", "family.rule.custom"],
-                              ["exempt", "family.member.exempt"]
-                            ]
-                          },
-                          "children": []
-                        }
-                      ]
-                    },
-                    {
-                      "type": "Cell",
-                      "props": {
-                        "label": "family.member.feeGroup"
-                      },
-                      "children": [
-                        {
-                          "type": "span",
-                          "props": {
-                            "className": "muted"
-                          },
-                          "children": ["family.pool.perFee.m1"]
-                        }
-                      ]
-                    },
-                    false,
-                    false,
-                    []
-                  ]
-                }
-              ]
-            },
-            {
               "type": "Fragment",
               "props": {},
               "children": [
@@ -1823,6 +1742,87 @@
                     },
                     null,
                     false
+                  ]
+                }
+              ]
+            },
+            {
+              "type": {
+                "render": "[handler]"
+              },
+              "props": {
+                "title": "receivable.modeReceipt"
+              },
+              "children": [
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstPayToggle"
+                  },
+                  "children": [
+                    {
+                      "type": "Toggle",
+                      "props": {
+                        "checked": false,
+                        "onChange": "[handler]"
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.feeGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "cell"
+                      },
+                      "children": [
+                        {
+                          "type": "Seg",
+                          "props": {
+                            "value": "follow",
+                            "onChange": "[handler]",
+                            "options": [
+                              ["follow", "family.rule.follow"],
+                              ["custom", "family.rule.custom"],
+                              ["exempt", "family.member.exempt"]
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "muted"
+                          },
+                          "children": ["family.pool.perFee.m1"]
+                        }
+                      ]
+                    },
+                    false,
+                    false,
+                    []
                   ]
                 }
               ]
@@ -2000,87 +2000,6 @@
           ]
         },
         {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "receivable.modeReceipt"
-          },
-          "children": [
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.firstPayToggle"
-              },
-              "children": [
-                {
-                  "type": "Toggle",
-                  "props": {
-                    "checked": false,
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "Fragment",
-          "props": {},
-          "children": [
-            {
-              "type": {
-                "render": "[handler]"
-              },
-              "props": {
-                "title": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "div",
-                  "props": {
-                    "className": "cell"
-                  },
-                  "children": [
-                    {
-                      "type": "Seg",
-                      "props": {
-                        "value": "follow",
-                        "onChange": "[handler]",
-                        "options": [
-                          ["follow", "family.rule.follow"],
-                          ["custom", "family.rule.custom"],
-                          ["exempt", "family.member.exempt"]
-                        ]
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.feeGroup"
-                  },
-                  "children": [
-                    {
-                      "type": "span",
-                      "props": {
-                        "className": "muted"
-                      },
-                      "children": ["family.pool.perFee.m1"]
-                    }
-                  ]
-                },
-                false,
-                false,
-                []
-              ]
-            }
-          ]
-        },
-        {
           "type": "Fragment",
           "props": {},
           "children": [
@@ -2168,6 +2087,87 @@
                 },
                 null,
                 false
+              ]
+            }
+          ]
+        },
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "receivable.modeReceipt"
+          },
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.firstPayToggle"
+              },
+              "children": [
+                {
+                  "type": "Toggle",
+                  "props": {
+                    "checked": false,
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
+              "type": {
+                "render": "[handler]"
+              },
+              "props": {
+                "title": "family.member.feeGroup"
+              },
+              "children": [
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "cell"
+                  },
+                  "children": [
+                    {
+                      "type": "Seg",
+                      "props": {
+                        "value": "follow",
+                        "onChange": "[handler]",
+                        "options": [
+                          ["follow", "family.rule.follow"],
+                          ["custom", "family.rule.custom"],
+                          ["exempt", "family.member.exempt"]
+                        ]
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.feeGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "span",
+                      "props": {
+                        "className": "muted"
+                      },
+                      "children": ["family.pool.perFee.m1"]
+                    }
+                  ]
+                },
+                false,
+                false,
+                []
               ]
             }
           ]
@@ -2751,216 +2751,6 @@
       "children": []
     },
     {
-      "type": {
-        "render": "[handler]"
-      },
-      "props": {
-        "title": "receivable.modeReceipt"
-      },
-      "children": [
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.firstPayToggle"
-          },
-          "children": [
-            {
-              "type": "Toggle",
-              "props": {
-                "checked": false,
-                "onChange": "[handler]"
-              },
-              "children": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.firstPayToggle"
-      },
-      "children": [
-        {
-          "type": "Toggle",
-          "props": {
-            "checked": false,
-            "onChange": "[handler]"
-          },
-          "children": []
-        }
-      ]
-    },
-    {
-      "type": "Toggle",
-      "props": {
-        "checked": false,
-        "onChange": "[handler]"
-      },
-      "children": []
-    },
-    {
-      "type": "Fragment",
-      "props": {},
-      "children": [
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "div",
-              "props": {
-                "className": "cell"
-              },
-              "children": [
-                {
-                  "type": "Seg",
-                  "props": {
-                    "value": "follow",
-                    "onChange": "[handler]",
-                    "options": [
-                      ["follow", "family.rule.follow"],
-                      ["custom", "family.rule.custom"],
-                      ["exempt", "family.member.exempt"]
-                    ]
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "span",
-                  "props": {
-                    "className": "muted"
-                  },
-                  "children": ["family.pool.perFee.m1"]
-                }
-              ]
-            },
-            false,
-            false,
-            []
-          ]
-        }
-      ]
-    },
-    {
-      "type": {
-        "render": "[handler]"
-      },
-      "props": {
-        "title": "family.member.feeGroup"
-      },
-      "children": [
-        {
-          "type": "div",
-          "props": {
-            "className": "cell"
-          },
-          "children": [
-            {
-              "type": "Seg",
-              "props": {
-                "value": "follow",
-                "onChange": "[handler]",
-                "options": [
-                  ["follow", "family.rule.follow"],
-                  ["custom", "family.rule.custom"],
-                  ["exempt", "family.member.exempt"]
-                ]
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "span",
-              "props": {
-                "className": "muted"
-              },
-              "children": ["family.pool.perFee.m1"]
-            }
-          ]
-        },
-        false,
-        false,
-        []
-      ]
-    },
-    {
-      "type": "div",
-      "props": {
-        "className": "cell"
-      },
-      "children": [
-        {
-          "type": "Seg",
-          "props": {
-            "value": "follow",
-            "onChange": "[handler]",
-            "options": [
-              ["follow", "family.rule.follow"],
-              ["custom", "family.rule.custom"],
-              ["exempt", "family.member.exempt"]
-            ]
-          },
-          "children": []
-        }
-      ]
-    },
-    {
-      "type": "Seg",
-      "props": {
-        "value": "follow",
-        "onChange": "[handler]",
-        "options": [
-          ["follow", "family.rule.follow"],
-          ["custom", "family.rule.custom"],
-          ["exempt", "family.member.exempt"]
-        ]
-      },
-      "children": []
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.feeGroup"
-      },
-      "children": [
-        {
-          "type": "span",
-          "props": {
-            "className": "muted"
-          },
-          "children": ["family.pool.perFee.m1"]
-        }
-      ]
-    },
-    {
-      "type": "span",
-      "props": {
-        "className": "muted"
-      },
-      "children": ["family.pool.perFee.m1"]
-    },
-    {
       "type": "Fragment",
       "props": {},
       "children": [
@@ -3301,6 +3091,216 @@
         "onValue": "[handler]"
       },
       "children": []
+    },
+    {
+      "type": {
+        "render": "[handler]"
+      },
+      "props": {
+        "title": "receivable.modeReceipt"
+      },
+      "children": [
+        {
+          "type": "Cell",
+          "props": {
+            "label": "family.member.firstPayToggle"
+          },
+          "children": [
+            {
+              "type": "Toggle",
+              "props": {
+                "checked": false,
+                "onChange": "[handler]"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Cell",
+      "props": {
+        "label": "family.member.firstPayToggle"
+      },
+      "children": [
+        {
+          "type": "Toggle",
+          "props": {
+            "checked": false,
+            "onChange": "[handler]"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "Toggle",
+      "props": {
+        "checked": false,
+        "onChange": "[handler]"
+      },
+      "children": []
+    },
+    {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.feeGroup"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "cell"
+              },
+              "children": [
+                {
+                  "type": "Seg",
+                  "props": {
+                    "value": "follow",
+                    "onChange": "[handler]",
+                    "options": [
+                      ["follow", "family.rule.follow"],
+                      ["custom", "family.rule.custom"],
+                      ["exempt", "family.member.exempt"]
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.feeGroup"
+              },
+              "children": [
+                {
+                  "type": "span",
+                  "props": {
+                    "className": "muted"
+                  },
+                  "children": ["family.pool.perFee.m1"]
+                }
+              ]
+            },
+            false,
+            false,
+            []
+          ]
+        }
+      ]
+    },
+    {
+      "type": {
+        "render": "[handler]"
+      },
+      "props": {
+        "title": "family.member.feeGroup"
+      },
+      "children": [
+        {
+          "type": "div",
+          "props": {
+            "className": "cell"
+          },
+          "children": [
+            {
+              "type": "Seg",
+              "props": {
+                "value": "follow",
+                "onChange": "[handler]",
+                "options": [
+                  ["follow", "family.rule.follow"],
+                  ["custom", "family.rule.custom"],
+                  ["exempt", "family.member.exempt"]
+                ]
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "type": "Cell",
+          "props": {
+            "label": "family.member.feeGroup"
+          },
+          "children": [
+            {
+              "type": "span",
+              "props": {
+                "className": "muted"
+              },
+              "children": ["family.pool.perFee.m1"]
+            }
+          ]
+        },
+        false,
+        false,
+        []
+      ]
+    },
+    {
+      "type": "div",
+      "props": {
+        "className": "cell"
+      },
+      "children": [
+        {
+          "type": "Seg",
+          "props": {
+            "value": "follow",
+            "onChange": "[handler]",
+            "options": [
+              ["follow", "family.rule.follow"],
+              ["custom", "family.rule.custom"],
+              ["exempt", "family.member.exempt"]
+            ]
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "Seg",
+      "props": {
+        "value": "follow",
+        "onChange": "[handler]",
+        "options": [
+          ["follow", "family.rule.follow"],
+          ["custom", "family.rule.custom"],
+          ["exempt", "family.member.exempt"]
+        ]
+      },
+      "children": []
+    },
+    {
+      "type": "Cell",
+      "props": {
+        "label": "family.member.feeGroup"
+      },
+      "children": [
+        {
+          "type": "span",
+          "props": {
+            "className": "muted"
+          },
+          "children": ["family.pool.perFee.m1"]
+        }
+      ]
+    },
+    {
+      "type": "span",
+      "props": {
+        "className": "muted"
+      },
+      "children": ["family.pool.perFee.m1"]
     }
   ],
   "normal/OwedOrNet": [
@@ -4652,87 +4652,6 @@
                   ]
                 },
                 {
-                  "type": {
-                    "render": "[handler]"
-                  },
-                  "props": {
-                    "title": "receivable.modeReceipt"
-                  },
-                  "children": [
-                    {
-                      "type": "Cell",
-                      "props": {
-                        "label": "family.member.firstPayToggle"
-                      },
-                      "children": [
-                        {
-                          "type": "Toggle",
-                          "props": {
-                            "checked": false,
-                            "onChange": "[handler]"
-                          },
-                          "children": []
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "Fragment",
-                  "props": {},
-                  "children": [
-                    {
-                      "type": {
-                        "render": "[handler]"
-                      },
-                      "props": {
-                        "title": "family.member.feeGroup"
-                      },
-                      "children": [
-                        {
-                          "type": "div",
-                          "props": {
-                            "className": "cell"
-                          },
-                          "children": [
-                            {
-                              "type": "Seg",
-                              "props": {
-                                "value": "follow",
-                                "onChange": "[handler]",
-                                "options": [
-                                  ["follow", "family.rule.follow"],
-                                  ["custom", "family.rule.custom"],
-                                  ["exempt", "family.member.exempt"]
-                                ]
-                              },
-                              "children": []
-                            }
-                          ]
-                        },
-                        {
-                          "type": "Cell",
-                          "props": {
-                            "label": "family.member.feeGroup"
-                          },
-                          "children": [
-                            {
-                              "type": "span",
-                              "props": {
-                                "className": "muted"
-                              },
-                              "children": ["family.pool.perFee.m1"]
-                            }
-                          ]
-                        },
-                        false,
-                        false,
-                        []
-                      ]
-                    }
-                  ]
-                },
-                {
                   "type": "Fragment",
                   "props": {},
                   "children": [
@@ -4820,6 +4739,87 @@
                         },
                         null,
                         false
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "receivable.modeReceipt"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.firstPayToggle"
+                      },
+                      "children": [
+                        {
+                          "type": "Toggle",
+                          "props": {
+                            "checked": false,
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Fragment",
+                  "props": {},
+                  "children": [
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "div",
+                          "props": {
+                            "className": "cell"
+                          },
+                          "children": [
+                            {
+                              "type": "Seg",
+                              "props": {
+                                "value": "follow",
+                                "onChange": "[handler]",
+                                "options": [
+                                  ["follow", "family.rule.follow"],
+                                  ["custom", "family.rule.custom"],
+                                  ["exempt", "family.member.exempt"]
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.feeGroup"
+                          },
+                          "children": [
+                            {
+                              "type": "span",
+                              "props": {
+                                "className": "muted"
+                              },
+                              "children": ["family.pool.perFee.m1"]
+                            }
+                          ]
+                        },
+                        false,
+                        false,
+                        []
                       ]
                     }
                   ]
@@ -5008,87 +5008,6 @@
               ]
             },
             {
-              "type": {
-                "render": "[handler]"
-              },
-              "props": {
-                "title": "receivable.modeReceipt"
-              },
-              "children": [
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstPayToggle"
-                  },
-                  "children": [
-                    {
-                      "type": "Toggle",
-                      "props": {
-                        "checked": false,
-                        "onChange": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "Fragment",
-              "props": {},
-              "children": [
-                {
-                  "type": {
-                    "render": "[handler]"
-                  },
-                  "props": {
-                    "title": "family.member.feeGroup"
-                  },
-                  "children": [
-                    {
-                      "type": "div",
-                      "props": {
-                        "className": "cell"
-                      },
-                      "children": [
-                        {
-                          "type": "Seg",
-                          "props": {
-                            "value": "follow",
-                            "onChange": "[handler]",
-                            "options": [
-                              ["follow", "family.rule.follow"],
-                              ["custom", "family.rule.custom"],
-                              ["exempt", "family.member.exempt"]
-                            ]
-                          },
-                          "children": []
-                        }
-                      ]
-                    },
-                    {
-                      "type": "Cell",
-                      "props": {
-                        "label": "family.member.feeGroup"
-                      },
-                      "children": [
-                        {
-                          "type": "span",
-                          "props": {
-                            "className": "muted"
-                          },
-                          "children": ["family.pool.perFee.m1"]
-                        }
-                      ]
-                    },
-                    false,
-                    false,
-                    []
-                  ]
-                }
-              ]
-            },
-            {
               "type": "Fragment",
               "props": {},
               "children": [
@@ -5176,6 +5095,87 @@
                     },
                     null,
                     false
+                  ]
+                }
+              ]
+            },
+            {
+              "type": {
+                "render": "[handler]"
+              },
+              "props": {
+                "title": "receivable.modeReceipt"
+              },
+              "children": [
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstPayToggle"
+                  },
+                  "children": [
+                    {
+                      "type": "Toggle",
+                      "props": {
+                        "checked": false,
+                        "onChange": "[handler]"
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.feeGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "cell"
+                      },
+                      "children": [
+                        {
+                          "type": "Seg",
+                          "props": {
+                            "value": "follow",
+                            "onChange": "[handler]",
+                            "options": [
+                              ["follow", "family.rule.follow"],
+                              ["custom", "family.rule.custom"],
+                              ["exempt", "family.member.exempt"]
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "muted"
+                          },
+                          "children": ["family.pool.perFee.m1"]
+                        }
+                      ]
+                    },
+                    false,
+                    false,
+                    []
                   ]
                 }
               ]
@@ -5353,87 +5353,6 @@
           ]
         },
         {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "receivable.modeReceipt"
-          },
-          "children": [
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.firstPayToggle"
-              },
-              "children": [
-                {
-                  "type": "Toggle",
-                  "props": {
-                    "checked": false,
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "Fragment",
-          "props": {},
-          "children": [
-            {
-              "type": {
-                "render": "[handler]"
-              },
-              "props": {
-                "title": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "div",
-                  "props": {
-                    "className": "cell"
-                  },
-                  "children": [
-                    {
-                      "type": "Seg",
-                      "props": {
-                        "value": "follow",
-                        "onChange": "[handler]",
-                        "options": [
-                          ["follow", "family.rule.follow"],
-                          ["custom", "family.rule.custom"],
-                          ["exempt", "family.member.exempt"]
-                        ]
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.feeGroup"
-                  },
-                  "children": [
-                    {
-                      "type": "span",
-                      "props": {
-                        "className": "muted"
-                      },
-                      "children": ["family.pool.perFee.m1"]
-                    }
-                  ]
-                },
-                false,
-                false,
-                []
-              ]
-            }
-          ]
-        },
-        {
           "type": "Fragment",
           "props": {},
           "children": [
@@ -5521,6 +5440,87 @@
                 },
                 null,
                 false
+              ]
+            }
+          ]
+        },
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "receivable.modeReceipt"
+          },
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.firstPayToggle"
+              },
+              "children": [
+                {
+                  "type": "Toggle",
+                  "props": {
+                    "checked": false,
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
+              "type": {
+                "render": "[handler]"
+              },
+              "props": {
+                "title": "family.member.feeGroup"
+              },
+              "children": [
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "cell"
+                  },
+                  "children": [
+                    {
+                      "type": "Seg",
+                      "props": {
+                        "value": "follow",
+                        "onChange": "[handler]",
+                        "options": [
+                          ["follow", "family.rule.follow"],
+                          ["custom", "family.rule.custom"],
+                          ["exempt", "family.member.exempt"]
+                        ]
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.feeGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "span",
+                      "props": {
+                        "className": "muted"
+                      },
+                      "children": ["family.pool.perFee.m1"]
+                    }
+                  ]
+                },
+                false,
+                false,
+                []
               ]
             }
           ]
@@ -6104,216 +6104,6 @@
       "children": []
     },
     {
-      "type": {
-        "render": "[handler]"
-      },
-      "props": {
-        "title": "receivable.modeReceipt"
-      },
-      "children": [
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.firstPayToggle"
-          },
-          "children": [
-            {
-              "type": "Toggle",
-              "props": {
-                "checked": false,
-                "onChange": "[handler]"
-              },
-              "children": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.firstPayToggle"
-      },
-      "children": [
-        {
-          "type": "Toggle",
-          "props": {
-            "checked": false,
-            "onChange": "[handler]"
-          },
-          "children": []
-        }
-      ]
-    },
-    {
-      "type": "Toggle",
-      "props": {
-        "checked": false,
-        "onChange": "[handler]"
-      },
-      "children": []
-    },
-    {
-      "type": "Fragment",
-      "props": {},
-      "children": [
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "div",
-              "props": {
-                "className": "cell"
-              },
-              "children": [
-                {
-                  "type": "Seg",
-                  "props": {
-                    "value": "follow",
-                    "onChange": "[handler]",
-                    "options": [
-                      ["follow", "family.rule.follow"],
-                      ["custom", "family.rule.custom"],
-                      ["exempt", "family.member.exempt"]
-                    ]
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "span",
-                  "props": {
-                    "className": "muted"
-                  },
-                  "children": ["family.pool.perFee.m1"]
-                }
-              ]
-            },
-            false,
-            false,
-            []
-          ]
-        }
-      ]
-    },
-    {
-      "type": {
-        "render": "[handler]"
-      },
-      "props": {
-        "title": "family.member.feeGroup"
-      },
-      "children": [
-        {
-          "type": "div",
-          "props": {
-            "className": "cell"
-          },
-          "children": [
-            {
-              "type": "Seg",
-              "props": {
-                "value": "follow",
-                "onChange": "[handler]",
-                "options": [
-                  ["follow", "family.rule.follow"],
-                  ["custom", "family.rule.custom"],
-                  ["exempt", "family.member.exempt"]
-                ]
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "span",
-              "props": {
-                "className": "muted"
-              },
-              "children": ["family.pool.perFee.m1"]
-            }
-          ]
-        },
-        false,
-        false,
-        []
-      ]
-    },
-    {
-      "type": "div",
-      "props": {
-        "className": "cell"
-      },
-      "children": [
-        {
-          "type": "Seg",
-          "props": {
-            "value": "follow",
-            "onChange": "[handler]",
-            "options": [
-              ["follow", "family.rule.follow"],
-              ["custom", "family.rule.custom"],
-              ["exempt", "family.member.exempt"]
-            ]
-          },
-          "children": []
-        }
-      ]
-    },
-    {
-      "type": "Seg",
-      "props": {
-        "value": "follow",
-        "onChange": "[handler]",
-        "options": [
-          ["follow", "family.rule.follow"],
-          ["custom", "family.rule.custom"],
-          ["exempt", "family.member.exempt"]
-        ]
-      },
-      "children": []
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.feeGroup"
-      },
-      "children": [
-        {
-          "type": "span",
-          "props": {
-            "className": "muted"
-          },
-          "children": ["family.pool.perFee.m1"]
-        }
-      ]
-    },
-    {
-      "type": "span",
-      "props": {
-        "className": "muted"
-      },
-      "children": ["family.pool.perFee.m1"]
-    },
-    {
       "type": "Fragment",
       "props": {},
       "children": [
@@ -6654,6 +6444,216 @@
         "onValue": "[handler]"
       },
       "children": []
+    },
+    {
+      "type": {
+        "render": "[handler]"
+      },
+      "props": {
+        "title": "receivable.modeReceipt"
+      },
+      "children": [
+        {
+          "type": "Cell",
+          "props": {
+            "label": "family.member.firstPayToggle"
+          },
+          "children": [
+            {
+              "type": "Toggle",
+              "props": {
+                "checked": false,
+                "onChange": "[handler]"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Cell",
+      "props": {
+        "label": "family.member.firstPayToggle"
+      },
+      "children": [
+        {
+          "type": "Toggle",
+          "props": {
+            "checked": false,
+            "onChange": "[handler]"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "Toggle",
+      "props": {
+        "checked": false,
+        "onChange": "[handler]"
+      },
+      "children": []
+    },
+    {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.feeGroup"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "cell"
+              },
+              "children": [
+                {
+                  "type": "Seg",
+                  "props": {
+                    "value": "follow",
+                    "onChange": "[handler]",
+                    "options": [
+                      ["follow", "family.rule.follow"],
+                      ["custom", "family.rule.custom"],
+                      ["exempt", "family.member.exempt"]
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.feeGroup"
+              },
+              "children": [
+                {
+                  "type": "span",
+                  "props": {
+                    "className": "muted"
+                  },
+                  "children": ["family.pool.perFee.m1"]
+                }
+              ]
+            },
+            false,
+            false,
+            []
+          ]
+        }
+      ]
+    },
+    {
+      "type": {
+        "render": "[handler]"
+      },
+      "props": {
+        "title": "family.member.feeGroup"
+      },
+      "children": [
+        {
+          "type": "div",
+          "props": {
+            "className": "cell"
+          },
+          "children": [
+            {
+              "type": "Seg",
+              "props": {
+                "value": "follow",
+                "onChange": "[handler]",
+                "options": [
+                  ["follow", "family.rule.follow"],
+                  ["custom", "family.rule.custom"],
+                  ["exempt", "family.member.exempt"]
+                ]
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "type": "Cell",
+          "props": {
+            "label": "family.member.feeGroup"
+          },
+          "children": [
+            {
+              "type": "span",
+              "props": {
+                "className": "muted"
+              },
+              "children": ["family.pool.perFee.m1"]
+            }
+          ]
+        },
+        false,
+        false,
+        []
+      ]
+    },
+    {
+      "type": "div",
+      "props": {
+        "className": "cell"
+      },
+      "children": [
+        {
+          "type": "Seg",
+          "props": {
+            "value": "follow",
+            "onChange": "[handler]",
+            "options": [
+              ["follow", "family.rule.follow"],
+              ["custom", "family.rule.custom"],
+              ["exempt", "family.member.exempt"]
+            ]
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "Seg",
+      "props": {
+        "value": "follow",
+        "onChange": "[handler]",
+        "options": [
+          ["follow", "family.rule.follow"],
+          ["custom", "family.rule.custom"],
+          ["exempt", "family.member.exempt"]
+        ]
+      },
+      "children": []
+    },
+    {
+      "type": "Cell",
+      "props": {
+        "label": "family.member.feeGroup"
+      },
+      "children": [
+        {
+          "type": "span",
+          "props": {
+            "className": "muted"
+          },
+          "children": ["family.pool.perFee.m1"]
+        }
+      ]
+    },
+    {
+      "type": "span",
+      "props": {
+        "className": "muted"
+      },
+      "children": ["family.pool.perFee.m1"]
     }
   ],
   "zero/OwedOrNet": [
@@ -7995,87 +7995,6 @@
                   ]
                 },
                 {
-                  "type": {
-                    "render": "[handler]"
-                  },
-                  "props": {
-                    "title": "receivable.modeReceipt"
-                  },
-                  "children": [
-                    {
-                      "type": "Cell",
-                      "props": {
-                        "label": "family.member.firstPayToggle"
-                      },
-                      "children": [
-                        {
-                          "type": "Toggle",
-                          "props": {
-                            "checked": false,
-                            "onChange": "[handler]"
-                          },
-                          "children": []
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "Fragment",
-                  "props": {},
-                  "children": [
-                    {
-                      "type": {
-                        "render": "[handler]"
-                      },
-                      "props": {
-                        "title": "family.member.feeGroup"
-                      },
-                      "children": [
-                        {
-                          "type": "div",
-                          "props": {
-                            "className": "cell"
-                          },
-                          "children": [
-                            {
-                              "type": "Seg",
-                              "props": {
-                                "value": "follow",
-                                "onChange": "[handler]",
-                                "options": [
-                                  ["follow", "family.rule.follow"],
-                                  ["custom", "family.rule.custom"],
-                                  ["exempt", "family.member.exempt"]
-                                ]
-                              },
-                              "children": []
-                            }
-                          ]
-                        },
-                        {
-                          "type": "Cell",
-                          "props": {
-                            "label": "family.member.feeGroup"
-                          },
-                          "children": [
-                            {
-                              "type": "span",
-                              "props": {
-                                "className": "muted"
-                              },
-                              "children": ["family.pool.perFee.m1"]
-                            }
-                          ]
-                        },
-                        false,
-                        false,
-                        []
-                      ]
-                    }
-                  ]
-                },
-                {
                   "type": "Fragment",
                   "props": {},
                   "children": [
@@ -8163,6 +8082,87 @@
                         },
                         null,
                         false
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "receivable.modeReceipt"
+                  },
+                  "children": [
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.firstPayToggle"
+                      },
+                      "children": [
+                        {
+                          "type": "Toggle",
+                          "props": {
+                            "checked": false,
+                            "onChange": "[handler]"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "Fragment",
+                  "props": {},
+                  "children": [
+                    {
+                      "type": {
+                        "render": "[handler]"
+                      },
+                      "props": {
+                        "title": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "div",
+                          "props": {
+                            "className": "cell"
+                          },
+                          "children": [
+                            {
+                              "type": "Seg",
+                              "props": {
+                                "value": "follow",
+                                "onChange": "[handler]",
+                                "options": [
+                                  ["follow", "family.rule.follow"],
+                                  ["custom", "family.rule.custom"],
+                                  ["exempt", "family.member.exempt"]
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "type": "Cell",
+                          "props": {
+                            "label": "family.member.feeGroup"
+                          },
+                          "children": [
+                            {
+                              "type": "span",
+                              "props": {
+                                "className": "muted"
+                              },
+                              "children": ["family.pool.perFee.m1"]
+                            }
+                          ]
+                        },
+                        false,
+                        false,
+                        []
                       ]
                     }
                   ]
@@ -8351,87 +8351,6 @@
               ]
             },
             {
-              "type": {
-                "render": "[handler]"
-              },
-              "props": {
-                "title": "receivable.modeReceipt"
-              },
-              "children": [
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.firstPayToggle"
-                  },
-                  "children": [
-                    {
-                      "type": "Toggle",
-                      "props": {
-                        "checked": false,
-                        "onChange": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "Fragment",
-              "props": {},
-              "children": [
-                {
-                  "type": {
-                    "render": "[handler]"
-                  },
-                  "props": {
-                    "title": "family.member.feeGroup"
-                  },
-                  "children": [
-                    {
-                      "type": "div",
-                      "props": {
-                        "className": "cell"
-                      },
-                      "children": [
-                        {
-                          "type": "Seg",
-                          "props": {
-                            "value": "follow",
-                            "onChange": "[handler]",
-                            "options": [
-                              ["follow", "family.rule.follow"],
-                              ["custom", "family.rule.custom"],
-                              ["exempt", "family.member.exempt"]
-                            ]
-                          },
-                          "children": []
-                        }
-                      ]
-                    },
-                    {
-                      "type": "Cell",
-                      "props": {
-                        "label": "family.member.feeGroup"
-                      },
-                      "children": [
-                        {
-                          "type": "span",
-                          "props": {
-                            "className": "muted"
-                          },
-                          "children": ["family.pool.perFee.m1"]
-                        }
-                      ]
-                    },
-                    false,
-                    false,
-                    []
-                  ]
-                }
-              ]
-            },
-            {
               "type": "Fragment",
               "props": {},
               "children": [
@@ -8519,6 +8438,87 @@
                     },
                     null,
                     false
+                  ]
+                }
+              ]
+            },
+            {
+              "type": {
+                "render": "[handler]"
+              },
+              "props": {
+                "title": "receivable.modeReceipt"
+              },
+              "children": [
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.firstPayToggle"
+                  },
+                  "children": [
+                    {
+                      "type": "Toggle",
+                      "props": {
+                        "checked": false,
+                        "onChange": "[handler]"
+                      },
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": {
+                    "render": "[handler]"
+                  },
+                  "props": {
+                    "title": "family.member.feeGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "div",
+                      "props": {
+                        "className": "cell"
+                      },
+                      "children": [
+                        {
+                          "type": "Seg",
+                          "props": {
+                            "value": "follow",
+                            "onChange": "[handler]",
+                            "options": [
+                              ["follow", "family.rule.follow"],
+                              ["custom", "family.rule.custom"],
+                              ["exempt", "family.member.exempt"]
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Cell",
+                      "props": {
+                        "label": "family.member.feeGroup"
+                      },
+                      "children": [
+                        {
+                          "type": "span",
+                          "props": {
+                            "className": "muted"
+                          },
+                          "children": ["family.pool.perFee.m1"]
+                        }
+                      ]
+                    },
+                    false,
+                    false,
+                    []
                   ]
                 }
               ]
@@ -8696,87 +8696,6 @@
           ]
         },
         {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "receivable.modeReceipt"
-          },
-          "children": [
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.firstPayToggle"
-              },
-              "children": [
-                {
-                  "type": "Toggle",
-                  "props": {
-                    "checked": false,
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "Fragment",
-          "props": {},
-          "children": [
-            {
-              "type": {
-                "render": "[handler]"
-              },
-              "props": {
-                "title": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "div",
-                  "props": {
-                    "className": "cell"
-                  },
-                  "children": [
-                    {
-                      "type": "Seg",
-                      "props": {
-                        "value": "follow",
-                        "onChange": "[handler]",
-                        "options": [
-                          ["follow", "family.rule.follow"],
-                          ["custom", "family.rule.custom"],
-                          ["exempt", "family.member.exempt"]
-                        ]
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.feeGroup"
-                  },
-                  "children": [
-                    {
-                      "type": "span",
-                      "props": {
-                        "className": "muted"
-                      },
-                      "children": ["family.pool.perFee.m1"]
-                    }
-                  ]
-                },
-                false,
-                false,
-                []
-              ]
-            }
-          ]
-        },
-        {
           "type": "Fragment",
           "props": {},
           "children": [
@@ -8864,6 +8783,87 @@
                 },
                 null,
                 false
+              ]
+            }
+          ]
+        },
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "receivable.modeReceipt"
+          },
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.firstPayToggle"
+              },
+              "children": [
+                {
+                  "type": "Toggle",
+                  "props": {
+                    "checked": false,
+                    "onChange": "[handler]"
+                  },
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
+              "type": {
+                "render": "[handler]"
+              },
+              "props": {
+                "title": "family.member.feeGroup"
+              },
+              "children": [
+                {
+                  "type": "div",
+                  "props": {
+                    "className": "cell"
+                  },
+                  "children": [
+                    {
+                      "type": "Seg",
+                      "props": {
+                        "value": "follow",
+                        "onChange": "[handler]",
+                        "options": [
+                          ["follow", "family.rule.follow"],
+                          ["custom", "family.rule.custom"],
+                          ["exempt", "family.member.exempt"]
+                        ]
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "type": "Cell",
+                  "props": {
+                    "label": "family.member.feeGroup"
+                  },
+                  "children": [
+                    {
+                      "type": "span",
+                      "props": {
+                        "className": "muted"
+                      },
+                      "children": ["family.pool.perFee.m1"]
+                    }
+                  ]
+                },
+                false,
+                false,
+                []
               ]
             }
           ]
@@ -9447,216 +9447,6 @@
       "children": []
     },
     {
-      "type": {
-        "render": "[handler]"
-      },
-      "props": {
-        "title": "receivable.modeReceipt"
-      },
-      "children": [
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.firstPayToggle"
-          },
-          "children": [
-            {
-              "type": "Toggle",
-              "props": {
-                "checked": false,
-                "onChange": "[handler]"
-              },
-              "children": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.firstPayToggle"
-      },
-      "children": [
-        {
-          "type": "Toggle",
-          "props": {
-            "checked": false,
-            "onChange": "[handler]"
-          },
-          "children": []
-        }
-      ]
-    },
-    {
-      "type": "Toggle",
-      "props": {
-        "checked": false,
-        "onChange": "[handler]"
-      },
-      "children": []
-    },
-    {
-      "type": "Fragment",
-      "props": {},
-      "children": [
-        {
-          "type": {
-            "render": "[handler]"
-          },
-          "props": {
-            "title": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "div",
-              "props": {
-                "className": "cell"
-              },
-              "children": [
-                {
-                  "type": "Seg",
-                  "props": {
-                    "value": "follow",
-                    "onChange": "[handler]",
-                    "options": [
-                      ["follow", "family.rule.follow"],
-                      ["custom", "family.rule.custom"],
-                      ["exempt", "family.member.exempt"]
-                    ]
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "span",
-                  "props": {
-                    "className": "muted"
-                  },
-                  "children": ["family.pool.perFee.m1"]
-                }
-              ]
-            },
-            false,
-            false,
-            []
-          ]
-        }
-      ]
-    },
-    {
-      "type": {
-        "render": "[handler]"
-      },
-      "props": {
-        "title": "family.member.feeGroup"
-      },
-      "children": [
-        {
-          "type": "div",
-          "props": {
-            "className": "cell"
-          },
-          "children": [
-            {
-              "type": "Seg",
-              "props": {
-                "value": "follow",
-                "onChange": "[handler]",
-                "options": [
-                  ["follow", "family.rule.follow"],
-                  ["custom", "family.rule.custom"],
-                  ["exempt", "family.member.exempt"]
-                ]
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "span",
-              "props": {
-                "className": "muted"
-              },
-              "children": ["family.pool.perFee.m1"]
-            }
-          ]
-        },
-        false,
-        false,
-        []
-      ]
-    },
-    {
-      "type": "div",
-      "props": {
-        "className": "cell"
-      },
-      "children": [
-        {
-          "type": "Seg",
-          "props": {
-            "value": "follow",
-            "onChange": "[handler]",
-            "options": [
-              ["follow", "family.rule.follow"],
-              ["custom", "family.rule.custom"],
-              ["exempt", "family.member.exempt"]
-            ]
-          },
-          "children": []
-        }
-      ]
-    },
-    {
-      "type": "Seg",
-      "props": {
-        "value": "follow",
-        "onChange": "[handler]",
-        "options": [
-          ["follow", "family.rule.follow"],
-          ["custom", "family.rule.custom"],
-          ["exempt", "family.member.exempt"]
-        ]
-      },
-      "children": []
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.feeGroup"
-      },
-      "children": [
-        {
-          "type": "span",
-          "props": {
-            "className": "muted"
-          },
-          "children": ["family.pool.perFee.m1"]
-        }
-      ]
-    },
-    {
-      "type": "span",
-      "props": {
-        "className": "muted"
-      },
-      "children": ["family.pool.perFee.m1"]
-    },
-    {
       "type": "Fragment",
       "props": {},
       "children": [
@@ -9997,6 +9787,216 @@
         "onValue": "[handler]"
       },
       "children": []
+    },
+    {
+      "type": {
+        "render": "[handler]"
+      },
+      "props": {
+        "title": "receivable.modeReceipt"
+      },
+      "children": [
+        {
+          "type": "Cell",
+          "props": {
+            "label": "family.member.firstPayToggle"
+          },
+          "children": [
+            {
+              "type": "Toggle",
+              "props": {
+                "checked": false,
+                "onChange": "[handler]"
+              },
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Cell",
+      "props": {
+        "label": "family.member.firstPayToggle"
+      },
+      "children": [
+        {
+          "type": "Toggle",
+          "props": {
+            "checked": false,
+            "onChange": "[handler]"
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "Toggle",
+      "props": {
+        "checked": false,
+        "onChange": "[handler]"
+      },
+      "children": []
+    },
+    {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": {
+            "render": "[handler]"
+          },
+          "props": {
+            "title": "family.member.feeGroup"
+          },
+          "children": [
+            {
+              "type": "div",
+              "props": {
+                "className": "cell"
+              },
+              "children": [
+                {
+                  "type": "Seg",
+                  "props": {
+                    "value": "follow",
+                    "onChange": "[handler]",
+                    "options": [
+                      ["follow", "family.rule.follow"],
+                      ["custom", "family.rule.custom"],
+                      ["exempt", "family.member.exempt"]
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.feeGroup"
+              },
+              "children": [
+                {
+                  "type": "span",
+                  "props": {
+                    "className": "muted"
+                  },
+                  "children": ["family.pool.perFee.m1"]
+                }
+              ]
+            },
+            false,
+            false,
+            []
+          ]
+        }
+      ]
+    },
+    {
+      "type": {
+        "render": "[handler]"
+      },
+      "props": {
+        "title": "family.member.feeGroup"
+      },
+      "children": [
+        {
+          "type": "div",
+          "props": {
+            "className": "cell"
+          },
+          "children": [
+            {
+              "type": "Seg",
+              "props": {
+                "value": "follow",
+                "onChange": "[handler]",
+                "options": [
+                  ["follow", "family.rule.follow"],
+                  ["custom", "family.rule.custom"],
+                  ["exempt", "family.member.exempt"]
+                ]
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "type": "Cell",
+          "props": {
+            "label": "family.member.feeGroup"
+          },
+          "children": [
+            {
+              "type": "span",
+              "props": {
+                "className": "muted"
+              },
+              "children": ["family.pool.perFee.m1"]
+            }
+          ]
+        },
+        false,
+        false,
+        []
+      ]
+    },
+    {
+      "type": "div",
+      "props": {
+        "className": "cell"
+      },
+      "children": [
+        {
+          "type": "Seg",
+          "props": {
+            "value": "follow",
+            "onChange": "[handler]",
+            "options": [
+              ["follow", "family.rule.follow"],
+              ["custom", "family.rule.custom"],
+              ["exempt", "family.member.exempt"]
+            ]
+          },
+          "children": []
+        }
+      ]
+    },
+    {
+      "type": "Seg",
+      "props": {
+        "value": "follow",
+        "onChange": "[handler]",
+        "options": [
+          ["follow", "family.rule.follow"],
+          ["custom", "family.rule.custom"],
+          ["exempt", "family.member.exempt"]
+        ]
+      },
+      "children": []
+    },
+    {
+      "type": "Cell",
+      "props": {
+        "label": "family.member.feeGroup"
+      },
+      "children": [
+        {
+          "type": "span",
+          "props": {
+            "className": "muted"
+          },
+          "children": ["family.pool.perFee.m1"]
+        }
+      ]
+    },
+    {
+      "type": "span",
+      "props": {
+        "className": "muted"
+      },
+      "children": ["family.pool.perFee.m1"]
     }
   ],
   "missing-fx/OwedOrNet": [

@@ -152,7 +152,7 @@
     "copyAccount": "复制账号",
     "toastPayEdited": "已更新收款",
     "editPayAria": "修改这笔收款",
-    "seatGroup": "座位",
+    "seatGroup": "加入与退出",
     "firstPayToggle": "已收到首笔款",
     "pickPerson": "从人员中选",
     "accountHere": "账号",
@@ -252,7 +252,7 @@
   },
   "collect": {
     "next": "下次收款 {date}",
-    "editFee": "编辑收费信息",
+    "editFee": "编辑收费标准",
     "until": "覆盖到",
     "feeFrom": "生效日期",
     "feeHelp": "整期按覆盖起点的收费计算，已记收款不变。",
