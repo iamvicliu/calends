@@ -3593,7 +3593,7 @@ test('点开已收的格子弹出这一笔的明细，可改可删；没收的�
   assert.deepEqual(nodes.find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!.props.preset, ['2026-09-01']);
 });
 
-test('成员弹窗分三段：人员账号在上、收款格子居中、收费日期，平时只读，底部编辑后三段都可改', () => {
+test('成员弹窗分三段：人员账号在上、收款格子居中、收费日期，平时只读，底部编辑后可改，取消留在弹窗', () => {
   const months = ['2026-08-01', '2026-09-01', '2026-10-01'];
   const member = {
     id: 'm',
@@ -3633,7 +3633,8 @@ test('成员弹窗分三段：人员账号在上、收款格子居中、收费�
       },
     );
   const r = make();
-  const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
+  let closed = 0;
+  const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose: () => closed++ });
   const nodes = render();
   const groups = nodes.filter((n) => n.type === 'Group');
   // 三段：人员与账号在最上面，收款格子居中，收费和日期一组只读
@@ -3675,6 +3676,17 @@ test('成员弹窗分三段：人员账号在上、收款格子居中、收费�
   assert.ok(all(group(2)).some((n) => n.type === 'DatePicker' && n.props.value === '2026-08-01'));
   assert.ok(all(group(2)).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields'));
   assert.deepEqual(texts(), ['family.member.delete', 'family.member.cancel', 'family.member.save']);
+  // 取消：改动丢掉，退出编辑但弹窗不关
+  const account = () => all(group(0)).find((n) => n.type === 'input')!;
+  account().props.onChange({ target: { value: 'changed@example.com' } });
+  assert.equal(account().props.value, 'changed@example.com');
+  foot()
+    .find((n) => n.type === 'button' && n.children.join('') === 'family.member.cancel')!
+    .props.onClick();
+  assert.equal(closed, 0);
+  assert.deepEqual(texts(), ['family.member.delete', 'detail.action.edit', 'common.done']);
+  assert.ok(!all(group(0)).some((n) => n.type === 'input'));
+  assert.ok(!all(group(0)).some((n) => n.children.includes('changed@example.com')));
   // 记一笔：叠上收款表单，不预设期，收款表单默认勾最早没结清的一期，也就是下一期（预收）
   add.props.onClick();
   const receipt = render().find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!;

@@ -59,7 +59,7 @@ export function useMemberForm({
   const once = s.cycle.unit === 'lifetime';
   // 收款默认币种：设置里的「合租收款币种」，缺省同本位币
   const collectCcy = collectCurrencyOf(state.settings);
-  const [f, setF] = useState<ShareMember>(() => {
+  const initF = (): ShareMember => {
     // 早期单独记的 Telegram 并入通用的联系方式
     const init =
       member?.tg && !member.contact
@@ -81,7 +81,8 @@ export function useMemberForm({
     // 老数据只有每期份额：换算成「每次收多少人民币」
     const fee = memberFee(state, s, init, today);
     return { ...init, fee: fee.amount, feeCurrency: fee.currency };
-  });
+  };
+  const [f, setF] = useState<ShareMember>(initF);
   const up = (p: Partial<ShareMember>) => setF(updateMemberLeave(f, p));
   const via = f.contactVia ?? 'Telegram';
   const setVia = (v: string) => up({ contactVia: v });
@@ -121,6 +122,16 @@ export function useMemberForm({
   const bridgeFull = bridgeAt ? memberRate(s, aligned, bridgeAt.from, collectCcy).amount : 0;
   const bridge = bridgeAt && bridgeAt.due < bridgeFull ? { ...bridgeAt, full: bridgeFull } : undefined;
   const [bridgeDue, setBridgeDue] = useState<number | undefined>(() => f.periodDues?.find((d) => d.from === bridgeAt?.from)?.amount);
+  // 编辑里点「取消」：资料、收费都回到账本里的样子，弹窗不关
+  const reset = () => {
+    const fresh = initF();
+    const c = memberFee(state, s, fresh, today);
+    setF(fresh);
+    setMode(initialMode);
+    setFee({ amount: c.amount, currency: c.currency, billEvery: memberBillMonths(s, fresh, today) });
+    setFeeFrom(today);
+    setBridgeDue(undefined);
+  };
   const realigned = !isNew && mode === 'follow' && initialMode !== 'follow';
   const draft = (): ShareMember => {
     let m = aligned;
@@ -214,7 +225,8 @@ export function useMemberForm({
   };
 
   const [busy, submit] = useSubmit();
-  const save = () =>
+  // after：已有成员存好后的去处（MemberForm 退出编辑、留在弹窗）；缺省关掉
+  const save = (after = onClose) =>
     run(
       async () => {
         // 新的人先建档；已有的人改了称呼或联系方式，订阅保存后再同步到他的其他合租、代付
@@ -240,12 +252,13 @@ export function useMemberForm({
         });
         if (link.after) await savePerson(link.after);
         if (isNew && collectAfter && !out.exempt && onAdded) onAdded(out.id);
-        else onClose();
+        else after();
       },
       isNew ? t('family.member.added') : t('family.member.saved'),
     );
 
   return {
+    reset,
     memberDialog,
     state,
     s,

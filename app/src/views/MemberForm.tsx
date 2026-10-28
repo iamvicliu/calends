@@ -169,6 +169,7 @@ export function MemberForm({
     busy,
     submit,
     save,
+    reset,
   } = context;
   // 加入时长：从加入日期算到退出日期（还在合租就到今天），几年几个月几天
   const joinedOn = f.joined ?? s.share?.since ?? s.start;
@@ -366,22 +367,14 @@ export function MemberForm({
     </Cell>
   );
   const tenureCell = tenure && <Cell label={t('family.member.tenure')}>{tenure}</Cell>;
-  // 已有成员：人员和账号在最上面，平时只读，点「编辑」才可重选人员、改账号
+  // 已有成员：人员和账号在最上面，平时只读，点「编辑」才可重选人员、改账号；人员资料点人员那一行打开
   const memberWho = (
-    <Group
-      title={t('family.member.group')}
-      action={
-        linked ? (
-          <button type="button" className="btn plain" onClick={() => setProfile(true)}>
-            {t('people.field.editProfile')}
-          </button>
-        ) : undefined
-      }
-    >
+    <Group title={t('family.member.group')}>
       {editing ? (
         personField
       ) : (
-        <Cell label={linked ? t('people.field.person') : t('family.member.name')}>
+        // 已关联的人点这一行看、改人员资料（联系方式在那里）
+        <Cell label={linked ? t('people.field.person') : t('family.member.name')} onClick={linked ? () => setProfile(true) : undefined}>
           <span className="row">
             <PersonAvatar p={personFor(state, f.personId, f.name)} size={22} />
             {f.name}
@@ -459,10 +452,22 @@ export function MemberForm({
           <span className="grow" />
           {isNew || editing ? (
             <>
-              <button className="btn" onClick={onClose}>
+              {/* 新成员取消即关掉；已有成员取消只退出编辑，改动丢掉，留在这个弹窗 */}
+              <button
+                className="btn"
+                onClick={() => {
+                  if (isNew) return onClose();
+                  reset();
+                  setEditing(false);
+                }}
+              >
                 {t('family.member.cancel')}
               </button>
-              <button className="btn primary" disabled={busy || !f.name.trim() || refundInvalid(s, next)} onClick={() => void submit(save)}>
+              <button
+                className="btn primary"
+                disabled={busy || !f.name.trim() || refundInvalid(s, next)}
+                onClick={() => void submit(() => save(isNew ? onClose : () => setEditing(false)))}
+              >
                 {isNew ? t('family.member.add') : t('family.member.save')}
               </button>
             </>
