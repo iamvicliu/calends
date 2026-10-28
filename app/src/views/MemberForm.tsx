@@ -3,7 +3,7 @@ import { useMemberForm, refundInvalid } from './member/useMemberForm.ts';
 import { PeriodPop } from './member/Receipts.tsx';
 
 import { PersonAvatar, personFor } from '../components/PersonAvatar.tsx';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { calendarSpan, collectionAnchor } from '../../../shared/billing.ts';
 import { cnDate, cnDateFull, money } from '../../../shared/format.ts';
 import type { AppState, Person, ShareMember, Subscription } from '../../../shared/types.ts';
@@ -171,6 +171,10 @@ export function MemberForm({
     save,
     reset,
   } = context;
+  // 只读时跟着账本走：存好、在收款表单里记过一笔后，资料和收费都以账本里最新的为准，下次编辑从这里起
+  useEffect(() => {
+    if (!isNew && !editing) reset();
+  }, [member, editing]);
   // 加入时长：从加入日期算到退出日期（还在合租就到今天），几年几个月几天
   const joinedOn = f.joined ?? s.share?.since ?? s.start;
   const span = calendarSpan(joinedOn, f.left && f.left < today ? f.left : today);
