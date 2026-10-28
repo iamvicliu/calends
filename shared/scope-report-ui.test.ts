@@ -3595,7 +3595,7 @@ test('点开已收的格子弹出这一笔的明细，可改可删；没收的�
   assert.deepEqual(nodes.find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!.props.preset, ['2026-09-01']);
 });
 
-test('成员弹窗分三段：人员账号在上、收款格子居中、收费日期只读，底部编辑才换成输入框', () => {
+test('成员弹窗分三段：人员账号在上、收款格子居中、收费日期，平时只读，底部编辑后三段都可改', () => {
   const months = ['2026-08-01', '2026-09-01', '2026-10-01'];
   const member = {
     id: 'm',
@@ -3667,10 +3667,11 @@ test('成员弹窗分三段：人员账号在上、收款格子居中、收费�
       .filter((n) => n.type === 'button' || n.type === 'ConfirmButton')
       .map((n) => n.children.join(''));
   assert.ok(![0, 2].some((i) => all(group(i)).some((n) => n.type === 'input' || n.type === 'DatePicker' || n.type === 'Picker')));
-  // 平时底部只有编辑、完成；删除收进编辑里
+  // 平时底部只有编辑、完成（编辑在完成左边）；删除收进编辑里
   assert.deepEqual(texts(), ['detail.action.edit', 'common.done']);
-  // 「编辑」后：账号、收费方式、加入和退出日期可改；底部换成删除、取消、保存
+  // 「编辑」后：人员可重选、账号、收费方式、加入和退出日期可改；底部换成删除、取消、保存
   expandMember(nodes);
+  assert.ok(all(group(0)).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'PersonNameField'));
   assert.ok(all(group(0)).some((n) => n.type === 'input'));
   assert.ok(all(group(2)).some((n) => n.type === 'Picker' && n.props.value === 'follow'));
   assert.ok(all(group(2)).some((n) => n.type === 'DatePicker' && n.props.value === '2026-08-01'));

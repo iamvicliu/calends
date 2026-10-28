@@ -1096,7 +1096,6 @@
           "props": {},
           "children": [
             false,
-            false,
             {
               "type": "span",
               "props": {
@@ -4366,7 +4365,6 @@
           "props": {},
           "children": [
             false,
-            false,
             {
               "type": "span",
               "props": {
@@ -7625,7 +7623,6 @@
           "type": "Fragment",
           "props": {},
           "children": [
-            false,
             false,
             {
               "type": "span",

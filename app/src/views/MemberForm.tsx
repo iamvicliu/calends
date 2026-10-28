@@ -218,14 +218,7 @@ export function MemberForm({
   // 人员：已关联的人是选择胶囊，点开换人；没关联时输入称呼，打字时联想已有的人
   const personField = linked ? (
     <Cell label={t('people.field.person')}>
-      <PersonPicker
-        state={state}
-        value={f.personId}
-        onPick={(p) => {
-          pickPerson(p);
-          setEditing(true);
-        }}
-      />
+      <PersonPicker state={state} value={f.personId} onPick={pickPerson} />
     </Cell>
   ) : (
     <Cell
@@ -373,7 +366,7 @@ export function MemberForm({
     </Cell>
   );
   const tenureCell = tenure && <Cell label={t('family.member.tenure')}>{tenure}</Cell>;
-  // 已有成员：人员和账号在最上面，人员随时可重选（选了即进入编辑）；没关联的称呼、账号点「编辑」才可改
+  // 已有成员：人员和账号在最上面，平时只读，点「编辑」才可重选人员、改账号
   const memberWho = (
     <Group
       title={t('family.member.group')}
@@ -385,10 +378,10 @@ export function MemberForm({
         ) : undefined
       }
     >
-      {linked || editing ? (
+      {editing ? (
         personField
       ) : (
-        <Cell label={t('family.member.name')}>
+        <Cell label={linked ? t('people.field.person') : t('family.member.name')}>
           <span className="row">
             <PersonAvatar p={personFor(state, f.personId, f.name)} size={22} />
             {f.name}
@@ -443,11 +436,6 @@ export function MemberForm({
       onClose={onClose}
       foot={
         <>
-          {!isNew && !editing && (
-            <button type="button" className="btn" aria-expanded={false} onClick={() => setEditing(true)}>
-              {t('detail.action.edit')}
-            </button>
-          )}
           {!isNew && editing && (
             <ConfirmButton
               disabled={busy}
@@ -479,9 +467,14 @@ export function MemberForm({
               </button>
             </>
           ) : (
-            <button className="btn primary" onClick={onClose}>
-              {t('common.done')}
-            </button>
+            <>
+              <button type="button" className="btn" aria-expanded={false} onClick={() => setEditing(true)}>
+                {t('detail.action.edit')}
+              </button>
+              <button className="btn primary" onClick={onClose}>
+                {t('common.done')}
+              </button>
+            </>
           )}
         </>
       }
