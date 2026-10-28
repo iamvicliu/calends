@@ -131,8 +131,8 @@ export function MemberForm({
   onAdded?: (id: string) => void;
 }) {
   const context = useMemberForm({ memberDialog, state, s, member, initialReceipt, onClose, onAdded });
-  // 收费：建成员时就定好，之后很少改，已有成员默认收起；不分摊的成员没有收款一块，收费直接展开
-  const [feeOpen, setFeeOpen] = useState(() => !!member?.exempt);
+  // 已有成员：资料平时只读，点「编辑」才换成输入框
+  const [editing, setEditing] = useState(false);
   const [cell, setCell] = useState<{ period: LedgerPeriod; anchor: HTMLElement } | null>(null);
   const {
     today,
@@ -215,6 +215,86 @@ export function MemberForm({
       ...(!f.account && used.length === 1 ? { account: used[0] } : {}),
     });
   };
+  // 人员：已关联的人是选择胶囊，点开换人；没关联时输入称呼，打字时联想已有的人
+  const personField = linked ? (
+    <Cell label={t('people.field.person')}>
+      <PersonPicker state={state} value={f.personId} onPick={pickPerson} />
+    </Cell>
+  ) : (
+    <Cell
+      label={
+        <span className="row">
+          <PersonAvatar p={personFor(state, f.personId, f.name)} size={28} />
+          {t('family.member.name')}
+        </span>
+      }
+    >
+      <PersonNameField state={state} name={f.name} autoFocus={isNew} onType={(name) => up({ name })} onPick={pickPerson} />
+    </Cell>
+  );
+  const accountField = (
+    <Cell label={t('family.member.accountHere')}>
+      <input autoCapitalize="off" value={f.account ?? ''} placeholder={t('family.member.accountPhShort')} onChange={(e) => up({ account: val(e) })} />
+    </Cell>
+  );
+  const joinedField = (
+    <Cell label={t('family.member.joined')}>
+      <DatePicker
+        value={f.joined}
+        clearable
+        max={f.left}
+        placeholder={s.share?.since ? t('family.member.joinedPh', { date: cnDateFull(s.share.since) }) : t('family.member.notSet')}
+        onChange={(v) => up({ joined: v })}
+      />
+    </Cell>
+  );
+  // 收费：一行选跟随车 / 自定义 / 不分摊，跟随车时标签下写车的标准；自定义才展开金额和周期，改了才问从哪天生效
+  const feeFields = (
+    <>
+      <Cell
+        label={t('family.member.feeGroup')}
+        sub={mode === 'follow' ? perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) }) : undefined}
+      >
+        <Picker
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'follow' as const, label: t('family.rule.follow') },
+            { value: 'custom' as const, label: t('family.rule.custom') },
+            { value: 'exempt' as const, label: t('family.member.exempt') },
+          ]}
+        />
+      </Cell>
+      {mode === 'custom' && (
+        <FeeRuleFields
+          value={{ billEvery: fee.billEvery, fee: fee.amount, currency: fee.currency }}
+          onChange={(r) => setFee({ billEvery: r.billEvery, amount: r.fee, currency: r.currency })}
+        />
+      )}
+      {rateChanged && (
+        <>
+          <Cell label={t('family.collect.feeFrom')}>
+            <DatePicker value={feeFrom} onChange={(v) => v && setFeeFrom(v)} />
+          </Cell>
+          {/* 改回跟随车时收款日对齐车的节奏：之前截短的那期缺省按天折算，可收整期或改金额 */}
+          {bridge && (
+            <>
+              <Cell label={t('family.member.bridge')} sub={`${cnDate(bridge.from)} – ${cnDate(bridge.until)}`}>
+                <Picker
+                  value={bridgeDue === bridge.full ? 'full' : 'prorate'}
+                  onChange={(v) => setBridgeDue(v === 'full' ? bridge.full : undefined)}
+                  options={['prorate', 'full'].map((value) => ({ value, label: t(`family.member.firstMode.${value}`) }))}
+                />
+              </Cell>
+              <Cell label={t('family.member.bridgeAmount')}>
+                <NumInput ccy={bridge.currency} className="num" value={bridgeDue} placeholder={String(bridge.due)} onValue={(n) => setBridgeDue(n)} />
+              </Cell>
+            </>
+          )}
+        </>
+      )}
+    </>
+  );
   // 是谁：新增和已有成员都放最前面
   const whoGroup = (
     <>
@@ -229,143 +309,120 @@ export function MemberForm({
           ) : undefined
         }
       >
-        {/* 已关联：左边「人员」，右边胶囊点开换人；没关联：输入称呼，打字时联想已有的人，选中就关联（带出唯一用过的账号），不选就是新建 */}
-        {linked ? (
-          <Cell label={t('people.field.person')}>
-            <PersonPicker state={state} value={f.personId} onPick={pickPerson} />
-          </Cell>
-        ) : (
-          <Cell
-            label={
-              <span className="row">
-                <PersonAvatar p={personFor(state, f.personId, f.name)} size={28} />
-                {t('family.member.name')}
-              </span>
-            }
-          >
-            <PersonNameField state={state} name={f.name} autoFocus={isNew} onType={(name) => up({ name })} onPick={pickPerson} />
-          </Cell>
-        )}
+        {personField}
         {/* 联系方式属于人员，在人员资料里看和改；这里只填这个人在这辆车上用的账号 */}
-        <Cell label={t('family.member.accountHere')}>
-          <input autoCapitalize="off" value={f.account ?? ''} placeholder={t('family.member.accountPhShort')} onChange={(e) => up({ account: val(e) })} />
-        </Cell>
+        {accountField}
       </Group>
     </>
   );
+  // 新成员：哪天上车、首期怎么算
   const seatGroup = (
     <>
-      {/* 加入与退出：哪天上车、首期怎么算、哪天下车。加入日期往后改时，新日期之前已收、免收的期保存时删掉，下面先提示 */}
-      <Group title={t('family.member.seatGroup')} foot={dropNote}>
-        <Cell label={t('family.member.joined')}>
-          <DatePicker
-            value={f.joined}
-            clearable
-            max={f.left}
-            placeholder={s.share?.since ? t('family.member.joinedPh', { date: cnDateFull(s.share.since) }) : t('family.member.notSet')}
-            onChange={(v) => up({ joined: v })}
-          />
-        </Cell>
-        {!isNew && tenure && (
-          <Cell label={t('family.member.tenure')}>
-            <span className="muted">{tenure}</span>
-          </Cell>
-        )}
-        {isNew &&
-          first.partial &&
-          mode !== 'exempt' &&
-          bridge?.from !== first.from &&
-          !ledger.periods.some((p) => p.key === first.from && p.status === 'paid') && (
-            <>
-              {/* 首期起止写在「首期方式」标签下面；折算出的金额是首期金额的占位，不再单独一行提示 */}
-              <Cell label={t('family.member.firstPeriod')} sub={`${cnDate(first.from)} – ${cnDate(first.until)}`}>
-                <Picker
-                  value={f.firstPeriod ?? 'prorate'}
-                  onChange={(v) => up({ firstPeriod: v as ShareMember['firstPeriod'], firstAmount: undefined })}
-                  options={['prorate', 'full', 'free'].map((value) => ({ value, label: t(`family.member.firstMode.${value}`) }))}
+      <Group title={t('family.member.seatGroup')}>
+        {joinedField}
+        {first.partial && mode !== 'exempt' && bridge?.from !== first.from && !ledger.periods.some((p) => p.key === first.from && p.status === 'paid') && (
+          <>
+            {/* 首期起止写在「首期方式」标签下面；折算出的金额是首期金额的占位，不再单独一行提示 */}
+            <Cell label={t('family.member.firstPeriod')} sub={`${cnDate(first.from)} – ${cnDate(first.until)}`}>
+              <Picker
+                value={f.firstPeriod ?? 'prorate'}
+                onChange={(v) => up({ firstPeriod: v as ShareMember['firstPeriod'], firstAmount: undefined })}
+                options={['prorate', 'full', 'free'].map((value) => ({ value, label: t(`family.member.firstMode.${value}`) }))}
+              />
+            </Cell>
+            {f.firstPeriod !== 'free' && (
+              <Cell label={t('family.member.firstAmount')}>
+                <NumInput
+                  ccy={first.currency}
+                  className="num"
+                  value={f.firstAmount}
+                  placeholder={String(first.amount)}
+                  onValue={(n) => up({ firstAmount: n })}
                 />
               </Cell>
-              {f.firstPeriod !== 'free' && (
-                <Cell label={t('family.member.firstAmount')}>
-                  <NumInput
-                    ccy={first.currency}
-                    className="num"
-                    value={f.firstAmount}
-                    placeholder={String(first.amount)}
-                    onValue={(n) => up({ firstAmount: n })}
-                  />
-                </Cell>
-              )}
-            </>
-          )}
-        {/* 来源这类说明属于人员（人员资料里的备注）；只给已经填过的旧数据留着，可改可清空 */}
-        {member?.source && (
-          <Cell label={t('family.member.source')}>
-            <input value={f.source ?? ''} placeholder={t('family.member.sourcePh')} onChange={(e) => up({ source: val(e) || undefined })} />
-          </Cell>
+            )}
+          </>
         )}
-        {!isNew && <MemberLeaveFields state={state} s={s} member={f} onChange={up} />}
       </Group>
     </>
   );
   const feeGroup = (
     <>
-      {/* 收费：跟随车 / 自定义 / 不分摊；已有成员改了才问从哪天生效 */}
-      <Group title={t('family.member.feeGroup')} foot={rateChanged ? t('family.collect.feeHelp') : undefined}>
-        <div className="cell">
-          <Seg
-            value={mode}
-            onChange={setMode}
-            options={[
-              ['follow', t('family.rule.follow')],
-              ['custom', t('family.rule.custom')],
-              ['exempt', t('family.member.exempt')],
-            ]}
-          />
-        </div>
-        {mode === 'follow' && (
-          <Cell label={t('family.member.feeGroup')}>
-            <span className="muted">{perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}</span>
-          </Cell>
-        )}
-        {mode === 'custom' && (
-          <FeeRuleFields
-            value={{ billEvery: fee.billEvery, fee: fee.amount, currency: fee.currency }}
-            onChange={(r) => setFee({ billEvery: r.billEvery, amount: r.fee, currency: r.currency })}
-          />
-        )}
-        {rateChanged && (
-          <>
-            <Cell label={t('family.collect.feeFrom')}>
-              <DatePicker value={feeFrom} onChange={(v) => v && setFeeFrom(v)} />
-            </Cell>
-            {/* 改回跟随车时收款日对齐车的节奏：之前截短的那期缺省按天折算，可收整期或改金额 */}
-            {bridge && (
-              <>
-                <Cell label={t('family.member.bridge')} sub={`${cnDate(bridge.from)} – ${cnDate(bridge.until)}`}>
-                  <Picker
-                    value={bridgeDue === bridge.full ? 'full' : 'prorate'}
-                    onChange={(v) => setBridgeDue(v === 'full' ? bridge.full : undefined)}
-                    options={['prorate', 'full'].map((value) => ({ value, label: t(`family.member.firstMode.${value}`) }))}
-                  />
-                </Cell>
-                <Cell label={t('family.member.bridgeAmount')}>
-                  <NumInput ccy={bridge.currency} className="num" value={bridgeDue} placeholder={String(bridge.due)} onValue={(n) => setBridgeDue(n)} />
-                </Cell>
-              </>
-            )}
-          </>
-        )}
-        {/* 调价记录：今天生效的那条就是上面的「收费」，不再重复列出 */}
-        {(member?.feeHistory ?? [])
-          .filter((point, i, all) => !(point.from <= today && !all.slice(i + 1).some((x) => x.from <= today)))
-          .map((point) => (
-            <Cell key={point.from} label={cnDateFull(point.from)}>
-              <span className="muted">{perBill('family.pool.perFee', point.billEvery, { fee: money(point.fee, point.currency) })}</span>
-            </Cell>
-          ))}
-      </Group>
+      <Group title={t('family.member.feeGroup')}>{feeFields}</Group>
     </>
+  );
+  // 已有成员的收费标准、退出写成一句话（只读时）
+  const feeText =
+    mode === 'exempt'
+      ? t('family.member.exempt')
+      : mode === 'custom'
+        ? perBill('family.pool.perFee', fee.billEvery, { fee: money(fee.amount, fee.currency) })
+        : perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) });
+  const refund = f.leaveRefund;
+  // 已付至（从第一期起连续结清到哪天）和加入时长两种状态都显示，改退出、退款时要看
+  const paidCell = !once && mode !== 'exempt' && (
+    <Cell label={t('family.member.paidUntil')}>
+      <span className={paidUntil ? '' : 'muted'}>{paidUntil ? cnDateFull(paidUntil) : t('family.pool.noPay')}</span>
+    </Cell>
+  );
+  const tenureCell = tenure && <Cell label={t('family.member.tenure')}>{tenure}</Cell>;
+  // 已有成员：人员、账号、收费、日期合在一组；平时只读，点「编辑」换成输入框。
+  // 加入日期往后改时，新日期之前已收、免收的期保存时删掉，组底先提示
+  const infoGroup = (
+    <Group
+      title={t('family.member.group')}
+      action={
+        editing ? undefined : (
+          <button type="button" className="btn plain" aria-expanded={false} onClick={() => setEditing(true)}>
+            {t('detail.action.edit')}
+          </button>
+        )
+      }
+      foot={editing ? [dropNote, rateChanged && t('family.collect.feeHelp')].filter(Boolean).join('\n') || undefined : undefined}
+    >
+      {editing ? (
+        <>
+          {personField}
+          {accountField}
+          {feeFields}
+          {/* 调价记录：今天生效的那条就是上面的收费，不再重复列出 */}
+          {(member?.feeHistory ?? [])
+            .filter((point, i, all) => !(point.from <= today && !all.slice(i + 1).some((x) => x.from <= today)))
+            .map((point) => (
+              <Cell key={point.from} label={cnDateFull(point.from)}>
+                <span className="muted">{perBill('family.pool.perFee', point.billEvery, { fee: money(point.fee, point.currency) })}</span>
+              </Cell>
+            ))}
+          {paidCell}
+          {joinedField}
+          {tenureCell}
+          <MemberLeaveFields state={state} s={s} member={f} onChange={up} />
+          {/* 来源这类说明属于人员（人员资料里的备注）；只给已经填过的旧数据留着，可改可清空 */}
+          {member?.source && (
+            <Cell label={t('family.member.source')}>
+              <input value={f.source ?? ''} placeholder={t('family.member.sourcePh')} onChange={(e) => up({ source: val(e) || undefined })} />
+            </Cell>
+          )}
+        </>
+      ) : (
+        <>
+          {/* 已关联的人点这一行看、改人员资料（联系方式在那里） */}
+          <Cell label={linked ? t('people.field.person') : t('family.member.name')} onClick={linked ? () => setProfile(true) : undefined}>
+            <span className="row">
+              <PersonAvatar p={personFor(state, f.personId, f.name)} size={22} />
+              {f.name}
+            </span>
+          </Cell>
+          <Cell label={t('family.member.accountHere')}>{f.account || <span className="muted">{t('family.member.notSet')}</span>}</Cell>
+          <Cell label={t('family.member.feeGroup')}>{feeText}</Cell>
+          {paidCell}
+          <Cell label={t('family.member.joined')}>{cnDateFull(joinedOn)}</Cell>
+          {tenureCell}
+          <Cell label={t('family.member.left')}>{f.left ? cnDateFull(f.left) : <span className="muted">{t('family.member.leftPh')}</span>}</Cell>
+          {refund && <Cell label={t('family.refund.title')}>{money(refund.amount, refund.currency)}</Cell>}
+        </>
+      )}
+    </Group>
   );
   return (
     <Sheet
@@ -395,12 +452,20 @@ export function MemberForm({
             </ConfirmButton>
           )}
           <span className="grow" />
-          <button className="btn" onClick={onClose}>
-            {t('family.member.cancel')}
-          </button>
-          <button className="btn primary" disabled={busy || !f.name.trim() || refundInvalid(s, next)} onClick={() => void submit(save)}>
-            {isNew ? t('family.member.add') : t('family.member.save')}
-          </button>
+          {isNew || editing ? (
+            <>
+              <button className="btn" onClick={onClose}>
+                {t('family.member.cancel')}
+              </button>
+              <button className="btn primary" disabled={busy || !f.name.trim() || refundInvalid(s, next)} onClick={() => void submit(save)}>
+                {isNew ? t('family.member.add') : t('family.member.save')}
+              </button>
+            </>
+          ) : (
+            <button className="btn primary" onClick={onClose}>
+              {t('common.done')}
+            </button>
+          )}
         </>
       }
     >
@@ -421,25 +486,16 @@ export function MemberForm({
           </>
         ) : (
           <>
-            {/* 谁 → 收款格子（最常看）→ 收费标准（点开才有）→ 加入与退出 */}
-            {whoGroup}
-            {/* 收款：一格一期，点已收的格子看明细；已付至和记一笔跟在下面；欠款默认勾欠的期，结清了默认勾下一期（预收） */}
+            {/* 收款格子单独在最上面：一格一期，点已收的格子看明细；欠款默认勾欠的期，结清了默认勾下一期（预收） */}
             {mode !== 'exempt' && (
               <Group
-                title={t('receivable.modeReceipt')}
-                action={
-                  <button type="button" className="btn plain" aria-expanded={feeOpen} onClick={() => setFeeOpen(!feeOpen)}>
-                    {t('family.collect.editFee')}
-                  </button>
-                }
                 foot={
                   [
                     st.gone || !st.owe
                       ? once && !st.gone
                         ? t('family.pool.settled')
                         : ''
-                      : // 下面有「已付至」时不再重复写应收哪天（就是已付至的后一天）
-                        `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${once ? t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) }) : t('family.pool.owedAmount', { amount: st.owed })}`,
+                      : `${st.late > 0 ? `${t('family.quick.late', { count: st.late })}\n` : ''}${once ? t('family.quick.owe', { amount: st.owed, date: cnDateFull(st.next.from) }) : t('family.pool.owedAmount', { amount: st.owed })}`,
                     ledger.unmatched.length ? t('receivable.unmatchedNote', { count: ledger.unmatched.length }) : '',
                   ]
                     .filter(Boolean)
@@ -451,19 +507,6 @@ export function MemberForm({
                     <PeriodStrip mode="months" periods={ledger.periods} today={today} onPick={(p, anchor) => setCell({ period: p, anchor })} />
                   </div>
                 )}
-                {!feeOpen && (
-                  <Cell label={t('family.member.feeGroup')}>
-                    {mode === 'custom'
-                      ? perBill('family.pool.perFee', fee.billEvery, { fee: money(fee.amount, fee.currency) })
-                      : perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) })}
-                  </Cell>
-                )}
-                {/* 已付至：从第一期起连续结清到哪天 */}
-                {!once && (
-                  <Cell label={t('family.member.paidUntil')}>
-                    <span className={paidUntil ? '' : 'muted'}>{paidUntil ? cnDateFull(paidUntil) : t('family.pool.noPay')}</span>
-                  </Cell>
-                )}
                 {!st.gone && (
                   <button type="button" className="cell tap member-pay-add" onClick={() => setReceipt({})}>
                     <Icon name="plus" /> {t('family.quick.backCollect')}
@@ -471,9 +514,7 @@ export function MemberForm({
                 )}
               </Group>
             )}
-            {/* 收费标准：收款标题旁「编辑收费标准」点开，紧跟在收款下面 */}
-            {feeOpen && feeGroup}
-            {seatGroup}
+            {infoGroup}
           </>
         )}
       </div>

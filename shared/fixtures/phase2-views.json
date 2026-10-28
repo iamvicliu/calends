@@ -1104,21 +1104,27 @@
               "children": []
             },
             {
-              "type": "button",
-              "props": {
-                "className": "btn",
-                "onClick": "[handler]"
-              },
-              "children": ["family.member.cancel"]
-            },
-            {
-              "type": "button",
-              "props": {
-                "className": "btn primary",
-                "disabled": true,
-                "onClick": "[handler]"
-              },
-              "children": ["family.member.add"]
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": "button",
+                  "props": {
+                    "className": "btn",
+                    "onClick": "[handler]"
+                  },
+                  "children": ["family.member.cancel"]
+                },
+                {
+                  "type": "button",
+                  "props": {
+                    "className": "btn primary",
+                    "disabled": true,
+                    "onClick": "[handler]"
+                  },
+                  "children": ["family.member.add"]
+                }
+              ]
             }
           ]
         }
@@ -1311,7 +1317,6 @@
                             }
                           ]
                         },
-                        false,
                         {
                           "type": "Fragment",
                           "props": {},
@@ -1366,9 +1371,7 @@
                               ]
                             }
                           ]
-                        },
-                        null,
-                        false
+                        }
                       ]
                     }
                   ]
@@ -1412,44 +1415,44 @@
                       },
                       "children": [
                         {
-                          "type": "div",
-                          "props": {
-                            "className": "cell"
-                          },
+                          "type": "Fragment",
+                          "props": {},
                           "children": [
                             {
-                              "type": "Seg",
+                              "type": "Cell",
                               "props": {
-                                "value": "follow",
-                                "onChange": "[handler]",
-                                "options": [
-                                  ["follow", "family.rule.follow"],
-                                  ["custom", "family.rule.custom"],
-                                  ["exempt", "family.member.exempt"]
-                                ]
+                                "label": "family.member.feeGroup",
+                                "sub": "family.pool.perFee.m1"
                               },
-                              "children": []
-                            }
+                              "children": [
+                                {
+                                  "type": "Picker",
+                                  "props": {
+                                    "value": "follow",
+                                    "onChange": "[handler]",
+                                    "options": [
+                                      {
+                                        "value": "follow",
+                                        "label": "family.rule.follow"
+                                      },
+                                      {
+                                        "value": "custom",
+                                        "label": "family.rule.custom"
+                                      },
+                                      {
+                                        "value": "exempt",
+                                        "label": "family.member.exempt"
+                                      }
+                                    ]
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            false,
+                            false
                           ]
-                        },
-                        {
-                          "type": "Cell",
-                          "props": {
-                            "label": "family.member.feeGroup"
-                          },
-                          "children": [
-                            {
-                              "type": "span",
-                              "props": {
-                                "className": "muted"
-                              },
-                              "children": ["family.pool.perFee.m1"]
-                            }
-                          ]
-                        },
-                        false,
-                        false,
-                        []
+                        }
                       ]
                     }
                   ]
@@ -1650,7 +1653,6 @@
                         }
                       ]
                     },
-                    false,
                     {
                       "type": "Fragment",
                       "props": {},
@@ -1705,9 +1707,7 @@
                           ]
                         }
                       ]
-                    },
-                    null,
-                    false
+                    }
                   ]
                 }
               ]
@@ -1751,44 +1751,44 @@
                   },
                   "children": [
                     {
-                      "type": "div",
-                      "props": {
-                        "className": "cell"
-                      },
+                      "type": "Fragment",
+                      "props": {},
                       "children": [
                         {
-                          "type": "Seg",
+                          "type": "Cell",
                           "props": {
-                            "value": "follow",
-                            "onChange": "[handler]",
-                            "options": [
-                              ["follow", "family.rule.follow"],
-                              ["custom", "family.rule.custom"],
-                              ["exempt", "family.member.exempt"]
-                            ]
+                            "label": "family.member.feeGroup",
+                            "sub": "family.pool.perFee.m1"
                           },
-                          "children": []
-                        }
+                          "children": [
+                            {
+                              "type": "Picker",
+                              "props": {
+                                "value": "follow",
+                                "onChange": "[handler]",
+                                "options": [
+                                  {
+                                    "value": "follow",
+                                    "label": "family.rule.follow"
+                                  },
+                                  {
+                                    "value": "custom",
+                                    "label": "family.rule.custom"
+                                  },
+                                  {
+                                    "value": "exempt",
+                                    "label": "family.member.exempt"
+                                  }
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        false,
+                        false
                       ]
-                    },
-                    {
-                      "type": "Cell",
-                      "props": {
-                        "label": "family.member.feeGroup"
-                      },
-                      "children": [
-                        {
-                          "type": "span",
-                          "props": {
-                            "className": "muted"
-                          },
-                          "children": ["family.pool.perFee.m1"]
-                        }
-                      ]
-                    },
-                    false,
-                    false,
-                    []
+                    }
                   ]
                 }
               ]
@@ -1978,7 +1978,6 @@
                     }
                   ]
                 },
-                false,
                 {
                   "type": "Fragment",
                   "props": {},
@@ -2033,9 +2032,7 @@
                       ]
                     }
                   ]
-                },
-                null,
-                false
+                }
               ]
             }
           ]
@@ -2079,44 +2076,44 @@
               },
               "children": [
                 {
-                  "type": "div",
-                  "props": {
-                    "className": "cell"
-                  },
+                  "type": "Fragment",
+                  "props": {},
                   "children": [
                     {
-                      "type": "Seg",
+                      "type": "Cell",
                       "props": {
-                        "value": "follow",
-                        "onChange": "[handler]",
-                        "options": [
-                          ["follow", "family.rule.follow"],
-                          ["custom", "family.rule.custom"],
-                          ["exempt", "family.member.exempt"]
-                        ]
+                        "label": "family.member.feeGroup",
+                        "sub": "family.pool.perFee.m1"
                       },
-                      "children": []
-                    }
+                      "children": [
+                        {
+                          "type": "Picker",
+                          "props": {
+                            "value": "follow",
+                            "onChange": "[handler]",
+                            "options": [
+                              {
+                                "value": "follow",
+                                "label": "family.rule.follow"
+                              },
+                              {
+                                "value": "custom",
+                                "label": "family.rule.custom"
+                              },
+                              {
+                                "value": "exempt",
+                                "label": "family.member.exempt"
+                              }
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    false,
+                    false
                   ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.feeGroup"
-                  },
-                  "children": [
-                    {
-                      "type": "span",
-                      "props": {
-                        "className": "muted"
-                      },
-                      "children": ["family.pool.perFee.m1"]
-                    }
-                  ]
-                },
-                false,
-                false,
-                []
+                }
               ]
             }
           ]
@@ -2669,7 +2666,6 @@
                 }
               ]
             },
-            false,
             {
               "type": "Fragment",
               "props": {},
@@ -2724,9 +2720,7 @@
                   ]
                 }
               ]
-            },
-            null,
-            false
+            }
           ]
         }
       ]
@@ -2757,7 +2751,6 @@
             }
           ]
         },
-        false,
         {
           "type": "Fragment",
           "props": {},
@@ -2812,9 +2805,7 @@
               ]
             }
           ]
-        },
-        null,
-        false
+        }
       ]
     },
     {
@@ -3044,44 +3035,44 @@
           },
           "children": [
             {
-              "type": "div",
-              "props": {
-                "className": "cell"
-              },
+              "type": "Fragment",
+              "props": {},
               "children": [
                 {
-                  "type": "Seg",
+                  "type": "Cell",
                   "props": {
-                    "value": "follow",
-                    "onChange": "[handler]",
-                    "options": [
-                      ["follow", "family.rule.follow"],
-                      ["custom", "family.rule.custom"],
-                      ["exempt", "family.member.exempt"]
-                    ]
+                    "label": "family.member.feeGroup",
+                    "sub": "family.pool.perFee.m1"
                   },
-                  "children": []
-                }
+                  "children": [
+                    {
+                      "type": "Picker",
+                      "props": {
+                        "value": "follow",
+                        "onChange": "[handler]",
+                        "options": [
+                          {
+                            "value": "follow",
+                            "label": "family.rule.follow"
+                          },
+                          {
+                            "value": "custom",
+                            "label": "family.rule.custom"
+                          },
+                          {
+                            "value": "exempt",
+                            "label": "family.member.exempt"
+                          }
+                        ]
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                false,
+                false
               ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "span",
-                  "props": {
-                    "className": "muted"
-                  },
-                  "children": ["family.pool.perFee.m1"]
-                }
-              ]
-            },
-            false,
-            false,
-            []
+            }
           ]
         }
       ]
@@ -3095,61 +3086,110 @@
       },
       "children": [
         {
-          "type": "div",
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.feeGroup",
+                "sub": "family.pool.perFee.m1"
+              },
+              "children": [
+                {
+                  "type": "Picker",
+                  "props": {
+                    "value": "follow",
+                    "onChange": "[handler]",
+                    "options": [
+                      {
+                        "value": "follow",
+                        "label": "family.rule.follow"
+                      },
+                      {
+                        "value": "custom",
+                        "label": "family.rule.custom"
+                      },
+                      {
+                        "value": "exempt",
+                        "label": "family.member.exempt"
+                      }
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false,
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": "Cell",
           "props": {
-            "className": "cell"
+            "label": "family.member.feeGroup",
+            "sub": "family.pool.perFee.m1"
           },
           "children": [
             {
-              "type": "Seg",
+              "type": "Picker",
               "props": {
                 "value": "follow",
                 "onChange": "[handler]",
                 "options": [
-                  ["follow", "family.rule.follow"],
-                  ["custom", "family.rule.custom"],
-                  ["exempt", "family.member.exempt"]
+                  {
+                    "value": "follow",
+                    "label": "family.rule.follow"
+                  },
+                  {
+                    "value": "custom",
+                    "label": "family.rule.custom"
+                  },
+                  {
+                    "value": "exempt",
+                    "label": "family.member.exempt"
+                  }
                 ]
               },
               "children": []
             }
           ]
         },
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "span",
-              "props": {
-                "className": "muted"
-              },
-              "children": ["family.pool.perFee.m1"]
-            }
-          ]
-        },
         false,
-        false,
-        []
+        false
       ]
     },
     {
-      "type": "div",
+      "type": "Cell",
       "props": {
-        "className": "cell"
+        "label": "family.member.feeGroup",
+        "sub": "family.pool.perFee.m1"
       },
       "children": [
         {
-          "type": "Seg",
+          "type": "Picker",
           "props": {
             "value": "follow",
             "onChange": "[handler]",
             "options": [
-              ["follow", "family.rule.follow"],
-              ["custom", "family.rule.custom"],
-              ["exempt", "family.member.exempt"]
+              {
+                "value": "follow",
+                "label": "family.rule.follow"
+              },
+              {
+                "value": "custom",
+                "label": "family.rule.custom"
+              },
+              {
+                "value": "exempt",
+                "label": "family.member.exempt"
+              }
             ]
           },
           "children": []
@@ -3157,39 +3197,26 @@
       ]
     },
     {
-      "type": "Seg",
+      "type": "Picker",
       "props": {
         "value": "follow",
         "onChange": "[handler]",
         "options": [
-          ["follow", "family.rule.follow"],
-          ["custom", "family.rule.custom"],
-          ["exempt", "family.member.exempt"]
+          {
+            "value": "follow",
+            "label": "family.rule.follow"
+          },
+          {
+            "value": "custom",
+            "label": "family.rule.custom"
+          },
+          {
+            "value": "exempt",
+            "label": "family.member.exempt"
+          }
         ]
       },
       "children": []
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.feeGroup"
-      },
-      "children": [
-        {
-          "type": "span",
-          "props": {
-            "className": "muted"
-          },
-          "children": ["family.pool.perFee.m1"]
-        }
-      ]
-    },
-    {
-      "type": "span",
-      "props": {
-        "className": "muted"
-      },
-      "children": ["family.pool.perFee.m1"]
     }
   ],
   "normal/OwedOrNet": [
@@ -4346,21 +4373,27 @@
               "children": []
             },
             {
-              "type": "button",
-              "props": {
-                "className": "btn",
-                "onClick": "[handler]"
-              },
-              "children": ["family.member.cancel"]
-            },
-            {
-              "type": "button",
-              "props": {
-                "className": "btn primary",
-                "disabled": true,
-                "onClick": "[handler]"
-              },
-              "children": ["family.member.add"]
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": "button",
+                  "props": {
+                    "className": "btn",
+                    "onClick": "[handler]"
+                  },
+                  "children": ["family.member.cancel"]
+                },
+                {
+                  "type": "button",
+                  "props": {
+                    "className": "btn primary",
+                    "disabled": true,
+                    "onClick": "[handler]"
+                  },
+                  "children": ["family.member.add"]
+                }
+              ]
             }
           ]
         }
@@ -4553,7 +4586,6 @@
                             }
                           ]
                         },
-                        false,
                         {
                           "type": "Fragment",
                           "props": {},
@@ -4608,9 +4640,7 @@
                               ]
                             }
                           ]
-                        },
-                        null,
-                        false
+                        }
                       ]
                     }
                   ]
@@ -4654,44 +4684,44 @@
                       },
                       "children": [
                         {
-                          "type": "div",
-                          "props": {
-                            "className": "cell"
-                          },
+                          "type": "Fragment",
+                          "props": {},
                           "children": [
                             {
-                              "type": "Seg",
+                              "type": "Cell",
                               "props": {
-                                "value": "follow",
-                                "onChange": "[handler]",
-                                "options": [
-                                  ["follow", "family.rule.follow"],
-                                  ["custom", "family.rule.custom"],
-                                  ["exempt", "family.member.exempt"]
-                                ]
+                                "label": "family.member.feeGroup",
+                                "sub": "family.pool.perFee.m1"
                               },
-                              "children": []
-                            }
+                              "children": [
+                                {
+                                  "type": "Picker",
+                                  "props": {
+                                    "value": "follow",
+                                    "onChange": "[handler]",
+                                    "options": [
+                                      {
+                                        "value": "follow",
+                                        "label": "family.rule.follow"
+                                      },
+                                      {
+                                        "value": "custom",
+                                        "label": "family.rule.custom"
+                                      },
+                                      {
+                                        "value": "exempt",
+                                        "label": "family.member.exempt"
+                                      }
+                                    ]
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            false,
+                            false
                           ]
-                        },
-                        {
-                          "type": "Cell",
-                          "props": {
-                            "label": "family.member.feeGroup"
-                          },
-                          "children": [
-                            {
-                              "type": "span",
-                              "props": {
-                                "className": "muted"
-                              },
-                              "children": ["family.pool.perFee.m1"]
-                            }
-                          ]
-                        },
-                        false,
-                        false,
-                        []
+                        }
                       ]
                     }
                   ]
@@ -4892,7 +4922,6 @@
                         }
                       ]
                     },
-                    false,
                     {
                       "type": "Fragment",
                       "props": {},
@@ -4947,9 +4976,7 @@
                           ]
                         }
                       ]
-                    },
-                    null,
-                    false
+                    }
                   ]
                 }
               ]
@@ -4993,44 +5020,44 @@
                   },
                   "children": [
                     {
-                      "type": "div",
-                      "props": {
-                        "className": "cell"
-                      },
+                      "type": "Fragment",
+                      "props": {},
                       "children": [
                         {
-                          "type": "Seg",
+                          "type": "Cell",
                           "props": {
-                            "value": "follow",
-                            "onChange": "[handler]",
-                            "options": [
-                              ["follow", "family.rule.follow"],
-                              ["custom", "family.rule.custom"],
-                              ["exempt", "family.member.exempt"]
-                            ]
+                            "label": "family.member.feeGroup",
+                            "sub": "family.pool.perFee.m1"
                           },
-                          "children": []
-                        }
+                          "children": [
+                            {
+                              "type": "Picker",
+                              "props": {
+                                "value": "follow",
+                                "onChange": "[handler]",
+                                "options": [
+                                  {
+                                    "value": "follow",
+                                    "label": "family.rule.follow"
+                                  },
+                                  {
+                                    "value": "custom",
+                                    "label": "family.rule.custom"
+                                  },
+                                  {
+                                    "value": "exempt",
+                                    "label": "family.member.exempt"
+                                  }
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        false,
+                        false
                       ]
-                    },
-                    {
-                      "type": "Cell",
-                      "props": {
-                        "label": "family.member.feeGroup"
-                      },
-                      "children": [
-                        {
-                          "type": "span",
-                          "props": {
-                            "className": "muted"
-                          },
-                          "children": ["family.pool.perFee.m1"]
-                        }
-                      ]
-                    },
-                    false,
-                    false,
-                    []
+                    }
                   ]
                 }
               ]
@@ -5220,7 +5247,6 @@
                     }
                   ]
                 },
-                false,
                 {
                   "type": "Fragment",
                   "props": {},
@@ -5275,9 +5301,7 @@
                       ]
                     }
                   ]
-                },
-                null,
-                false
+                }
               ]
             }
           ]
@@ -5321,44 +5345,44 @@
               },
               "children": [
                 {
-                  "type": "div",
-                  "props": {
-                    "className": "cell"
-                  },
+                  "type": "Fragment",
+                  "props": {},
                   "children": [
                     {
-                      "type": "Seg",
+                      "type": "Cell",
                       "props": {
-                        "value": "follow",
-                        "onChange": "[handler]",
-                        "options": [
-                          ["follow", "family.rule.follow"],
-                          ["custom", "family.rule.custom"],
-                          ["exempt", "family.member.exempt"]
-                        ]
+                        "label": "family.member.feeGroup",
+                        "sub": "family.pool.perFee.m1"
                       },
-                      "children": []
-                    }
+                      "children": [
+                        {
+                          "type": "Picker",
+                          "props": {
+                            "value": "follow",
+                            "onChange": "[handler]",
+                            "options": [
+                              {
+                                "value": "follow",
+                                "label": "family.rule.follow"
+                              },
+                              {
+                                "value": "custom",
+                                "label": "family.rule.custom"
+                              },
+                              {
+                                "value": "exempt",
+                                "label": "family.member.exempt"
+                              }
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    false,
+                    false
                   ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.feeGroup"
-                  },
-                  "children": [
-                    {
-                      "type": "span",
-                      "props": {
-                        "className": "muted"
-                      },
-                      "children": ["family.pool.perFee.m1"]
-                    }
-                  ]
-                },
-                false,
-                false,
-                []
+                }
               ]
             }
           ]
@@ -5911,7 +5935,6 @@
                 }
               ]
             },
-            false,
             {
               "type": "Fragment",
               "props": {},
@@ -5966,9 +5989,7 @@
                   ]
                 }
               ]
-            },
-            null,
-            false
+            }
           ]
         }
       ]
@@ -5999,7 +6020,6 @@
             }
           ]
         },
-        false,
         {
           "type": "Fragment",
           "props": {},
@@ -6054,9 +6074,7 @@
               ]
             }
           ]
-        },
-        null,
-        false
+        }
       ]
     },
     {
@@ -6286,44 +6304,44 @@
           },
           "children": [
             {
-              "type": "div",
-              "props": {
-                "className": "cell"
-              },
+              "type": "Fragment",
+              "props": {},
               "children": [
                 {
-                  "type": "Seg",
+                  "type": "Cell",
                   "props": {
-                    "value": "follow",
-                    "onChange": "[handler]",
-                    "options": [
-                      ["follow", "family.rule.follow"],
-                      ["custom", "family.rule.custom"],
-                      ["exempt", "family.member.exempt"]
-                    ]
+                    "label": "family.member.feeGroup",
+                    "sub": "family.pool.perFee.m1"
                   },
-                  "children": []
-                }
+                  "children": [
+                    {
+                      "type": "Picker",
+                      "props": {
+                        "value": "follow",
+                        "onChange": "[handler]",
+                        "options": [
+                          {
+                            "value": "follow",
+                            "label": "family.rule.follow"
+                          },
+                          {
+                            "value": "custom",
+                            "label": "family.rule.custom"
+                          },
+                          {
+                            "value": "exempt",
+                            "label": "family.member.exempt"
+                          }
+                        ]
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                false,
+                false
               ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "span",
-                  "props": {
-                    "className": "muted"
-                  },
-                  "children": ["family.pool.perFee.m1"]
-                }
-              ]
-            },
-            false,
-            false,
-            []
+            }
           ]
         }
       ]
@@ -6337,61 +6355,110 @@
       },
       "children": [
         {
-          "type": "div",
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.feeGroup",
+                "sub": "family.pool.perFee.m1"
+              },
+              "children": [
+                {
+                  "type": "Picker",
+                  "props": {
+                    "value": "follow",
+                    "onChange": "[handler]",
+                    "options": [
+                      {
+                        "value": "follow",
+                        "label": "family.rule.follow"
+                      },
+                      {
+                        "value": "custom",
+                        "label": "family.rule.custom"
+                      },
+                      {
+                        "value": "exempt",
+                        "label": "family.member.exempt"
+                      }
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false,
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": "Cell",
           "props": {
-            "className": "cell"
+            "label": "family.member.feeGroup",
+            "sub": "family.pool.perFee.m1"
           },
           "children": [
             {
-              "type": "Seg",
+              "type": "Picker",
               "props": {
                 "value": "follow",
                 "onChange": "[handler]",
                 "options": [
-                  ["follow", "family.rule.follow"],
-                  ["custom", "family.rule.custom"],
-                  ["exempt", "family.member.exempt"]
+                  {
+                    "value": "follow",
+                    "label": "family.rule.follow"
+                  },
+                  {
+                    "value": "custom",
+                    "label": "family.rule.custom"
+                  },
+                  {
+                    "value": "exempt",
+                    "label": "family.member.exempt"
+                  }
                 ]
               },
               "children": []
             }
           ]
         },
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "span",
-              "props": {
-                "className": "muted"
-              },
-              "children": ["family.pool.perFee.m1"]
-            }
-          ]
-        },
         false,
-        false,
-        []
+        false
       ]
     },
     {
-      "type": "div",
+      "type": "Cell",
       "props": {
-        "className": "cell"
+        "label": "family.member.feeGroup",
+        "sub": "family.pool.perFee.m1"
       },
       "children": [
         {
-          "type": "Seg",
+          "type": "Picker",
           "props": {
             "value": "follow",
             "onChange": "[handler]",
             "options": [
-              ["follow", "family.rule.follow"],
-              ["custom", "family.rule.custom"],
-              ["exempt", "family.member.exempt"]
+              {
+                "value": "follow",
+                "label": "family.rule.follow"
+              },
+              {
+                "value": "custom",
+                "label": "family.rule.custom"
+              },
+              {
+                "value": "exempt",
+                "label": "family.member.exempt"
+              }
             ]
           },
           "children": []
@@ -6399,39 +6466,26 @@
       ]
     },
     {
-      "type": "Seg",
+      "type": "Picker",
       "props": {
         "value": "follow",
         "onChange": "[handler]",
         "options": [
-          ["follow", "family.rule.follow"],
-          ["custom", "family.rule.custom"],
-          ["exempt", "family.member.exempt"]
+          {
+            "value": "follow",
+            "label": "family.rule.follow"
+          },
+          {
+            "value": "custom",
+            "label": "family.rule.custom"
+          },
+          {
+            "value": "exempt",
+            "label": "family.member.exempt"
+          }
         ]
       },
       "children": []
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.feeGroup"
-      },
-      "children": [
-        {
-          "type": "span",
-          "props": {
-            "className": "muted"
-          },
-          "children": ["family.pool.perFee.m1"]
-        }
-      ]
-    },
-    {
-      "type": "span",
-      "props": {
-        "className": "muted"
-      },
-      "children": ["family.pool.perFee.m1"]
     }
   ],
   "zero/OwedOrNet": [
@@ -7578,21 +7632,27 @@
               "children": []
             },
             {
-              "type": "button",
-              "props": {
-                "className": "btn",
-                "onClick": "[handler]"
-              },
-              "children": ["family.member.cancel"]
-            },
-            {
-              "type": "button",
-              "props": {
-                "className": "btn primary",
-                "disabled": true,
-                "onClick": "[handler]"
-              },
-              "children": ["family.member.add"]
+              "type": "Fragment",
+              "props": {},
+              "children": [
+                {
+                  "type": "button",
+                  "props": {
+                    "className": "btn",
+                    "onClick": "[handler]"
+                  },
+                  "children": ["family.member.cancel"]
+                },
+                {
+                  "type": "button",
+                  "props": {
+                    "className": "btn primary",
+                    "disabled": true,
+                    "onClick": "[handler]"
+                  },
+                  "children": ["family.member.add"]
+                }
+              ]
             }
           ]
         }
@@ -7785,7 +7845,6 @@
                             }
                           ]
                         },
-                        false,
                         {
                           "type": "Fragment",
                           "props": {},
@@ -7840,9 +7899,7 @@
                               ]
                             }
                           ]
-                        },
-                        null,
-                        false
+                        }
                       ]
                     }
                   ]
@@ -7886,44 +7943,44 @@
                       },
                       "children": [
                         {
-                          "type": "div",
-                          "props": {
-                            "className": "cell"
-                          },
+                          "type": "Fragment",
+                          "props": {},
                           "children": [
                             {
-                              "type": "Seg",
+                              "type": "Cell",
                               "props": {
-                                "value": "follow",
-                                "onChange": "[handler]",
-                                "options": [
-                                  ["follow", "family.rule.follow"],
-                                  ["custom", "family.rule.custom"],
-                                  ["exempt", "family.member.exempt"]
-                                ]
+                                "label": "family.member.feeGroup",
+                                "sub": "family.pool.perFee.m1"
                               },
-                              "children": []
-                            }
+                              "children": [
+                                {
+                                  "type": "Picker",
+                                  "props": {
+                                    "value": "follow",
+                                    "onChange": "[handler]",
+                                    "options": [
+                                      {
+                                        "value": "follow",
+                                        "label": "family.rule.follow"
+                                      },
+                                      {
+                                        "value": "custom",
+                                        "label": "family.rule.custom"
+                                      },
+                                      {
+                                        "value": "exempt",
+                                        "label": "family.member.exempt"
+                                      }
+                                    ]
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            false,
+                            false
                           ]
-                        },
-                        {
-                          "type": "Cell",
-                          "props": {
-                            "label": "family.member.feeGroup"
-                          },
-                          "children": [
-                            {
-                              "type": "span",
-                              "props": {
-                                "className": "muted"
-                              },
-                              "children": ["family.pool.perFee.m1"]
-                            }
-                          ]
-                        },
-                        false,
-                        false,
-                        []
+                        }
                       ]
                     }
                   ]
@@ -8124,7 +8181,6 @@
                         }
                       ]
                     },
-                    false,
                     {
                       "type": "Fragment",
                       "props": {},
@@ -8179,9 +8235,7 @@
                           ]
                         }
                       ]
-                    },
-                    null,
-                    false
+                    }
                   ]
                 }
               ]
@@ -8225,44 +8279,44 @@
                   },
                   "children": [
                     {
-                      "type": "div",
-                      "props": {
-                        "className": "cell"
-                      },
+                      "type": "Fragment",
+                      "props": {},
                       "children": [
                         {
-                          "type": "Seg",
+                          "type": "Cell",
                           "props": {
-                            "value": "follow",
-                            "onChange": "[handler]",
-                            "options": [
-                              ["follow", "family.rule.follow"],
-                              ["custom", "family.rule.custom"],
-                              ["exempt", "family.member.exempt"]
-                            ]
+                            "label": "family.member.feeGroup",
+                            "sub": "family.pool.perFee.m1"
                           },
-                          "children": []
-                        }
+                          "children": [
+                            {
+                              "type": "Picker",
+                              "props": {
+                                "value": "follow",
+                                "onChange": "[handler]",
+                                "options": [
+                                  {
+                                    "value": "follow",
+                                    "label": "family.rule.follow"
+                                  },
+                                  {
+                                    "value": "custom",
+                                    "label": "family.rule.custom"
+                                  },
+                                  {
+                                    "value": "exempt",
+                                    "label": "family.member.exempt"
+                                  }
+                                ]
+                              },
+                              "children": []
+                            }
+                          ]
+                        },
+                        false,
+                        false
                       ]
-                    },
-                    {
-                      "type": "Cell",
-                      "props": {
-                        "label": "family.member.feeGroup"
-                      },
-                      "children": [
-                        {
-                          "type": "span",
-                          "props": {
-                            "className": "muted"
-                          },
-                          "children": ["family.pool.perFee.m1"]
-                        }
-                      ]
-                    },
-                    false,
-                    false,
-                    []
+                    }
                   ]
                 }
               ]
@@ -8452,7 +8506,6 @@
                     }
                   ]
                 },
-                false,
                 {
                   "type": "Fragment",
                   "props": {},
@@ -8507,9 +8560,7 @@
                       ]
                     }
                   ]
-                },
-                null,
-                false
+                }
               ]
             }
           ]
@@ -8553,44 +8604,44 @@
               },
               "children": [
                 {
-                  "type": "div",
-                  "props": {
-                    "className": "cell"
-                  },
+                  "type": "Fragment",
+                  "props": {},
                   "children": [
                     {
-                      "type": "Seg",
+                      "type": "Cell",
                       "props": {
-                        "value": "follow",
-                        "onChange": "[handler]",
-                        "options": [
-                          ["follow", "family.rule.follow"],
-                          ["custom", "family.rule.custom"],
-                          ["exempt", "family.member.exempt"]
-                        ]
+                        "label": "family.member.feeGroup",
+                        "sub": "family.pool.perFee.m1"
                       },
-                      "children": []
-                    }
+                      "children": [
+                        {
+                          "type": "Picker",
+                          "props": {
+                            "value": "follow",
+                            "onChange": "[handler]",
+                            "options": [
+                              {
+                                "value": "follow",
+                                "label": "family.rule.follow"
+                              },
+                              {
+                                "value": "custom",
+                                "label": "family.rule.custom"
+                              },
+                              {
+                                "value": "exempt",
+                                "label": "family.member.exempt"
+                              }
+                            ]
+                          },
+                          "children": []
+                        }
+                      ]
+                    },
+                    false,
+                    false
                   ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.feeGroup"
-                  },
-                  "children": [
-                    {
-                      "type": "span",
-                      "props": {
-                        "className": "muted"
-                      },
-                      "children": ["family.pool.perFee.m1"]
-                    }
-                  ]
-                },
-                false,
-                false,
-                []
+                }
               ]
             }
           ]
@@ -9143,7 +9194,6 @@
                 }
               ]
             },
-            false,
             {
               "type": "Fragment",
               "props": {},
@@ -9198,9 +9248,7 @@
                   ]
                 }
               ]
-            },
-            null,
-            false
+            }
           ]
         }
       ]
@@ -9231,7 +9279,6 @@
             }
           ]
         },
-        false,
         {
           "type": "Fragment",
           "props": {},
@@ -9286,9 +9333,7 @@
               ]
             }
           ]
-        },
-        null,
-        false
+        }
       ]
     },
     {
@@ -9518,44 +9563,44 @@
           },
           "children": [
             {
-              "type": "div",
-              "props": {
-                "className": "cell"
-              },
+              "type": "Fragment",
+              "props": {},
               "children": [
                 {
-                  "type": "Seg",
+                  "type": "Cell",
                   "props": {
-                    "value": "follow",
-                    "onChange": "[handler]",
-                    "options": [
-                      ["follow", "family.rule.follow"],
-                      ["custom", "family.rule.custom"],
-                      ["exempt", "family.member.exempt"]
-                    ]
+                    "label": "family.member.feeGroup",
+                    "sub": "family.pool.perFee.m1"
                   },
-                  "children": []
-                }
+                  "children": [
+                    {
+                      "type": "Picker",
+                      "props": {
+                        "value": "follow",
+                        "onChange": "[handler]",
+                        "options": [
+                          {
+                            "value": "follow",
+                            "label": "family.rule.follow"
+                          },
+                          {
+                            "value": "custom",
+                            "label": "family.rule.custom"
+                          },
+                          {
+                            "value": "exempt",
+                            "label": "family.member.exempt"
+                          }
+                        ]
+                      },
+                      "children": []
+                    }
+                  ]
+                },
+                false,
+                false
               ]
-            },
-            {
-              "type": "Cell",
-              "props": {
-                "label": "family.member.feeGroup"
-              },
-              "children": [
-                {
-                  "type": "span",
-                  "props": {
-                    "className": "muted"
-                  },
-                  "children": ["family.pool.perFee.m1"]
-                }
-              ]
-            },
-            false,
-            false,
-            []
+            }
           ]
         }
       ]
@@ -9569,61 +9614,110 @@
       },
       "children": [
         {
-          "type": "div",
+          "type": "Fragment",
+          "props": {},
+          "children": [
+            {
+              "type": "Cell",
+              "props": {
+                "label": "family.member.feeGroup",
+                "sub": "family.pool.perFee.m1"
+              },
+              "children": [
+                {
+                  "type": "Picker",
+                  "props": {
+                    "value": "follow",
+                    "onChange": "[handler]",
+                    "options": [
+                      {
+                        "value": "follow",
+                        "label": "family.rule.follow"
+                      },
+                      {
+                        "value": "custom",
+                        "label": "family.rule.custom"
+                      },
+                      {
+                        "value": "exempt",
+                        "label": "family.member.exempt"
+                      }
+                    ]
+                  },
+                  "children": []
+                }
+              ]
+            },
+            false,
+            false
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Fragment",
+      "props": {},
+      "children": [
+        {
+          "type": "Cell",
           "props": {
-            "className": "cell"
+            "label": "family.member.feeGroup",
+            "sub": "family.pool.perFee.m1"
           },
           "children": [
             {
-              "type": "Seg",
+              "type": "Picker",
               "props": {
                 "value": "follow",
                 "onChange": "[handler]",
                 "options": [
-                  ["follow", "family.rule.follow"],
-                  ["custom", "family.rule.custom"],
-                  ["exempt", "family.member.exempt"]
+                  {
+                    "value": "follow",
+                    "label": "family.rule.follow"
+                  },
+                  {
+                    "value": "custom",
+                    "label": "family.rule.custom"
+                  },
+                  {
+                    "value": "exempt",
+                    "label": "family.member.exempt"
+                  }
                 ]
               },
               "children": []
             }
           ]
         },
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.feeGroup"
-          },
-          "children": [
-            {
-              "type": "span",
-              "props": {
-                "className": "muted"
-              },
-              "children": ["family.pool.perFee.m1"]
-            }
-          ]
-        },
         false,
-        false,
-        []
+        false
       ]
     },
     {
-      "type": "div",
+      "type": "Cell",
       "props": {
-        "className": "cell"
+        "label": "family.member.feeGroup",
+        "sub": "family.pool.perFee.m1"
       },
       "children": [
         {
-          "type": "Seg",
+          "type": "Picker",
           "props": {
             "value": "follow",
             "onChange": "[handler]",
             "options": [
-              ["follow", "family.rule.follow"],
-              ["custom", "family.rule.custom"],
-              ["exempt", "family.member.exempt"]
+              {
+                "value": "follow",
+                "label": "family.rule.follow"
+              },
+              {
+                "value": "custom",
+                "label": "family.rule.custom"
+              },
+              {
+                "value": "exempt",
+                "label": "family.member.exempt"
+              }
             ]
           },
           "children": []
@@ -9631,39 +9725,26 @@
       ]
     },
     {
-      "type": "Seg",
+      "type": "Picker",
       "props": {
         "value": "follow",
         "onChange": "[handler]",
         "options": [
-          ["follow", "family.rule.follow"],
-          ["custom", "family.rule.custom"],
-          ["exempt", "family.member.exempt"]
+          {
+            "value": "follow",
+            "label": "family.rule.follow"
+          },
+          {
+            "value": "custom",
+            "label": "family.rule.custom"
+          },
+          {
+            "value": "exempt",
+            "label": "family.member.exempt"
+          }
         ]
       },
       "children": []
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.feeGroup"
-      },
-      "children": [
-        {
-          "type": "span",
-          "props": {
-            "className": "muted"
-          },
-          "children": ["family.pool.perFee.m1"]
-        }
-      ]
-    },
-    {
-      "type": "span",
-      "props": {
-        "className": "muted"
-      },
-      "children": ["family.pool.perFee.m1"]
     }
   ],
   "missing-fx/OwedOrNet": [

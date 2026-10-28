@@ -31,11 +31,11 @@ type Node = { type: string; props: Record<string, any>; children: unknown[] };
 const all = (n: unknown): Node[] =>
   Array.isArray(n) ? n.flatMap(all) : n && typeof n === 'object' && 'type' in n ? [n as Node, ...all((n as Node).children)] : [];
 const st: AppState = { subscriptions: [], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX };
-// 已有成员的收费在收款标题旁「编辑收费信息」点开；要改收费的用例先展开（座位直接可改）
+// 已有成员的资料平时只读，点「编辑」才能改；要改资料的用例先点开
 const expandMember = (nodes: Node[]) => {
   nodes
     .flatMap((n) => all(n.props.action))
-    .find((n) => n.type === 'button' && n.children.includes('family.collect.editFee') && n.props['aria-expanded'] === false)
+    .find((n) => n.type === 'button' && n.children.includes('detail.action.edit') && n.props['aria-expanded'] === false)
     ?.props.onClick();
 };
 const today = '2026-10-22';
@@ -1868,7 +1868,7 @@ test('成员先改收费再改生效日只留下一个调整，今天标准与�
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
   expandMember(render());
   render()
-    .find((n) => n.type === 'Seg' && n.props.value === 'follow')!
+    .find((n) => n.type === 'Picker' && n.props.value === 'follow')!
     .props.onChange('custom');
   // 没改金额前不问生效日
   assert.equal(
@@ -2098,7 +2098,7 @@ test('成员表单：改自定义收费从生效日起记调价', async () => {
       .props.onClick();
   expandMember(render());
   render()
-    .find((n) => n.type === 'Seg' && n.props.value === 'follow')!
+    .find((n) => n.type === 'Picker' && n.props.value === 'follow')!
     .props.onChange('custom');
   render()
     .find((n) => n.type === 'NumInput' && n.props.value === 44)!
@@ -3593,7 +3593,7 @@ test('点开已收的格子弹出这一笔的明细，可改可删；没收的�
   assert.deepEqual(nodes.find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!.props.preset, ['2026-09-01']);
 });
 
-test('成员弹窗：先是谁，再是收款（含收费标准、已付至、记一笔预收，标题旁编辑收费信息），座位收成只读几行、点开可改', () => {
+test('成员弹窗：收款格子单独在上，其余资料合成一组只读，点编辑才换成输入框', () => {
   const months = ['2026-08-01', '2026-09-01', '2026-10-01'];
   const member = {
     id: 'm',
@@ -3636,41 +3636,52 @@ test('成员弹窗：先是谁，再是收款（含收费标准、已付至、�
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
   const nodes = render();
   const groups = nodes.filter((n) => n.type === 'Group');
-  // 先是谁，紧跟收款：已结清，下面直接有「记一笔」
-  assert.equal(groups[0].props.title, 'family.member.group');
-  // 成员一块只有人员和账号，联系方式在人员资料里
-  assert.ok(!all(groups[0]).some((n) => n.type === 'Cell' && n.props.label === 'family.member.contact'));
-  const collect = groups[1];
-  assert.equal(collect.props.title, 'receivable.modeReceipt');
+  // 收款格子单独在最上面：已结清，下面直接有「记一笔」，不再重复「下次应收」
+  const collect = groups[0];
+  assert.equal(collect.props.title, undefined);
   const add = all(collect).find((n) => n.type === 'button' && n.children.includes('family.quick.backCollect'))!;
   assert.ok(add, 'settled members can record from the top section');
-  // 已付至在收款这一块里，不再单独一块，也不再重复「下次应收」
-  assert.ok(all(collect).some((n) => n.type === 'Cell' && n.props.label === 'family.member.paidUntil'));
   assert.equal(collect.props.foot, undefined);
-  // 收款最常看，放在前面；加入与退出在最后；收费标准跟在收款里，「编辑收费标准」点开收费表单
-  const titles = groups.map((n) => n.props.title);
-  assert.deepEqual(titles, ['family.member.group', 'receivable.modeReceipt', 'family.member.seatGroup']);
-  assert.ok(
-    all(collect).some((n) => n.type === 'Cell' && n.props.label === 'family.member.feeGroup'),
-    'fee standard shows with the receipts',
+  // 其余资料合成一组，平时只读：人员、账号、收费标准、已付至、加入日期、时长、退出；没有联系方式，没有输入框
+  assert.deepEqual(
+    groups.map((n) => n.props.title),
+    [undefined, 'family.member.group'],
   );
+  const info = () => render().filter((n) => n.type === 'Group')[1];
+  const labels = (g: Node) =>
+    all(g)
+      .filter((n) => n.type === 'Cell')
+      .map((n) => n.props.label);
+  assert.deepEqual(labels(info()), [
+    'family.member.name',
+    'family.member.accountHere',
+    'family.member.feeGroup',
+    'family.member.paidUntil',
+    'family.member.joined',
+    'family.member.tenure',
+    'family.member.left',
+  ]);
+  assert.ok(!all(info()).some((n) => n.type === 'input' || n.type === 'DatePicker' || n.type === 'Picker'));
+  assert.ok(!all(render().find((n) => n.type === 'Sheet')!.props.foot).some((n) => n.type === 'button' && n.children.includes('family.member.save')));
+  // 「编辑」后同一组换成输入框：收费方式一行选择，加入、退出日期可改；保存按钮出现
   expandMember(nodes);
-  const open = render()
-    .filter((n) => n.type === 'Group')
-    .map((n) => n.props.title);
-  assert.ok(open.includes('family.member.seatGroup') && open.includes('family.member.feeGroup'));
+  assert.ok(all(info()).some((n) => n.type === 'Picker' && n.props.value === 'follow'));
+  assert.ok(all(info()).some((n) => n.type === 'DatePicker' && n.props.value === '2026-08-01'));
+  assert.ok(all(info()).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields'));
+  assert.ok(all(render().find((n) => n.type === 'Sheet')!.props.foot).some((n) => n.type === 'button' && n.children.includes('family.member.save')));
   // 记一笔：叠上收款表单，不预设期，收款表单默认勾最早没结清的一期，也就是下一期（预收）
   add.props.onClick();
   const receipt = render().find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!;
   assert.ok(receipt);
   assert.equal(receipt.props.preset, undefined);
-  // 不分摊的成员没有收款一块，只有资料
-  const exempt = make().render('MemberForm', { state: st, s: sub, member: { ...member, exempt: true }, onClose() {} });
-  assert.equal(
-    exempt.some((n) => n.type === 'Group' && n.props.title === 'receivable.modeReceipt'),
-    false,
+  // 不分摊的成员没有收款格子，只有资料
+  const exempt = make()
+    .render('MemberForm', { state: st, s: sub, member: { ...member, exempt: true }, onClose() {} })
+    .filter((n) => n.type === 'Group');
+  assert.deepEqual(
+    exempt.map((n) => n.props.title),
+    ['family.member.group'],
   );
-  assert.ok(exempt.some((n) => n.type === 'Group' && n.props.title === 'family.member.seatGroup'));
 });
 
 test('跨年各段悬停一起高亮，点击仍返回同一期；触屏按下和键盘聚焦能预览', () => {
