@@ -250,12 +250,18 @@ export function MemberForm({
     </Cell>
   );
   // 收费：一行选跟随车 / 自定义 / 不分摊，跟随车时标签下写车的标准；自定义才展开金额和周期，改了才问从哪天生效
+  // 已有成员的调价记录按时间往下排：之前的标准灰字，现行的一条接在最后；自定义时现行的就是下面的输入框
+  const carFee = perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) });
+  const history = member?.feeHistory ?? [];
+  const current = history.filter((p) => p.from <= today).at(-1);
+  const pointRow = (point: (typeof history)[number]) => (
+    <Cell key={point.from} label={cnDateFull(point.from)}>
+      <span className="muted">{perBill('family.pool.perFee', point.billEvery, { fee: money(point.fee, point.currency) })}</span>
+    </Cell>
+  );
   const feeFields = (
     <>
-      <Cell
-        label={t('family.member.feeGroup')}
-        sub={mode === 'follow' ? perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) }) : undefined}
-      >
+      <Cell label={t('family.member.feeGroup')} sub={isNew && mode === 'follow' ? carFee : undefined}>
         <Picker
           value={mode}
           onChange={setMode}
@@ -266,15 +272,18 @@ export function MemberForm({
           ]}
         />
       </Cell>
+      {!isNew && history.filter((p) => p.from <= today && p !== current).map(pointRow)}
+      {!isNew && mode === 'follow' && !rateChanged && <Cell label={cnDateFull(current?.from ?? joinedOn)}>{carFee}</Cell>}
       {mode === 'custom' && (
         <FeeRuleFields
           value={{ billEvery: fee.billEvery, fee: fee.amount, currency: fee.currency }}
           onChange={(r) => setFee({ billEvery: r.billEvery, amount: r.fee, currency: r.currency })}
         />
       )}
+      {!isNew && history.filter((p) => p.from > today).map(pointRow)}
       {rateChanged && (
         <>
-          <Cell label={t('family.collect.feeFrom')}>
+          <Cell label={t('family.collect.feeFrom')} sub={mode === 'follow' ? carFee : undefined}>
             <DatePicker value={feeFrom} onChange={(v) => v && setFeeFrom(v)} />
           </Cell>
           {/* 改回跟随车时收款日对齐车的节奏：之前截短的那期缺省按天折算，可收整期或改金额 */}
@@ -358,7 +367,7 @@ export function MemberForm({
       ? t('family.member.exempt')
       : mode === 'custom'
         ? perBill('family.pool.perFee', fee.billEvery, { fee: money(fee.amount, fee.currency) })
-        : perBill('family.pool.perFee', rule.billEvery, { fee: money(rule.fee, rule.currency) });
+        : carFee;
   const refund = f.leaveRefund;
   // 已付至（从第一期起连续结清到哪天）和加入时长两种状态都显示，改退出、退款时要看
   const paidCell = !once && mode !== 'exempt' && (
@@ -391,14 +400,6 @@ export function MemberForm({
       {editing ? (
         <>
           {feeFields}
-          {/* 调价记录：今天生效的那条就是上面的收费，不再重复列出 */}
-          {(member?.feeHistory ?? [])
-            .filter((point, i, all) => !(point.from <= today && !all.slice(i + 1).some((x) => x.from <= today)))
-            .map((point) => (
-              <Cell key={point.from} label={cnDateFull(point.from)}>
-                <span className="muted">{perBill('family.pool.perFee', point.billEvery, { fee: money(point.fee, point.currency) })}</span>
-              </Cell>
-            ))}
           {paidCell}
           {joinedField}
           {tenureCell}

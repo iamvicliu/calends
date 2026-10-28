@@ -3673,6 +3673,37 @@ test('成员弹窗分三段：人员账号在上、收款格子居中、收费�
   assert.ok(all(group(0)).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'PersonNameField'));
   assert.ok(all(group(0)).some((n) => n.type === 'input'));
   assert.ok(all(group(2)).some((n) => n.type === 'Picker' && n.props.value === 'follow'));
+  // 跟随车：车的标准不再写在标签下，而是作为现行的一条接在调价记录后面
+  const feeCells = all(group(2)).filter((n) => n.type === 'Cell');
+  assert.equal(feeCells[0].props.sub, undefined);
+  assert.deepEqual(
+    feeCells.slice(1, 3).map((n) => n.props.label),
+    ['Aug 1, 2026', 'family.member.paidUntil'],
+  );
+  assert.deepEqual(feeCells[1].children, ['family.pool.perFee.m1']);
+  // 调过价：之前的标准灰字在上，现行的一条接在最后
+  const r2 = make();
+  const withHistory = () =>
+    r2.render('MemberForm', {
+      state: st,
+      s: sub,
+      member: {
+        ...member,
+        feeHistory: [
+          { from: '2026-08-01', fee: 5, currency: 'USD', billEvery: 1 },
+          { from: '2026-09-01', fee: 10, currency: 'USD', billEvery: 1 },
+        ],
+      },
+      onClose() {},
+    });
+  expandMember(withHistory());
+  const historyCells = all(withHistory().filter((n) => n.type === 'Group')[2]).filter((n) => n.type === 'Cell');
+  assert.deepEqual(
+    historyCells.slice(0, 3).map((n) => n.props.label),
+    ['family.member.feeGroup', 'Aug 1, 2026', 'Sep 1, 2026'],
+  );
+  assert.equal(historyCells[1].children[0].props.className, 'muted');
+  assert.deepEqual(historyCells[2].children, ['family.pool.perFee.m1']);
   assert.ok(all(group(2)).some((n) => n.type === 'DatePicker' && n.props.value === '2026-08-01'));
   assert.ok(all(group(2)).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields'));
   assert.deepEqual(texts(), ['family.member.delete', 'family.member.cancel', 'family.member.save']);
