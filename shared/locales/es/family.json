@@ -82,6 +82,14 @@
     "accountPh": "Correo, teléfono, usuario o ID en {name}",
     "joined": "Se unió",
     "tenure": "Antigüedad",
+    "joinDrop": {
+      "one": "{count} periodo pagado o exento antes de la nueva fecha de alta se eliminará al guardar.",
+      "other": "{count} periodos pagados o exentos antes de la nueva fecha de alta se eliminarán al guardar."
+    },
+    "joinDropPaid": {
+      "one": "{count} periodo pagado o exento antes de la nueva fecha de alta ({amount} recibidos) se eliminará al guardar.",
+      "other": "{count} periodos pagados o exentos antes de la nueva fecha de alta ({amount} recibidos) se eliminarán al guardar."
+    },
     "joinedPh": "Inicio del plan ({date})",
     "notSet": "Sin definir",
     "left": "Salió",

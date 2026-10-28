@@ -82,6 +82,14 @@
     "accountPh": "E-Mail, Telefon, Benutzername oder ID bei {name}",
     "joined": "Beigetreten",
     "tenure": "Dabei seit",
+    "joinDrop": {
+      "one": "{count} bezahlte oder erlassene Periode vor dem neuen Beitrittsdatum wird beim Speichern gelöscht.",
+      "other": "{count} bezahlte oder erlassene Perioden vor dem neuen Beitrittsdatum werden beim Speichern gelöscht."
+    },
+    "joinDropPaid": {
+      "one": "{count} bezahlte oder erlassene Periode vor dem neuen Beitrittsdatum ({amount} erhalten) wird beim Speichern gelöscht.",
+      "other": "{count} bezahlte oder erlassene Perioden vor dem neuen Beitrittsdatum ({amount} erhalten) werden beim Speichern gelöscht."
+    },
     "joinedPh": "Abo-Beginn ({date})",
     "notSet": "Nicht festgelegt",
     "left": "Ausgetreten",

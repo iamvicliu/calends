@@ -82,6 +82,14 @@
     "accountPh": "Email, phone, username or ID on {name}",
     "joined": "Joined",
     "tenure": "Member for",
+    "joinDrop": {
+      "one": "{count} paid or waived period before the new join date will be deleted when you save.",
+      "other": "{count} paid or waived periods before the new join date will be deleted when you save."
+    },
+    "joinDropPaid": {
+      "one": "{count} paid or waived period before the new join date ({amount} received) will be deleted when you save.",
+      "other": "{count} paid or waived periods before the new join date ({amount} received) will be deleted when you save."
+    },
     "joinedPh": "Plan start ({date})",
     "notSet": "Not set",
     "left": "Left",

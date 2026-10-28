@@ -81,6 +81,8 @@
     "accountPh": "{name} のメール、電話番号、ユーザー名または ID",
     "joined": "参加日",
     "tenure": "参加期間",
+    "joinDrop": "新しい加入日より前の {count} 期分の入金・免除は、保存すると削除されます",
+    "joinDropPaid": "新しい加入日より前の {count} 期分の入金・免除（入金 {amount}）は、保存すると削除されます",
     "joinedPh": "プラン開始日（{date}）",
     "notSet": "未設定",
     "left": "脱退日",

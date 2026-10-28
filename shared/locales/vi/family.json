@@ -81,6 +81,8 @@
     "accountPh": "Email, điện thoại, tên người dùng hoặc ID trên {name}",
     "joined": "Ngày tham gia",
     "tenure": "Thời gian tham gia",
+    "joinDrop": "{count} kỳ đã thu hoặc miễn trước ngày tham gia mới sẽ bị xóa khi lưu",
+    "joinDropPaid": "{count} kỳ đã thu hoặc miễn trước ngày tham gia mới (đã thu {amount}) sẽ bị xóa khi lưu",
     "joinedPh": "Ngày bắt đầu gói ({date})",
     "notSet": "Chưa đặt",
     "left": "Ngày rời",

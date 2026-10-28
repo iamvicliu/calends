@@ -82,6 +82,14 @@
     "accountPh": "E-mail, téléphone, pseudo ou ID sur {name}",
     "joined": "Arrivée",
     "tenure": "Ancienneté",
+    "joinDrop": {
+      "one": "{count} période payée ou exonérée avant la nouvelle date d’arrivée sera supprimée à l’enregistrement.",
+      "other": "{count} périodes payées ou exonérées avant la nouvelle date d’arrivée seront supprimées à l’enregistrement."
+    },
+    "joinDropPaid": {
+      "one": "{count} période payée ou exonérée avant la nouvelle date d’arrivée ({amount} reçus) sera supprimée à l’enregistrement.",
+      "other": "{count} périodes payées ou exonérées avant la nouvelle date d’arrivée ({amount} reçus) seront supprimées à l’enregistrement."
+    },
     "joinedPh": "Début du partage ({date})",
     "notSet": "Non défini",
     "left": "Départ",

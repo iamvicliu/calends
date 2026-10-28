@@ -81,6 +81,8 @@
     "accountPh": "Email, telepon, nama pengguna atau ID di {name}",
     "joined": "Bergabung",
     "tenure": "Lama bergabung",
+    "joinDrop": "{count} periode pembayaran atau pembebasan sebelum tanggal bergabung baru akan dihapus saat disimpan",
+    "joinDropPaid": "{count} periode pembayaran atau pembebasan sebelum tanggal bergabung baru (diterima {amount}) akan dihapus saat disimpan",
     "joinedPh": "Awal paket ({date})",
     "notSet": "Belum diatur",
     "left": "Keluar",

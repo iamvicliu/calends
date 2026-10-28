@@ -16,8 +16,9 @@ import {
   collectionPeriod,
   memberCashFlows,
   updateMemberLeave,
+  moveMemberJoin,
 } from './carpool.ts';
-import { memberDues, memberPeriods, memberRate } from './billing.ts';
+import { memberDues, memberLedger, memberPeriods, memberRate } from './billing.ts';
 import { migrateReceivables } from './receivables-legacy.ts';
 import { DEFAULT_SETTINGS, type AppState, type Subscription } from './types.ts';
 
@@ -742,4 +743,44 @@ test('订阅调价：窗口内提示是否调整收费标准，改过收费、�
   );
   assert.equal(costChange({ ...s, share: { ...s.share, members: [{ ...member, exempt: true }] } }, '2026-10-27'), undefined);
   assert.equal(costChange({ ...s, priceHistory: undefined }, '2026-10-27'), undefined);
+});
+
+test('加入日往后改：之前整期的收款删掉（一笔分几期只去掉那几期的钱），跨过新加入日的那期挪到新首期；往前改不动收款', () => {
+  const s = sub({ price: 60, cycle: { unit: 'month', every: 1 }, start: '2021-01-05', share: { role: 'owner', seats: 6, since: '2021-01-05', members: [] } });
+  const m = {
+    id: 'm',
+    name: 'M',
+    share: 10,
+    fee: 10,
+    feeCurrency: 'CNY',
+    billEvery: 1,
+    joined: '2024-01-05',
+    receipts: [
+      { id: 'r1', date: '2024-01-05', amount: 10, currency: 'CNY', periods: ['2024-01-05'] },
+      { id: 'r2', date: '2024-02-05', amount: 20, currency: 'CNY', periods: ['2024-02-05', '2024-03-05'] },
+      { id: 'r3', date: '2024-04-05', amount: 10, currency: 'CNY', periods: ['2024-04-05'] },
+    ],
+  };
+  const today = '2024-05-01';
+  const later = moveMemberJoin(s, m, { ...m, joined: '2024-03-05' }, today, 'CNY');
+  assert.deepEqual(
+    later.dropped.map((p) => p.key),
+    ['2024-01-05', '2024-02-05'],
+  );
+  assert.deepEqual(
+    later.member.receipts?.map((r) => [r.id, r.amount, r.periods]),
+    [
+      ['r2', 10, ['2024-03-05']],
+      ['r3', 10, ['2024-04-05']],
+    ],
+  );
+  assert.ok(memberLedger(s, later.member, today, 'CNY').periods.every((p) => p.status === 'paid'));
+  const mid = moveMemberJoin(s, m, { ...m, joined: '2024-04-20' }, today, 'CNY');
+  assert.deepEqual(
+    mid.member.receipts?.map((r) => r.periods),
+    [['2024-04-20']],
+  );
+  const earlier = moveMemberJoin(s, m, { ...m, joined: '2023-11-05' }, today, 'CNY');
+  assert.deepEqual(earlier.dropped, []);
+  assert.deepEqual(earlier.member.receipts, m.receipts);
 });

@@ -22,7 +22,7 @@ import { PersonPicker } from './person-fields.tsx';
 import { suggestedLeaveRefund, updateMemberLeave } from '../../../shared/carpool.ts';
 import { CurrencySelect, Picker } from '../components/Picker.tsx';
 import { t } from '../../../shared/i18n.ts';
-import { ContactField, contactText } from '../components/Contact.tsx';
+import { contactText } from '../components/Contact.tsx';
 import { perBill } from './member-fields.tsx';
 import { FeeRuleFields } from './member-fields.tsx';
 
@@ -131,7 +131,6 @@ export function MemberForm({
   onAdded?: (id: string) => void;
 }) {
   const context = useMemberForm({ memberDialog, state, s, member, initialReceipt, onClose, onAdded });
-  // 已有成员：资料、座位、收费收在「编辑资料」里，默认收起；不分摊的成员没有收款可看，直接展开
   // 收费：建成员时就定好，之后很少改，已有成员默认收起；不分摊的成员没有收款一块，收费直接展开
   const [feeOpen, setFeeOpen] = useState(() => !!member?.exempt);
   const [cell, setCell] = useState<{ period: LedgerPeriod; anchor: HTMLElement } | null>(null);
@@ -142,9 +141,6 @@ export function MemberForm({
     f,
     setF,
     up,
-    via,
-    setVia,
-    setContact,
     val,
     rule,
     mode,
@@ -159,6 +155,7 @@ export function MemberForm({
     setBridgeDue,
     next,
     ledger,
+    joinDropped,
     collectAfter,
     setCollectAfter,
     first,
@@ -186,6 +183,18 @@ export function MemberForm({
           .filter(Boolean)
           .join(' ')
       : undefined;
+  // 加入日往后改要删掉的期：几期、其中实收多少（按收款币种分开写）
+  const dropPaid: Record<string, number> = {};
+  for (const p of joinDropped)
+    if (p.receipt && !p.receipt.opening && p.share != null) dropPaid[p.receipt.currency] = (dropPaid[p.receipt.currency] ?? 0) + p.share;
+  const dropNote = joinDropped.length
+    ? t(Object.keys(dropPaid).length ? 'family.member.joinDropPaid' : 'family.member.joinDrop', {
+        count: joinDropped.length,
+        amount: Object.entries(dropPaid)
+          .map(([c, a]) => money(a, c))
+          .join(' + '),
+      })
+    : undefined;
   const pickPerson = (p: Person | undefined) => {
     if (!p) return up({ personId: undefined, name: '', contactVia: undefined, contact: undefined, tg: undefined });
     // 这个人在别的车上只用过一个账号时一起带出来，可以再改
@@ -220,7 +229,7 @@ export function MemberForm({
           ) : undefined
         }
       >
-        {/* 已关联：左边「人员」，右边胶囊点开换人；没关联：输入称呼，打字时联想已有的人，选中就关联（带出联系方式和唯一用过的账号），不选就是新建 */}
+        {/* 已关联：左边「人员」，右边胶囊点开换人；没关联：输入称呼，打字时联想已有的人，选中就关联（带出唯一用过的账号），不选就是新建 */}
         {linked ? (
           <Cell label={t('people.field.person')}>
             <PersonPicker state={state} value={f.personId} onPick={pickPerson} />
@@ -237,14 +246,7 @@ export function MemberForm({
             <PersonNameField state={state} name={f.name} autoFocus={isNew} onType={(name) => up({ name })} onPick={pickPerson} />
           </Cell>
         )}
-        <Cell label={t('family.member.contact')}>
-          {linked ? (
-            <span className="muted">{contactText(f) || t('people.field.noContact')}</span>
-          ) : (
-            <ContactField via={via} value={f.contact} onVia={setVia} onChange={setContact} />
-          )}
-        </Cell>
-        {/* 账号属于这个座位（同一个人在不同车上可能不同），但添加时和称呼、联系方式一起填，所以放在这里 */}
+        {/* 联系方式属于人员，在人员资料里看和改；这里只填这个人在这辆车上用的账号 */}
         <Cell label={t('family.member.accountHere')}>
           <input autoCapitalize="off" value={f.account ?? ''} placeholder={t('family.member.accountPhShort')} onChange={(e) => up({ account: val(e) })} />
         </Cell>
@@ -253,19 +255,16 @@ export function MemberForm({
   );
   const seatGroup = (
     <>
-      {/* 加入与退出：哪天上车、首期怎么算、哪天下车。已有成员的加入日期、时长只展示；退出日期是记下车的唯一入口 */}
-      <Group title={t('family.member.seatGroup')}>
+      {/* 加入与退出：哪天上车、首期怎么算、哪天下车。加入日期往后改时，新日期之前已收、免收的期保存时删掉，下面先提示 */}
+      <Group title={t('family.member.seatGroup')} foot={dropNote}>
         <Cell label={t('family.member.joined')}>
-          {isNew ? (
-            <DatePicker
-              value={f.joined}
-              clearable
-              placeholder={s.share?.since ? t('family.member.joinedPh', { date: cnDateFull(s.share.since) }) : t('family.member.notSet')}
-              onChange={(v) => up({ joined: v })}
-            />
-          ) : (
-            cnDateFull(joinedOn)
-          )}
+          <DatePicker
+            value={f.joined}
+            clearable
+            max={f.left}
+            placeholder={s.share?.since ? t('family.member.joinedPh', { date: cnDateFull(s.share.since) }) : t('family.member.notSet')}
+            onChange={(v) => up({ joined: v })}
+          />
         </Cell>
         {!isNew && tenure && (
           <Cell label={t('family.member.tenure')}>
@@ -422,9 +421,8 @@ export function MemberForm({
           </>
         ) : (
           <>
-            {/* 谁 → 什么时候加入和退出（决定有哪几期）→ 收款格子 → 收费标准（每期收多少） */}
+            {/* 谁 → 收款格子（最常看）→ 收费标准（点开才有）→ 加入与退出 */}
             {whoGroup}
-            {seatGroup}
             {/* 收款：一格一期，点已收的格子看明细；已付至和记一笔跟在下面；欠款默认勾欠的期，结清了默认勾下一期（预收） */}
             {mode !== 'exempt' && (
               <Group
@@ -475,6 +473,7 @@ export function MemberForm({
             )}
             {/* 收费标准：收款标题旁「编辑收费标准」点开，紧跟在收款下面 */}
             {feeOpen && feeGroup}
+            {seatGroup}
           </>
         )}
       </div>

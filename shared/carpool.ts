@@ -26,7 +26,7 @@ import {
 import { chargeBaseOrNaN, convertOn, toBaseAt, toBaseOrNaN } from './fx.ts';
 import { yearCost } from './metrics.ts';
 import { currencyDecimals } from './format.ts';
-import { isSettled, paidThrough, putRecord, type Period } from './receivables.ts';
+import { isSettled, paidThrough, putRecord, removeRecordPeriod, resolveKey, type LedgerPeriod, type Period, type Receivable } from './receivables.ts';
 import type { AppState, CarRule, MemberFeePoint, ShareMember, Subscription } from './types.ts';
 
 /** 成员实际交来、退回的钱：期初结清没有金额，不算；退款作为负数。不改变各期是否结清 */
@@ -430,6 +430,43 @@ export function dropReshaped(s: Subscription, before: ShareMember, after: ShareM
   const receipts = after.receipts?.map((r) => (r.opening ? keep(r) : r)).filter((r) => r.periods.length);
   const waivers = after.waivers?.map(keep).filter((w) => w.periods.length);
   return { ...after, receipts: receipts?.length ? receipts : undefined, waivers: waivers?.length ? waivers : undefined };
+}
+
+/**
+ * 改已有成员的加入日：新加入日之前整期落在外面的收款、免收删掉这几期（一笔分几期时只去掉这几期和分到的金额）；
+ * 跨过新加入日的那期挪到新的首期上。收款、免收取 after 上的；dropped 是删掉的期，界面保存前提示
+ */
+export function moveMemberJoin(
+  s: Subscription,
+  before: ShareMember,
+  after: ShareMember,
+  today: string,
+  collectCurrency: string,
+): { member: ShareMember; dropped: LedgerPeriod[] } {
+  const joined = memberSince(s, after);
+  if (joined === memberSince(s, before)) return { member: after, dropped: [] };
+  // 记录以 after 上的为准，期按原来的加入日切
+  let r: Receivable = { receipts: after.receipts, waivers: after.waivers };
+  const was = memberLedger(s, { ...before, ...r }, today, collectCurrency).periods;
+  const dropped: LedgerPeriod[] = [];
+  for (const p of was.filter((p) => p.until < joined)) {
+    const rec = p.receipt ?? p.waiver;
+    if (!rec) continue;
+    r = removeRecordPeriod(r, rec.id, p, was);
+    dropped.push(p);
+  }
+  const cut = was.find((p) => p.from < joined && joined <= p.until && (p.receipt || p.waiver));
+  if (cut) {
+    const first = memberPeriods(s, after, joined, collectCurrency).find((p) => p.from <= joined && joined <= p.until);
+    const shift = <T extends { periods: string[] }>(x: T) => ({
+      ...x,
+      periods: x.periods.map((k) => (first && resolveKey(was, k) === cut.key ? first.key : k)),
+    });
+    r = { receipts: r.receipts?.map(shift), waivers: r.waivers?.map(shift) };
+  }
+  const receipts = r.receipts?.length ? r.receipts : undefined;
+  const waivers = r.waivers?.length ? r.waivers : undefined;
+  return { member: { ...after, receipts, waivers }, dropped };
 }
 
 /** 几期应收的合计：金额折成第一期的币种相加（收款表单按选中的期预填金额） */

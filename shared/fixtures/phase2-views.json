@@ -1262,23 +1262,6 @@
                         {
                           "type": "Cell",
                           "props": {
-                            "label": "family.member.contact"
-                          },
-                          "children": [
-                            {
-                              "type": "[handler]",
-                              "props": {
-                                "via": "Telegram",
-                                "onVia": "[handler]",
-                                "onChange": "[handler]"
-                              },
-                              "children": []
-                            }
-                          ]
-                        },
-                        {
-                          "type": "Cell",
-                          "props": {
                             "label": "family.member.accountHere"
                           },
                           "children": [
@@ -1618,23 +1601,6 @@
                     {
                       "type": "Cell",
                       "props": {
-                        "label": "family.member.contact"
-                      },
-                      "children": [
-                        {
-                          "type": "[handler]",
-                          "props": {
-                            "via": "Telegram",
-                            "onVia": "[handler]",
-                            "onChange": "[handler]"
-                          },
-                          "children": []
-                        }
-                      ]
-                    },
-                    {
-                      "type": "Cell",
-                      "props": {
                         "label": "family.member.accountHere"
                       },
                       "children": [
@@ -1955,23 +1921,6 @@
                         "autoFocus": true,
                         "onType": "[handler]",
                         "onPick": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.contact"
-                  },
-                  "children": [
-                    {
-                      "type": "[handler]",
-                      "props": {
-                        "via": "Telegram",
-                        "onVia": "[handler]",
-                        "onChange": "[handler]"
                       },
                       "children": []
                     }
@@ -2302,23 +2251,6 @@
             {
               "type": "Cell",
               "props": {
-                "label": "family.member.contact"
-              },
-              "children": [
-                {
-                  "type": "[handler]",
-                  "props": {
-                    "via": "Telegram",
-                    "onVia": "[handler]",
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
                 "label": "family.member.accountHere"
               },
               "children": [
@@ -2454,23 +2386,6 @@
                 "autoFocus": true,
                 "onType": "[handler]",
                 "onPick": "[handler]"
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.contact"
-          },
-          "children": [
-            {
-              "type": "[handler]",
-              "props": {
-                "via": "Telegram",
-                "onVia": "[handler]",
-                "onChange": "[handler]"
               },
               "children": []
             }
@@ -2693,32 +2608,6 @@
         "autoFocus": true,
         "onType": "[handler]",
         "onPick": "[handler]"
-      },
-      "children": []
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.contact"
-      },
-      "children": [
-        {
-          "type": "[handler]",
-          "props": {
-            "via": "Telegram",
-            "onVia": "[handler]",
-            "onChange": "[handler]"
-          },
-          "children": []
-        }
-      ]
-    },
-    {
-      "type": "[handler]",
-      "props": {
-        "via": "Telegram",
-        "onVia": "[handler]",
-        "onChange": "[handler]"
       },
       "children": []
     },
@@ -4615,23 +4504,6 @@
                         {
                           "type": "Cell",
                           "props": {
-                            "label": "family.member.contact"
-                          },
-                          "children": [
-                            {
-                              "type": "[handler]",
-                              "props": {
-                                "via": "Telegram",
-                                "onVia": "[handler]",
-                                "onChange": "[handler]"
-                              },
-                              "children": []
-                            }
-                          ]
-                        },
-                        {
-                          "type": "Cell",
-                          "props": {
                             "label": "family.member.accountHere"
                           },
                           "children": [
@@ -4971,23 +4843,6 @@
                     {
                       "type": "Cell",
                       "props": {
-                        "label": "family.member.contact"
-                      },
-                      "children": [
-                        {
-                          "type": "[handler]",
-                          "props": {
-                            "via": "Telegram",
-                            "onVia": "[handler]",
-                            "onChange": "[handler]"
-                          },
-                          "children": []
-                        }
-                      ]
-                    },
-                    {
-                      "type": "Cell",
-                      "props": {
                         "label": "family.member.accountHere"
                       },
                       "children": [
@@ -5308,23 +5163,6 @@
                         "autoFocus": true,
                         "onType": "[handler]",
                         "onPick": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.contact"
-                  },
-                  "children": [
-                    {
-                      "type": "[handler]",
-                      "props": {
-                        "via": "Telegram",
-                        "onVia": "[handler]",
-                        "onChange": "[handler]"
                       },
                       "children": []
                     }
@@ -5655,23 +5493,6 @@
             {
               "type": "Cell",
               "props": {
-                "label": "family.member.contact"
-              },
-              "children": [
-                {
-                  "type": "[handler]",
-                  "props": {
-                    "via": "Telegram",
-                    "onVia": "[handler]",
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
                 "label": "family.member.accountHere"
               },
               "children": [
@@ -5807,23 +5628,6 @@
                 "autoFocus": true,
                 "onType": "[handler]",
                 "onPick": "[handler]"
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.contact"
-          },
-          "children": [
-            {
-              "type": "[handler]",
-              "props": {
-                "via": "Telegram",
-                "onVia": "[handler]",
-                "onChange": "[handler]"
               },
               "children": []
             }
@@ -6046,32 +5850,6 @@
         "autoFocus": true,
         "onType": "[handler]",
         "onPick": "[handler]"
-      },
-      "children": []
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.contact"
-      },
-      "children": [
-        {
-          "type": "[handler]",
-          "props": {
-            "via": "Telegram",
-            "onVia": "[handler]",
-            "onChange": "[handler]"
-          },
-          "children": []
-        }
-      ]
-    },
-    {
-      "type": "[handler]",
-      "props": {
-        "via": "Telegram",
-        "onVia": "[handler]",
-        "onChange": "[handler]"
       },
       "children": []
     },
@@ -7958,23 +7736,6 @@
                         {
                           "type": "Cell",
                           "props": {
-                            "label": "family.member.contact"
-                          },
-                          "children": [
-                            {
-                              "type": "[handler]",
-                              "props": {
-                                "via": "Telegram",
-                                "onVia": "[handler]",
-                                "onChange": "[handler]"
-                              },
-                              "children": []
-                            }
-                          ]
-                        },
-                        {
-                          "type": "Cell",
-                          "props": {
                             "label": "family.member.accountHere"
                           },
                           "children": [
@@ -8314,23 +8075,6 @@
                     {
                       "type": "Cell",
                       "props": {
-                        "label": "family.member.contact"
-                      },
-                      "children": [
-                        {
-                          "type": "[handler]",
-                          "props": {
-                            "via": "Telegram",
-                            "onVia": "[handler]",
-                            "onChange": "[handler]"
-                          },
-                          "children": []
-                        }
-                      ]
-                    },
-                    {
-                      "type": "Cell",
-                      "props": {
                         "label": "family.member.accountHere"
                       },
                       "children": [
@@ -8651,23 +8395,6 @@
                         "autoFocus": true,
                         "onType": "[handler]",
                         "onPick": "[handler]"
-                      },
-                      "children": []
-                    }
-                  ]
-                },
-                {
-                  "type": "Cell",
-                  "props": {
-                    "label": "family.member.contact"
-                  },
-                  "children": [
-                    {
-                      "type": "[handler]",
-                      "props": {
-                        "via": "Telegram",
-                        "onVia": "[handler]",
-                        "onChange": "[handler]"
                       },
                       "children": []
                     }
@@ -8998,23 +8725,6 @@
             {
               "type": "Cell",
               "props": {
-                "label": "family.member.contact"
-              },
-              "children": [
-                {
-                  "type": "[handler]",
-                  "props": {
-                    "via": "Telegram",
-                    "onVia": "[handler]",
-                    "onChange": "[handler]"
-                  },
-                  "children": []
-                }
-              ]
-            },
-            {
-              "type": "Cell",
-              "props": {
                 "label": "family.member.accountHere"
               },
               "children": [
@@ -9150,23 +8860,6 @@
                 "autoFocus": true,
                 "onType": "[handler]",
                 "onPick": "[handler]"
-              },
-              "children": []
-            }
-          ]
-        },
-        {
-          "type": "Cell",
-          "props": {
-            "label": "family.member.contact"
-          },
-          "children": [
-            {
-              "type": "[handler]",
-              "props": {
-                "via": "Telegram",
-                "onVia": "[handler]",
-                "onChange": "[handler]"
               },
               "children": []
             }
@@ -9389,32 +9082,6 @@
         "autoFocus": true,
         "onType": "[handler]",
         "onPick": "[handler]"
-      },
-      "children": []
-    },
-    {
-      "type": "Cell",
-      "props": {
-        "label": "family.member.contact"
-      },
-      "children": [
-        {
-          "type": "[handler]",
-          "props": {
-            "via": "Telegram",
-            "onVia": "[handler]",
-            "onChange": "[handler]"
-          },
-          "children": []
-        }
-      ]
-    },
-    {
-      "type": "[handler]",
-      "props": {
-        "via": "Telegram",
-        "onVia": "[handler]",
-        "onChange": "[handler]"
       },
       "children": []
     },

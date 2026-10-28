@@ -22,6 +22,7 @@ import {
   memberPaidThrough,
   nextCollectionDay,
   dropReshaped,
+  moveMemberJoin,
 } from '../../../../shared/carpool.ts';
 
 import { t } from '../../../../shared/i18n.ts';
@@ -129,9 +130,12 @@ export function useMemberForm({
       m = { ...m, periodDues: dues.length ? dues : undefined };
     }
     // 收款、免收以账本为准：收款表单另行保存
-    return realigned ? m : { ...m, receipts: member?.receipts, waivers: member?.waivers };
+    const out = realigned ? m : { ...m, receipts: member?.receipts, waivers: member?.waivers };
+    return member ? moveMemberJoin(s, member, out, today, collectCcy).member : out;
   };
   const next = draft();
+  // 加入日往后改：新加入日之前已收、免收的期保存时删掉，保存前提示
+  const joinDropped = member ? moveMemberJoin(s, member, { ...f, receipts: member.receipts, waivers: member.waivers }, today, collectCcy).dropped : [];
   const ledger = memberLedgerAhead(state, s, next, today);
 
   // 新成员：勾上就在保存后接着打开收款表单，与之后记收款是同一个表单
@@ -219,8 +223,9 @@ export function useMemberForm({
         const sh = current.share!;
         const stored = sh.members.find((x) => x.id === next.id);
         const base: ShareMember = { ...next, name: f.name.trim(), account: f.account?.trim() || undefined, personId: link.id };
-        // 收款、免收以账本里最新的为准（期间可能在收款表单里记过）
-        const latest = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
+        // 收款、免收以账本里最新的为准（期间可能在收款表单里记过）；加入日改了，按新加入日对一遍
+        const fresh = { ...base, receipts: stored?.receipts, waivers: stored?.waivers };
+        const latest = stored ? moveMemberJoin(current, stored, fresh, today, collectCcy).member : fresh;
         // 改回跟随车对齐了节奏：起止变了的期不再被期初结清、免收盖住
         const opened = realigned && stored ? dropReshaped(current, stored, latest) : latest;
         // 取消不分摊：生效日之前没结清的期记成免收，不补收不分摊那段时间
@@ -276,6 +281,7 @@ export function useMemberForm({
     draft,
     next,
     ledger,
+    joinDropped,
     collectAfter,
     setCollectAfter,
     first,

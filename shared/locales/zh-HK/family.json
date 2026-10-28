@@ -79,6 +79,8 @@
     "accountPh": "{name} 的電郵、手機號碼、用戶名稱或 ID",
     "joined": "加入日期",
     "tenure": "加入時長",
+    "joinDrop": "新加入日期之前已有 {count} 期收款或免收，儲存後一併刪除",
+    "joinDropPaid": "新加入日期之前已有 {count} 期收款或免收（實收 {amount}），儲存後一併刪除",
     "joinedPh": "同發起日 {date}",
     "notSet": "不設定",
     "left": "退出日期",

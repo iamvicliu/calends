@@ -82,6 +82,8 @@
     "accountPh": "{name} için e-posta, telefon, kullanıcı adı veya ID",
     "joined": "Katılma",
     "tenure": "Üyelik süresi",
+    "joinDrop": "Yeni katılım tarihinden önceki {count} dönemlik ödeme veya muafiyet kaydedince silinir",
+    "joinDropPaid": "Yeni katılım tarihinden önceki {count} dönemlik ödeme veya muafiyet (alınan {amount}) kaydedince silinir",
     "joinedPh": "Plan başlangıcı ({date})",
     "notSet": "Belirtilmedi",
     "left": "Ayrılma",

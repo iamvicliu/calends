@@ -82,6 +82,14 @@
     "accountPh": "E-mail, telefone, usuário ou ID no {name}",
     "joined": "Entrou em",
     "tenure": "Tempo no grupo",
+    "joinDrop": {
+      "one": "{count} período pago ou isento antes da nova data de entrada será excluído ao salvar.",
+      "other": "{count} períodos pagos ou isentos antes da nova data de entrada serão excluídos ao salvar."
+    },
+    "joinDropPaid": {
+      "one": "{count} período pago ou isento antes da nova data de entrada ({amount} recebidos) será excluído ao salvar.",
+      "other": "{count} períodos pagos ou isentos antes da nova data de entrada ({amount} recebidos) serão excluídos ao salvar."
+    },
     "joinedPh": "Início do plano ({date})",
     "notSet": "Não definido",
     "left": "Saiu em",
