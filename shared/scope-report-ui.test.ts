@@ -31,10 +31,10 @@ type Node = { type: string; props: Record<string, any>; children: unknown[] };
 const all = (n: unknown): Node[] =>
   Array.isArray(n) ? n.flatMap(all) : n && typeof n === 'object' && 'type' in n ? [n as Node, ...all((n as Node).children)] : [];
 const st: AppState = { subscriptions: [], methods: [], settings: DEFAULT_SETTINGS, fx: billing.FALLBACK_FX };
-// 已有成员的资料平时只读，点「编辑」才能改；要改资料的用例先点开
+// 已有成员的资料平时只读，点底部「编辑」才能改；要改资料的用例先点开
 const expandMember = (nodes: Node[]) => {
   nodes
-    .flatMap((n) => all(n.props.action))
+    .flatMap((n) => all(n.props.foot))
     .find((n) => n.type === 'button' && n.children.includes('detail.action.edit') && n.props['aria-expanded'] === false)
     ?.props.onClick();
 };
@@ -2229,8 +2229,10 @@ test('成员、人员和渠道胶囊确认后删除，成员删除保留其他�
     },
   };
   const r = harness('../app/src/views/Members.tsx', 'MemberForm', {}, deps);
-  const foot = r.render('MemberForm', { state: st, s: sub, member, onClose: () => closed++ }).find((n) => n.type === 'Sheet')!.props.foot;
-  const remove = all(foot).find((n) => n.type === 'ConfirmButton')!;
+  const renderForm = () => r.render('MemberForm', { state: st, s: sub, member, onClose: () => closed++ });
+  // 删除收在编辑里
+  expandMember(renderForm());
+  const remove = all(renderForm().find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'ConfirmButton')!;
   assert.equal(remove.props.hint, 'family.member.confirmDelete');
   assert.equal(saved, undefined);
   await remove.props.onConfirm();
@@ -3593,7 +3595,7 @@ test('点开已收的格子弹出这一笔的明细，可改可删；没收的�
   assert.deepEqual(nodes.find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!.props.preset, ['2026-09-01']);
 });
 
-test('成员弹窗：收款格子单独在上，其余资料合成一组只读，点编辑才换成输入框', () => {
+test('成员弹窗分三段：人员账号在上、收款格子居中、收费日期只读，底部编辑才换成输入框', () => {
   const months = ['2026-08-01', '2026-09-01', '2026-10-01'];
   const member = {
     id: 'm',
@@ -3636,39 +3638,44 @@ test('成员弹窗：收款格子单独在上，其余资料合成一组只读�
   const render = () => r.render('MemberForm', { state: st, s: sub, member, onClose() {} });
   const nodes = render();
   const groups = nodes.filter((n) => n.type === 'Group');
-  // 收款格子单独在最上面：已结清，下面直接有「记一笔」，不再重复「下次应收」
-  const collect = groups[0];
-  assert.equal(collect.props.title, undefined);
-  const add = all(collect).find((n) => n.type === 'button' && n.children.includes('family.quick.backCollect'))!;
-  assert.ok(add, 'settled members can record from the top section');
-  assert.equal(collect.props.foot, undefined);
-  // 其余资料合成一组，平时只读：人员、账号、收费标准、已付至、加入日期、时长、退出；没有联系方式，没有输入框
+  // 三段：人员与账号在最上面，收款格子居中，收费和日期一组只读
   assert.deepEqual(
     groups.map((n) => n.props.title),
-    [undefined, 'family.member.group'],
+    ['family.member.group', undefined, undefined],
   );
-  const info = () => render().filter((n) => n.type === 'Group')[1];
   const labels = (g: Node) =>
     all(g)
       .filter((n) => n.type === 'Cell')
       .map((n) => n.props.label);
-  assert.deepEqual(labels(info()), [
-    'family.member.name',
-    'family.member.accountHere',
+  const group = (i: number) => render().filter((n) => n.type === 'Group')[i];
+  assert.deepEqual(labels(groups[0]), ['family.member.name', 'family.member.accountHere']);
+  // 收款格子：已结清，下面直接有「记一笔」，不再重复「下次应收」
+  const collect = groups[1];
+  const add = all(collect).find((n) => n.type === 'button' && n.children.includes('family.quick.backCollect'))!;
+  assert.ok(add, 'settled members can record from the grid section');
+  assert.equal(collect.props.foot, undefined);
+  assert.deepEqual(labels(group(2)), [
     'family.member.feeGroup',
     'family.member.paidUntil',
     'family.member.joined',
     'family.member.tenure',
     'family.member.left',
   ]);
-  assert.ok(!all(info()).some((n) => n.type === 'input' || n.type === 'DatePicker' || n.type === 'Picker'));
-  assert.ok(!all(render().find((n) => n.type === 'Sheet')!.props.foot).some((n) => n.type === 'button' && n.children.includes('family.member.save')));
-  // 「编辑」后同一组换成输入框：收费方式一行选择，加入、退出日期可改；保存按钮出现
+  const foot = () => all(render().find((n) => n.type === 'Sheet')!.props.foot);
+  const texts = () =>
+    foot()
+      .filter((n) => n.type === 'button' || n.type === 'ConfirmButton')
+      .map((n) => n.children.join(''));
+  assert.ok(![0, 2].some((i) => all(group(i)).some((n) => n.type === 'input' || n.type === 'DatePicker' || n.type === 'Picker')));
+  // 平时底部只有编辑、完成；删除收进编辑里
+  assert.deepEqual(texts(), ['detail.action.edit', 'common.done']);
+  // 「编辑」后：账号、收费方式、加入和退出日期可改；底部换成删除、取消、保存
   expandMember(nodes);
-  assert.ok(all(info()).some((n) => n.type === 'Picker' && n.props.value === 'follow'));
-  assert.ok(all(info()).some((n) => n.type === 'DatePicker' && n.props.value === '2026-08-01'));
-  assert.ok(all(info()).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields'));
-  assert.ok(all(render().find((n) => n.type === 'Sheet')!.props.foot).some((n) => n.type === 'button' && n.children.includes('family.member.save')));
+  assert.ok(all(group(0)).some((n) => n.type === 'input'));
+  assert.ok(all(group(2)).some((n) => n.type === 'Picker' && n.props.value === 'follow'));
+  assert.ok(all(group(2)).some((n) => n.type === 'DatePicker' && n.props.value === '2026-08-01'));
+  assert.ok(all(group(2)).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'MemberLeaveFields'));
+  assert.deepEqual(texts(), ['family.member.delete', 'family.member.cancel', 'family.member.save']);
   // 记一笔：叠上收款表单，不预设期，收款表单默认勾最早没结清的一期，也就是下一期（预收）
   add.props.onClick();
   const receipt = render().find((n) => typeof n.type === 'function' && (n.type as Function).name === 'ReceiptForm')!;
@@ -3680,7 +3687,7 @@ test('成员弹窗：收款格子单独在上，其余资料合成一组只读�
     .filter((n) => n.type === 'Group');
   assert.deepEqual(
     exempt.map((n) => n.props.title),
-    ['family.member.group'],
+    ['family.member.group', undefined],
   );
 });
 

@@ -218,7 +218,14 @@ export function MemberForm({
   // 人员：已关联的人是选择胶囊，点开换人；没关联时输入称呼，打字时联想已有的人
   const personField = linked ? (
     <Cell label={t('people.field.person')}>
-      <PersonPicker state={state} value={f.personId} onPick={pickPerson} />
+      <PersonPicker
+        state={state}
+        value={f.personId}
+        onPick={(p) => {
+          pickPerson(p);
+          setEditing(true);
+        }}
+      />
     </Cell>
   ) : (
     <Cell
@@ -366,24 +373,37 @@ export function MemberForm({
     </Cell>
   );
   const tenureCell = tenure && <Cell label={t('family.member.tenure')}>{tenure}</Cell>;
-  // 已有成员：人员、账号、收费、日期合在一组；平时只读，点「编辑」换成输入框。
-  // 加入日期往后改时，新日期之前已收、免收的期保存时删掉，组底先提示
-  const infoGroup = (
+  // 已有成员：人员和账号在最上面，人员随时可重选（选了即进入编辑）；没关联的称呼、账号点「编辑」才可改
+  const memberWho = (
     <Group
       title={t('family.member.group')}
       action={
-        editing ? undefined : (
-          <button type="button" className="btn plain" aria-expanded={false} onClick={() => setEditing(true)}>
-            {t('detail.action.edit')}
+        linked ? (
+          <button type="button" className="btn plain" onClick={() => setProfile(true)}>
+            {t('people.field.editProfile')}
           </button>
-        )
+        ) : undefined
       }
-      foot={editing ? [dropNote, rateChanged && t('family.collect.feeHelp')].filter(Boolean).join('\n') || undefined : undefined}
     >
+      {linked || editing ? (
+        personField
+      ) : (
+        <Cell label={t('family.member.name')}>
+          <span className="row">
+            <PersonAvatar p={personFor(state, f.personId, f.name)} size={22} />
+            {f.name}
+          </span>
+        </Cell>
+      )}
+      {editing ? accountField : <Cell label={t('family.member.accountHere')}>{f.account || <span className="muted">{t('family.member.notSet')}</span>}</Cell>}
+    </Group>
+  );
+  // 收费和日期合在一组；平时只读，点底部「编辑」换成输入框。
+  // 加入日期往后改时，新日期之前已收、免收的期保存时删掉，组底先提示
+  const infoGroup = (
+    <Group foot={editing ? [dropNote, rateChanged && t('family.collect.feeHelp')].filter(Boolean).join('\n') || undefined : undefined}>
       {editing ? (
         <>
-          {personField}
-          {accountField}
           {feeFields}
           {/* 调价记录：今天生效的那条就是上面的收费，不再重复列出 */}
           {(member?.feeHistory ?? [])
@@ -406,14 +426,6 @@ export function MemberForm({
         </>
       ) : (
         <>
-          {/* 已关联的人点这一行看、改人员资料（联系方式在那里） */}
-          <Cell label={linked ? t('people.field.person') : t('family.member.name')} onClick={linked ? () => setProfile(true) : undefined}>
-            <span className="row">
-              <PersonAvatar p={personFor(state, f.personId, f.name)} size={22} />
-              {f.name}
-            </span>
-          </Cell>
-          <Cell label={t('family.member.accountHere')}>{f.account || <span className="muted">{t('family.member.notSet')}</span>}</Cell>
           <Cell label={t('family.member.feeGroup')}>{feeText}</Cell>
           {paidCell}
           <Cell label={t('family.member.joined')}>{cnDateFull(joinedOn)}</Cell>
@@ -431,7 +443,12 @@ export function MemberForm({
       onClose={onClose}
       foot={
         <>
-          {!isNew && (
+          {!isNew && !editing && (
+            <button type="button" className="btn" aria-expanded={false} onClick={() => setEditing(true)}>
+              {t('detail.action.edit')}
+            </button>
+          )}
+          {!isNew && editing && (
             <ConfirmButton
               disabled={busy}
               hint={t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') })}
@@ -486,7 +503,8 @@ export function MemberForm({
           </>
         ) : (
           <>
-            {/* 收款格子单独在最上面：一格一期，点已收的格子看明细；欠款默认勾欠的期，结清了默认勾下一期（预收） */}
+            {memberWho}
+            {/* 收款格子在人员下面：一格一期，点已收的格子看明细；欠款默认勾欠的期，结清了默认勾下一期（预收） */}
             {mode !== 'exempt' && (
               <Group
                 foot={
