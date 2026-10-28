@@ -436,7 +436,7 @@ export function MemberForm({
       onClose={onClose}
       foot={
         <>
-          {!isNew && editing && (
+          {!isNew && (
             <ConfirmButton
               disabled={busy}
               hint={t('family.member.confirmDelete', { name: f.name || t('family.member.unnamed') })}

@@ -2230,8 +2230,6 @@ test('成员、人员和渠道胶囊确认后删除，成员删除保留其他�
   };
   const r = harness('../app/src/views/Members.tsx', 'MemberForm', {}, deps);
   const renderForm = () => r.render('MemberForm', { state: st, s: sub, member, onClose: () => closed++ });
-  // 删除收在编辑里
-  expandMember(renderForm());
   const remove = all(renderForm().find((n) => n.type === 'Sheet')!.props.foot).find((n) => n.type === 'ConfirmButton')!;
   assert.equal(remove.props.hint, 'family.member.confirmDelete');
   assert.equal(saved, undefined);
@@ -3667,8 +3665,8 @@ test('成员弹窗分三段：人员账号在上、收款格子居中、收费�
       .filter((n) => n.type === 'button' || n.type === 'ConfirmButton')
       .map((n) => n.children.join(''));
   assert.ok(![0, 2].some((i) => all(group(i)).some((n) => n.type === 'input' || n.type === 'DatePicker' || n.type === 'Picker')));
-  // 平时底部只有编辑、完成（编辑在完成左边）；删除收进编辑里
-  assert.deepEqual(texts(), ['detail.action.edit', 'common.done']);
+  // 平时底部左边删除（移出这辆车），右边编辑、完成
+  assert.deepEqual(texts(), ['family.member.delete', 'detail.action.edit', 'common.done']);
   // 「编辑」后：人员可重选、账号、收费方式、加入和退出日期可改；底部换成删除、取消、保存
   expandMember(nodes);
   assert.ok(all(group(0)).some((n) => typeof n.type === 'function' && (n.type as Function).name === 'PersonNameField'));
